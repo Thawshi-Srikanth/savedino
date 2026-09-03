@@ -18,7 +18,7 @@
 html {
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f4f4f4;
   color: #535353;
 }
@@ -26,8 +26,12 @@ html {
 body {
   margin: 0;
   line-height: inherit;
-  background-color: #f4f4f4 !important;
-  color: #535353 !important;
+  transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+body.night-mode, html.night-mode {
+  background-color: #202124 !important;
+  color: #e8eaed !important;
 }
 
 .font-game {
@@ -36,6 +40,10 @@ body {
 
 .font-pixel {
   font-family: var(--font-pixel), 'PressStart2P', monospace;
+}
+
+.font-tech {
+  font-family: var(--font-tech), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 /* Pixel Art crisp rendering */

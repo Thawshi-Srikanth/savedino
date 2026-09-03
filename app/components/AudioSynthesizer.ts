@@ -1,12 +1,14 @@
 "use client";
 
-// Web Audio API Synthesizer for 8-bit retro sounds
+// Web Audio API Synthesizer for 8-bit retro sounds + Theme Music Player
 class AudioSynthesizer {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
+  private bgMusic: HTMLAudioElement | null = null;
+  private isMusicPlaying: boolean = false;
 
   constructor() {
-    // Lazy-load AudioContext upon first user interaction
+    // Lazy-load on first interaction
   }
 
   private initCtx() {
@@ -21,8 +23,40 @@ class AudioSynthesizer {
     }
   }
 
+  private initMusic() {
+    if (!this.bgMusic && typeof window !== "undefined") {
+      this.bgMusic = new Audio("/themesong.mp3");
+      this.bgMusic.loop = true;
+      this.bgMusic.volume = 0.35;
+      this.bgMusic.autoplay = true;
+    }
+  }
+
+  public startMusic() {
+    this.initMusic();
+    if (this.bgMusic && !this.muted) {
+      this.bgMusic.play().then(() => {
+        this.isMusicPlaying = true;
+      }).catch(() => {
+        // Autoplay policy: will trigger on next click
+      });
+    }
+  }
+
+  public pauseMusic() {
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+      this.isMusicPlaying = false;
+    }
+  }
+
   public toggleMute(): boolean {
     this.muted = !this.muted;
+    if (this.muted) {
+      this.pauseMusic();
+    } else {
+      this.startMusic();
+    }
     return this.muted;
   }
 
@@ -92,7 +126,6 @@ class AudioSynthesizer {
 
     const now = this.ctx.currentTime;
     
-    // Low square pulse
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = "sawtooth";
@@ -165,7 +198,6 @@ class AudioSynthesizer {
 
     const now = this.ctx.currentTime;
     
-    // Descending whistle/whoosh
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = "sine";

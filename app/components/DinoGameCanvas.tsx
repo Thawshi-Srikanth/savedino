@@ -5,6 +5,7 @@ import { audioSynth } from "./AudioSynthesizer";
 
 interface DinoGameCanvasProps {
   onScoreUpdate?: (score: number, high: number, meteorsDestroyed: number) => void;
+  onNightModeChange?: (isNight: boolean) => void;
 }
 
 interface Meteor {
@@ -46,12 +47,14 @@ interface Particle {
 const MAX_CHARGES = 3;
 const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 
-export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate }) => {
+export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, onNightModeChange }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spriteImgRef = useRef<HTMLImageElement | null>(null);
 
-  // React State for HUD
+  // React State for HUD & Theme
   const [gameState, setGameState] = useState<"IDLE" | "RUNNING" | "GAMEOVER">("IDLE");
+  const [isNight, setIsNight] = useState<boolean>(false);
+  const isNightRef = useRef<boolean>(false);
   const [laserCharges, setLaserCharges] = useState<number>(MAX_CHARGES);
   const [rechargeProgress, setRechargeProgress] = useState<number>(1.0);
   const [score, setScore] = useState<number>(0);
@@ -165,7 +168,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       setGameState("RUNNING");
       setLaserCharges(MAX_CHARGES);
       setRechargeProgress(1.0);
+      isNightRef.current = false;
+      setIsNight(false);
+      onNightModeChange?.(false);
       audioSynth.playButtonClick();
+      audioSynth.startMusic();
     }
 
     // 2. If GAMEOVER: Restart game
@@ -195,7 +202,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       setGameState("RUNNING");
       setLaserCharges(MAX_CHARGES);
       setRechargeProgress(1.0);
+      isNightRef.current = false;
+      setIsNight(false);
+      onNightModeChange?.(false);
       audioSynth.playButtonClick();
+      audioSynth.startMusic();
       return;
     }
 
@@ -634,7 +645,14 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
         ctx.translate(shakeX, shakeY);
       }
 
-      const night = Math.floor(s.score / 700) % 2 === 1;
+      const night = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
+      if (isNightRef.current !== night) {
+        isNightRef.current = night;
+        setIsNight(night);
+        if (onNightModeChange) {
+          onNightModeChange(night);
+        }
+      }
       ctx.fillStyle = night ? "#202124" : "#f4f4f4";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -800,18 +818,6 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
         }
       }
 
-      // HUD: Score & Meteors
-      ctx.font = '11px "PressStart2P", "Press Start 2P", monospace';
-      ctx.fillStyle = mainColor;
-      ctx.textAlign = "right";
-
-      const hiStr = Math.floor(s.highScore).toString().padStart(5, "0");
-      const scoreStr = Math.floor(s.score).toString().padStart(5, "0");
-      ctx.fillText(`HI ${hiStr}  ${scoreStr}`, CANVAS_WIDTH - 15, 25);
-
-      ctx.textAlign = "left";
-      ctx.font = '9px "PressStart2P", "Press Start 2P", monospace';
-      ctx.fillText(`BLASTED: ${s.meteorsDestroyed}`, 15, 25);
 
       // Start Screen if IDLE
       if (s.gameState === "IDLE") {
@@ -822,7 +828,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
           ctx.fillText("PRESS SPACE TO FIRE & START", CANVAS_WIDTH / 2, 65);
         }
         ctx.font = '9px "PressStart2P", "Press Start 2P", monospace';
-        ctx.fillText("SPACE: CROUCH & FIRE EXPANDING PLASMA BALL", CANVAS_WIDTH / 2, 90);
+        ctx.fillText("SPACE: LASER | UP ARROW: JUMP", CANVAS_WIDTH / 2, 90);
       }
 
       // Game Over Screen if GAMEOVER
@@ -857,14 +863,15 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
 
   return (
     <div className="w-full flex flex-col items-center select-none gap-3">
-      {/* ---------------------------------------------------- */}
-      {/* HIGH-VISIBILITY DEDICATED RECHARGE BATTERY METER     */}
-      {/* ---------------------------------------------------- */}
-      <div className="w-full max-w-[600px] flex items-center justify-between px-3 py-2 bg-[#ffffff] border-2 border-[#535353] rounded shadow-[3px_3px_0px_#535353]">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-pixel text-[#535353] font-bold">
-            ⚡ PLASMA BATTERY:
-          </span>
+      {/* HUD HEADER BAR: Circular Plasma Orbs + Blasted Count + Scores */}
+      <div className={`w-full max-w-[600px] flex items-center justify-between px-3.5 py-2 border-2 rounded transition-colors duration-700 ${
+        isNight
+          ? "bg-[#2b2c2f] border-[#80868b] shadow-[3px_3px_0px_#80868b] text-[#e8eaed]"
+          : "bg-[#ffffff] border-[#535353] shadow-[3px_3px_0px_#535353] text-[#535353]"
+      }`}>
+        {/* Left: 3 Circular Plasma Orbs + Blasted Counter */}
+        <div className="flex items-center gap-3">
+          {/* Circular Plasma Orbs (No "LASER:" text) */}
           <div className="flex items-center gap-1.5">
             {[0, 1, 2].map((idx) => {
               const isFilled = idx < laserCharges;
@@ -873,44 +880,45 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
               return (
                 <div
                   key={idx}
-                  className={`w-7 h-4 border border-[#535353] rounded-sm overflow-hidden relative ${
-                    isFilled ? "bg-[#0284c7] shadow-[0_0_8px_#38bdf8]" : "bg-[#e5e7eb]"
+                  className={`w-5 h-5 rounded-full border-2 overflow-hidden relative flex items-center justify-center transition-all ${
+                    isNight ? "border-[#80868b]" : "border-[#535353]"
+                  } ${
+                    isFilled ? "bg-[#0284c7] shadow-[0_0_8px_#38bdf8]" : (isNight ? "bg-[#3c4043]" : "bg-[#e5e7eb]")
                   }`}
+                  title={isFilled ? "Charge Ready" : "Recharging..."}
                 >
                   {isCurrentlyRecharging && (
                     <div
-                      className="h-full bg-[#f97316] transition-all duration-75"
-                      style={{ width: `${Math.min(100, Math.max(0, rechargeProgress * 100))}%` }}
+                      className="absolute bottom-0 w-full bg-[#f97316] transition-all duration-75"
+                      style={{ height: `${Math.min(100, Math.max(0, rechargeProgress * 100))}%` }}
                     />
                   )}
                   {isFilled && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-full h-1 bg-[#ffffff] opacity-40"></div>
-                    </div>
+                    <div className="w-1.5 h-1.5 bg-white rounded-full opacity-60 absolute top-0.5 left-0.5" />
                   )}
                 </div>
               );
             })}
           </div>
+
+          {/* Blasted Count */}
+          <div className={`text-[10px] font-pixel tracking-wide transition-colors duration-700 ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
+            BLASTED: <span className="font-bold text-[#0284c7]">{meteorsDestroyed}</span>
+          </div>
         </div>
 
-        <div className="text-[10px] font-pixel">
-          {laserCharges > 0 ? (
-            <span className="text-[#0284c7] font-bold">
-              [{laserCharges}/3 READY]
-            </span>
-          ) : (
-            <span className="text-[#f97316] font-bold animate-pulse">
-              [RECHARGING...]
-            </span>
-          )}
+        {/* Right: Scores (HI 00000  00000) */}
+        <div className={`font-pixel text-[10px] sm:text-[11px] tracking-wider transition-colors duration-700 ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
+          <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span> {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;{Math.floor(score).toString().padStart(5, "0")}
         </div>
       </div>
 
       {/* Canvas Container */}
       <div
         onClick={fireLaser}
-        className="relative w-full max-w-[600px] cursor-pointer overflow-hidden bg-[#f4f4f4]"
+        className={`relative w-full max-w-[600px] cursor-pointer overflow-hidden transition-colors duration-700 ${
+          isNight ? "bg-[#202124]" : "bg-[#f4f4f4]"
+        }`}
       >
         <canvas
           ref={canvasRef}
@@ -928,7 +936,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
             }}
             className="flex-1 py-3 bg-[#535353] text-white rounded font-pixel text-[11px] shadow-[2px_2px_0px_#000]"
           >
-            ⬆ JUMP
+            <span className="flex items-center justify-center gap-1.5">
+              <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                <polygon points="8,2 2,9 6,9 6,14 10,14 10,9 14,9" />
+              </svg>
+              <span>JUMP</span>
+            </span>
           </button>
 
           <button
@@ -938,15 +951,22 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
             }}
             className="flex-1 py-3 bg-[#0284c7] text-white rounded font-pixel text-[11px] font-bold shadow-[2px_2px_0px_#000]"
           >
-            ⚡ PLASMA BALL ({laserCharges})
+            <span className="flex items-center justify-center gap-1.5">
+              <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                <polygon points="9,1 3,9 8,9 7,15 13,7 8,7" />
+              </svg>
+              <span>BLAST ({laserCharges})</span>
+            </span>
           </button>
         </div>
       </div>
 
       {/* Controls Hint */}
-      <div className="w-full max-w-[600px] flex items-center justify-between px-2 text-[11px] font-mono text-[#535353]">
-        <span><b>SPACE</b>: Crouch & Shoot Plasma Ball &nbsp;|&nbsp; <b>UP ARROW</b>: Jump</span>
-        <span className="text-[10px] text-[#737373]">Ball expands as it travels</span>
+      <div className={`w-full max-w-[600px] flex items-center justify-between px-2 text-[11px] font-mono transition-colors duration-700 ${
+        isNight ? "text-[#9aa0a6]" : "text-[#535353]"
+      }`}>
+        <span><b>SPACE</b>: Laser &nbsp;|&nbsp; <b>UP ARROW</b>: Jump</span>
+        <span className="text-[10px] opacity-75">Laser expands as it travels</span>
       </div>
     </div>
   );
