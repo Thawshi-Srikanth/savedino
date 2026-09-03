@@ -1,18 +1,19 @@
-// Web Audio API Retro Sound Synthesizer for Chrome Dino & Asteroid Game
+"use client";
 
+// Web Audio API Synthesizer for 8-bit retro sounds
 class AudioSynthesizer {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
 
   constructor() {
-    // AudioContext will be lazily created on user gesture to obey autoplay policy
+    // Lazy-load AudioContext upon first user interaction
   }
 
   private initCtx() {
     if (!this.ctx && typeof window !== "undefined") {
-      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtxClass) {
-        this.ctx = new AudioCtxClass();
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
       }
     }
     if (this.ctx && this.ctx.state === "suspended") {
@@ -20,20 +21,16 @@ class AudioSynthesizer {
     }
   }
 
-  public setMuted(muted: boolean) {
-    this.muted = muted;
+  public toggleMute(): boolean {
+    this.muted = !this.muted;
+    return this.muted;
   }
 
   public isMuted(): boolean {
     return this.muted;
   }
 
-  public toggleMute(): boolean {
-    this.muted = !this.muted;
-    return this.muted;
-  }
-
-  // Classic Chrome Dino Jump Beep
+  // 8-Bit Jump Sound (short rising pitch)
   public playJump() {
     if (this.muted) return;
     this.initCtx();
@@ -44,53 +41,50 @@ class AudioSynthesizer {
     const gain = this.ctx.createGain();
 
     osc.type = "square";
-    osc.frequency.setValueAtTime(400, now);
-    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
 
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.09);
+    osc.stop(now + 0.12);
   }
 
-  // 100-Point High Score Milestone Chime
+  // 8-Bit Score Milestone Sound (Two cheerful high beeps)
   public playScore() {
     if (this.muted) return;
     this.initCtx();
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
-    
-    // First tone
-    const osc1 = this.ctx.createOscillator();
-    const gain1 = this.ctx.createGain();
-    osc1.type = "square";
-    osc1.frequency.setValueAtTime(659.25, now); // E5
-    gain1.gain.setValueAtTime(0.12, now);
-    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-    osc1.connect(gain1);
-    gain1.connect(this.ctx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.08);
 
-    // Second tone
-    const osc2 = this.ctx.createOscillator();
-    const gain2 = this.ctx.createGain();
-    osc2.type = "square";
-    osc2.frequency.setValueAtTime(880, now + 0.08); // A5
-    gain2.gain.setValueAtTime(0.15, now + 0.08);
-    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-    osc2.connect(gain2);
-    gain2.connect(this.ctx.destination);
-    osc2.start(now + 0.08);
-    osc2.stop(now + 0.18);
+    const playTone = (freq: number, start: number, duration: number) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.15, start);
+      gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(start);
+      osc.stop(start + duration);
+    };
+
+    playTone(784, now, 0.08);        // G5
+    playTone(1046.5, now + 0.09, 0.14); // C6
   }
 
-  // Crash / Game Over Noise
+  // 8-Bit Hit / Crash Sound (Low descending crunch)
   public playHit() {
     if (this.muted) return;
     this.initCtx();
@@ -113,6 +107,54 @@ class AudioSynthesizer {
 
     osc.start(now);
     osc.stop(now + 0.25);
+  }
+
+  // 8-Bit Laser Beam Pew-Pew
+  public playLaser() {
+    if (this.muted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(950, now);
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+
+  // Asteroid Explosion Blast
+  public playExplosion() {
+    if (this.muted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(240, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.22);
+
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.22);
   }
 
   // Incoming Meteor Whoosh & Crater Impact
