@@ -14,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground border border-destructive/80 hover:bg-destructive/90 font-bold",
         outline:
-          "border border-[#10b981] bg-white text-[#0f172a] dark:bg-[#1e293b] dark:text-[#f8fafc] hover:bg-[#10b981] hover:text-white transition-colors font-bold",
+          "border border-border bg-white text-[#0f172a] dark:bg-[#1c1d21] dark:text-[#f3f4f6] shadow-[0_3px_0_0_rgba(0,0,0,0.15)] hover:border-[#8b5cf6] active:translate-y-[2px] active:shadow-none font-bold",
         secondary:
           "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -22,7 +22,7 @@ const buttonVariants = cva(
         link:
           "border-transparent text-primary underline-offset-4 hover:underline",
         pill:
-          "rounded-full border border-border bg-white text-[#0f172a] dark:bg-[#1e293b] dark:text-[#f8fafc] hover:bg-[#8b5cf6] hover:text-white hover:border-[#8b5cf6] text-[11px] font-medium px-3.5 py-1 transition-all",
+          "rounded-full border border-border bg-white text-[#0f172a] dark:bg-[#1c1d21] dark:text-[#f3f4f6] hover:bg-[#8b5cf6] hover:text-white hover:border-[#8b5cf6] text-[11px] font-medium px-3.5 py-1 transition-all",
         emerald:
           "bg-[#10b981] text-white border border-[#047857] shadow-[0_3px_0_0_#047857] hover:bg-[#059669] active:translate-y-[2px] active:shadow-none font-bold",
       },

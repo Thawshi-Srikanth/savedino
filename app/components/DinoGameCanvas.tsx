@@ -1092,7 +1092,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
       {/* Dedicated Touch Arcade Controls at Bottom (Hidden on desktop / wide screens, visible on mobile) */}
       <div className="w-full max-w-[600px] flex sm:hidden items-center justify-between gap-3 px-1 mt-3 z-30 relative select-none">
-        {/* JUMP Touch Pad */}
+        {/* JUMP Touch Pad (White 3D PostHog Button) */}
         <Button
           type="button"
           variant="outline"
@@ -1101,12 +1101,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             e.stopPropagation();
             jump();
           }}
-          className="flex-1 py-4 h-12 font-pixel text-xs tracking-wider font-bold cursor-pointer select-none shadow-xs"
+          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
         >
           JUMP
         </Button>
 
-        {/* LASER BLAST Touch Pad */}
+        {/* LASER BLAST Touch Pad (Purple 3D PostHog Button) */}
         <Button
           type="button"
           variant={laserCharges > 0 ? "default" : "secondary"}
@@ -1116,7 +1116,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             e.stopPropagation();
             fireLaser();
           }}
-          className="flex-1 py-4 h-12 font-pixel text-xs tracking-wider font-bold cursor-pointer select-none shadow-xs"
+          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
         >
           BLAST ({laserCharges})
         </Button>
