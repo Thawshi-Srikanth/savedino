@@ -52,6 +52,15 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     });
   };
 
+  // Dedicated Full-Screen Layout for Login & Register (No Navbar)
+  if (pathname === "/login" || pathname === "/register") {
+    return (
+      <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans transition-colors duration-700 select-none">
+        {children}
+      </div>
+    );
+  }
+
   // Navigation Items
   const navItems = [
     { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },

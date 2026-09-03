@@ -4,7 +4,6 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -42,62 +41,121 @@ function LoginForm() {
   };
 
   return (
-    <Card className="p-6">
-      <CardHeader className="p-0 border-none mb-4">
-        <CardTitle>Sign In</CardTitle>
-        <CardDescription>Enter your email and password to access your account.</CardDescription>
-      </CardHeader>
-
-      {errorMsg && (
-        <div className="mb-4 p-2.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-xs font-medium">
-          {errorMsg}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-xs font-medium mb-1">Email Address</label>
-          <Input
-            type="email"
-            required
-            placeholder="user@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+    <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none transition-colors duration-700 bg-background text-foreground">
+      {/* Top Left Monospace Code Comment Accent (PostHog Inspired) */}
+      <div className="w-full max-w-6xl mx-auto flex items-center justify-between text-xs font-mono text-muted-foreground">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1">
+            <span>// sign in to your account</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>// iasc asteroid search collaboration</span>
+            <span className="w-2 h-3.5 bg-[#8b5cf6] inline-block animate-pulse" />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium mb-1">Password</label>
-          <Input
-            type="password"
-            required
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        {/* Back to Game */}
+        <Link href="/" className="hidden sm:inline-flex items-center gap-1 text-xs font-pixel text-muted-foreground hover:text-foreground">
+          <span>&lt; Arcade Game</span>
+        </Link>
+      </div>
 
-        <Button type="submit" variant="default" className="w-full mt-2" disabled={loading}>
-          {loading ? "Signing in..." : "Sign In"}
-        </Button>
-
-        <div className="pt-4 text-center border-t border-border text-xs text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-primary hover:underline font-semibold">
-            Create an Account
+      {/* Main Centered Auth Section */}
+      <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
+        {/* PostHog Style Centered Brand Logo */}
+        <div className="flex flex-col items-center justify-center gap-2">
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+            {/* Slanted 3-Color Badge */}
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-7 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
+              <div className="w-3 h-7 bg-[#10b981] rounded-xs transform -skew-x-12" />
+              <div className="w-3 h-7 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
+            </div>
+            <span className="font-pixel text-xl tracking-wider uppercase text-foreground">
+              SaveDino
+            </span>
           </Link>
         </div>
-      </form>
-    </Card>
+
+        {/* PostHog Style Auth Card */}
+        <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
+          <div className="text-center space-y-1.5">
+            <h1 className="text-xl sm:text-2xl font-pixel font-bold tracking-tight text-foreground">
+              Sign in
+            </h1>
+            <p className="text-xs font-mono text-muted-foreground">
+              Access your Asteroid Search team workspace and campaigns.
+            </p>
+          </div>
+
+          {errorMsg && (
+            <div className="p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-mono">
+              {errorMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-mono font-bold uppercase tracking-wider mb-1 text-foreground">
+                Email
+              </label>
+              <Input
+                type="email"
+                required
+                placeholder="you@yourcompany.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-11 font-mono text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-mono font-bold uppercase tracking-wider mb-1 text-foreground">
+                Password
+              </label>
+              <Input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 font-mono text-xs"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              variant="default"
+              className="w-full h-11 font-pixel text-xs uppercase tracking-wider font-bold mt-2"
+              disabled={loading}
+            >
+              {loading ? "Signing in..." : "Continue >"}
+            </Button>
+          </form>
+        </div>
+
+        {/* Bottom Link Outside Card */}
+        <div className="text-center text-xs font-mono text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
+            <span>Create an account</span>
+            <span>&rarr;</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Bottom Footer Spacing */}
+      <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
+        SaveDino — NASA & IASC Asteroid Search Collaboration
+      </div>
+    </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="w-full max-w-md mx-auto py-12">
-      <Suspense fallback={<div className="text-center text-xs text-muted-foreground">Loading form...</div>}>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">Loading form...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
