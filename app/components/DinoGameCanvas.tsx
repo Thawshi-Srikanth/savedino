@@ -6,6 +6,7 @@ import { audioSynth } from "./AudioSynthesizer";
 interface DinoGameCanvasProps {
   onScoreUpdate?: (score: number, high: number, meteorsDestroyed: number) => void;
   onNightModeChange?: (isNight: boolean) => void;
+  nightModeOverride?: boolean | null;
 }
 
 interface Meteor {
@@ -47,19 +48,33 @@ interface Particle {
 const MAX_CHARGES = 3;
 const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 
-export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, onNightModeChange }) => {
+export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
+  onScoreUpdate,
+  onNightModeChange,
+  nightModeOverride,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spriteImgRef = useRef<HTMLImageElement | null>(null);
+  const nightModeOverrideRef = useRef<boolean | null>(nightModeOverride ?? null);
+  nightModeOverrideRef.current = nightModeOverride ?? null;
 
   // React State for HUD & Theme
   const [gameState, setGameState] = useState<"IDLE" | "RUNNING" | "GAMEOVER">("IDLE");
-  const [isNight, setIsNight] = useState<boolean>(false);
-  const isNightRef = useRef<boolean>(false);
+  const [isNight, setIsNight] = useState<boolean>(nightModeOverride ?? false);
+  const isNightRef = useRef<boolean>(nightModeOverride ?? false);
   const [laserCharges, setLaserCharges] = useState<number>(MAX_CHARGES);
   const [rechargeProgress, setRechargeProgress] = useState<number>(1.0);
   const [score, setScore] = useState<number>(0);
   const [highScore, setHighScore] = useState<number>(0);
   const [meteorsDestroyed, setMeteorsDestroyed] = useState<number>(0);
+
+  useEffect(() => {
+    if (nightModeOverride !== undefined && nightModeOverride !== null) {
+      setIsNight(nightModeOverride);
+      isNightRef.current = nightModeOverride;
+      onNightModeChange?.(nightModeOverride);
+    }
+  }, [nightModeOverride, onNightModeChange]);
 
   // Load official Chromium sprite sheet
   useEffect(() => {
@@ -74,13 +89,14 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
 
   // Engine State Ref
   const gameLoopRef = useRef<number | null>(null);
+  const lastFireTimeRef = useRef<number>(0);
   const stateRef = useRef({
     gameState: "IDLE" as "IDLE" | "RUNNING" | "GAMEOVER",
     score: 0,
     highScore: 0,
     meteorsDestroyed: 0,
     speed: 6.0,
-    groundY: 127,
+    groundY: 148,
     frameCount: 0,
     gameOverTimestamp: 0,
     screenShake: 0,
@@ -99,7 +115,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
     // Dino State (Crouches into shooting stance when firing)
     dino: {
       x: 50,
-      y: 80, // 127 - 47
+      y: 101, // 148 - 47
       vy: 0,
       width: 44,
       height: 47,
@@ -168,6 +184,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
       setGameState("RUNNING");
       setLaserCharges(MAX_CHARGES);
       setRechargeProgress(1.0);
+      setScore(0);
+      setMeteorsDestroyed(0);
+      onScoreUpdate?.(0, s.highScore, 0);
       isNightRef.current = false;
       setIsNight(false);
       onNightModeChange?.(false);
@@ -202,6 +221,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
       setGameState("RUNNING");
       setLaserCharges(MAX_CHARGES);
       setRechargeProgress(1.0);
+      setScore(0);
+      setMeteorsDestroyed(0);
+      onScoreUpdate?.(0, s.highScore, 0);
       isNightRef.current = false;
       setIsNight(false);
       onNightModeChange?.(false);
@@ -210,11 +232,18 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
       return;
     }
 
-    // 3. If RUNNING: Check Charges
+    // 3. If RUNNING: Check Charges & Fire Rate Cooldown
+    const now = Date.now();
+    if (now - lastFireTimeRef.current < 260) {
+      return; // Prevents accidental sequential bullet discharge / double-tap spam
+    }
+
     if (s.charges <= 0) {
       audioSynth.playButtonClick();
       return;
     }
+
+    lastFireTimeRef.current = now;
 
     // Consume 1 charge
     s.charges -= 1;
@@ -264,7 +293,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
   // Jump Action (Jump)
   const jump = useCallback(() => {
     const s = stateRef.current;
-    if (s.gameState === "IDLE") {
+    if (s.gameState === "IDLE" || s.gameState === "GAMEOVER") {
       fireLaser();
       return;
     }
@@ -275,6 +304,37 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
       audioSynth.playJump();
     }
   }, [fireLaser]);
+
+  // Canvas Tap/Click Handler (Splits screen: Left 45% = Jump, Right 55% = Shoot)
+  const handleCanvasInteraction = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+      const s = stateRef.current;
+      if (s.gameState === "IDLE" || s.gameState === "GAMEOVER") {
+        fireLaser();
+        return;
+      }
+
+      let clientX = 0;
+      if ("touches" in e && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+      } else if ("clientX" in e) {
+        clientX = (e as React.MouseEvent).clientX;
+      }
+
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect && rect.width > 0) {
+        const relX = clientX - rect.left;
+        if (relX < rect.width * 0.45) {
+          jump();
+        } else {
+          fireLaser();
+        }
+      } else {
+        fireLaser();
+      }
+    },
+    [fireLaser, jump]
+  );
 
   // Keyboard Listeners
   useEffect(() => {
@@ -306,7 +366,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
       s.frameCount++;
 
       const CANVAS_WIDTH = 600;
-      const CANVAS_HEIGHT = 150;
+      const CANVAS_HEIGHT = 175;
       const groundY = s.groundY;
 
       // 1. UPDATE GAME LOGIC
@@ -645,7 +705,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
         ctx.translate(shakeX, shakeY);
       }
 
-      const night = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
+      const calculatedNight = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
+      const night = nightModeOverrideRef.current !== null ? nightModeOverrideRef.current : calculatedNight;
       if (isNightRef.current !== night) {
         isNightRef.current = night;
         setIsNight(night);
@@ -653,8 +714,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
           onNightModeChange(night);
         }
       }
-      ctx.fillStyle = night ? "#202124" : "#f4f4f4";
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Transparent Canvas Clear (Lets the smooth 700ms page background transition show through directly)
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       const mainColor = night ? "#e8eaed" : "#535353";
       const spriteImg = spriteImgRef.current;
@@ -837,29 +899,29 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
       // Start Screen if IDLE
       if (s.gameState === "IDLE") {
         ctx.textAlign = "center";
-        ctx.font = '11px "PressStart2P", "Press Start 2P", monospace';
+        ctx.font = '11px "Press Start 2P", monospace';
         const blink = Math.floor(s.frameCount / 30) % 2 === 0;
         if (blink) {
-          ctx.fillText("PRESS SPACE TO FIRE & START", CANVAS_WIDTH / 2, 65);
+          ctx.fillText("PRESS SPACE TO FIRE & START", CANVAS_WIDTH / 2, 75);
         }
-        ctx.font = '9px "PressStart2P", "Press Start 2P", monospace';
-        ctx.fillText("SPACE: LASER | UP ARROW: JUMP", CANVAS_WIDTH / 2, 90);
+        ctx.font = '9px "Press Start 2P", monospace';
+        ctx.fillText("SPACE: LASER | UP ARROW: JUMP", CANVAS_WIDTH / 2, 105);
       }
 
       // Game Over Screen if GAMEOVER
       if (s.gameState === "GAMEOVER") {
         ctx.textAlign = "center";
-        ctx.font = '14px "PressStart2P", "Press Start 2P", monospace';
-        ctx.fillText("G A M E   O V E R", CANVAS_WIDTH / 2, 50);
+        ctx.font = '14px "Press Start 2P", monospace';
+        ctx.fillText("G A M E   O V E R", CANVAS_WIDTH / 2, 60);
 
         const btnX = CANVAS_WIDTH / 2;
-        const btnY = 65;
+        const btnY = 80;
         if (spriteImg) {
           ctx.drawImage(spriteImg, 2, 2, 36, 32, btnX - 18, btnY, 36, 32);
         }
 
-        ctx.font = '9px "PressStart2P", "Press Start 2P", monospace';
-        ctx.fillText("PRESS SPACE TO RESTART", CANVAS_WIDTH / 2, 115);
+        ctx.font = '9px "Press Start 2P", monospace';
+        ctx.fillText("PRESS SPACE TO RESTART", CANVAS_WIDTH / 2, 130);
       }
 
       ctx.restore();
@@ -878,11 +940,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
 
   return (
     <div className="w-full flex flex-col items-center select-none gap-3">
-      {/* HUD HEADER BAR: Circular Plasma Orbs + Blasted Count + Scores */}
-      <div className={`w-full max-w-[600px] flex items-center justify-between px-3.5 py-2 border-2 rounded transition-colors duration-700 ${
-        isNight
-          ? "bg-[#2b2c2f] border-[#80868b] shadow-[3px_3px_0px_#80868b] text-[#e8eaed]"
-          : "bg-[#ffffff] border-[#535353] shadow-[3px_3px_0px_#535353] text-[#535353]"
+      {/* HUD Header Bar: Seamlessly blended with the background (no container box) */}
+      <div className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 transition-colors duration-700 ${
+        isNight ? "text-[#e8eaed]" : "text-[#535353]"
       }`}>
         {/* Left: 3 Circular Plasma Orbs + Blasted Counter */}
         <div className="flex items-center gap-3">
@@ -913,7 +973,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
                     {/* Stepped 8-bit Pixel Outline */}
                     <path
                       d="M4 1h6v1h2v2h1v6h-1v2h-2v1H4v-1H2v-2H1V4h1V2h2V1z"
-                      fill={isNight ? "#80868b" : "#000000"}
+                      fill={isNight ? "#80868b" : "#535353"}
                     />
 
                     {isFilled ? (
@@ -953,9 +1013,10 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
             })}
           </div>
 
-          {/* Blasted Count */}
+          {/* Asteroid Destroyed Count (Clean & shortened on mobile) */}
           <div className={`text-[10px] font-pixel tracking-wide transition-colors duration-700 ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
-            BLASTED: <span className="font-bold text-[#0284c7]">{meteorsDestroyed}</span>
+            <span className="hidden sm:inline">BLASTED: </span>
+            <span className="font-bold text-[#0284c7]">×{meteorsDestroyed}</span>
           </div>
         </div>
 
@@ -965,56 +1026,22 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
         </div>
       </div>
 
-      {/* Canvas Container */}
+      {/* Canvas Container with Dual-Side Tap Interaction */}
       <div
-        onClick={fireLaser}
-        className={`relative w-full max-w-[600px] cursor-pointer overflow-hidden transition-colors duration-700 ${
-          isNight ? "bg-[#202124]" : "bg-[#f4f4f4]"
-        }`}
+        onClick={handleCanvasInteraction}
+        onTouchStart={handleCanvasInteraction}
+        className="relative w-full max-w-[600px] cursor-pointer overflow-hidden select-none bg-transparent"
       >
         <canvas
           ref={canvasRef}
           width={600}
-          height={150}
+          height={175}
           className="w-full h-auto block touch-none"
         />
-
-        {/* Mobile Touch Action Controls */}
-        <div className="sm:hidden mt-3 flex items-center justify-between gap-3 pointer-events-auto px-2">
-          <button
-            onTouchStart={(e) => {
-              e.preventDefault();
-              jump();
-            }}
-            className="flex-1 py-3 bg-[#535353] text-white rounded font-pixel text-[11px] shadow-[2px_2px_0px_#000]"
-          >
-            <span className="flex items-center justify-center gap-1.5">
-              <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
-                <polygon points="8,2 2,9 6,9 6,14 10,14 10,9 14,9" />
-              </svg>
-              <span>JUMP</span>
-            </span>
-          </button>
-
-          <button
-            onTouchStart={(e) => {
-              e.preventDefault();
-              fireLaser();
-            }}
-            className="flex-1 py-3 bg-[#0284c7] text-white rounded font-pixel text-[11px] font-bold shadow-[2px_2px_0px_#000]"
-          >
-            <span className="flex items-center justify-center gap-1.5">
-              <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
-                <polygon points="9,1 3,9 8,9 7,15 13,7 8,7" />
-              </svg>
-              <span>BLAST ({laserCharges})</span>
-            </span>
-          </button>
-        </div>
       </div>
 
-      {/* Controls Hint with Pixel Keyboard Keycap Sprites */}
-      <div className={`w-full max-w-[600px] flex items-center justify-between px-2 text-[11px] font-mono transition-colors duration-700 ${
+      {/* Controls Hint with Pixel Keyboard Keycap Sprites (Helper contents) */}
+      <div className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono transition-colors duration-700 ${
         isNight ? "text-[#9aa0a6]" : "text-[#535353]"
       }`}>
         <div className="flex items-center gap-3">
@@ -1055,9 +1082,48 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
           </div>
         </div>
 
-        <span className="text-[10px] font-mono opacity-75 hidden sm:inline">
-          Laser expands as it travels
+        <span className="text-[10px] font-mono opacity-75">
+          <span className="sm:hidden">Tap left Jump, right Shoot • </span>Laser expands in flight
         </span>
+      </div>
+
+      {/* Dedicated Touch Arcade Controls at Bottom (Ergonomic for thumb control) */}
+      <div className="w-full max-w-[600px] flex items-center justify-between gap-3 px-1 mt-2 z-30 relative select-none">
+        {/* JUMP Touch Pad */}
+        <button
+          type="button"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            jump();
+          }}
+          className={`flex-1 py-3 px-4 rounded border-2 transition-all flex items-center justify-center font-pixel text-xs tracking-wider font-bold cursor-pointer select-none active:translate-y-0.5 ${
+            isNight
+              ? "bg-[#2b2c2f] border-[#80868b] text-[#e8eaed] shadow-[2px_2px_0px_#80868b] active:shadow-none"
+              : "bg-white border-[#535353] text-[#202124] shadow-[2px_2px_0px_#535353] active:shadow-none"
+          }`}
+        >
+          JUMP
+        </button>
+
+        {/* LASER BLAST Touch Pad */}
+        <button
+          type="button"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fireLaser();
+          }}
+          className={`flex-1 py-3 px-4 rounded border-2 transition-all flex items-center justify-center font-pixel text-xs tracking-wider font-bold cursor-pointer select-none active:translate-y-0.5 ${
+            laserCharges > 0
+              ? "bg-[#0284c7] border-[#0369a1] text-white shadow-[2px_2px_0px_#0369a1] active:shadow-none"
+              : isNight
+              ? "bg-[#3c4043] border-[#555] text-gray-400 opacity-60"
+              : "bg-gray-200 border-gray-400 text-gray-500 opacity-60"
+          }`}
+        >
+          BLAST
+        </button>
       </div>
     </div>
   );

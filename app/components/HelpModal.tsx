@@ -11,8 +11,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in select-none">
-      <div className="relative w-full max-w-lg rounded-xl border-2 border-[#535353] bg-white p-6 shadow-[6px_6px_0px_#535353] dark:bg-[#1e1e1e] dark:border-[#888] dark:shadow-[6px_6px_0px_#888]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 animate-fade-in select-none">
+      <div className="relative w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-xl border-2 border-[#535353] bg-white p-4 sm:p-6 shadow-[4px_4px_0px_#535353] sm:shadow-[6px_6px_0px_#535353] dark:bg-[#1e1e1e] dark:border-[#888] dark:shadow-[4px_4px_0px_#888]">
         {/* Close Button */}
         <button
           onClick={onClose}

@@ -7,6 +7,7 @@ interface HeaderProps {
   isMuted: boolean;
   onToggleMute: () => void;
   isNight?: boolean;
+  onToggleTheme?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,12 +15,13 @@ export const Header: React.FC<HeaderProps> = ({
   isMuted,
   onToggleMute,
   isNight = false,
+  onToggleTheme,
 }) => {
   const textColor = isNight ? "text-[#e8eaed]" : "text-[#535353]";
   const borderColor = isNight ? "border-[#80868b]" : "border-[#535353]";
 
   return (
-    <header className="w-full relative px-6 py-4 sm:px-12 sm:py-6 flex flex-col items-center select-none transition-colors duration-700">
+    <header className="w-full relative px-3 py-2 sm:px-12 sm:py-6 flex flex-col items-center select-none transition-colors duration-700">
       {/* Top Navigation Bar */}
       <div className="w-full max-w-6xl flex items-center justify-between">
         {/* Top Left Badge - Custom Project Branding */}
@@ -39,8 +41,32 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
 
-        {/* Top Right Controls: Sound Toggle & Help */}
-        <div className="flex items-center gap-3">
+        {/* Top Right Controls: Theme Toggle, Sound Toggle & Help */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme Toggle Button (Icon only) */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors duration-700 focus:outline-hidden cursor-pointer ${borderColor} ${textColor} ${
+                isNight ? "hover:bg-[#333]" : "hover:bg-gray-200"
+              }`}
+              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+            >
+              {isNight ? (
+                /* Pixel Moon Icon */
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                  <path d="M6 1h2v1H6V1zm2 1h2v2H8V2zm2 2h1v2h-1V4zm1 2h1v4h-1V6zm-1 4h-1v2h1v-2zm-2 2H6v-1h2v1zm-2 0H4v-1h2v1zm-2-1H3v-2h1v2zm-1-2H1V7h1v2zm0-2h1V4H2v1z" />
+                </svg>
+              ) : (
+                /* Pixel Sun Icon */
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                  <path d="M7 0h2v2H7V0zm0 14h2v2H7v-2zM0 7h2v2H0V7zm14 0h2v2h-2V7zm-2-5h2v2h-2V2zM2 12h2v2H2v-2zm10 0h2v2h-2v-2zM2 2h2v2H2V2zm3 3h6v6H5V5z" />
+                </svg>
+              )}
+            </button>
+          )}
+
+          {/* Sound Toggle */}
           <button
             onClick={onToggleMute}
             className="p-1.5 bg-transparent border-0 shadow-none hover:opacity-75 active:scale-90 transition-all focus:outline-hidden cursor-pointer"
@@ -53,9 +79,10 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </button>
 
+          {/* Help Button */}
           <button
             onClick={onOpenHelp}
-            className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-bold transition-colors duration-700 focus:outline-hidden ${borderColor} ${textColor} ${
+            className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-bold transition-colors duration-700 focus:outline-hidden cursor-pointer ${borderColor} ${textColor} ${
               isNight ? "hover:bg-[#333]" : "hover:bg-gray-200"
             }`}
             title="Help / How to Play"
@@ -65,8 +92,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Floating Sound Controls Container (Clean icon, no background, no shadow) */}
-      <div className="sound-controls-container fixed bottom-6 right-6 z-50">
+      {/* Floating Sound Controls Container (Desktop only to prevent cluttering mobile gameplay) */}
+      <div className="sound-controls-container hidden md:block fixed bottom-6 right-6 z-50">
         <button
           onClick={onToggleMute}
           className="p-2 bg-transparent border-0 shadow-none hover:scale-110 active:scale-90 transition-all focus:outline-hidden cursor-pointer"

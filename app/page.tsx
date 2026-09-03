@@ -6,15 +6,24 @@ import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { audioSynth } from "./components/AudioSynthesizer";
 
-// Dynamically import DinoGameCanvas with SSR disabled to eliminate canvas hydration mismatch
+// Dynamically import DinoGameCanvas with SSR disabled
 const DinoGameCanvas = dynamic(
   () => import("./components/DinoGameCanvas").then((mod) => mod.DinoGameCanvas),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full max-w-[600px] h-[190px] bg-[#f4f4f4] flex items-center justify-center border-2 border-[#535353] rounded">
-        <span className="font-pixel text-[10px] text-[#70757a] animate-pulse">
-          INITIALIZING RADAR...
+      <div className="w-full max-w-[600px] h-[225px] flex flex-col items-center justify-center gap-3 select-none">
+        <div
+          className="w-11 h-12"
+          style={{
+            backgroundImage: "url('/offline-sprite-1x.png')",
+            backgroundPosition: "-40px -2px",
+            backgroundRepeat: "no-repeat",
+            imageRendering: "pixelated",
+          }}
+        />
+        <span className="font-pixel text-[9px] text-[#70757a] tracking-wider uppercase animate-pulse">
+          READY...
         </span>
       </div>
     ),
@@ -26,6 +35,7 @@ export default function Home() {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isNight, setIsNight] = useState<boolean>(false);
+  const [devNightOverride, setDevNightOverride] = useState<boolean | null>(null);
 
   const [score, setScore] = useState<number>(0);
   const [highScore, setHighScore] = useState<number>(0);
@@ -75,11 +85,12 @@ export default function Home() {
     setMeteorsDestroyed(destroyed);
   };
 
-  const nightActive = mounted && isNight;
+  const effectiveNight = devNightOverride !== null ? devNightOverride : isNight;
+  const nightActive = mounted && effectiveNight;
 
   return (
     <main
-      className={`min-h-screen flex flex-col items-center justify-between pb-12 px-4 sm:px-8 select-none transition-colors duration-700 ease-in-out ${
+      className={`min-h-[100dvh] flex flex-col items-center justify-between pb-3 sm:pb-12 px-2.5 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
         nightActive ? "bg-[#202124] text-[#e8eaed]" : "bg-[#f4f4f4] text-[#535353]"
       }`}
     >
@@ -89,17 +100,23 @@ export default function Home() {
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
         isNight={nightActive}
+        onToggleTheme={() => {
+          const nextNight = devNightOverride !== null ? !devNightOverride : !isNight;
+          setDevNightOverride(nextNight);
+          setIsNight(nextNight);
+        }}
       />
 
       {/* Main Game Stage */}
-      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-2">
+      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 sm:py-2">
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
           onNightModeChange={setIsNight}
+          nightModeOverride={devNightOverride}
         />
 
         {/* Chrome Error Style "Coming Soon" Section (Dynamic Day/Night Theme) */}
-        <div className="w-full mt-10 text-left select-text transition-colors duration-700">
+        <div className="w-full mt-3 sm:mt-8 text-left select-text transition-colors duration-700">
           <h2
             className={`text-base sm:text-lg font-pixel font-bold tracking-wide uppercase transition-colors duration-700 ${
               nightActive ? "text-[#ffffff]" : "text-[#202124]"

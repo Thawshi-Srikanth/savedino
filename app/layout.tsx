@@ -36,11 +36,11 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} h-full antialiased`}
+      className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} h-full antialiased overscroll-none`}
     >
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-[#f4f4f4] text-[#535353] selection:bg-black selection:text-white"
+        className="min-h-[100dvh] flex flex-col bg-[#f4f4f4] text-[#535353] selection:bg-black selection:text-white overscroll-none"
       >
         {children}
       </body>
