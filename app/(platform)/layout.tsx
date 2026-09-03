@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Telescope, Users, ShieldAlert, Gamepad2, LogOut, User, Sparkles, Menu } from "lucide-react";
+import { LogOut, User, Menu } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,72 +16,74 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   // Navigation Items
   const navItems = [
-    { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Team Workspace", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+    { title: "CAMPAIGNS", url: "/campaigns", active: pathname === "/campaigns" },
+    { title: "TEAM WORKSPACE", url: "/campaigns", active: pathname.startsWith("/team/") },
   ];
 
   // @ts-ignore
   if (session?.user?.role === "admin") {
     navItems.push({
-      title: "Admin Console",
+      title: "ADMIN CONSOLE",
       url: "/admin",
-      icon: ShieldAlert,
       active: pathname === "/admin",
     });
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans">
-      {/* Top Navbar for Desktop & Mobile */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <div className="min-h-screen w-full flex flex-col bg-[#f4f4f4] dark:bg-[#121212] text-[#535353] dark:text-[#e8eaed] font-sans">
+      {/* Top Navbar Matching Homepage Style Exactly */}
+      <header className="sticky top-0 z-40 w-full border-b border-[#535353]/20 dark:border-[#80868b]/30 bg-[#f4f4f4]/95 dark:bg-[#121212]/95 backdrop-blur-md transition-colors duration-700">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo & Arcade Branding */}
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2.5 font-bold text-sm text-primary tracking-tight group">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm group-hover:scale-105 transition-transform">
-                <Sparkles className="size-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-pixel text-xs tracking-wider text-primary">SAVE DINO</span>
-                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest -mt-0.5">IASC PORTAL</span>
-              </div>
+          {/* Logo & Branding - Matching Homepage Header */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+              <svg
+                className="w-4 h-4 fill-current text-[#535353] dark:text-[#e8eaed] transition-transform group-hover:scale-110"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
+              </svg>
+              <span className="font-sans font-bold text-xs tracking-wider uppercase text-[#535353] dark:text-[#e8eaed]">
+                SAVE DINO
+              </span>
+              <span className="hidden sm:inline-block text-[10px] uppercase tracking-wide px-2 py-0.5 border border-[#535353]/60 dark:border-[#80868b] rounded-full font-mono text-[#535353] dark:text-[#e8eaed]">
+                IASC PORTAL
+              </span>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            {/* Desktop Navigation Pills */}
+            <nav className="hidden md:flex items-center gap-2 ml-4">
               {navItems.map((item) => (
                 <Link
                   key={item.title}
                   href={item.url}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  className={`text-[10px] uppercase tracking-wide px-3 py-1 border rounded-full font-mono transition-all cursor-pointer ${
                     item.active
-                      ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      ? "bg-[#0284c7] text-white border-[#0284c7] font-bold shadow-xs"
+                      : "border-[#535353]/40 dark:border-[#80868b]/60 text-[#535353] dark:text-[#e8eaed] hover:bg-[#0284c7] hover:text-white hover:border-[#0284c7]"
                   }`}
                 >
-                  <item.icon className="size-4" />
-                  <span>{item.title}</span>
+                  {item.title}
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Desktop Right Actions & Arcade Launcher */}
+          {/* Desktop Right Controls: Play Dino Game & User Session */}
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
+              className="text-[10px] uppercase tracking-wide px-3 py-1 border border-amber-500/60 rounded-full font-mono text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all cursor-pointer"
             >
-              <Gamepad2 className="size-4" />
-              <span>Play Arcade Game</span>
+              PLAY DINO GAME &gt;
             </Link>
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full bg-accent/50 text-xs">
-                  <User className="size-3.5 text-primary" />
-                  <span className="font-medium">{session.user.name}</span>
+                <div className="flex items-center gap-1.5 px-3 py-1 border border-[#535353]/30 dark:border-[#80868b]/30 rounded-full text-xs font-mono">
+                  <User className="size-3 text-[#535353] dark:text-[#e8eaed]" />
+                  <span className="font-semibold">{session.user.name}</span>
                 </div>
                 <Button
                   size="sm"
@@ -90,71 +92,71 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
                   title="Sign Out"
                 >
-                  <LogOut className="size-4" />
+                  <LogOut className="size-3.5" />
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 font-mono text-xs">
                 <Link href="/login">
-                  <Button size="sm" variant="outline">Sign In</Button>
+                  <Button size="sm" variant="outline" className="h-8 text-xs font-mono">Sign In</Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" variant="default">Register</Button>
+                  <Button size="sm" variant="default" className="h-8 text-xs font-mono bg-[#0284c7] hover:bg-[#0284c7]/90 text-white">Register</Button>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile Navigation Trigger */}
+          {/* Mobile Menu Trigger */}
           <div className="flex md:hidden items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9">
+                <Button variant="outline" size="icon" className="h-8 w-8">
                   <Menu className="size-4" />
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between">
+              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-[#f4f4f4] dark:bg-[#121212]">
                 <div>
-                  <SheetHeader className="p-4 border-b border-border text-left">
-                    <SheetTitle className="flex items-center gap-2 font-pixel text-xs text-primary">
-                      <Sparkles className="size-4 text-primary" />
-                      <span>SAVE DINO HQ</span>
+                  <SheetHeader className="p-4 border-b border-[#535353]/20 dark:border-[#80868b]/30 text-left">
+                    <SheetTitle className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-[#535353] dark:text-[#e8eaed]">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
+                      </svg>
+                      <span>SAVE DINO</span>
                     </SheetTitle>
                   </SheetHeader>
 
                   <div className="p-4 space-y-4">
-                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
-                      Navigation
+                    <div className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+                      NAVIGATION
                     </div>
-                    <nav className="space-y-1">
+                    <nav className="space-y-2">
                       {navItems.map((item) => (
                         <Link
                           key={item.title}
                           href={item.url}
                           onClick={() => setMobileOpen(false)}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${
+                          className={`block text-[11px] uppercase tracking-wide px-3 py-2 border rounded-full font-mono transition-all ${
                             item.active
-                              ? "bg-primary text-primary-foreground font-semibold"
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                              ? "bg-[#0284c7] text-white border-[#0284c7] font-bold"
+                              : "border-[#535353]/30 text-[#535353] dark:text-[#e8eaed]"
                           }`}
                         >
-                          <item.icon className="size-4 shrink-0" />
-                          <span>{item.title}</span>
+                          {item.title}
                         </Link>
                       ))}
                     </nav>
                   </div>
                 </div>
 
-                <div className="p-4 border-t border-border space-y-3">
+                <div className="p-4 border-t border-[#535353]/20 dark:border-[#80868b]/30 space-y-3 font-mono">
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30"
+                    className="block text-center text-[10px] uppercase tracking-wide px-3 py-2 border border-amber-500 rounded-full text-amber-600 dark:text-amber-400 font-bold"
                   >
-                    <Gamepad2 className="size-4" />
-                    <span>Play Dino Game</span>
+                    PLAY DINO GAME &gt;
                   </Link>
 
                   {session?.user ? (
@@ -165,7 +167,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                         setMobileOpen(false);
                         signOut({ fetchOptions: { onSuccess: () => router.push("/") } });
                       }}
-                      className="w-full justify-start text-xs text-destructive hover:text-destructive"
+                      className="w-full justify-start text-xs text-destructive hover:text-destructive font-mono"
                     >
                       <LogOut className="size-4 mr-2" />
                       Sign Out ({session.user.name})
@@ -173,10 +175,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       <Link href="/login" onClick={() => setMobileOpen(false)}>
-                        <Button variant="outline" size="sm" className="w-full text-xs">Sign In</Button>
+                        <Button variant="outline" size="sm" className="w-full text-xs font-mono">Sign In</Button>
                       </Link>
                       <Link href="/register" onClick={() => setMobileOpen(false)}>
-                        <Button variant="default" size="sm" className="w-full text-xs">Register</Button>
+                        <Button size="sm" className="w-full text-xs font-mono bg-[#0284c7] text-white">Register</Button>
                       </Link>
                     </div>
                   )}
@@ -189,7 +191,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       </header>
 
       {/* Main Content Body */}
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
         {children}
       </main>
     </div>
