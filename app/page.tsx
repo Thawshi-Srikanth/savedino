@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { audioSynth } from "./components/AudioSynthesizer";
+import { Button } from "@/components/ui/button";
 
 // Dynamically import DinoGameCanvas with SSR disabled
 const DinoGameCanvas = dynamic(
@@ -162,11 +163,10 @@ export default function Home() {
           </ul>
 
           <div className="mt-5 flex items-center gap-3">
-            <Link
-              href="/campaigns"
-              className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-md bg-[#8b5cf6] text-white border border-[#6d28d9] shadow-[0_3px_0_0_#6d28d9] hover:bg-[#7c3aed] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
-            >
-              <span>Explore Campaigns &gt;</span>
+            <Link href="/campaigns">
+              <Button size="default" variant="default" className="text-xs font-bold">
+                <span>Explore Campaigns &gt;</span>
+              </Button>
             </Link>
           </div>
         </div>

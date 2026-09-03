@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Sun, Moon, Volume2, VolumeX, HelpCircle, Telescope } from "lucide-react";
 
 interface HeaderProps {
@@ -40,12 +41,11 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </Link>
 
-          <Link
-            href="/campaigns"
-            className="text-xs px-3.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 bg-[#8b5cf6] text-white hover:bg-[#7c3aed] shadow-xs"
-          >
-            <Telescope className="size-3.5" />
-            <span>IASC PLATFORM &gt;</span>
+          <Link href="/campaigns">
+            <Button size="sm" variant="default" className="text-xs font-bold flex items-center gap-1.5">
+              <Telescope className="size-3.5" />
+              <span>IASC PLATFORM &gt;</span>
+            </Button>
           </Link>
         </div>
 
@@ -53,9 +53,11 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Theme Toggle Button */}
           {onToggleTheme && (
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={onToggleTheme}
-              className="w-8 h-8 rounded-md border border-border bg-card flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
+              className="h-8 w-8 rounded-md"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -63,13 +65,15 @@ export const Header: React.FC<HeaderProps> = ({
               ) : (
                 <Moon className="size-4 text-[#8b5cf6]" />
               )}
-            </button>
+            </Button>
           )}
 
           {/* Sound Toggle */}
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={onToggleMute}
-            className="w-8 h-8 rounded-md border border-border bg-card flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
+            className="h-8 w-8 rounded-md"
             title={isMuted ? "Unmute Music & Sound" : "Mute Music & Sound"}
           >
             {isMuted ? (
@@ -77,17 +81,19 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <Volume2 className="size-4 text-[#10b981]" />
             )}
-          </button>
+          </Button>
 
           {/* Help Controls Modal Launcher */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onOpenHelp}
-            className="px-3 py-1.5 rounded-md border border-border bg-card text-xs font-semibold flex items-center gap-1.5 transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
+            className="h-8 text-xs font-bold flex items-center gap-1.5"
             title="View Game Controls & Instructions"
           >
             <HelpCircle className="size-3.5 text-[#38bdf8]" />
             <span className="hidden sm:inline">Controls</span>
-          </button>
+          </Button>
         </div>
       </div>
     </header>
