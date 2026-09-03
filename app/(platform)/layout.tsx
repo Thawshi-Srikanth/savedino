@@ -70,23 +70,23 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700">
-      {/* Top Navbar Matching PostHog Sample Exactly */}
-      <header className="sticky top-0 z-40 w-full border-b border-[#111111]/15 dark:border-white/15 bg-[#e2e7dc]/90 dark:bg-[#121315]/90 backdrop-blur-md transition-colors duration-700">
+      {/* Top Navbar Matching PostHog Modern Slate & Violet Palette */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#0f172a]/90 backdrop-blur-md transition-colors duration-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* PostHog Style Logo & Branding */}
+          {/* PostHog Style Slate & Violet Branding Logo */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
-              {/* PostHog Hedge / Dino Icon Badge */}
+              {/* Slanted 3-Color Badge */}
               <div className="flex items-center gap-1">
-                <div className="w-2.5 h-6 bg-[#f54e00] rounded-xs transform -skew-x-12" />
-                <div className="w-2.5 h-6 bg-[#f59e0b] rounded-xs transform -skew-x-12" />
-                <div className="w-2.5 h-6 bg-[#bd10e0] rounded-xs transform -skew-x-12" />
+                <div className="w-2.5 h-6 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
+                <div className="w-2.5 h-6 bg-[#10b981] rounded-xs transform -skew-x-12" />
+                <div className="w-2.5 h-6 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
               </div>
               <span className="font-sans font-bold text-sm tracking-tight text-foreground">
                 SaveDino
               </span>
-              <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 border border-[#111111]/20 dark:border-white/20 rounded-md bg-white/50 dark:bg-white/10 text-foreground">
+              <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 border border-border rounded-md bg-card text-foreground">
                 IASC PORTAL
               </span>
             </Link>
@@ -99,8 +99,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   href={item.url}
                   className={`text-xs px-3.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                     item.active
-                      ? "bg-[#bd10e0] text-white font-bold shadow-xs"
-                      : "text-foreground hover:bg-white/60 dark:hover:bg-white/10"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-foreground hover:bg-card hover:border hover:border-border"
                   }`}
                 >
                   <item.icon className="size-3.5" />
@@ -115,13 +115,13 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             {/* Theme Switcher Button */}
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-md border border-[#111111]/20 dark:border-white/20 bg-white/60 dark:bg-white/10 flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-white dark:hover:bg-white/20 text-foreground"
+              className="w-8 h-8 rounded-md border border-border bg-card flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
                 <Sun className="size-4 text-amber-400" />
               ) : (
-                <Moon className="size-4 text-[#bd10e0]" />
+                <Moon className="size-4 text-[#8b5cf6]" />
               )}
             </button>
 
@@ -134,8 +134,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1 border border-[#111111]/20 dark:border-white/20 rounded-md text-xs font-medium bg-white/50 dark:bg-white/10">
-                  <User className="size-3 text-[#bd10e0]" />
+                <div className="flex items-center gap-1.5 px-3 py-1 border border-border rounded-md text-xs font-medium bg-card">
+                  <User className="size-3 text-[#8b5cf6]" />
                   <span className="font-bold">{session.user.name}</span>
                 </div>
                 <Button
@@ -164,13 +164,13 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-md border border-[#111111]/20 dark:border-white/20 bg-white/60 dark:bg-white/10 flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
+              className="w-8 h-8 rounded-md border border-border bg-card flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
                 <Sun className="size-4 text-amber-400" />
               ) : (
-                <Moon className="size-4 text-[#bd10e0]" />
+                <Moon className="size-4 text-[#8b5cf6]" />
               )}
             </button>
 
@@ -186,9 +186,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <SheetHeader className="p-4 border-b border-border text-left">
                     <SheetTitle className="flex items-center gap-2 font-sans font-bold text-sm tracking-tight text-foreground">
                       <div className="flex items-center gap-1">
-                        <div className="w-2 h-5 bg-[#f54e00] rounded-xs transform -skew-x-12" />
-                        <div className="w-2 h-5 bg-[#f59e0b] rounded-xs transform -skew-x-12" />
-                        <div className="w-2 h-5 bg-[#bd10e0] rounded-xs transform -skew-x-12" />
+                        <div className="w-2 h-5 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
+                        <div className="w-2 h-5 bg-[#10b981] rounded-xs transform -skew-x-12" />
+                        <div className="w-2 h-5 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
                       </div>
                       <span>SaveDino</span>
                     </SheetTitle>
@@ -206,7 +206,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                           onClick={() => setMobileOpen(false)}
                           className={`flex items-center gap-2 text-xs px-3.5 py-2 rounded-md font-semibold transition-all ${
                             item.active
-                              ? "bg-[#bd10e0] text-white font-bold"
+                              ? "bg-[#8b5cf6] text-white font-bold"
                               : "text-foreground hover:bg-muted"
                           }`}
                         >
