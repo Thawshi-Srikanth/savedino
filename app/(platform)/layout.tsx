@@ -52,8 +52,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     });
   };
 
-  // Dedicated Full-Screen Layout for Login & Register (No Navbar)
-  if (pathname === "/login" || pathname === "/register") {
+  // Dedicated Full-Screen Layout for Login, Register & Signup (No Navbar)
+  if (pathname === "/login" || pathname === "/register" || pathname === "/signup") {
     return (
       <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans transition-colors duration-700 select-none">
         {children}
