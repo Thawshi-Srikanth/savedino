@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Retrieve session token from Better Auth cookies
@@ -40,14 +40,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api/auth (Better Auth endpoints)
-     * - _next/static (static assets)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - Public asset extensions (.png, .jpg, .svg, .gif, .ico)
-     */
     "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
