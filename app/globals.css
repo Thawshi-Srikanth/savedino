@@ -1,96 +1,153 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *, .night-mode *));
+
+@theme inline {
+  --font-pixel: var(--font-pixel), "Press Start 2P", monospace;
+  --font-mono: var(--font-tech), monospace;
+  --font-sans: var(--font-sans), sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --sidebar-width: 16rem;
+  --sidebar-width-mobile: 18rem;
+  --sidebar-width-icon: 3rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+}
+
 :root {
-  --background: #f4f4f4;
-  --foreground: #535353;
+  --sidebar-width: 16rem;
+  --sidebar-width-mobile: 18rem;
+  --sidebar-width-icon: 3rem;
+  --radius: 0.5rem;
+
+  /* --- POSTHOG LIGHT THEME --- */
+  --background: #f8fafc;                 /* PostHog Light Slate Canvas */
+  --foreground: #0f172a;                 /* Deep Slate Text */
+  --card: #ffffff;                       /* Pure White Flat Card */
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  
+  --primary: #8b5cf6;                    /* PostHog Electric Violet */
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;                     /* Clean Slate Border */
+  --input: #e2e8f0;
+  --ring: #8b5cf6;
+
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #8b5cf6;
 }
 
-*, :before, :after {
-  box-sizing: border-box;
-  border-color: #e5e7eb;
+.dark, .night-mode {
+  /* --- POSTHOG GREYISH BLACK DARK THEME --- */
+  --background: #121315;                 /* PostHog Greyish Void Black */
+  --foreground: #f3f4f6;                 /* High Legibility Off-White Text */
+  --card: #1c1d21;                       /* PostHog Greyish Charcoal Card */
+  --card-foreground: #f3f4f6;
+  --popover: #1c1d21;
+  --popover-foreground: #f3f4f6;
+  
+  --primary: #8b5cf6;                    /* PostHog Electric Violet */
+  --primary-foreground: #ffffff;
+  --secondary: #27282d;
+  --secondary-foreground: #f3f4f6;
+  --muted: #27282d;
+  --muted-foreground: #9ca3af;
+  --accent: #27282d;
+  --accent-foreground: #f3f4f6;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #38393e;                     /* PostHog Greyish Dark Border */
+  --input: #38393e;
+  --ring: #8b5cf6;
+
+  --sidebar: #121315;
+  --sidebar-foreground: #f3f4f6;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #27282d;
+  --sidebar-accent-foreground: #f3f4f6;
+  --sidebar-border: #38393e;
+  --sidebar-ring: #8b5cf6;
 }
 
-html {
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f4f4f4;
-  color: #535353;
-  overscroll-behavior: none;
-  touch-action: manipulation;
-}
-
-body {
-  margin: 0;
-  line-height: inherit;
-  transition: background-color 700ms ease, color 700ms ease;
-  min-height: 100dvh;
-  overscroll-behavior: none;
-  touch-action: manipulation;
-}
-
-body.night-mode, html.night-mode {
-  background-color: #202124 !important;
-  color: #e8eaed !important;
-}
-
-.font-game {
-  font-family: var(--font-pixel), 'Press Start 2P', monospace;
-}
-
+/* Explicit Font Utility Classes for Tailwind v4 Compatibility */
 .font-pixel {
-  font-family: var(--font-pixel), 'Press Start 2P', monospace;
+  font-family: var(--font-pixel), "Press Start 2P", monospace !important;
 }
 
-.font-tech {
-  font-family: var(--font-tech), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+.font-tech, .font-mono {
+  font-family: var(--font-tech), monospace !important;
 }
 
-/* Pixel Art crisp rendering */
-canvas, img, svg, .pixelated {
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
 
-/* Pixelated Button styles matching original Gen Dino CSS */
-.pixelated-button {
-  color: #fff;
-  background-color: #535353;
-  border-radius: 0.5rem;
-  position: relative;
-  border: 0.2rem solid #535353;
-  padding: 1.2rem 2.4rem;
-  font-family: var(--font-pixel), 'Press Start 2P', monospace;
-  font-size: 1.2rem;
-  line-height: 1.2rem;
-  letter-spacing: 0.05em;
-  transition: 0.3s all ease;
-  cursor: pointer;
+/* PostHog Highlight Utilities */
+.posthog-violet-highlight {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.375rem;
 }
 
-.pixelated-button:hover {
-  background-color: #333333;
-  border-color: #333333;
-  transform: translateY(-1px);
-}
-
-.pixelated-button:active {
-  transform: translateY(1px);
-}
-
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #9ca3af;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+.posthog-emerald-highlight {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
 }

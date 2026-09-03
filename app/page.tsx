@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { audioSynth } from "./components/AudioSynthesizer";
+import { Button } from "@/components/ui/button";
 
 // Dynamically import DinoGameCanvas with SSR disabled
 const DinoGameCanvas = dynamic(
@@ -22,7 +24,7 @@ const DinoGameCanvas = dynamic(
             imageRendering: "pixelated",
           }}
         />
-        <span className="font-pixel text-[9px] text-[#70757a] tracking-wider uppercase animate-pulse">
+        <span className="font-pixel text-[9px] text-muted-foreground tracking-wider uppercase animate-pulse">
           READY...
         </span>
       </div>
@@ -44,6 +46,12 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
 
+    // Sync from local storage
+    const savedTheme = localStorage.getItem("savedino_theme");
+    if (savedTheme === "dark") {
+      setIsNight(true);
+    }
+
     // Start background theme audio
     audioSynth.startMusic();
 
@@ -62,15 +70,17 @@ export default function Home() {
     };
   }, []);
 
-  // Sync night-mode class to document for seamless whole-page dark mode
+  // Sync night-mode and dark class to document for seamless whole-page dark mode
   useEffect(() => {
     if (!mounted) return;
     if (isNight) {
       document.documentElement.classList.add("night-mode");
-      document.body.classList.add("night-mode");
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("savedino_theme", "dark");
     } else {
       document.documentElement.classList.remove("night-mode");
-      document.body.classList.remove("night-mode");
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("savedino_theme", "light");
     }
   }, [isNight, mounted]);
 
@@ -90,8 +100,8 @@ export default function Home() {
 
   return (
     <main
-      className={`min-h-[100dvh] flex flex-col items-center justify-between pb-3 sm:pb-12 px-2.5 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
-        nightActive ? "bg-[#202124] text-[#e8eaed]" : "bg-[#f4f4f4] text-[#535353]"
+      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
+        nightActive ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
       {/* Header */}
@@ -108,70 +118,48 @@ export default function Home() {
       />
 
       {/* Main Game Stage */}
-      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 sm:py-2">
+      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
           onNightModeChange={setIsNight}
           nightModeOverride={devNightOverride}
         />
 
-        {/* Chrome Error Style "Coming Soon" Section (Dynamic Day/Night Theme) */}
-        <div className="w-full mt-3 sm:mt-8 text-left select-text transition-colors duration-700">
-          <h2
-            className={`text-base sm:text-lg font-pixel font-bold tracking-wide uppercase transition-colors duration-700 ${
-              nightActive ? "text-[#ffffff]" : "text-[#202124]"
-            }`}
-          >
-            Coming Soon
+        {/* Chrome Dino Style "Page Not Found / No Internet" Section */}
+        <div className="w-full mt-4 sm:mt-4 text-left select-text transition-colors duration-700 space-y-1 px-2 sm:px-0">
+          <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
+            No Campaign Joined
           </h2>
 
-          <p
-            className={`text-xs font-pixel mt-5 mb-3 transition-colors duration-700 ${
-              nightActive ? "text-[#9aa0a6]" : "text-[#535353]"
-            }`}
-          >
-            Stay :
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            ERR_ASTEROID_CAMPAIGN_OFFLINE
           </p>
 
-          <ul
-            className={`font-tech space-y-2 text-xs sm:text-[13px] pl-1 leading-relaxed transition-colors duration-700 ${
-              nightActive ? "text-[#e8eaed]" : "text-[#535353]"
-            }`}
-          >
-            <li className="flex items-center gap-2.5">
-              <span
-                className={`w-1.5 h-1.5 inline-block flex-shrink-0 transition-colors duration-700 ${
-                  nightActive ? "bg-[#9aa0a6]" : "bg-[#535353]"
-                }`}
-              ></span>
-              <span>Curious about Asteroids ?</span>
+          <p className="text-[11px] font-mono font-bold text-foreground pt-1">
+            Try:
+          </p>
+
+          <ul className="font-mono space-y-1 text-xs text-muted-foreground pl-1 leading-relaxed">
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Forming an IASC asteroid search team</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <span
-                className={`w-1.5 h-1.5 inline-block flex-shrink-0 transition-colors duration-700 ${
-                  nightActive ? "bg-[#9aa0a6]" : "bg-[#535353]"
-                }`}
-              ></span>
-              <span>Gather your team now</span>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Analyzing telescope FITS image sets</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <span className="w-1.5 h-1.5 bg-[#0284c7] inline-block flex-shrink-0"></span>
-              <span
-                className={`hover:underline cursor-pointer font-bold transition-colors duration-700 ${
-                  nightActive ? "text-[#38bdf8]" : "text-[#0284c7]"
-                }`}
-              >
-                Initiating Asteroid Searching Campaign 2026
-              </span>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Submitting discovery reports to MPC</span>
             </li>
           </ul>
 
-          <div
-            className={`mt-8 font-tech text-[11px] sm:text-xs tracking-widest uppercase font-bold transition-colors duration-700 ${
-              nightActive ? "text-[#9aa0a6]" : "text-[#70757a]"
-            }`}
-          >
-            ASTEROID_SEARCHING_CAMPAIGN
+          <div className="pt-2 flex items-center gap-3">
+            <Link href="/campaigns">
+              <Button size="sm" variant="default" className="text-xs font-bold">
+                <span>Explore Campaigns &gt;</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

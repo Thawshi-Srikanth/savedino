@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { audioSynth } from "./AudioSynthesizer";
+import { Button } from "@/components/ui/button";
 
 interface DinoGameCanvasProps {
   onScoreUpdate?: (score: number, high: number, meteorsDestroyed: number) => void;
@@ -1089,43 +1090,36 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         </span>
       </div>
 
-      {/* Dedicated Touch Arcade Controls at Bottom (Ergonomic for thumb control) */}
-      <div className="w-full max-w-[600px] flex items-center justify-between gap-3 px-1 mt-2 z-30 relative select-none">
-        {/* JUMP Touch Pad */}
-        <button
+      {/* Dedicated Touch Arcade Controls at Bottom (Hidden on desktop / wide screens, visible on mobile) */}
+      <div className="w-full max-w-[600px] flex sm:hidden items-center justify-between gap-3 px-1 mt-3 z-30 relative select-none">
+        {/* JUMP Touch Pad (White 3D PostHog Button) */}
+        <Button
           type="button"
+          variant="outline"
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
             jump();
           }}
-          className={`flex-1 py-3 px-4 rounded border-2 transition-all flex items-center justify-center font-pixel text-xs tracking-wider font-bold cursor-pointer select-none active:translate-y-0.5 ${
-            isNight
-              ? "bg-[#2b2c2f] border-[#80868b] text-[#e8eaed] shadow-[2px_2px_0px_#80868b] active:shadow-none"
-              : "bg-white border-[#535353] text-[#202124] shadow-[2px_2px_0px_#535353] active:shadow-none"
-          }`}
+          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
         >
           JUMP
-        </button>
+        </Button>
 
-        {/* LASER BLAST Touch Pad */}
-        <button
+        {/* LASER BLAST Touch Pad (Purple 3D PostHog Button) */}
+        <Button
           type="button"
+          variant={laserCharges > 0 ? "default" : "secondary"}
+          disabled={laserCharges <= 0}
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
             fireLaser();
           }}
-          className={`flex-1 py-3 px-4 rounded border-2 transition-all flex items-center justify-center font-pixel text-xs tracking-wider font-bold cursor-pointer select-none active:translate-y-0.5 ${
-            laserCharges > 0
-              ? "bg-[#0284c7] border-[#0369a1] text-white shadow-[2px_2px_0px_#0369a1] active:shadow-none"
-              : isNight
-              ? "bg-[#3c4043] border-[#555] text-gray-400 opacity-60"
-              : "bg-gray-200 border-gray-400 text-gray-500 opacity-60"
-          }`}
+          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
         >
-          BLAST
-        </button>
+          BLAST ({laserCharges})
+        </Button>
       </div>
     </div>
   );
