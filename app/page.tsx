@@ -23,7 +23,7 @@ const DinoGameCanvas = dynamic(
             imageRendering: "pixelated",
           }}
         />
-        <span className="font-pixel text-[9px] text-[#70757a] tracking-wider uppercase animate-pulse">
+        <span className="font-pixel text-[9px] text-muted-foreground tracking-wider uppercase animate-pulse">
           READY...
         </span>
       </div>
@@ -45,6 +45,12 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
 
+    // Sync from local storage
+    const savedTheme = localStorage.getItem("savedino_theme");
+    if (savedTheme === "dark") {
+      setIsNight(true);
+    }
+
     // Start background theme audio
     audioSynth.startMusic();
 
@@ -63,15 +69,17 @@ export default function Home() {
     };
   }, []);
 
-  // Sync night-mode class to document for seamless whole-page dark mode
+  // Sync night-mode and dark class to document for seamless whole-page dark mode
   useEffect(() => {
     if (!mounted) return;
     if (isNight) {
       document.documentElement.classList.add("night-mode");
-      document.body.classList.add("night-mode");
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("savedino_theme", "dark");
     } else {
       document.documentElement.classList.remove("night-mode");
-      document.body.classList.remove("night-mode");
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("savedino_theme", "light");
     }
   }, [isNight, mounted]);
 
@@ -92,7 +100,7 @@ export default function Home() {
   return (
     <main
       className={`min-h-[100dvh] flex flex-col items-center justify-between pb-3 sm:pb-12 px-2.5 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
-        nightActive ? "bg-[#202124] text-[#e8eaed]" : "bg-[#f4f4f4] text-[#535353]"
+        nightActive ? "bg-[#020617] text-[#f8fafc]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
       {/* Header */}
@@ -116,70 +124,64 @@ export default function Home() {
           nightModeOverride={devNightOverride}
         />
 
-        {/* Chrome Error Style "Coming Soon" Section (Dynamic Day/Night Theme) */}
+        {/* PostHog Highlight Styled Section */}
         <div className="w-full mt-3 sm:mt-8 text-left select-text transition-colors duration-700">
           <h2
             className={`text-base sm:text-lg font-pixel font-bold tracking-wide uppercase transition-colors duration-700 ${
-              nightActive ? "text-[#ffffff]" : "text-[#202124]"
+              nightActive ? "text-[#f8fafc]" : "text-[#0f172a]"
             }`}
           >
-            Coming Soon
+            IASC Asteroid Search Campaign
           </h2>
 
           <p
-            className={`text-xs font-pixel mt-5 mb-3 transition-colors duration-700 ${
-              nightActive ? "text-[#9aa0a6]" : "text-[#535353]"
+            className={`text-xs font-mono mt-3 mb-3 transition-colors duration-700 ${
+              nightActive ? "text-slate-400" : "text-slate-600"
             }`}
           >
-            Stay :
+            Join <span className="posthog-violet-highlight font-bold">500,000+ teams</span> discovering new main-belt asteroids with NASA & IASC.
           </p>
 
           <ul
-            className={`font-tech space-y-2 text-xs sm:text-[13px] pl-1 leading-relaxed transition-colors duration-700 ${
-              nightActive ? "text-[#e8eaed]" : "text-[#535353]"
+            className={`font-mono space-y-2 text-xs sm:text-[13px] pl-1 leading-relaxed transition-colors duration-700 ${
+              nightActive ? "text-slate-300" : "text-slate-700"
             }`}
           >
-            <li className="flex items-center gap-2.5">
-              <span
-                className={`w-1.5 h-1.5 inline-block flex-shrink-0 transition-colors duration-700 ${
-                  nightActive ? "bg-[#9aa0a6]" : "bg-[#535353]"
-                }`}
-              ></span>
-              <span>Curious about Asteroids ?</span>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Real astronomical FITS image processing</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <span
-                className={`w-1.5 h-1.5 inline-block flex-shrink-0 transition-colors duration-700 ${
-                  nightActive ? "bg-[#9aa0a6]" : "bg-[#535353]"
-                }`}
-              ></span>
-              <span>Gather your team now</span>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Submit preliminary discovery reports to MPC</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <span className="w-1.5 h-1.5 bg-[#0284c7] inline-block flex-shrink-0"></span>
-              <Link
-                href="/campaigns"
-                className={`hover:underline cursor-pointer font-bold transition-colors duration-700 flex items-center gap-1.5 ${
-                  nightActive ? "text-[#38bdf8]" : "text-[#0284c7]"
-                }`}
-              >
-                <span>Initiating Asteroid Searching Campaign 2026</span>
-                <span className="text-[10px] font-pixel px-1.5 py-0.5 border border-current rounded uppercase">
-                  ENTER &gt;
-                </span>
-              </Link>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Collaborate with global university & school teams</span>
             </li>
           </ul>
 
-          <div
-            className={`mt-8 font-tech text-[11px] sm:text-xs tracking-widest uppercase font-bold transition-colors duration-700 ${
-              nightActive ? "text-[#9aa0a6]" : "text-[#70757a]"
-            }`}
-          >
-            ASTEROID_SEARCHING_CAMPAIGN
+          <div className="mt-5 flex items-center gap-3">
+            <Link
+              href="/campaigns"
+              className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-md bg-[#8b5cf6] text-white border border-[#6d28d9] shadow-[0_3px_0_0_#6d28d9] hover:bg-[#7c3aed] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
+            >
+              <span>Explore Campaigns &gt;</span>
+            </Link>
           </div>
         </div>
       </div>
+
+      {/* Footer Branding */}
+      <footer className="w-full max-w-[600px] pt-4 pb-2 border-t border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-4 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
+          <div className="w-2 h-4 bg-[#10b981] rounded-xs transform -skew-x-12" />
+          <div className="w-2 h-4 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
+          <span className="font-bold text-foreground ml-1">SaveDino</span>
+        </div>
+        <span>Powered by Next.js & Prisma</span>
+      </footer>
 
       {/* Help Modal */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
