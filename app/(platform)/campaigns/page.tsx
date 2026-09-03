@@ -207,7 +207,7 @@ export default function CampaignsPage() {
       <Card className="p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">
+            <h1 className="text-base sm:text-lg font-pixel font-bold tracking-wide uppercase">
               Asteroid Search Campaigns
             </h1>
             <p className="text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
@@ -245,7 +245,7 @@ export default function CampaignsPage() {
       {/* RECRUITING TEAMS */}
       <div className="pt-2 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold tracking-tight">
+          <h2 className="text-xs sm:text-sm font-pixel font-bold tracking-wide uppercase text-primary">
             Teams Looking for Members ({recruitingTeams.length})
           </h2>
         </div>
@@ -259,9 +259,11 @@ export default function CampaignsPage() {
             {recruitingTeams.map((team) => (
               <Card key={team.id} className="p-4 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-semibold text-primary">{team.event.code}</span>
-                    <Badge variant={team.members.length < 2 ? "secondary" : "default"}>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[10px] font-pixel font-bold text-primary uppercase">
+                      {team.event.code}
+                    </span>
+                    <Badge variant="outline">
                       {team.members.length}/6 Members
                     </Badge>
                   </div>
@@ -301,8 +303,8 @@ export default function CampaignsPage() {
       {/* CAMPAIGNS LIST */}
       <div className="pt-4 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold tracking-tight">
-            Campaigns
+          <h2 className="text-xs sm:text-sm font-pixel font-bold tracking-wide uppercase text-primary">
+            Active & Upcoming Campaigns
           </h2>
         </div>
 
@@ -320,7 +322,7 @@ export default function CampaignsPage() {
               <Card key={ev.id} className="flex flex-col justify-between">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-semibold text-primary uppercase">
+                    <span className="text-[10px] font-pixel font-bold text-primary uppercase">
                       {ev.code}
                     </span>
                     <Badge variant={ev.status === "ACTIVE" ? "default" : "outline"}>

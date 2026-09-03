@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Tabs Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start">
+        <TabsList className="w-full justify-start font-pixel text-[9px] uppercase tracking-wider font-bold">
           <TabsTrigger value="MATCHMAKING">
             Unassigned Students ({users.filter((u) => u.teamMembers.length === 0).length})
           </TabsTrigger>

@@ -303,7 +303,7 @@ export default function TeamWorkspacePage({
               )}
             </div>
 
-            <h1 className="text-xl font-bold tracking-tight">{team?.name || "Team Workspace"}</h1>
+            <h1 className="text-base sm:text-lg font-pixel font-bold tracking-wide uppercase">{team?.name || "Team Workspace"}</h1>
             <p className="text-xs text-muted-foreground mt-1">
               Campaign: {team?.event?.title || "Asteroid Search"}
             </p>
@@ -319,10 +319,10 @@ export default function TeamWorkspacePage({
             {/* Invite Code Box */}
             <div className="flex items-center gap-3 bg-accent/40 border border-border p-3 rounded-md">
               <div>
-                <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+                <span className="block text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">
                   INVITE CODE
                 </span>
-                <span className="text-sm font-bold tracking-wider text-primary">
+                <span className="text-xs font-pixel font-bold tracking-wider text-primary">
                   {team?.inviteCode || "AST-XXXX"}
                 </span>
               </div>
