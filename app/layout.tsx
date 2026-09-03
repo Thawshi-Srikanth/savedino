@@ -40,7 +40,7 @@ export default function RootLayout({
     >
       <body
         suppressHydrationWarning
-        className="min-h-screen flex flex-col bg-background text-foreground font-sans antialiased overscroll-none"
+        className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} min-h-screen flex flex-col bg-background text-foreground font-sans antialiased overscroll-none`}
       >
         {children}
       </body>

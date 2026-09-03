@@ -3,6 +3,10 @@
 @custom-variant dark (&:is(.dark *, .night-mode *));
 
 @theme inline {
+  --font-pixel: var(--font-pixel), "Press Start 2P", monospace;
+  --font-mono: var(--font-tech), monospace;
+  --font-sans: var(--font-sans), sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -111,6 +115,15 @@
   --sidebar-accent-foreground: #f3f4f6;
   --sidebar-border: #38393e;
   --sidebar-ring: #8b5cf6;
+}
+
+/* Explicit Font Utility Classes for Tailwind v4 Compatibility */
+.font-pixel {
+  font-family: var(--font-pixel), "Press Start 2P", monospace !important;
+}
+
+.font-tech, .font-mono {
+  font-family: var(--font-tech), monospace !important;
 }
 
 @layer base {
