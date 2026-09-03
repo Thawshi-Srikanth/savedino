@@ -40,12 +40,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-background text-foreground font-sans">
-      {/* Fixed Dedicated Width Left Navigation Sidebar (w-64 / 256px) */}
-      <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col justify-between min-h-screen">
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground font-sans">
+      {/* Fixed Sticky Sidebar (w-64 / 256px) - never scrolls with page */}
+      <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col justify-between h-screen">
         <div>
           {/* Header */}
-          <div className="h-16 px-6 flex items-center border-b border-border">
+          <div className="h-16 px-6 flex items-center border-b border-border shrink-0">
             <Link href="/" className="flex items-center gap-2.5 font-bold text-sm text-primary tracking-tight">
               <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -81,7 +81,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         </div>
 
         {/* Footer Arcade Link */}
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border shrink-0">
           <Link
             href="/"
             className="flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
@@ -92,9 +92,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         </div>
       </aside>
 
-      {/* Right Main Content Area (occupies remaining width cleanly) */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        {/* Top Bar Header */}
+      {/* Right Content Area (Fixed Height Container) */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Fixed Top Bar Header (never scrolls) */}
         <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground font-medium">Dino HQ</span>
@@ -133,7 +133,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           </div>
         </header>
 
-        {/* Main Body */}
+        {/* Independent Scrollable Main Content Body */}
         <main className="flex-1 p-6 sm:p-8 overflow-y-auto bg-background/50">
           {children}
         </main>
