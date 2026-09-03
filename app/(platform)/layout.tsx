@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, User, Menu } from "lucide-react";
+import { Sun, Moon, LogOut, User, Menu } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -108,24 +108,18 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </nav>
           </div>
 
-          {/* Desktop Right Controls: Play Dino Game, Theme Switcher & User Session */}
+          {/* Desktop Right Controls: Play Dino Game, Lucide Sun/Moon Theme Switcher & User Session */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Pixel Theme Switcher Button */}
+            {/* Lucide Sun/Moon Theme Switcher Button */}
             <button
               onClick={handleToggleTheme}
-              className="w-7 h-7 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 text-[#535353] dark:text-[#e8eaed]"
-              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+              className="w-8 h-8 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 text-[#535353] dark:text-[#e8eaed]"
+              title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
-                /* Pixel Moon Icon */
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
-                  <path d="M6 1h2v1H6V1zm2 1h2v2H8V2zm2 2h1v2h-1V4zm1 2h1v4h-1V6zm-1 4h-1v2h1v-2zm-2 2H6v-1h2v1zm-2 0H4v-1h2v1zm-2-1H3v-2h1v2zm-1-2H1V7h1v2zm0-2h1V4H2v1z" />
-                </svg>
+                <Sun className="size-4 text-amber-400" />
               ) : (
-                /* Pixel Sun Icon */
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
-                  <path d="M7 0h2v2H7V0zm0 14h2v2H7v-2zM0 7h2v2H0V7zm14 0h2v2h-2V7zm-2-5h2v2h-2V2zM2 12h2v2H2v-2zm10 0h2v2h-2v-2zM2 2h2v2H2V2zm3 3h6v6H5V5z" />
-                </svg>
+                <Moon className="size-4 text-slate-700 dark:text-slate-200" />
               )}
             </button>
 
@@ -168,17 +162,13 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleToggleTheme}
-              className="w-7 h-7 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-[#535353] dark:text-[#e8eaed]"
-              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+              className="w-8 h-8 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-[#535353] dark:text-[#e8eaed]"
+              title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
-                  <path d="M6 1h2v1H6V1zm2 1h2v2H8V2zm2 2h1v2h-1V4zm1 2h1v4h-1V6zm-1 4h-1v2h1v-2zm-2 2H6v-1h2v1zm-2 0H4v-1h2v1zm-2-1H3v-2h1v2zm-1-2H1V7h1v2zm0-2h1V4H2v1z" />
-                </svg>
+                <Sun className="size-4 text-amber-400" />
               ) : (
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
-                  <path d="M7 0h2v2H7V0zm0 14h2v2H7v-2zM0 7h2v2H0V7zm14 0h2v2h-2V7zm-2-5h2v2h-2V2zM2 12h2v2H2v-2zm10 0h2v2h-2v-2zM2 2h2v2H2V2zm3 3h6v6H5V5z" />
-                </svg>
+                <Moon className="size-4 text-slate-700 dark:text-slate-200" />
               )}
             </button>
 
