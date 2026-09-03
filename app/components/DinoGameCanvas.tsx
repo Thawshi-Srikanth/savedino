@@ -723,17 +723,17 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
           }
         };
 
-        // 1. Solid Black Stepped Pixel Outline (Maximum Contrast)
-        fillPixelCircle(bx, by, r + 3, pSize, "#000000");
-
-        // 2. Deep Blue / Cyan Pixel Body
+        // 1. Outer Electric Blue/Cyan Plasma Corona (Blends seamlessly with background)
         fillPixelCircle(bx, by, r, pSize, "#0284c7");
 
-        // 3. Bright Electric Cyan Pixel Ring
-        fillPixelCircle(bx, by, Math.floor(r * 0.72), pSize, "#00ffff");
+        // 2. Bright Electric Cyan Pixel Ring
+        fillPixelCircle(bx, by, Math.floor(r * 0.78), pSize, "#00ffff");
 
-        // 4. Blinding White Pixel Core
-        fillPixelCircle(bx + Math.floor(r * 0.15), by, Math.floor(r * 0.42), pSize, "#ffffff");
+        // 3. Bright Cyan/White Mid Core
+        fillPixelCircle(bx, by, Math.floor(r * 0.52), pSize, "#e0f2fe");
+
+        // 4. Blinding White Pure Energy Center
+        fillPixelCircle(bx + Math.floor(r * 0.12), by, Math.floor(r * 0.32), pSize, "#ffffff");
 
         // 5. White Pixel Highlights (Top-Left Glints)
         ctx.fillStyle = "#ffffff";
@@ -743,8 +743,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
 
         // 6. Leading Pixel Energy Sparks on Front Edge
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(bx + r - pSize, by - Math.floor(r * 0.4), pSize, pSize * 2);
-        ctx.fillRect(bx + r - pSize, by + Math.floor(r * 0.25), pSize, pSize * 2);
+        ctx.fillRect(bx + r - pSize, by - Math.floor(r * 0.35), pSize, pSize * 2);
+        ctx.fillRect(bx + r - pSize, by + Math.floor(r * 0.2), pSize, pSize * 2);
 
         ctx.restore();
       });
@@ -810,13 +810,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate, o
           const mx = Math.floor(s.dino.x + (s.dino.isShootingCrouch && !s.dino.isJumping ? 52 : 38));
           const my = Math.floor(s.dino.isShootingCrouch && !s.dino.isJumping ? s.dino.y + 12 : s.dino.y + 14);
 
-          // 1. Black Pixel Outline Cross
-          ctx.fillStyle = "#000000";
-          ctx.fillRect(mx - 7, my - 3, 16, 7);
-          ctx.fillRect(mx - 3, my - 7, 7, 16);
-          ctx.fillRect(mx - 5, my - 5, 11, 11);
-
-          // 2. Electric Cyan Pixel Blast (#00ffff)
+          // 1. Electric Cyan Pixel Blast (#00ffff - pure glowing energy)
           ctx.fillStyle = "#00ffff";
           ctx.fillRect(mx - 6, my - 2, 14, 5);
           ctx.fillRect(mx - 2, my - 6, 5, 14);
