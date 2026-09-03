@@ -101,7 +101,7 @@ export default function Home() {
   return (
     <main
       className={`min-h-[100dvh] flex flex-col items-center justify-between pb-3 sm:pb-12 px-2.5 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
-        nightActive ? "bg-[#020617] text-[#f8fafc]" : "bg-[#f8fafc] text-[#0f172a]"
+        nightActive ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
       {/* Header */}
@@ -129,7 +129,7 @@ export default function Home() {
         <div className="w-full mt-3 sm:mt-8 text-left select-text transition-colors duration-700">
           <h2
             className={`text-base sm:text-lg font-pixel font-bold tracking-wide uppercase transition-colors duration-700 ${
-              nightActive ? "text-[#f8fafc]" : "text-[#0f172a]"
+              nightActive ? "text-[#f3f4f6]" : "text-[#0f172a]"
             }`}
           >
             IASC Asteroid Search Campaign

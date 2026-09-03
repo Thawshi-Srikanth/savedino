@@ -70,11 +70,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700">
-      {/* Top Navbar Matching Deep Slate-950 Dark Palette */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#020617]/90 backdrop-blur-md transition-colors duration-700">
+      {/* Top Navbar Matching PostHog Greyish Black Dark Palette */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md transition-colors duration-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* PostHog Style Branding Logo with Tasteful Pixel Accent */}
+          {/* PostHog Style Slate & Violet Branding Logo */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
               {/* Slanted 3-Color Badge */}
@@ -110,7 +110,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </nav>
           </div>
 
-          {/* Desktop Right Controls: Play Dino Game with Pixel Accent Button, Sun/Moon Switcher & Session */}
+          {/* Desktop Right Controls: Play Dino Game, Sun/Moon Switcher & Session */}
           <div className="hidden md:flex items-center gap-3">
             {/* Theme Switcher Button */}
             <button
