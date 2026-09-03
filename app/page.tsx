@@ -172,17 +172,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer Branding */}
-      <footer className="w-full max-w-[600px] pt-4 pb-2 border-t border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-4 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-          <div className="w-2 h-4 bg-[#10b981] rounded-xs transform -skew-x-12" />
-          <div className="w-2 h-4 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-          <span className="font-bold text-foreground ml-1">SaveDino</span>
-        </div>
-        <span>Powered by Next.js & Prisma</span>
-      </footer>
-
       {/* Help Modal */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </main>
