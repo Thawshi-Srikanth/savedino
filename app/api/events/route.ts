@@ -35,8 +35,6 @@ export async function GET() {
             submissionStart: new Date(now.getTime() + 10 * day),
             submissionEnd: new Date(now.getTime() + 40 * day),
             status: "ACTIVE",
-            minTeamMembers: 2,
-            maxTeamMembers: 6,
           },
           {
             title: "Catalina Sky Survey Winter Search 2026",
@@ -51,8 +49,6 @@ export async function GET() {
             submissionStart: new Date(now.getTime() + 50 * day),
             submissionEnd: new Date(now.getTime() + 80 * day),
             status: "UPCOMING",
-            minTeamMembers: 2,
-            maxTeamMembers: 6,
           },
         ],
       });

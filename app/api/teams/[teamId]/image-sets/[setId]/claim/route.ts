@@ -45,15 +45,15 @@ export async function POST(
     }
 
     // Toggle claim
-    const isAlreadyClaimedByMe = currentSet.claimedByUserId === session.user.id;
+    const isAlreadyClaimedByMe = currentSet.claimedById === session.user.id;
     const updated = await prisma.imageSet.update({
       where: { id: setId },
       data: {
-        claimedByUserId: isAlreadyClaimedByMe ? null : session.user.id,
-        status: isAlreadyClaimedByMe ? "PENDING" : "CLAIMED",
+        claimedById: isAlreadyClaimedByMe ? null : session.user.id,
+        status: isAlreadyClaimedByMe ? "UNASSIGNED" : "IN_PROGRESS",
       },
       include: {
-        claimedByUser: {
+        claimedBy: {
           select: { id: true, name: true, email: true },
         },
       },

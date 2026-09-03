@@ -75,8 +75,7 @@ export function generateInviteCode(): string {
 /**
  * Validates team status based on member count
  */
-export function calculateTeamStatus(memberCount: number): "FORMING" | "READY" | "FULL" {
+export function calculateTeamStatus(memberCount: number): "FORMING" | "ACTIVE" {
   if (memberCount < 2) return "FORMING";
-  if (memberCount >= 6) return "FULL";
-  return "READY";
+  return "ACTIVE";
 }

@@ -15,12 +15,11 @@ export async function GET(
     const sets = await prisma.imageSet.findMany({
       where: { teamId },
       include: {
-        claimedByUser: {
+        claimedBy: {
           select: { id: true, name: true, email: true },
         },
-        candidates: true,
       },
-      orderBy: { setCode: "asc" },
+      orderBy: { name: "asc" },
     });
 
     return NextResponse.json({ success: true, imageSets: sets });
@@ -44,6 +43,16 @@ export async function POST(
     }
 
     const { teamId } = await context.params;
+
+    // Fetch team to get eventId
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      return NextResponse.json({ success: false, error: "Team not found." }, { status: 404 });
+    }
+
     const body = await req.json();
     const { rawText, setCode } = body;
 
@@ -84,21 +93,22 @@ export async function POST(
       try {
         await prisma.imageSet.create({
           data: {
+            eventId: team.eventId,
             teamId,
-            setCode: code,
-            status: "PENDING",
+            name: code,
+            status: "UNASSIGNED",
           },
         });
         created.push(code);
       } catch (err: any) {
-        // Skip duplicate unique constraint
+        // Skip duplicates
       }
     }
 
     return NextResponse.json({
       success: true,
-      addedCodes: created,
-      totalAdded: created.length,
+      message: `Successfully logged ${created.length} image set(s).`,
+      sets: created,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

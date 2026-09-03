@@ -35,7 +35,7 @@ export async function GET() {
           },
         },
         _count: {
-          select: { candidates: true, imageSets: true },
+          select: { members: true, imageSets: true },
         },
       },
     });

@@ -227,12 +227,12 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
     }
   }, [isOpen, range]);
 
-  const handleFromDateTimeChange = (date: Date) => {
-    setRange((prev) => ({ ...prev, from: date }));
+  const handleFromDateTimeChange = (dateStr: string) => {
+    setRange((prev) => ({ ...prev, from: dateStr ? new Date(dateStr) : undefined }));
   };
 
-  const handleToDateTimeChange = (date: Date) => {
-    setRange((prev) => ({ ...prev, to: date }));
+  const handleToDateTimeChange = (dateStr: string) => {
+    setRange((prev) => ({ ...prev, to: dateStr ? new Date(dateStr) : undefined }));
   };
 
   return (
@@ -304,13 +304,13 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border">
               <DateTimeInput
-                value={range.from}
+                value={range.from ? range.from.toISOString().slice(0, 16) : ""}
                 onChange={handleFromDateTimeChange}
                 label="Start"
               />
               <ChevronRightIcon className="hidden sm:block mx-1 h-4 w-4 text-muted-foreground" />
               <DateTimeInput
-                value={range.to}
+                value={range.to ? range.to.toISOString().slice(0, 16) : ""}
                 onChange={handleToDateTimeChange}
                 label="End"
               />
