@@ -721,16 +721,18 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       const mainColor = night ? "#e8eaed" : "#535353";
       const spriteImg = spriteImgRef.current;
 
-      // Night Stars & Moon
+      // Night Stars
       if (night) {
-        if (spriteImg) {
-          ctx.drawImage(spriteImg, 484, 2, 40, 40, 520, 20, 40, 40);
-        } else {
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.arc(520, 30, 12, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.fillStyle = "#ffffff";
+        [
+          { x: 45, y: 25 },
+          { x: 130, y: 45 },
+          { x: 210, y: 20 },
+          { x: 340, y: 35 },
+          { x: 430, y: 55 },
+        ].forEach((st) => {
+          ctx.fillRect(st.x, st.y, 2, 2);
+        });
       }
 
       // Clouds
