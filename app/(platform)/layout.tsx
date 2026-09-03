@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Sun, Moon, LogOut, User, Menu } from "lucide-react";
+import { Sun, Moon, LogOut, User, Menu, Orbit, Telescope, Users, ShieldAlert, Gamepad2 } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -54,8 +54,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   // Navigation Items
   const navItems = [
-    { title: "CAMPAIGNS", url: "/campaigns", active: pathname === "/campaigns" },
-    { title: "TEAM WORKSPACE", url: "/campaigns", active: pathname.startsWith("/team/") },
+    { title: "CAMPAIGNS", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
+    { title: "TEAM WORKSPACE", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
   ];
 
   // @ts-ignore
@@ -63,30 +63,28 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     navItems.push({
       title: "ADMIN CONSOLE",
       url: "/admin",
+      icon: ShieldAlert,
       active: pathname === "/admin",
     });
   }
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700">
-      {/* Top Navbar with Genuine 8-Bit Arcade Styling */}
-      <header className="sticky top-0 z-40 w-full border-b-2 border-border bg-card/95 backdrop-blur-md transition-colors duration-700 shadow-xs">
+      {/* Top Navbar with Cosmic Universe Palette */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur-md transition-colors duration-700 shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo & Branding - Featuring Press Start 2P Pixel Font */}
+          {/* Logo & Cosmic Branding */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
-              <svg
-                className="w-4 h-4 fill-current text-primary transition-transform group-hover:scale-110"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
-              </svg>
-              <span className="font-pixel text-[10px] tracking-widest uppercase text-foreground">
+              <div className="flex size-7 items-center justify-center rounded-full bg-primary/10 border border-primary/40 text-primary group-hover:scale-110 transition-transform">
+                <Orbit className="size-4 text-primary" />
+              </div>
+              <span className="font-sans font-bold text-xs tracking-wider uppercase text-foreground">
                 SAVE DINO
               </span>
-              <span className="hidden sm:inline-block text-[9px] uppercase tracking-wider px-2 py-0.5 border border-border font-mono text-muted-foreground">
-                IASC PORTAL
+              <span className="hidden sm:inline-block text-[10px] uppercase tracking-wide px-2 py-0.5 border border-border rounded-full font-mono text-muted-foreground">
+                COSMIC PORTAL
               </span>
             </Link>
 
@@ -96,24 +94,25 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Link
                   key={item.title}
                   href={item.url}
-                  className={`text-[10px] uppercase tracking-wide px-3 py-1 border transition-all cursor-pointer font-mono ${
+                  className={`text-[10px] uppercase tracking-wide px-3 py-1 border rounded-full font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                     item.active
-                      ? "bg-primary text-primary-foreground border-primary font-bold"
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
                       : "border-border text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
                   }`}
                 >
-                  {item.title}
+                  <item.icon className="size-3" />
+                  <span>{item.title}</span>
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Desktop Right Controls: Play Dino Game, Lucide Sun/Moon Theme Switcher & User Session */}
+          {/* Desktop Right Controls: Play Arcade Game, Sun/Moon Theme Switcher & Session */}
           <div className="hidden md:flex items-center gap-3">
             {/* Theme Switcher Button */}
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
+              className="w-8 h-8 rounded-full border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
               title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
@@ -125,14 +124,15 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
             <Link
               href="/"
-              className="text-[10px] uppercase tracking-wide px-3 py-1 border border-amber-500 font-mono text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all cursor-pointer font-bold"
+              className="text-[10px] uppercase tracking-wide px-3 py-1 border border-amber-500/60 rounded-full font-mono text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 font-bold"
             >
-              PLAY DINO GAME &gt;
+              <Gamepad2 className="size-3" />
+              <span>PLAY DINO GAME &gt;</span>
             </Link>
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1 border border-border text-xs font-mono bg-accent/40">
+                <div className="flex items-center gap-1.5 px-3 py-1 border border-border rounded-full text-xs font-mono bg-accent/40">
                   <User className="size-3 text-primary" />
                   <span className="font-semibold">{session.user.name}</span>
                 </div>
@@ -158,11 +158,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             )}
           </div>
 
-          {/* Mobile Controls: Theme Switcher & Menu Trigger */}
+          {/* Mobile Controls */}
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
+              className="w-8 h-8 rounded-full border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
               title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
@@ -179,14 +179,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r-2 border-border">
+              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
                 <div>
-                  <SheetHeader className="p-4 border-b-2 border-border text-left">
-                    <SheetTitle className="flex items-center gap-2 font-pixel text-xs uppercase tracking-wider text-foreground">
-                      <svg className="w-4 h-4 fill-current text-primary" viewBox="0 0 24 24">
-                        <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
-                      </svg>
-                      <span>SAVE DINO</span>
+                  <SheetHeader className="p-4 border-b border-border text-left">
+                    <SheetTitle className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-foreground">
+                      <Orbit className="size-4 text-primary" />
+                      <span>SAVE DINO COSMIC HQ</span>
                     </SheetTitle>
                   </SheetHeader>
 
@@ -200,26 +198,28 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                           key={item.title}
                           href={item.url}
                           onClick={() => setMobileOpen(false)}
-                          className={`block text-[11px] uppercase tracking-wide px-3 py-2 border font-mono transition-all ${
+                          className={`flex items-center gap-2 text-[11px] uppercase tracking-wide px-3 py-2 border rounded-full font-mono transition-all ${
                             item.active
                               ? "bg-primary text-primary-foreground border-primary font-bold"
                               : "border-border text-foreground hover:bg-accent"
                           }`}
                         >
-                          {item.title}
+                          <item.icon className="size-3.5" />
+                          <span>{item.title}</span>
                         </Link>
                       ))}
                     </nav>
                   </div>
                 </div>
 
-                <div className="p-4 border-t-2 border-border space-y-3 font-mono">
+                <div className="p-4 border-t border-border space-y-3 font-mono">
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-center text-[10px] uppercase tracking-wide px-3 py-2 border border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                    className="flex items-center justify-center gap-2 text-center text-[10px] uppercase tracking-wide px-3 py-2 border border-amber-500 rounded-full text-amber-600 dark:text-amber-400 font-bold"
                   >
-                    PLAY DINO GAME &gt;
+                    <Gamepad2 className="size-3.5" />
+                    <span>PLAY DINO GAME &gt;</span>
                   </Link>
 
                   {session?.user ? (

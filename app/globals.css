@@ -36,81 +36,81 @@
   --sidebar-width-mobile: 18rem;
   --sidebar-width-icon: 3rem;
 
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 :root {
   --sidebar-width: 16rem;
   --sidebar-width-mobile: 18rem;
   --sidebar-width-icon: 3rem;
-  --radius: 0px;
+  --radius: 0.5rem;
 
-  /* --- LIGHT MODE: RETRO GAME BOY / 8-BIT ARCADE --- */
-  --background: #e0f8cf;                 /* Classic Game Boy Olive Canvas */
-  --foreground: #0f380f;                 /* Deep Game Boy Dark Green Text */
-  --card: #9bbc0f;                       /* Iconic Game Boy LCD Card Screen */
-  --card-foreground: #0f380f;
-  --popover: #9bbc0f;
-  --popover-foreground: #0f380f;
+  /* --- LIGHT COSMIC OBSERVATORY THEME --- */
+  --background: oklch(0.965 0.015 250);  /* #f0f4fa - Crisp Observatory Blue-White */
+  --foreground: oklch(0.20 0.04 265);     /* #0f172a - Deep Cosmic Midnight Text */
+  --card: oklch(0.99 0.01 250);         /* #ffffff - Elevated Observatory Card */
+  --card-foreground: oklch(0.20 0.04 265);
+  --popover: oklch(0.99 0.01 250);
+  --popover-foreground: oklch(0.20 0.04 265);
   
-  --primary: #306230;                    /* Dark Arcade Forest Green */
-  --primary-foreground: #e0f8cf;
-  --secondary: #8bac0f;
-  --secondary-foreground: #0f380f;
-  --muted: #8bac0f;
-  --muted-foreground: #306230;
-  --accent: #8bac0f;
-  --accent-foreground: #0f380f;
-  --destructive: #d90429;
-  --destructive-foreground: #ffffff;
-  --border: #0f380f;                     /* Hard 8-Bit Pixel Border */
-  --input: #0f380f;
-  --ring: #306230;
+  --primary: oklch(0.55 0.18 240);        /* Deep Cosmos Blue #0284c7 */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.92 0.02 250);
+  --secondary-foreground: oklch(0.20 0.04 265);
+  --muted: oklch(0.92 0.02 250);
+  --muted-foreground: oklch(0.50 0.04 250);
+  --accent: oklch(0.92 0.02 250);
+  --accent-foreground: oklch(0.20 0.04 265);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.88 0.02 250);         /* Soft Celestial Border */
+  --input: oklch(0.88 0.02 250);
+  --ring: oklch(0.55 0.18 240);
 
-  --sidebar: #e0f8cf;
-  --sidebar-foreground: #0f380f;
-  --sidebar-primary: #306230;
-  --sidebar-primary-foreground: #e0f8cf;
-  --sidebar-accent: #8bac0f;
-  --sidebar-accent-foreground: #0f380f;
-  --sidebar-border: #0f380f;
-  --sidebar-ring: #306230;
+  --sidebar: oklch(0.965 0.015 250);
+  --sidebar-foreground: oklch(0.20 0.04 265);
+  --sidebar-primary: oklch(0.55 0.18 240);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.92 0.02 250);
+  --sidebar-accent-foreground: oklch(0.20 0.04 265);
+  --sidebar-border: oklch(0.88 0.02 250);
+  --sidebar-ring: oklch(0.55 0.18 240);
 }
 
 .dark, .night-mode {
-  /* --- DARK MODE: 80s CYBER NEON ARCADE CABINET --- */
-  --background: #080811;                 /* Pure Arcade CRT Night Black */
-  --foreground: #00f0ff;                 /* Electric Neon Cyan Text */
-  --card: #121324;                       /* Neon Arcade Cabinet Card */
-  --card-foreground: #f4f4f4;
-  --popover: #121324;
-  --popover-foreground: #f4f4f4;
+  /* --- DARK COSMIC DEEP SPACE NEBULA THEME --- */
+  --background: oklch(0.12 0.04 265);    /* #050714 - Deep Void Cosmic Space Black */
+  --foreground: oklch(0.95 0.02 240);     /* #f0f4ff - Starlight Off-White Text */
+  --card: oklch(0.18 0.05 265);           /* #0e1329 - Deep Starlight Navy Card */
+  --card-foreground: oklch(0.95 0.02 240);
+  --popover: oklch(0.18 0.05 265);
+  --popover-foreground: oklch(0.95 0.02 240);
   
-  --primary: #ff007f;                    /* Hot Arcade Neon Magenta/Pink */
-  --primary-foreground: #ffffff;
-  --secondary: #1a1c36;
-  --secondary-foreground: #00f0ff;
-  --muted: #1a1c36;
-  --muted-foreground: #8a96cc;
-  --accent: #1a1c36;
-  --accent-foreground: #00f0ff;
-  --destructive: #ff2a5f;
-  --destructive-foreground: #ffffff;
-  --border: #00f0ff;                     /* Glowing Neon Cyan Border */
-  --input: #00f0ff;
-  --ring: #ff007f;
+  --primary: oklch(0.68 0.22 285);        /* Cosmic Nebula Purple #8b5cf6 */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.24 0.06 265);
+  --secondary-foreground: oklch(0.95 0.02 240);
+  --muted: oklch(0.24 0.06 265);
+  --muted-foreground: oklch(0.70 0.06 250);
+  --accent: oklch(0.24 0.06 265);
+  --accent-foreground: oklch(0.95 0.02 240);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.26 0.06 265);         /* Starlight Cosmic Border #1e2942 */
+  --input: oklch(0.26 0.06 265);
+  --ring: oklch(0.68 0.22 285);
 
-  --sidebar: #080811;
-  --sidebar-foreground: #00f0ff;
-  --sidebar-primary: #ff007f;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1c36;
-  --sidebar-accent-foreground: #00f0ff;
-  --sidebar-border: #00f0ff;
-  --sidebar-ring: #ff007f;
+  --sidebar: oklch(0.12 0.04 265);
+  --sidebar-foreground: oklch(0.95 0.02 240);
+  --sidebar-primary: oklch(0.68 0.22 285);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.24 0.06 265);
+  --sidebar-accent-foreground: oklch(0.95 0.02 240);
+  --sidebar-border: oklch(0.26 0.06 265);
+  --sidebar-ring: oklch(0.68 0.22 285);
 }
 
 @layer base {
