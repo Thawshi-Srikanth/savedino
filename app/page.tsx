@@ -59,7 +59,7 @@ export default function Home() {
               </button>
 
               <p className="text-[11px] font-mono text-[#535353] mt-2">
-                Press <b>SPACE</b> to Blast Falling Asteroids with Lasers!
+                <b>SPACE</b> to Blast Lasers &nbsp;|&nbsp; <b>UP ARROW</b> to Jump!
               </p>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function Home() {
 
             <div className="w-full max-w-[600px] flex items-center justify-between px-2 text-xs font-mono text-[#535353]">
               <span className="text-[11px] text-[#535353]">
-                <b>SPACE</b>: Fire Laser &nbsp;|&nbsp; <b>DOWN ARROW</b>: Crouch / Dodge &nbsp;|&nbsp; <b>UP ARROW</b>: Jump
+                <b>SPACE</b>: Shoot Laser &nbsp;|&nbsp; <b>UP ARROW / W</b>: Jump
               </span>
 
               <button
@@ -89,7 +89,7 @@ export default function Home() {
         <p className="font-pixel text-[10px] uppercase text-[#535353]">
           SAVE DINO — ASTEROID DEFENSE
         </p>
-        <p>Blast Asteroids with Dino's Laser Beam & Survive the Extinction Event</p>
+        <p>Jump and Blast Incoming Falling Asteroids</p>
       </footer>
 
       {/* Help Modal */}

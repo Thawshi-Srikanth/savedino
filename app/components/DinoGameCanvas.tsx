@@ -9,6 +9,7 @@ interface DinoGameCanvasProps {
 
 interface Meteor {
   id: number;
+  type: "small" | "medium" | "giant";
   x: number;
   y: number;
   vx: number;
@@ -20,15 +21,14 @@ interface Meteor {
   hp: number;
 }
 
-interface Projectile {
+interface GrowingBlast {
   id: number;
   x: number;
   y: number;
   vx: number;
   vy: number;
-  width: number;
-  height: number;
   angle: number;
+  distanceTraveled: number;
 }
 
 interface Particle {
@@ -43,22 +43,19 @@ interface Particle {
 }
 
 const MAX_CHARGES = 3;
-const RECHARGE_FRAMES_PER_CHARGE = 45; // ~0.75s per charge refill
+const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 
 export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spriteImgRef = useRef<HTMLImageElement | null>(null);
 
-  // React State for HUD & Game Over
+  // React State for HUD
   const [gameState, setGameState] = useState<"IDLE" | "RUNNING" | "GAMEOVER">("IDLE");
   const [laserCharges, setLaserCharges] = useState<number>(MAX_CHARGES);
   const [rechargeProgress, setRechargeProgress] = useState<number>(1.0);
   const [score, setScore] = useState<number>(0);
   const [highScore, setHighScore] = useState<number>(0);
   const [meteorsDestroyed, setMeteorsDestroyed] = useState<number>(0);
-
-  // Key tracking for manual multi-angle aim
-  const keysPressedRef = useRef<{ [key: string]: boolean }>({});
 
   // Load official Chromium sprite sheet
   useEffect(() => {
@@ -87,7 +84,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
     // 3-Charge Laser Battery
     charges: MAX_CHARGES,
     rechargeTimer: 0,
-    projectiles: [] as Projectile[],
+    blasts: [] as GrowingBlast[],
 
     // Horizon Line Double-Buffer
     horizonX1: 0,
@@ -95,17 +92,14 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
     sourceX1: 2,
     sourceX2: 602,
 
-    // Dino State
+    // Dino State (Jump and Shoot only)
     dino: {
       x: 50,
       y: 80, // 127 - 47
       vy: 0,
       width: 44,
       height: 47,
-      duckWidth: 59,
-      duckHeight: 25,
       isJumping: false,
-      isDucking: false,
       legFrame: 0,
       fireGlowTimer: 0,
     },
@@ -123,7 +117,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       { x: 520, y: 20, speed: 0.5 },
     ],
 
-    meteorSpawnTimer: 25,
+    meteorSpawnTimer: 20,
   });
 
   // Load High Score
@@ -138,7 +132,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
     }
   }, []);
 
-  // Skill-Based Fire Laser (NO AIMBOT — Timing & Player Direction Only)
+  // Fire Laser Action (Shoot Bold High-Visibility Laser Bolt)
   const fireLaser = useCallback(() => {
     const s = stateRef.current;
 
@@ -151,7 +145,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       s.charges = MAX_CHARGES;
       s.rechargeTimer = 0;
       s.meteors = [];
-      s.projectiles = [];
+      s.blasts = [];
       s.particles = [];
       s.horizonX1 = 0;
       s.horizonX2 = 600;
@@ -160,8 +154,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       s.dino.y = s.groundY - s.dino.height;
       s.dino.vy = 0;
       s.dino.isJumping = false;
-      s.dino.isDucking = false;
-      s.meteorSpawnTimer = 20;
+      s.meteorSpawnTimer = 15;
 
       setGameState("RUNNING");
       setLaserCharges(MAX_CHARGES);
@@ -181,7 +174,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       s.charges = MAX_CHARGES;
       s.rechargeTimer = 0;
       s.meteors = [];
-      s.projectiles = [];
+      s.blasts = [];
       s.particles = [];
       s.horizonX1 = 0;
       s.horizonX2 = 600;
@@ -190,8 +183,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       s.dino.y = s.groundY - s.dino.height;
       s.dino.vy = 0;
       s.dino.isJumping = false;
-      s.dino.isDucking = false;
-      s.meteorSpawnTimer = 20;
+      s.meteorSpawnTimer = 15;
 
       setGameState("RUNNING");
       setLaserCharges(MAX_CHARGES);
@@ -209,115 +201,74 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
     // Consume 1 charge
     s.charges -= 1;
     setLaserCharges(s.charges);
-    s.dino.fireGlowTimer = 10;
+    s.dino.fireGlowTimer = 12;
     audioSynth.playLaser();
 
-    // Beam Origin from Dino
-    const startX = s.dino.x + (s.dino.isDucking ? 52 : 38);
-    const startY = s.dino.y + (s.dino.isDucking ? 12 : 14);
+    // Beam Origin from Dino's mouth/snout
+    const startX = s.dino.x + 38;
+    const startY = s.dino.y + 14;
 
-    // ----------------------------------------------------
-    // PURE SKILL-BASED AIMING (NO AIMBOT SNAP)
-    // ----------------------------------------------------
-    // - Up Arrow held or in air: High anti-air sky angle (-38 degrees)
-    // - Down Arrow held (ducking): Low ground angle (-5 degrees)
-    // - Default standing: Standard diagonal intercept angle (-20 degrees)
-    let angle = -0.35; // ~20 degrees upward
-    if (keysPressedRef.current["ArrowUp"] || s.dino.isJumping) {
-      angle = -0.65; // High 38-degree anti-air sky trajectory!
-    } else if (keysPressedRef.current["ArrowDown"] || s.dino.isDucking) {
-      angle = -0.08; // Flat ground-level trajectory!
-    }
+    // Angle: standard upward sky trajectory (-22°), steeper if jumping (-36°)
+    const angle = s.dino.isJumping ? -0.62 : -0.38;
+    const speed = 14.0;
 
-    const projectileSpeed = 16.0; // Fast energy blast requiring player timing to intercept
-
-    s.projectiles.push({
+    // High-visibility growing laser blast
+    s.blasts.push({
       id: Date.now() + Math.random(),
       x: startX,
       y: startY,
-      vx: Math.cos(angle) * projectileSpeed,
-      vy: Math.sin(angle) * projectileSpeed,
-      width: 32,
-      height: 8,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
       angle: angle,
+      distanceTraveled: 0,
     });
 
     // Muzzle sparks
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       s.particles.push({
         x: startX,
         y: startY,
-        vx: Math.cos(angle) * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 2,
-        vy: Math.sin(angle) * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 2,
+        vx: Math.cos(angle) * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
+        vy: Math.sin(angle) * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
         size: Math.random() * 3 + 2,
         color: "#00ffff",
-        life: 8,
-        maxLife: 8,
+        life: 10,
+        maxLife: 10,
       });
     }
   }, []);
 
-  // Jump Action (ArrowUp)
+  // Jump Action (Jump)
   const jump = useCallback(() => {
     const s = stateRef.current;
+    if (s.gameState === "IDLE") {
+      fireLaser();
+      return;
+    }
     if (s.gameState === "RUNNING" && !s.dino.isJumping) {
       s.dino.isJumping = true;
-      s.dino.isDucking = false;
       s.dino.vy = s.jumpVelocity;
       audioSynth.playJump();
     }
-  }, []);
-
-  // Duck Action (ArrowDown)
-  const setDuck = useCallback((ducking: boolean) => {
-    const s = stateRef.current;
-    if (s.gameState === "RUNNING") {
-      if (ducking && !s.dino.isJumping) {
-        s.dino.isDucking = true;
-        s.dino.y = s.groundY - s.dino.duckHeight;
-      } else if (!ducking) {
-        s.dino.isDucking = false;
-        s.dino.y = s.groundY - s.dino.height;
-      }
-      if (ducking && s.dino.isJumping) {
-        s.dino.vy += 3.0;
-      }
-    }
-  }, []);
+  }, [fireLaser]);
 
   // Keyboard Listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      keysPressedRef.current[e.code] = true;
-
-      if (e.code === "Space" || e.key === " " || e.key === "Spacebar") {
+      if (e.code === "Space") {
         e.preventDefault();
         fireLaser();
-      } else if (e.code === "ArrowUp") {
+      } else if (e.code === "ArrowUp" || e.code === "KeyW") {
         e.preventDefault();
         jump();
-      } else if (e.code === "ArrowDown") {
-        e.preventDefault();
-        setDuck(true);
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysPressedRef.current[e.code] = false;
-
-      if (e.code === "ArrowDown") {
-        e.preventDefault();
-        setDuck(false);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [fireLaser, jump, setDuck]);
+  }, [fireLaser, jump]);
 
   // Main Render Loop
   useEffect(() => {
@@ -381,19 +332,18 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
           s.sourceX2 = Math.random() > 0.5 ? 602 : 2;
         }
 
-        // Dino Physics
-        const currentDinoHeight = s.dino.isDucking ? s.dino.duckHeight : s.dino.height;
+        // Dino Physics (Jumping only)
         if (s.dino.isJumping) {
           s.dino.y += s.dino.vy;
           s.dino.vy += s.gravity;
 
-          if (s.dino.y >= groundY - currentDinoHeight) {
-            s.dino.y = groundY - currentDinoHeight;
+          if (s.dino.y >= groundY - s.dino.height) {
+            s.dino.y = groundY - s.dino.height;
             s.dino.isJumping = false;
             s.dino.vy = 0;
           }
         } else {
-          s.dino.y = groundY - currentDinoHeight;
+          s.dino.y = groundY - s.dino.height;
           if (s.frameCount % 6 === 0) {
             s.dino.legFrame = (s.dino.legFrame + 1) % 2;
           }
@@ -404,34 +354,49 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
         }
 
         // ----------------------------------------------------
-        // SPAWN FALLING METEORS
+        // SPAWN METEORS WITH DYNAMIC SIZE & SPEED VARIETY
         // ----------------------------------------------------
         s.meteorSpawnTimer++;
-        const spawnInterval = Math.max(50, 115 - Math.floor(s.score / 50) * 5);
+        const spawnInterval = Math.max(45, 110 - Math.floor(s.score / 50) * 5);
         if (s.meteorSpawnTimer >= spawnInterval) {
           s.meteorSpawnTimer = 0;
           audioSynth.playMeteor();
 
-          const startX = CANVAS_WIDTH + 20;
-          const startY = -15 + Math.random() * 25;
-          
-          const isHighMeteor = Math.random() > 0.45;
+          const startX = CANVAS_WIDTH + 25;
+          const startY = -20 + Math.random() * 30;
           const targetX = s.dino.x + 10 + (Math.random() > 0.5 ? 0 : 35);
-          const targetY = isHighMeteor ? groundY - 38 : groundY - 18;
+          const targetY = groundY - (Math.random() > 0.4 ? 20 : 36);
 
           const dx = targetX - startX;
           const dy = targetY - startY;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const meteorSpeed = 3.6 + (s.speed - 6) * 0.35 + Math.random() * 0.9;
 
-          const size = 18 + Math.floor(Math.random() * 6);
+          const randClass = Math.random();
+          let meteorType: "small" | "medium" | "giant" = "medium";
+          let size = 22;
+          let speed = 3.6;
+
+          if (randClass < 0.35) {
+            meteorType = "small";
+            size = 14 + Math.floor(Math.random() * 4);
+            speed = 4.8 + (s.speed - 6) * 0.4 + Math.random() * 0.8;
+          } else if (randClass < 0.75) {
+            meteorType = "medium";
+            size = 22 + Math.floor(Math.random() * 5);
+            speed = 3.5 + (s.speed - 6) * 0.3 + Math.random() * 0.6;
+          } else {
+            meteorType = "giant";
+            size = 32 + Math.floor(Math.random() * 8);
+            speed = 2.4 + (s.speed - 6) * 0.2 + Math.random() * 0.5;
+          }
 
           s.meteors.push({
             id: Date.now() + Math.random(),
+            type: meteorType,
             x: startX,
             y: startY,
-            vx: (dx / dist) * meteorSpeed,
-            vy: (dy / dist) * meteorSpeed,
+            vx: (dx / dist) * speed,
+            vy: (dy / dist) * speed,
             size: size,
             radius: size / 2,
             rotation: 0,
@@ -441,53 +406,62 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
         }
 
         // ----------------------------------------------------
-        // UPDATE PROJECTILES & COLLISION (SKILL TIMING INTERCEPT)
+        // UPDATE GROWING LASER BOLTS
         // ----------------------------------------------------
-        for (let pIdx = s.projectiles.length - 1; pIdx >= 0; pIdx--) {
-          const proj = s.projectiles[pIdx];
-          proj.x += proj.vx;
-          proj.y += proj.vy;
+        for (let bIdx = s.blasts.length - 1; bIdx >= 0; bIdx--) {
+          const b = s.blasts[bIdx];
+          b.x += b.vx;
+          b.y += b.vy;
+          b.distanceTraveled += Math.hypot(b.vx, b.vy);
 
-          // Wake particles
-          s.particles.push({
-            x: proj.x - proj.vx * 0.4,
-            y: proj.y - proj.vy * 0.4,
-            vx: (Math.random() - 0.5) * 1.5,
-            vy: (Math.random() - 0.5) * 1.5,
-            size: 3,
-            color: "#00ffff",
-            life: 8,
-            maxLife: 8,
-          });
+          const currentHeight = Math.min(34, 12 + b.distanceTraveled * 0.07);
+          const currentWidth = Math.min(80, 35 + b.distanceTraveled * 0.15);
 
-          // Check hit against meteors (timing intercept)
+          // Trailing electric particles
+          if (s.frameCount % 2 === 0) {
+            s.particles.push({
+              x: b.x - b.vx * 0.4,
+              y: b.y + (Math.random() - 0.5) * currentHeight,
+              vx: (Math.random() - 0.5) * 2,
+              vy: (Math.random() - 0.5) * 2,
+              size: Math.random() * 3 + 2,
+              color: "#00ffff",
+              life: 10,
+              maxLife: 10,
+            });
+          }
+
+          // Check hit against meteors with growing hitbox
           let hitMeteor = false;
+          const hitRadius = currentHeight / 2 + 8;
+
           for (let mIdx = s.meteors.length - 1; mIdx >= 0; mIdx--) {
             const m = s.meteors[mIdx];
-            const dist = Math.hypot(proj.x - (m.x + m.radius), proj.y - (m.y + m.radius));
+            const dist = Math.hypot(b.x - (m.x + m.radius), b.y - (m.y + m.radius));
 
-            // Realistic intercept radius
-            if (dist < m.radius + 10) {
+            if (dist < m.radius + hitRadius) {
               s.meteors.splice(mIdx, 1);
               hitMeteor = true;
 
               s.meteorsDestroyed++;
               setMeteorsDestroyed(s.meteorsDestroyed);
-              s.score += 40;
-              s.screenShake = 4;
+              
+              const pts = m.type === "small" ? 50 : m.type === "giant" ? 30 : 40;
+              s.score += pts;
+              s.screenShake = m.type === "giant" ? 6 : 3.5;
 
               audioSynth.playExplosion();
 
-              // Big explosion burst
-              for (let p = 0; p < 24; p++) {
+              const particleCount = m.type === "giant" ? 36 : m.type === "small" ? 18 : 25;
+              for (let p = 0; p < particleCount; p++) {
                 const pAngle = Math.random() * Math.PI * 2;
-                const pSpeed = Math.random() * 5 + 1.5;
+                const pSpeed = Math.random() * (m.type === "giant" ? 6 : 4.5) + 1.2;
                 s.particles.push({
                   x: m.x + m.radius,
                   y: m.y + m.radius,
                   vx: Math.cos(pAngle) * pSpeed,
                   vy: Math.sin(pAngle) * pSpeed,
-                  size: Math.random() * 4 + 2,
+                  size: Math.random() * (m.type === "giant" ? 5 : 3.5) + 2,
                   color: Math.random() > 0.4 ? "#facc15" : (Math.random() > 0.5 ? "#f97316" : "#ef4444"),
                   life: 20,
                   maxLife: 20,
@@ -497,8 +471,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
             }
           }
 
-          if (hitMeteor || proj.x > CANVAS_WIDTH + 50 || proj.y < -40 || proj.y > groundY) {
-            s.projectiles.splice(pIdx, 1);
+          if (hitMeteor || b.x > CANVAS_WIDTH + 80 || b.y < -50 || b.y > groundY + 10) {
+            s.blasts.splice(bIdx, 1);
           }
         }
 
@@ -513,26 +487,26 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
 
           if (s.frameCount % 2 === 0) {
             s.particles.push({
-              x: m.x + m.radius + (Math.random() - 0.5) * 6,
-              y: m.y + m.radius + (Math.random() - 0.5) * 6,
+              x: m.x + m.radius + (Math.random() - 0.5) * (m.radius * 0.8),
+              y: m.y + m.radius + (Math.random() - 0.5) * (m.radius * 0.8),
               vx: -m.vx * 0.2 + (Math.random() - 0.5) * 1.5,
               vy: -m.vy * 0.2 + (Math.random() - 0.5) * 1.5,
-              size: Math.random() * 3 + 2,
+              size: Math.random() * (m.type === "giant" ? 4 : 2.5) + 2,
               color: Math.random() > 0.5 ? "#f97316" : "#ef4444",
-              life: 12,
-              maxLife: 12,
+              life: m.type === "giant" ? 16 : 10,
+              maxLife: m.type === "giant" ? 16 : 10,
             });
           }
 
           if (m.y >= groundY - 2 || m.x < -40) {
             if (m.y >= groundY - 2) {
-              for (let p = 0; p < 6; p++) {
+              for (let p = 0; p < (m.type === "giant" ? 10 : 5); p++) {
                 s.particles.push({
                   x: m.x,
                   y: groundY - 2,
-                  vx: (Math.random() - 0.5) * 3,
+                  vx: (Math.random() - 0.5) * 4,
                   vy: -Math.random() * 2 - 1,
-                  size: Math.random() * 2 + 1,
+                  size: Math.random() * 2.5 + 1,
                   color: "#737373",
                   life: 10,
                   maxLife: 10,
@@ -544,11 +518,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
         }
 
         // ----------------------------------------------------
-        // DINO COLLISION (DODGE OR GET HIT)
+        // DINO COLLISION (JUMP OVER OR GET HIT)
         // ----------------------------------------------------
-        const dinoBox = s.dino.isDucking
-          ? { x: s.dino.x + 4, y: s.dino.y + 6, width: 48, height: 18 }
-          : { x: s.dino.x + 8, y: s.dino.y + 4, width: 28, height: 40 };
+        const dinoBox = { x: s.dino.x + 8, y: s.dino.y + 4, width: 28, height: 40 };
 
         let dinoHit = false;
         for (const m of s.meteors) {
@@ -685,43 +657,49 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
       ctx.globalAlpha = 1.0;
 
       // ----------------------------------------------------
-      // DRAW VISIBLE PROJECTILES (NO AUTO-AIM, TRAVELING BOLTS)
+      // DRAW HIGH-VISIBILITY BOLD LASER BOLTS
       // ----------------------------------------------------
-      s.projectiles.forEach((proj) => {
+      s.blasts.forEach((b) => {
         ctx.save();
-        ctx.translate(proj.x, proj.y);
-        ctx.rotate(proj.angle);
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.angle);
 
-        // Dark navy high-contrast border
-        ctx.fillStyle = "#0c4a6e";
-        ctx.fillRect(-proj.width / 2 - 2, -proj.height / 2 - 2, proj.width + 4, proj.height + 4);
+        // Calculate growing dimensions
+        const boltLength = Math.min(80, 36 + b.distanceTraveled * 0.15);
+        const boltHeight = Math.min(28, 12 + b.distanceTraveled * 0.06);
 
-        // Neon Cyan Plasma Body
-        ctx.fillStyle = "#06b6d4";
-        ctx.shadowColor = "#0284c7";
-        ctx.shadowBlur = 10;
-        ctx.fillRect(-proj.width / 2, -proj.height / 2, proj.width, proj.height);
+        // 1. Solid Black Outer Border (Absolute maximum contrast on #f4f4f4 background)
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(-boltLength / 2 - 2, -boltHeight / 2 - 2, boltLength + 4, boltHeight + 4);
 
-        // Pure White Core
+        // 2. Deep Electric Blue Body
+        ctx.fillStyle = "#0284c7";
+        ctx.shadowColor = "#00ffff";
+        ctx.shadowBlur = 12;
+        ctx.fillRect(-boltLength / 2, -boltHeight / 2, boltLength, boltHeight);
+
+        // 3. Bright Electric Cyan Mid-Energy
+        ctx.fillStyle = "#00ffff";
+        ctx.fillRect(-boltLength / 2 + 2, -boltHeight / 4, boltLength - 4, boltHeight / 2);
+
+        // 4. Pure White Center Beam
         ctx.fillStyle = "#ffffff";
         ctx.shadowBlur = 0;
-        ctx.fillRect(-proj.width / 2 + 3, -proj.height / 2 + 2, proj.width - 6, proj.height - 4);
+        ctx.fillRect(-boltLength / 2 + 4, -2, boltLength - 8, 4);
 
         ctx.restore();
       });
 
-      // ----------------------------------------------------
-      // DRAW ASTEROIDS / METEORS
-      // ----------------------------------------------------
+      // Draw Varied Asteroids
       s.meteors.forEach((m) => {
         ctx.save();
         ctx.translate(m.x + m.radius, m.y + m.radius);
         ctx.rotate(m.rotation);
 
-        // Fiery halo
-        ctx.fillStyle = "#f97316";
+        // Halo
+        ctx.fillStyle = m.type === "giant" ? "#dc2626" : m.type === "small" ? "#f59e0b" : "#f97316";
         ctx.shadowColor = "#ef4444";
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = m.type === "giant" ? 14 : 8;
         ctx.fillRect(-m.radius, -m.radius, m.size, m.size);
 
         // Rocky core
@@ -731,15 +709,18 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
 
         // Crater dots
         ctx.fillStyle = "#292524";
-        ctx.fillRect(-m.radius + 4, -m.radius + 4, 3, 3);
-        ctx.fillRect(-m.radius + m.size - 7, -m.radius + 6, 2, 2);
+        ctx.fillRect(-m.radius + 4, -m.radius + 4, m.type === "giant" ? 5 : 3, m.type === "giant" ? 5 : 3);
+        if (m.type === "giant") {
+          ctx.fillRect(-m.radius + m.size - 10, -m.radius + 8, 4, 4);
+          ctx.fillRect(-m.radius + 8, -m.radius + m.size - 10, 4, 4);
+        } else {
+          ctx.fillRect(-m.radius + m.size - 7, -m.radius + 6, 2, 2);
+        }
 
         ctx.restore();
       });
 
-      // ----------------------------------------------------
-      // DRAW DINO (OFFICIAL CHROMIUM SPRITE)
-      // ----------------------------------------------------
+      // Draw Dino (Running / Jumping)
       if (spriteImg) {
         let sx = 677;
         let sy = 2;
@@ -748,11 +729,6 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
 
         if (s.gameState === "GAMEOVER") {
           sx = 853; // Crashed X-eyes
-        } else if (s.dino.isDucking) {
-          sw = 59;
-          sh = 25;
-          sy = 19;
-          sx = s.dino.legFrame === 0 ? 941 : 1000;
         } else if (s.dino.isJumping) {
           sx = 677;
         } else {
@@ -763,13 +739,13 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
 
         // Muzzle flare on Dino
         if (s.dino.fireGlowTimer > 0) {
-          const muzzleX = s.dino.x + (s.dino.isDucking ? 52 : 38);
-          const muzzleY = s.dino.y + (s.dino.isDucking ? 12 : 14);
+          const muzzleX = s.dino.x + 38;
+          const muzzleY = s.dino.y + 14;
           ctx.fillStyle = "#00ffff";
           ctx.shadowColor = "#0284c7";
-          ctx.shadowBlur = 16;
+          ctx.shadowBlur = 18;
           ctx.beginPath();
-          ctx.arc(muzzleX, muzzleY, 7, 0, Math.PI * 2);
+          ctx.arc(muzzleX, muzzleY, 8, 0, Math.PI * 2);
           ctx.fill();
           ctx.shadowBlur = 0;
         }
@@ -797,7 +773,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
           ctx.fillText("PRESS SPACE TO FIRE & START", CANVAS_WIDTH / 2, 65);
         }
         ctx.font = '9px "PressStart2P", "Press Start 2P", monospace';
-        ctx.fillText("SPACE: SHOOT (TIMING) | UP: AIM SKY | DOWN: DODGE", CANVAS_WIDTH / 2, 90);
+        ctx.fillText("SPACE: SHOOT LASER | UP ARROW: JUMP", CANVAS_WIDTH / 2, 90);
       }
 
       // Game Over Screen if GAMEOVER
@@ -895,29 +871,15 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
         />
 
         {/* Mobile Touch Action Controls */}
-        <div className="sm:hidden mt-3 flex items-center justify-between gap-2 pointer-events-auto px-2">
-          <button
-            onTouchStart={(e) => {
-              e.preventDefault();
-              setDuck(true);
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              setDuck(false);
-            }}
-            className="flex-1 py-2.5 bg-[#535353] text-white rounded font-pixel text-[10px]"
-          >
-            CROUCH / DODGE
-          </button>
-
+        <div className="sm:hidden mt-3 flex items-center justify-between gap-3 pointer-events-auto px-2">
           <button
             onTouchStart={(e) => {
               e.preventDefault();
               jump();
             }}
-            className="flex-1 py-2.5 bg-[#535353] text-white rounded font-pixel text-[10px]"
+            className="flex-1 py-3 bg-[#535353] text-white rounded font-pixel text-[11px] shadow-[2px_2px_0px_#000]"
           >
-            JUMP
+            ⬆ JUMP
           </button>
 
           <button
@@ -925,16 +887,17 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({ onScoreUpdate })
               e.preventDefault();
               fireLaser();
             }}
-            className="flex-1 py-2.5 bg-[#0284c7] text-white rounded font-pixel text-[10px] font-bold shadow-[2px_2px_0px_#000]"
+            className="flex-1 py-3 bg-[#0284c7] text-white rounded font-pixel text-[11px] font-bold shadow-[2px_2px_0px_#000]"
           >
-            ⚡ BLAST ({laserCharges})
+            ⚡ BLAST LASER ({laserCharges})
           </button>
         </div>
       </div>
 
       {/* Controls Hint */}
       <div className="w-full max-w-[600px] flex items-center justify-between px-2 text-[11px] font-mono text-[#535353]">
-        <span><b>SPACE</b>: Shoot &nbsp;|&nbsp; <b>UP + SPACE</b>: High Sky Shot &nbsp;|&nbsp; <b>DOWN</b>: Crouch/Dodge</span>
+        <span><b>SPACE</b>: Shoot &nbsp;|&nbsp; <b>UP ARROW</b>: Jump</span>
+        <span className="text-[10px] text-[#737373]">Blast expands as it travels</span>
       </div>
     </div>
   );
