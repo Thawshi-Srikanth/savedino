@@ -74,7 +74,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#020617]/90 backdrop-blur-md transition-colors duration-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* PostHog Style Slate & Violet Branding Logo */}
+          {/* PostHog Style Branding Logo with Tasteful Pixel Accent */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
               {/* Slanted 3-Color Badge */}
@@ -83,10 +83,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <div className="w-2.5 h-6 bg-[#10b981] rounded-xs transform -skew-x-12" />
                 <div className="w-2.5 h-6 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
               </div>
-              <span className="font-sans font-bold text-sm tracking-tight text-foreground">
+              <span className="font-pixel text-[11px] tracking-wider uppercase text-foreground">
                 SaveDino
               </span>
-              <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 border border-border rounded-md bg-card text-foreground">
+              <span className="hidden sm:inline-block text-[8px] font-pixel uppercase tracking-widest px-2 py-0.5 border border-border rounded-md bg-card text-foreground">
                 IASC PORTAL
               </span>
             </Link>
@@ -110,7 +110,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </nav>
           </div>
 
-          {/* Desktop Right Controls: Play Dino Game, Sun/Moon Switcher & Session */}
+          {/* Desktop Right Controls: Play Dino Game with Pixel Accent Button, Sun/Moon Switcher & Session */}
           <div className="hidden md:flex items-center gap-3">
             {/* Theme Switcher Button */}
             <button
@@ -126,9 +126,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </button>
 
             <Link href="/">
-              <Button size="sm" variant="default" className="text-xs font-bold flex items-center gap-1.5">
+              <Button size="sm" variant="default" className="text-[9px] font-pixel tracking-wide flex items-center gap-1.5">
                 <Gamepad2 className="size-3.5" />
-                <span>Play Arcade &gt;</span>
+                <span>PLAY ARCADE &gt;</span>
               </Button>
             </Link>
 
@@ -184,7 +184,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
                 <div>
                   <SheetHeader className="p-4 border-b border-border text-left">
-                    <SheetTitle className="flex items-center gap-2 font-sans font-bold text-sm tracking-tight text-foreground">
+                    <SheetTitle className="flex items-center gap-2 font-pixel text-xs tracking-tight text-foreground">
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-5 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
                         <div className="w-2 h-5 bg-[#10b981] rounded-xs transform -skew-x-12" />
@@ -224,9 +224,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                     onClick={() => setMobileOpen(false)}
                     className="block"
                   >
-                    <Button variant="default" className="w-full text-xs font-bold flex items-center justify-center gap-2">
+                    <Button variant="default" className="w-full text-[10px] font-pixel tracking-wide flex items-center justify-center gap-2">
                       <Gamepad2 className="size-4" />
-                      <span>Play Arcade &gt;</span>
+                      <span>PLAY ARCADE &gt;</span>
                     </Button>
                   </Link>
 
