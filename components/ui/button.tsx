@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-mono font-bold tracking-wide transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:translate-y-[1px] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-sans font-bold tracking-wide transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground border border-[#23241f] dark:border-[#38393e] hover:bg-[#d94400] font-bold shadow-xs",
+          "bg-[#f59e0b] text-[#111111] border border-[#b45309] shadow-[0_3px_0_0_#b45309] hover:bg-[#d97706] active:translate-y-[2px] active:shadow-none font-bold",
         destructive:
-          "bg-destructive text-destructive-foreground border border-[#23241f] dark:border-[#38393e] hover:bg-destructive/90 font-bold",
+          "bg-destructive text-destructive-foreground border border-destructive/80 hover:bg-destructive/90 font-bold",
         outline:
-          "border border-border bg-card text-foreground hover:bg-[#f54e00] hover:text-white hover:border-[#f54e00]",
+          "border border-[#b45309] bg-white text-[#111111] dark:bg-[#1c1d21] dark:text-[#f4f4f5] dark:border-[#f59e0b] hover:bg-[#f59e0b] hover:text-[#111111] transition-colors font-bold",
         secondary:
           "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -22,7 +22,9 @@ const buttonVariants = cva(
         link:
           "border-transparent text-primary underline-offset-4 hover:underline",
         pill:
-          "rounded-full border border-border bg-card text-foreground hover:bg-[#f54e00] hover:text-white hover:border-[#f54e00] text-[10px] uppercase px-3 py-1 font-mono",
+          "rounded-full border border-[#111111]/30 bg-white text-[#111111] dark:bg-[#1c1d21] dark:text-[#f4f4f5] hover:bg-[#bd10e0] hover:text-white hover:border-[#bd10e0] text-[11px] font-medium px-3.5 py-1 transition-all",
+        magenta:
+          "bg-[#bd10e0] text-white border border-[#9000b3] shadow-[0_3px_0_0_#750091] hover:bg-[#a80bc7] active:translate-y-[2px] active:shadow-none font-bold",
       },
       size: {
         default: "h-9 px-4 py-2",
