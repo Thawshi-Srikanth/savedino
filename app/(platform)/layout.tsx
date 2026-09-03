@@ -64,7 +64,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   // Navigation Items
   const navItems = [
     { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Team Workspace", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+    { title: "Teams", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
   ];
 
   // @ts-ignore
@@ -78,7 +78,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700">
+    <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700 relative">
       {/* Top Navbar Matching PostHog Greyish Black Dark Palette */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md transition-colors duration-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
@@ -95,36 +95,33 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <span className="font-pixel text-[11px] tracking-wider uppercase text-foreground">
                 SaveDino
               </span>
-              <span className="hidden sm:inline-block text-[8px] font-pixel uppercase tracking-widest px-2 py-0.5 border border-border rounded-md bg-card text-foreground">
-                IASC PORTAL
-              </span>
             </Link>
 
-            {/* Desktop Navigation Pills */}
+            {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
               {navItems.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.url}
-                  className={`text-xs px-3.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    item.active
-                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                      : "text-foreground hover:bg-card hover:border hover:border-border"
-                  }`}
-                >
-                  <item.icon className="size-3.5" />
-                  <span>{item.title}</span>
+                <Link key={item.title} href={item.url}>
+                  <Button
+                    size="sm"
+                    variant={item.active ? "default" : "outline"}
+                    className="h-9 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <item.icon className="size-3.5" />
+                    <span>{item.title}</span>
+                  </Button>
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Desktop Right Controls: Play Dino Game, Sun/Moon Switcher & Session */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Theme Switcher Button */}
-            <button
+          {/* Desktop Right Controls: Uniform Height (h-9) Controls & Session */}
+          <div className="hidden md:flex items-center gap-2.5">
+            {/* Theme Switcher 3D Button */}
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-md border border-border bg-card flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
+              className="h-9 w-9 rounded-md cursor-pointer"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -132,26 +129,20 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               ) : (
                 <Moon className="size-4 text-[#8b5cf6]" />
               )}
-            </button>
-
-            <Link href="/">
-              <Button size="sm" variant="default" className="text-[9px] font-pixel tracking-wide flex items-center gap-1.5">
-                <Gamepad2 className="size-3.5" />
-                <span>PLAY ARCADE &gt;</span>
-              </Button>
-            </Link>
+            </Button>
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1 border border-border rounded-md text-xs font-medium bg-card">
-                  <User className="size-3 text-[#8b5cf6]" />
+                {/* Logged-In User Badge with 3D PostHog Shadow & Uniform h-9 Height */}
+                <div className="h-9 flex items-center gap-1.5 px-3.5 border border-border rounded-md text-xs font-medium bg-card shadow-[0_3px_0_0_rgba(0,0,0,0.15)] dark:shadow-[0_3px_0_0_rgba(255,255,255,0.08)]">
+                  <User className="size-3.5 text-[#8b5cf6]" />
                   <span className="font-bold">{session.user.name}</span>
                 </div>
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                  className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut className="size-3.5" />
@@ -160,10 +151,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             ) : (
               <div className="flex items-center gap-2 text-xs">
                 <Link href="/login">
-                  <Button size="sm" variant="outline" className="h-8 text-xs font-bold">Sign In</Button>
+                  <Button size="sm" variant="outline" className="h-9 px-3.5 text-xs font-bold">Sign In</Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" variant="default" className="h-8 text-xs font-bold">Register</Button>
+                  <Button size="sm" variant="default" className="h-9 px-3.5 text-xs font-bold">Register</Button>
                 </Link>
               </div>
             )}
@@ -171,9 +162,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
           {/* Mobile Controls */}
           <div className="flex md:hidden items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-md border border-border bg-card flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
+              className="h-9 w-9 rounded-md cursor-pointer"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -181,11 +174,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               ) : (
                 <Moon className="size-4 text-[#8b5cf6]" />
               )}
-            </button>
+            </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8">
+                <Button variant="outline" size="icon" className="h-9 w-9">
                   <Menu className="size-4" />
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
@@ -228,17 +221,6 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 </div>
 
                 <div className="p-4 border-t border-border space-y-3">
-                  <Link
-                    href="/"
-                    onClick={() => setMobileOpen(false)}
-                    className="block"
-                  >
-                    <Button variant="default" className="w-full text-[10px] font-pixel tracking-wide flex items-center justify-center gap-2">
-                      <Gamepad2 className="size-4" />
-                      <span>PLAY ARCADE &gt;</span>
-                    </Button>
-                  </Link>
-
                   {session?.user ? (
                     <Button
                       variant="outline"
@@ -274,6 +256,19 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
         {children}
       </main>
+
+      {/* Global Floating Arcade Game Square Icon Button (PostHog Yellow-Orange) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Link href="/">
+          <Button
+            size="icon"
+            className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-[0_3.5px_0_0_#b45309] active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
+            title="Play SaveDino Arcade Game"
+          >
+            <Gamepad2 className="size-6 text-[#0f172a]" />
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

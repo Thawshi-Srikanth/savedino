@@ -1,10 +1,10 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 // -------------------------------------------------------------
@@ -47,89 +47,95 @@ model Session {
 }
 
 model Account {
-  id           String    @id @default(cuid())
-  userId       String
-  accountId    String
-  providerId   String
-  accessToken  String?
-  refreshToken String?
-  idToken      String?
-  expiresAt    DateTime?
-  password     String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  expiresAt             DateTime?
+  issuer                String?
 
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
 
 model Verification {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
 
   @@map("verification")
 }
 
 // -------------------------------------------------------------
-// CAMPAIGNS, TEAMS, AND DISCOVERY MODELS
+// ASTEROID CAMPAIGN & TEAM WORKSPACE MODELS
 // -------------------------------------------------------------
+enum EventStatus {
+  UPCOMING
+  ACTIVE
+  SUBMISSION_OPEN
+  COMPLETED
+}
+
+enum TeamStatus {
+  FORMING
+  ACTIVE
+  SUBMITTED
+  DISQUALIFIED
+}
+
 model Event {
-  id                 String    @id @default(cuid())
-  title              String    // e.g. "IASC Pan-STARRS Campaign Oct 2026"
-  code               String    @unique // e.g. "IASC-2026-OCT"
+  id                 String      @id @default(cuid())
+  title              String
+  code               String      @unique // e.g. "AST-2026-A"
   description        String?
-  
-  // Phase 1: User Registration Period
   regStart           DateTime
   regEnd             DateTime
-  
-  // Phase 2: Team Formation Period
   teamFormationStart DateTime
   teamFormationEnd   DateTime
-  
-  // Phase 3: Campaign & Image Set Analysis Period
   startDate          DateTime
   endDate            DateTime
-  
-  // Phase 4: Report Submission Period
   submissionStart    DateTime
   submissionEnd      DateTime
-
-  status             String    @default("ACTIVE") // "UPCOMING" | "ACTIVE" | "COMPLETED"
-  minTeamMembers     Int       @default(2)
-  maxTeamMembers     Int       @default(6)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  status             EventStatus @default(UPCOMING)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
   teams              Team[]
+  imageSets          ImageSet[]
 
   @@map("event")
 }
 
 model Team {
-  id               String            @id @default(cuid())
+  id               String       @id @default(cuid())
   eventId          String
   name             String
-  inviteCode       String            @unique // 6-character code e.g. "AST-8492"
-  leaderId         String
-  status           String            @default("FORMING") // "FORMING" (<2) | "READY" (2-6) | "FULL" (6)
-  isRecruiting     Boolean           @default(true)      // Open for join requests
-  recruitmentNotes String?           // Seeking notes e.g. "Need 2 members with FITS experience"
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  inviteCode       String       @unique // Short 6-char shareable code e.g. "AST-X9Y"
+  status           TeamStatus   @default(FORMING)
+  isRecruiting     Boolean      @default(true) // Open for solo student matching
+  recruitmentNotes String?
+  leaderId         String // User ID of Team Creator / Leader
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
-  event            Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event            Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   members          TeamMember[]
   imageSets        ImageSet[]
-  candidates       Candidate[]
   joinRequests     TeamJoinRequest[]
 
-  @@unique([eventId, name])
   @@map("team")
 }
 
@@ -137,8 +143,8 @@ model TeamMember {
   id        String   @id @default(cuid())
   teamId    String
   userId    String
-  role      String   @default("MEMBER") // "LEADER" | "MEMBER"
-  joinedAt  DateTime @default(now())
+  role      String   @default("member") // "leader" | "member"
+  createdAt DateTime @default(now())
 
   team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -151,50 +157,33 @@ model TeamJoinRequest {
   id        String   @id @default(cuid())
   teamId    String
   userId    String
-  message   String?  // Optional intro/pitch
+  message   String?
   status    String   @default("PENDING") // "PENDING" | "ACCEPTED" | "REJECTED"
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([teamId, userId])
   @@map("team_join_request")
 }
 
 model ImageSet {
-  id              String       @id @default(cuid())
-  teamId          String
-  setCode         String       // e.g. "PS1-26A-01"
-  claimedByUserId String?
-  status          String       @default("PENDING") // "PENDING" | "CLAIMED" | "CLEAN" | "REPORTED"
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  team            Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  claimedByUser   User?        @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
-  candidates      Candidate[]
-
-  @@unique([teamId, setCode])
-  @@map("image_set")
-}
-
-model Candidate {
   id            String    @id @default(cuid())
-  teamId        String
-  imageSetId    String
-  candidateCode String    // e.g. "P10AbCd"
-  ra            String    // "21 14 32.18"
-  dec           String    // "+14 22 18.4"
-  magnitude     Float     // 21.4
-  observedAt    DateTime
-  status        String    @default("SUBMITTED") // "SUBMITTED" | "PRELIMINARY" | "PROVISIONAL"
-  rawMpcLine    String
+  eventId       String
+  teamId        String?
+  claimedById   String?
+  name          String // e.g. "SET-0492"
+  fitsUrl       String? // Link to FITS image archive
+  status        String    @default("UNASSIGNED") // "UNASSIGNED" | "IN_PROGRESS" | "SUBMITTED"
+  mpcReportText String? // MPC 80-column discovery format text
+  isClean       Boolean   @default(false) // True if team verified no asteroids found
+  submittedAt   DateTime?
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  team          Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  imageSet      ImageSet  @relation(fields: [imageSetId], references: [id], onDelete: Cascade)
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  team          Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  claimedBy     User?     @relation(fields: [claimedById], references: [id], onDelete: SetNull)
 
-  @@map("candidate")
+  @@map("image_set")
 }

@@ -7,6 +7,26 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          // Automatic First Account Admin Provisioning:
+          // If no accounts exist in the database, automatically assign admin role to the first user.
+          const userCount = await prisma.user.count();
+          if (userCount === 0) {
+            return {
+              data: {
+                ...user,
+                role: "admin",
+              },
+            };
+          }
+          return { data: user };
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
