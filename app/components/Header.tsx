@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </Link>
 
-          <Link href="/campaigns">
+          <Link href="/campaigns" className="hidden sm:inline-flex">
             <Button size="sm" variant="default" className="text-[10px] sm:text-xs font-bold flex items-center gap-1.5 px-2.5 sm:px-3.5">
               <Telescope className="size-3.5" />
               <span>PLATFORM &gt;</span>
