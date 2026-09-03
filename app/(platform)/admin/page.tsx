@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/8bit/card";
-import { Button } from "@/components/ui/8bit/button";
-import { Badge } from "@/components/ui/8bit/badge";
-import { Input, Textarea } from "@/components/ui/8bit/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/8bit/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/8bit/dialog";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/8bit/table";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 
 interface EventData {
   id: string;
@@ -219,11 +220,11 @@ export default function AdminDashboardPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>STUDENT NAME</TableHead>
-                    <TableHead>EMAIL</TableHead>
-                    <TableHead>COUNTRY / INSTITUTION</TableHead>
-                    <TableHead>STATUS</TableHead>
-                    <TableHead className="text-right">ACTION</TableHead>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Country / Institution</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -231,16 +232,16 @@ export default function AdminDashboardPage() {
                     const isSolo = u.teamMembers.length === 0;
                     return (
                       <TableRow key={u.id}>
-                        <TableCell className="font-bold">{u.name}</TableCell>
-                        <TableCell className="text-gray-500">{u.email}</TableCell>
+                        <TableCell className="font-semibold">{u.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{u.email}</TableCell>
                         <TableCell>
                           {u.country || "Global"} {u.institution ? `(${u.institution})` : ""}
                         </TableCell>
                         <TableCell>
                           {isSolo ? (
-                            <Badge variant="amber">Looking for Team</Badge>
+                            <Badge variant="secondary">Looking for Team</Badge>
                           ) : (
-                            <Badge variant="emerald">In {u.teamMembers[0]?.team.name}</Badge>
+                            <Badge variant="default">In {u.teamMembers[0]?.team.name}</Badge>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
@@ -278,19 +279,19 @@ export default function AdminDashboardPage() {
                 {teams.map((t) => (
                   <div
                     key={t.id}
-                    className="p-4 border-2 border-[#535353] dark:border-[#80868b] bg-gray-50 dark:bg-[#202124] flex flex-col justify-between"
+                    className="p-4 border border-border rounded-md bg-card flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-[10px] font-pixel mb-1.5">
-                        <span className="text-[#0284c7] dark:text-[#38bdf8]">{t.event.code}</span>
-                        <Badge variant={t.members.length < 2 ? "amber" : "emerald"}>
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="font-semibold text-primary">{t.event.code}</span>
+                        <Badge variant={t.members.length < 2 ? "secondary" : "default"}>
                           {t.members.length < 2 ? "NEEDS 2" : `${t.members.length}/6 READY`}
                         </Badge>
                       </div>
-                      <h3 className="font-bold text-sm font-pixel uppercase mb-1">{t.name}</h3>
-                      <div className="text-xs font-mono text-gray-400 mb-3">Invite Code: {t.inviteCode}</div>
+                      <h3 className="font-bold text-sm mb-1">{t.name}</h3>
+                      <div className="text-xs text-muted-foreground mb-3">Invite Code: {t.inviteCode}</div>
 
-                      <div className="text-[11px] font-mono mb-4 space-y-1">
+                      <div className="text-xs text-muted-foreground mb-4 space-y-1">
                         <div>Roster: {t.members.map((m) => m.user.name).join(", ")}</div>
                       </div>
                     </div>
@@ -315,7 +316,7 @@ export default function AdminDashboardPage() {
                 <CardTitle>Campaign Events Management</CardTitle>
                 <CardDescription>Create and publish multi-phase asteroid search events.</CardDescription>
               </div>
-              <Button variant="primary" size="sm" onClick={() => setShowEventModal(true)}>
+              <Button variant="default" size="sm" onClick={() => setShowEventModal(true)}>
                 + Create New Event
               </Button>
             </CardHeader>
@@ -323,19 +324,19 @@ export default function AdminDashboardPage() {
               {events.map((ev) => (
                 <div
                   key={ev.id}
-                  className="p-4 border-2 border-[#535353] dark:border-[#80868b] bg-gray-50 dark:bg-[#202124] flex items-center justify-between"
+                  className="p-4 border border-border rounded-md bg-card flex items-center justify-between"
                 >
                   <div>
-                    <div className="text-[10px] font-pixel text-[#0284c7] dark:text-[#38bdf8] uppercase">
+                    <div className="text-xs font-semibold text-primary uppercase">
                       {ev.code}
                     </div>
-                    <div className="font-bold text-sm font-pixel uppercase mt-0.5">{ev.title}</div>
-                    <div className="text-xs font-mono text-gray-400 mt-1">
+                    <div className="font-bold text-sm mt-0.5">{ev.title}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
                       {new Date(ev.startDate).toLocaleDateString()} to {new Date(ev.endDate).toLocaleDateString()}
                     </div>
                   </div>
 
-                  <Badge variant={ev.status === "ACTIVE" ? "emerald" : "outline"}>{ev.status}</Badge>
+                  <Badge variant={ev.status === "ACTIVE" ? "default" : "outline"}>{ev.status}</Badge>
                 </div>
               ))}
             </CardContent>
@@ -354,26 +355,26 @@ export default function AdminDashboardPage() {
           </DialogHeader>
 
           {assignError && (
-            <div className="p-2 border border-red-500 bg-red-50 text-red-700 text-xs font-mono mb-3">
+            <div className="p-2 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
               ! {assignError}
             </div>
           )}
           {assignSuccess && (
-            <div className="p-2 border border-emerald-500 bg-emerald-50 text-emerald-700 text-xs font-mono mb-3">
+            <div className="p-2 border border-emerald-500 bg-emerald-500/10 text-emerald-600 text-xs mb-3">
               ✓ {assignSuccess}
             </div>
           )}
 
           <form onSubmit={handleAssignStudent} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-pixel uppercase mb-1.5">
+              <label className="block text-xs font-medium mb-1.5">
                 Select Target Team (&lt; 6 members):
               </label>
               <select
                 required
                 value={selectedTeamId}
                 onChange={(e) => setSelectedTeamId(e.target.value)}
-                className="w-full p-2 text-xs font-mono bg-white dark:bg-[#202124] border-2 border-[#535353] dark:border-[#80868b]"
+                className="w-full p-2 text-xs bg-card border border-border rounded-md"
               >
                 <option value="">-- Choose Target Team --</option>
                 {teams
@@ -390,8 +391,8 @@ export default function AdminDashboardPage() {
               <Button type="button" variant="ghost" onClick={() => setAssigningUser(null)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" disabled={!selectedTeamId}>
-                Confirm Assignment &gt;
+              <Button type="submit" variant="default" disabled={!selectedTeamId}>
+                Confirm Assignment
               </Button>
             </DialogFooter>
           </form>
@@ -407,14 +408,14 @@ export default function AdminDashboardPage() {
           </DialogHeader>
 
           {eventError && (
-            <div className="p-2 border border-red-500 bg-red-50 text-red-700 text-xs font-mono mb-3">
+            <div className="p-2 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
               ! {eventError}
             </div>
           )}
 
           <form onSubmit={handleCreateEvent} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-pixel uppercase mb-1">Campaign Title</label>
+              <label className="block text-xs font-medium mb-1">Campaign Title</label>
               <Input
                 type="text"
                 required
@@ -425,7 +426,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-pixel uppercase mb-1">Campaign Code</label>
+              <label className="block text-xs font-medium mb-1">Campaign Code</label>
               <Input
                 type="text"
                 required
@@ -435,8 +436,8 @@ export default function AdminDashboardPage() {
               />
             </div>
 
-            <div className="space-y-3 p-3 border border-dashed border-[#535353]/40 dark:border-[#80868b]/40">
-              <span className="block text-[10px] font-pixel text-[#0284c7] dark:text-[#38bdf8] uppercase">
+            <div className="space-y-3 p-3 border border-border rounded-md bg-accent/20">
+              <span className="block text-xs font-semibold text-primary uppercase">
                 1. User Registration Phase
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -454,7 +455,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <span className="block text-[10px] font-pixel text-[#0284c7] dark:text-[#38bdf8] uppercase pt-1">
+              <span className="block text-xs font-semibold text-primary uppercase pt-1">
                 2. Team Formation Phase
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -472,7 +473,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <span className="block text-[10px] font-pixel text-[#0284c7] dark:text-[#38bdf8] uppercase pt-1">
+              <span className="block text-xs font-semibold text-primary uppercase pt-1">
                 3. Campaign Observation Phase
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -490,7 +491,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <span className="block text-[10px] font-pixel text-[#0284c7] dark:text-[#38bdf8] uppercase pt-1">
+              <span className="block text-xs font-semibold text-primary uppercase pt-1">
                 4. Report Submission Phase
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -510,7 +511,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-pixel uppercase mb-1">Description</label>
+              <label className="block text-xs font-medium mb-1">Description</label>
               <Textarea
                 rows={3}
                 value={newDesc}
@@ -523,7 +524,7 @@ export default function AdminDashboardPage() {
               <Button type="button" variant="ghost" onClick={() => setShowEventModal(false)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="default">
                 Publish Campaign &gt;
               </Button>
             </DialogFooter>

@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { RetroModeSwitcher } from "@/components/ui/retro-mode-switcher";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -26,9 +25,8 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/8bit/button";
-import { Telescope, Users, ShieldAlert, Gamepad2, LogOut, User } from "lucide-react";
-import "@/components/ui/8bit/styles/retro.css";
+import { Button } from "@/components/ui/button";
+import { Telescope, Users, ShieldAlert, Gamepad2, LogOut, User, Sparkles } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -63,19 +61,19 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-[100dvh] w-full bg-[#f4f4f4] dark:bg-[#202124] text-[#535353] dark:text-[#e8eaed] transition-colors duration-700 font-sans select-none">
-        {/* 8bitcn Retro Sidebar */}
-        <Sidebar className="retro border-r-3 border-[#535353] dark:border-[#80868b] bg-white dark:bg-[#2b2c2f]">
-          <SidebarHeader className="p-4 border-b-2 border-[#535353]/20 dark:border-[#80868b]/20">
-            <Link href="/" className="flex items-center gap-2 font-pixel text-xs font-bold uppercase tracking-wider text-[#0284c7] dark:text-[#38bdf8]">
-              <span className="w-3 h-3 bg-[#0284c7] inline-block"></span>
+      <div className="flex min-h-[100dvh] w-full bg-background text-foreground font-sans">
+        {/* Modern Traditional shadcn Sidebar */}
+        <Sidebar className="border-r border-border bg-card">
+          <SidebarHeader className="p-4 border-b border-border">
+            <Link href="/" className="flex items-center gap-2 font-semibold text-sm text-primary tracking-tight">
+              <Sparkles className="size-4 text-primary" />
               <span>SAVE DINO HQ</span>
             </Link>
           </SidebarHeader>
 
-          <SidebarContent className="p-2 space-y-4">
+          <SidebarContent className="p-3 space-y-4">
             <SidebarGroup>
-              <SidebarGroupLabel className="text-[9px] font-pixel text-gray-400 uppercase tracking-widest px-2 mb-2">
+              <SidebarGroupLabel className="text-xs text-muted-foreground font-medium px-2 mb-2">
                 IASC Operations
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -85,10 +83,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                       <SidebarMenuButton
                         asChild
                         isActive={item.active}
-                        className={`font-pixel text-[11px] uppercase tracking-wider p-2.5 rounded-none border-2 ${
+                        className={`text-xs font-medium p-2.5 rounded-md transition-colors ${
                           item.active
-                            ? "bg-[#535353] text-white dark:bg-[#38bdf8] dark:text-[#202124] border-[#202124] dark:border-[#80868b] shadow-[2px_2px_0px_#000]"
-                            : "border-transparent hover:bg-gray-100 dark:hover:bg-[#3c4043]"
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
                         }`}
                       >
                         <Link href={item.url} className="flex items-center gap-2.5">
@@ -103,15 +101,15 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </SidebarGroup>
 
             <SidebarGroup>
-              <SidebarGroupLabel className="text-[9px] font-pixel text-gray-400 uppercase tracking-widest px-2 mb-2">
-                Arcade Switch
+              <SidebarGroupLabel className="text-xs text-muted-foreground font-medium px-2 mb-2">
+                Arcade
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className="font-pixel text-[11px] uppercase tracking-wider p-2.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                      className="text-xs font-medium p-2.5 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-md"
                     >
                       <Link href="/" className="flex items-center gap-2.5">
                         <Gamepad2 className="size-4" />
@@ -128,22 +126,22 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar Header */}
-          <header className="h-14 border-b-2 border-[#535353] dark:border-[#80868b] bg-white dark:bg-[#2b2c2f] px-4 flex items-center justify-between shadow-xs">
+          <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <SidebarTrigger className="p-1 text-[#535353] dark:text-[#e8eaed] hover:bg-gray-100 dark:hover:bg-zinc-800 rounded" />
-              <div className="h-4 w-px bg-[#535353]/30 dark:bg-[#80868b]/30"></div>
+              <SidebarTrigger className="p-1.5 text-muted-foreground hover:text-foreground rounded-md" />
+              <div className="h-4 w-px bg-border"></div>
 
-              {/* 8bitcn Breadcrumb */}
-              <Breadcrumb className="font-pixel text-[10px] uppercase">
+              {/* Traditional shadcn Breadcrumb */}
+              <Breadcrumb className="text-xs">
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-gray-400 hover:text-current">
+                    <BreadcrumbLink href="/" className="text-muted-foreground hover:text-foreground">
                       Dino HQ
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-gray-400">&gt;</BreadcrumbSeparator>
+                  <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage className="font-bold text-[#0284c7] dark:text-[#38bdf8]">
+                    <BreadcrumbPage className="font-semibold text-foreground">
                       {getBreadcrumbName()}
                     </BreadcrumbPage>
                   </BreadcrumbItem>
@@ -151,22 +149,19 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               </Breadcrumb>
             </div>
 
-            {/* Controls & Session Info */}
+            {/* Session Info & Controls */}
             <div className="flex items-center gap-3">
-              {/* 8bitcn Retro Mode Switcher */}
-              <RetroModeSwitcher />
-
               {session?.user ? (
-                <div className="flex items-center gap-2.5 text-xs font-mono">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 border border-[#535353] dark:border-[#80868b] rounded-full bg-gray-50 dark:bg-[#202124]">
-                    <User className="size-3.5 text-[#0284c7] dark:text-[#38bdf8]" />
-                    <span className="font-bold text-[11px]">{session.user.name}</span>
+                <div className="flex items-center gap-2.5 text-xs">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full bg-accent/50">
+                    <User className="size-3.5 text-primary" />
+                    <span className="font-medium text-xs">{session.user.name}</span>
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                    className="p-1 hover:text-red-500"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
                     title="Sign Out"
                   >
                     <LogOut className="size-4" />
@@ -178,7 +173,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                     <Button size="sm" variant="outline">Sign In</Button>
                   </Link>
                   <Link href="/register">
-                    <Button size="sm" variant="primary">Register</Button>
+                    <Button size="sm" variant="default">Register</Button>
                   </Link>
                 </div>
               )}
@@ -186,7 +181,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           </header>
 
           {/* Page Body */}
-          <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+          <main className="flex-1 p-4 sm:p-8 overflow-y-auto bg-background/50">
             {children}
           </main>
         </div>

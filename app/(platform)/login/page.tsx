@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/8bit/card";
-import { Button } from "@/components/ui/8bit/button";
-import { Input } from "@/components/ui/8bit/input";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,14 +47,14 @@ export default function LoginPage() {
         </CardHeader>
 
         {errorMsg && (
-          <div className="mb-4 p-2.5 border border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 text-xs font-mono">
+          <div className="mb-4 p-2.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-xs font-medium">
             ! {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[11px] font-pixel uppercase mb-1">Email Address</label>
+            <label className="block text-xs font-medium mb-1">Email Address</label>
             <Input
               type="email"
               required
@@ -65,7 +65,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-[11px] font-pixel uppercase mb-1">Password</label>
+            <label className="block text-xs font-medium mb-1">Password</label>
             <Input
               type="password"
               required
@@ -75,13 +75,13 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button type="submit" variant="primary" className="w-full mt-2" disabled={loading}>
-            {loading ? "AUTHENTICATING..." : "SIGN IN >"}
+          <Button type="submit" variant="default" className="w-full mt-2" disabled={loading}>
+            {loading ? "Authenticating..." : "Sign In"}
           </Button>
 
-          <div className="pt-4 text-center border-t border-[#535353]/20 dark:border-[#80868b]/20 text-xs font-mono">
+          <div className="pt-4 text-center border-t border-border text-xs text-muted-foreground">
             New Cadet?{" "}
-            <Link href="/register" className="text-[#0284c7] dark:text-[#38bdf8] hover:underline font-bold">
+            <Link href="/register" className="text-primary hover:underline font-semibold">
               Register Student Account
             </Link>
           </div>
