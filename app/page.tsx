@@ -100,7 +100,7 @@ export default function Home() {
 
   return (
     <main
-      className={`min-h-[100dvh] flex flex-col items-center justify-between pb-3 sm:pb-12 px-2.5 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
+      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pb-2 sm:pb-4 px-2.5 sm:px-6 select-none overscroll-none transition-colors duration-700 ease-in-out ${
         nightActive ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
@@ -118,57 +118,28 @@ export default function Home() {
       />
 
       {/* Main Game Stage */}
-      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 sm:py-2">
+      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1">
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
           onNightModeChange={setIsNight}
           nightModeOverride={devNightOverride}
         />
 
-        {/* PostHog Highlight Styled Section */}
-        <div className="w-full mt-3 sm:mt-8 text-left select-text transition-colors duration-700">
-          <h2
-            className={`text-base sm:text-lg font-pixel font-bold tracking-wide uppercase transition-colors duration-700 ${
-              nightActive ? "text-[#f3f4f6]" : "text-[#0f172a]"
-            }`}
-          >
-            IASC Asteroid Search Campaign
-          </h2>
-
-          <p
-            className={`text-xs font-mono mt-3 mb-3 transition-colors duration-700 ${
-              nightActive ? "text-slate-400" : "text-slate-600"
-            }`}
-          >
-            Join <span className="posthog-violet-highlight font-bold">500,000+ teams</span> discovering new main-belt asteroids with NASA & IASC.
-          </p>
-
-          <ul
-            className={`font-mono space-y-2 text-xs sm:text-[13px] pl-1 leading-relaxed transition-colors duration-700 ${
-              nightActive ? "text-slate-300" : "text-slate-700"
-            }`}
-          >
-            <li className="flex items-center gap-2">
-              <span className="text-[#10b981] font-bold">✓</span>
-              <span>Real astronomical FITS image processing</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-[#10b981] font-bold">✓</span>
-              <span>Submit preliminary discovery reports to MPC</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-[#10b981] font-bold">✓</span>
-              <span>Collaborate with global university & school teams</span>
-            </li>
-          </ul>
-
-          <div className="mt-5 flex items-center gap-3">
+        {/* Compact, Non-Distracting PostHog Info Strip */}
+        <div className="w-full mt-2 sm:mt-4 p-3 rounded-lg border border-border bg-card text-left transition-colors duration-700 space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-[10px] sm:text-xs font-pixel font-bold tracking-wider uppercase text-foreground">
+              IASC Asteroid Search
+            </h2>
             <Link href="/campaigns">
-              <Button size="default" variant="default" className="text-xs font-bold">
-                <span>Explore Campaigns &gt;</span>
+              <Button size="sm" variant="default" className="text-[10px] h-7 px-3 font-bold">
+                <span>Campaigns &gt;</span>
               </Button>
             </Link>
           </div>
+          <p className="text-[11px] font-mono text-muted-foreground leading-tight">
+            Discover main-belt asteroids with NASA & IASC astronomical FITS image processing.
+          </p>
         </div>
       </div>
 
