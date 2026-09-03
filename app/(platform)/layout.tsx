@@ -68,24 +68,24 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-[#f4f4f4] dark:bg-[#121212] text-[#535353] dark:text-[#e8eaed] font-sans transition-colors duration-700">
-      {/* Top Navbar Matching Homepage Style Exactly */}
-      <header className="sticky top-0 z-40 w-full border-b border-[#535353]/20 dark:border-[#80868b]/30 bg-[#f4f4f4]/95 dark:bg-[#121212]/95 backdrop-blur-md transition-colors duration-700">
+    <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700">
+      {/* Top Navbar with Rich Arcade Palette */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur-md transition-colors duration-700 shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo & Branding - Matching Homepage Header */}
+          {/* Logo & Branding */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 group cursor-pointer">
               <svg
-                className="w-4 h-4 fill-current text-[#535353] dark:text-[#e8eaed] transition-transform group-hover:scale-110"
+                className="w-4 h-4 fill-current text-primary transition-transform group-hover:scale-110"
                 viewBox="0 0 24 24"
               >
                 <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
               </svg>
-              <span className="font-sans font-bold text-xs tracking-wider uppercase text-[#535353] dark:text-[#e8eaed]">
+              <span className="font-sans font-bold text-xs tracking-wider uppercase text-foreground">
                 SAVE DINO
               </span>
-              <span className="hidden sm:inline-block text-[10px] uppercase tracking-wide px-2 py-0.5 border border-[#535353]/60 dark:border-[#80868b] rounded-full font-mono text-[#535353] dark:text-[#e8eaed]">
+              <span className="hidden sm:inline-block text-[10px] uppercase tracking-wide px-2 py-0.5 border border-border rounded-full font-mono text-muted-foreground">
                 IASC PORTAL
               </span>
             </Link>
@@ -98,8 +98,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   href={item.url}
                   className={`text-[10px] uppercase tracking-wide px-3 py-1 border rounded-full font-mono transition-all cursor-pointer ${
                     item.active
-                      ? "bg-[#0284c7] text-white border-[#0284c7] font-bold shadow-xs"
-                      : "border-[#535353]/40 dark:border-[#80868b]/60 text-[#535353] dark:text-[#e8eaed] hover:bg-[#0284c7] hover:text-white hover:border-[#0284c7]"
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                      : "border-border text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
                   }`}
                 >
                   {item.title}
@@ -110,16 +110,16 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
           {/* Desktop Right Controls: Play Dino Game, Lucide Sun/Moon Theme Switcher & User Session */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Lucide Sun/Moon Theme Switcher Button */}
+            {/* Theme Switcher Button */}
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 text-[#535353] dark:text-[#e8eaed]"
+              className="w-8 h-8 rounded-full border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
               title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
                 <Sun className="size-4 text-amber-400" />
               ) : (
-                <Moon className="size-4 text-slate-700 dark:text-slate-200" />
+                <Moon className="size-4 text-primary" />
               )}
             </button>
 
@@ -132,8 +132,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1 border border-[#535353]/30 dark:border-[#80868b]/30 rounded-full text-xs font-mono">
-                  <User className="size-3 text-[#535353] dark:text-[#e8eaed]" />
+                <div className="flex items-center gap-1.5 px-3 py-1 border border-border rounded-full text-xs font-mono bg-accent/40">
+                  <User className="size-3 text-primary" />
                   <span className="font-semibold">{session.user.name}</span>
                 </div>
                 <Button
@@ -152,7 +152,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <Button size="sm" variant="outline" className="h-8 text-xs font-mono">Sign In</Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" variant="default" className="h-8 text-xs font-mono bg-[#0284c7] hover:bg-[#0284c7]/90 text-white">Register</Button>
+                  <Button size="sm" variant="default" className="h-8 text-xs font-mono bg-primary text-primary-foreground hover:bg-primary/90">Register</Button>
                 </Link>
               </div>
             )}
@@ -162,13 +162,13 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-[#535353] dark:text-[#e8eaed]"
+              className="w-8 h-8 rounded-full border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
               title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
                 <Sun className="size-4 text-amber-400" />
               ) : (
-                <Moon className="size-4 text-slate-700 dark:text-slate-200" />
+                <Moon className="size-4 text-primary" />
               )}
             </button>
 
@@ -179,11 +179,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-[#f4f4f4] dark:bg-[#121212]">
+              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
                 <div>
-                  <SheetHeader className="p-4 border-b border-[#535353]/20 dark:border-[#80868b]/30 text-left">
-                    <SheetTitle className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-[#535353] dark:text-[#e8eaed]">
-                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <SheetHeader className="p-4 border-b border-border text-left">
+                    <SheetTitle className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-foreground">
+                      <svg className="w-4 h-4 fill-current text-primary" viewBox="0 0 24 24">
                         <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
                       </svg>
                       <span>SAVE DINO</span>
@@ -202,8 +202,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                           onClick={() => setMobileOpen(false)}
                           className={`block text-[11px] uppercase tracking-wide px-3 py-2 border rounded-full font-mono transition-all ${
                             item.active
-                              ? "bg-[#0284c7] text-white border-[#0284c7] font-bold"
-                              : "border-[#535353]/30 text-[#535353] dark:text-[#e8eaed]"
+                              ? "bg-primary text-primary-foreground border-primary font-bold"
+                              : "border-border text-foreground hover:bg-accent"
                           }`}
                         >
                           {item.title}
@@ -213,7 +213,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   </div>
                 </div>
 
-                <div className="p-4 border-t border-[#535353]/20 dark:border-[#80868b]/30 space-y-3 font-mono">
+                <div className="p-4 border-t border-border space-y-3 font-mono">
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
@@ -241,7 +241,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                         <Button variant="outline" size="sm" className="w-full text-xs font-mono">Sign In</Button>
                       </Link>
                       <Link href="/register" onClick={() => setMobileOpen(false)}>
-                        <Button size="sm" className="w-full text-xs font-mono bg-[#0284c7] text-white">Register</Button>
+                        <Button size="sm" className="w-full text-xs font-mono bg-primary text-primary-foreground">Register</Button>
                       </Link>
                     </div>
                   )}

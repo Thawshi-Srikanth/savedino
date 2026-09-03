@@ -9,7 +9,6 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-[#f4f4f4]: var(--background);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -49,67 +48,69 @@
   --sidebar-width-icon: 3rem;
   --radius: 0.5rem;
 
-  /* Seamless Light Mode (Soft #f4f4f4 background, #f7f7f8 cards, subtle borders) */
-  --background: oklch(0.965 0 0);
-  --foreground: oklch(0.35 0 0);
-  --card: oklch(0.972 0 0);
-  --card-foreground: oklch(0.35 0 0);
-  --popover: oklch(0.972 0 0);
-  --popover-foreground: oklch(0.35 0 0);
-  --primary: oklch(0.48 0.16 240);
+  /* --- LIGHT ARCADE THEME (Warm Game Boy Cream & CRT Slate Accent) --- */
+  --background: oklch(0.95 0.015 110);    /* #eeefea - Warm retro Game Boy canvas */
+  --foreground: oklch(0.28 0.03 140);     /* #202b23 - Deep Arcade green-black text */
+  --card: oklch(0.92 0.02 110);           /* #e1e4da - Elevated arcade cabinet card */
+  --card-foreground: oklch(0.28 0.03 140);
+  --popover: oklch(0.92 0.02 110);
+  --popover-foreground: oklch(0.28 0.03 140);
+  
+  --primary: oklch(0.55 0.18 190);        /* Arcade Cyan-Blue #0284c7 */
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.94 0 0);
-  --secondary-foreground: oklch(0.30 0 0);
-  --muted: oklch(0.94 0 0);
-  --muted-foreground: oklch(0.52 0 0);
-  --accent: oklch(0.94 0 0);
-  --accent-foreground: oklch(0.30 0 0);
+  --secondary: oklch(0.88 0.03 110);
+  --secondary-foreground: oklch(0.25 0.03 140);
+  --muted: oklch(0.88 0.02 110);
+  --muted-foreground: oklch(0.45 0.04 140);
+  --accent: oklch(0.88 0.03 110);
+  --accent-foreground: oklch(0.25 0.03 140);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.90 0 0);
-  --input: oklch(0.90 0 0);
-  --ring: oklch(0.60 0.16 240);
+  --border: oklch(0.82 0.03 110);         /* Crisp arcade card border */
+  --input: oklch(0.82 0.03 110);
+  --ring: oklch(0.55 0.18 190);
 
-  --sidebar: oklch(0.965 0 0);
-  --sidebar-foreground: oklch(0.35 0 0);
-  --sidebar-primary: oklch(0.48 0.16 240);
+  --sidebar: oklch(0.95 0.015 110);
+  --sidebar-foreground: oklch(0.28 0.03 140);
+  --sidebar-primary: oklch(0.55 0.18 190);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0 0);
-  --sidebar-accent-foreground: oklch(0.30 0 0);
-  --sidebar-border: oklch(0.90 0 0);
-  --sidebar-ring: oklch(0.60 0.16 240);
+  --sidebar-accent: oklch(0.88 0.03 110);
+  --sidebar-accent-foreground: oklch(0.25 0.03 140);
+  --sidebar-border: oklch(0.82 0.03 110);
+  --sidebar-ring: oklch(0.55 0.18 190);
 }
 
 .dark, .night-mode {
-  /* Smooth Dark Mode */
-  --background: oklch(0.18 0 0);
-  --foreground: oklch(0.92 0 0);
-  --card: oklch(0.22 0 0);
-  --card-foreground: oklch(0.92 0 0);
-  --popover: oklch(0.22 0 0);
-  --popover-foreground: oklch(0.92 0 0);
-  --primary: oklch(0.65 0.18 240);
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.26 0 0);
-  --secondary-foreground: oklch(0.92 0 0);
-  --muted: oklch(0.26 0 0);
-  --muted-foreground: oklch(0.70 0 0);
-  --accent: oklch(0.26 0 0);
-  --accent-foreground: oklch(0.92 0 0);
-  --destructive: oklch(0.45 0.18 25);
-  --destructive-foreground: oklch(0.95 0 0);
-  --border: oklch(0.28 0 0);
-  --input: oklch(0.28 0 0);
-  --ring: oklch(0.65 0.18 240);
+  /* --- DARK CYBER ARCADE THEME (Deep Synthwave Blue & Electric Neon Accents) --- */
+  --background: oklch(0.14 0.03 260);    /* #0c0f1d - Deep Synthwave Cyber Navy */
+  --foreground: oklch(0.94 0.02 200);     /* #e1f5fe - Electric Cool White text */
+  --card: oklch(0.19 0.04 260);           /* #141829 - Neon Arcade Cabinet Card */
+  --card-foreground: oklch(0.94 0.02 200);
+  --popover: oklch(0.19 0.04 260);
+  --popover-foreground: oklch(0.94 0.02 200);
+  
+  --primary: oklch(0.78 0.18 190);        /* Electric Neon Cyan #00f5d4 */
+  --primary-foreground: oklch(0.10 0.03 260);
+  --secondary: oklch(0.25 0.05 260);
+  --secondary-foreground: oklch(0.94 0.02 200);
+  --muted: oklch(0.25 0.05 260);
+  --muted-foreground: oklch(0.72 0.05 230);
+  --accent: oklch(0.25 0.05 260);
+  --accent-foreground: oklch(0.94 0.02 200);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.28 0.06 260);         /* Subtle Cyber Glowing Border */
+  --input: oklch(0.28 0.06 260);
+  --ring: oklch(0.78 0.18 190);
 
-  --sidebar: oklch(0.20 0 0);
-  --sidebar-foreground: oklch(0.92 0 0);
-  --sidebar-primary: oklch(0.65 0.18 240);
-  --sidebar-primary-foreground: oklch(0.12 0 0);
-  --sidebar-accent: oklch(0.26 0 0);
-  --sidebar-accent-foreground: oklch(0.92 0 0);
-  --sidebar-border: oklch(0.28 0 0);
-  --sidebar-ring: oklch(0.65 0.18 240);
+  --sidebar: oklch(0.14 0.03 260);
+  --sidebar-foreground: oklch(0.94 0.02 200);
+  --sidebar-primary: oklch(0.78 0.18 190);
+  --sidebar-primary-foreground: oklch(0.10 0.03 260);
+  --sidebar-accent: oklch(0.25 0.05 260);
+  --sidebar-accent-foreground: oklch(0.94 0.02 200);
+  --sidebar-border: oklch(0.28 0.06 260);
+  --sidebar-ring: oklch(0.78 0.18 190);
 }
 
 @layer base {
