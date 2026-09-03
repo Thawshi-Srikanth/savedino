@@ -35,9 +35,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#f4f4f4] text-[#535353] selection:bg-black selection:text-white">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-[#f4f4f4] text-[#535353] selection:bg-black selection:text-white"
+      >
         {children}
       </body>
     </html>

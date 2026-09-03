@@ -60,13 +60,41 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               [&gt;] Controls
             </h3>
             <div className="grid grid-cols-2 gap-2 mt-2">
-              <div className="rounded-md bg-gray-100 p-2.5 dark:bg-gray-800">
-                <span className="font-pixel text-[9px] block font-bold text-gray-900 dark:text-gray-100">SPACEBAR</span>
-                <span className="text-[11px] text-gray-500 dark:text-gray-400">Laser</span>
+              <div className="rounded-md bg-gray-100 p-2.5 dark:bg-gray-800 flex items-center justify-between">
+                <div>
+                  <span className="font-pixel text-[9px] block font-bold text-gray-900 dark:text-gray-100">SPACEBAR</span>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400">Laser</span>
+                </div>
+                <span
+                  className="inline-block flex-shrink-0"
+                  style={{
+                    width: "32px",
+                    height: "16px",
+                    backgroundImage: "url('/Keyboard-Extras.png')",
+                    backgroundPosition: "-64px -32px",
+                    backgroundRepeat: "no-repeat",
+                    imageRendering: "pixelated",
+                  }}
+                  title="SPACEBAR"
+                />
               </div>
-              <div className="rounded-md bg-gray-100 p-2.5 dark:bg-gray-800">
-                <span className="font-pixel text-[9px] block font-bold text-gray-900 dark:text-gray-100">UP ARROW / W</span>
-                <span className="text-[11px] text-gray-500 dark:text-gray-400">Jump / Mid-air Shot</span>
+              <div className="rounded-md bg-gray-100 p-2.5 dark:bg-gray-800 flex items-center justify-between">
+                <div>
+                  <span className="font-pixel text-[9px] block font-bold text-gray-900 dark:text-gray-100">UP ARROW</span>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400">Jump / Mid-air</span>
+                </div>
+                <span
+                  className="inline-block flex-shrink-0"
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    backgroundImage: "url('/Keyboard-Letter.png')",
+                    backgroundPosition: "0px 0px",
+                    backgroundRepeat: "no-repeat",
+                    imageRendering: "pixelated",
+                  }}
+                  title="UP ARROW"
+                />
               </div>
               <div className="rounded-md bg-gray-100 p-2.5 dark:bg-gray-800 col-span-2">
                 <span className="font-pixel text-[9px] block font-bold text-gray-900 dark:text-gray-100">TOUCH CONTROLS</span>
