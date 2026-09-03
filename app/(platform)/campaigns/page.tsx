@@ -127,7 +127,7 @@ export default function CampaignsPage() {
         router.push(`/team/${data.teamId}`);
       }
     } catch (err: any) {
-      setJoinError(err.message || "An unexpected error occurred.");
+      setJoinError(err.message || "An error occurred.");
     } finally {
       setJoinLoading(false);
     }
@@ -160,7 +160,7 @@ export default function CampaignsPage() {
         router.push(`/team/${data.team.id}`);
       }
     } catch (err: any) {
-      setCreateError(err.message || "An unexpected error occurred.");
+      setCreateError(err.message || "An error occurred.");
     } finally {
       setCreateLoading(false);
     }
@@ -185,9 +185,9 @@ export default function CampaignsPage() {
       const data = await res.json();
 
       if (!data.success) {
-        setRequestFeedback(`! ${data.error}`);
+        setRequestFeedback(data.error || "Failed to send request.");
       } else {
-        setRequestFeedback("✓ Join request submitted to squad leader!");
+        setRequestFeedback("Join request sent successfully.");
         setTimeout(() => {
           setRequestTeam(null);
           setRequestMsg("");
@@ -195,7 +195,7 @@ export default function CampaignsPage() {
         }, 1500);
       }
     } catch (err: any) {
-      setRequestFeedback(`! ${err.message}`);
+      setRequestFeedback(err.message || "An error occurred.");
     } finally {
       setRequestLoading(false);
     }
@@ -203,23 +203,19 @@ export default function CampaignsPage() {
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Campaign Banner Card */}
+      {/* Overview Card */}
       <Card className="p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="default">IASC OBSERVATION PORTAL</Badge>
-              <Badge variant="outline">2026 CAMPAIGNS</Badge>
-            </div>
             <h1 className="text-xl font-bold tracking-tight">
-              Asteroid Searching Campaigns
+              Asteroid Search Campaigns
             </h1>
             <p className="text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
-              Official International Astronomical Search Collaboration platform. Form a squad of 2 to 6 members or request to join an active recruiting squad!
+              International Astronomical Search Collaboration platform. Form a team or join an open team to analyze telescope image sets.
             </p>
           </div>
 
-          {/* Quick Join With Code Form */}
+          {/* Join With Code */}
           <form onSubmit={handleJoinTeamByCode} className="w-full md:w-auto flex flex-col gap-2">
             <span className="text-xs font-medium text-muted-foreground">
               Have an invite code?
@@ -241,28 +237,22 @@ export default function CampaignsPage() {
                 {joinLoading ? "..." : "Join"}
               </Button>
             </div>
-            {joinError && <span className="text-xs text-destructive">! {joinError}</span>}
+            {joinError && <span className="text-xs text-destructive">{joinError}</span>}
           </form>
         </div>
       </Card>
 
-      {/* SECTION 1: RECRUITING SQUADS BOARD */}
+      {/* RECRUITING TEAMS */}
       <div className="pt-2 space-y-4">
         <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              SQUAD MATCHMAKING
-            </span>
-            <h2 className="text-base font-bold tracking-tight mt-0.5">
-              Recruiting Squads Seeking Cadets ({recruitingTeams.length})
-            </h2>
-          </div>
-          <Badge variant="secondary">Open for Requests</Badge>
+          <h2 className="text-base font-bold tracking-tight">
+            Teams Looking for Members ({recruitingTeams.length})
+          </h2>
         </div>
 
         {recruitingTeams.length === 0 ? (
           <Card className="p-6 text-center text-sm text-muted-foreground">
-            No squads currently recruiting. Create your own team below!
+            No teams are currently looking for members. You can form your own team below.
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -277,12 +267,12 @@ export default function CampaignsPage() {
                   </div>
 
                   <h3 className="font-bold text-sm mb-1">{team.name}</h3>
-                  <div className="text-xs text-muted-foreground mb-3">
-                    {team.recruitmentNotes || "Seeking active cadets to analyze FITS image sets."}
-                  </div>
+                  <p className="text-xs text-muted-foreground mb-3 leading-normal">
+                    {team.recruitmentNotes || "Looking for active members to analyze FITS image sets."}
+                  </p>
 
                   <div className="text-xs text-muted-foreground mb-4">
-                    Cadets: {team.members.map((m) => m.user.name).join(", ")}
+                    Members: {team.members.map((m) => m.user.name).join(", ")}
                   </div>
                 </div>
 
@@ -300,7 +290,7 @@ export default function CampaignsPage() {
                   size="sm"
                   className="w-full"
                 >
-                  ✉ Request to Join Squad
+                  Request to Join
                 </Button>
               </Card>
             ))}
@@ -308,22 +298,21 @@ export default function CampaignsPage() {
         )}
       </div>
 
-      {/* SECTION 2: ACTIVE CAMPAIGNS */}
+      {/* CAMPAIGNS LIST */}
       <div className="pt-4 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold tracking-tight">
-            Active &amp; Upcoming Campaigns
+            Campaigns
           </h2>
-          <Badge variant="outline">Rule: 1 Event Per Cadet</Badge>
         </div>
 
         {loading ? (
           <div className="py-12 text-center text-sm text-muted-foreground animate-pulse">
-            Loading campaign manifests...
+            Loading campaigns...
           </div>
         ) : events.length === 0 ? (
           <Card className="p-8 text-center text-sm text-muted-foreground">
-            No active campaigns found. Check back soon.
+            No active campaigns found.
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -341,34 +330,34 @@ export default function CampaignsPage() {
 
                   <CardTitle>{ev.title}</CardTitle>
                   <CardDescription>
-                    {ev.description || "International Asteroid Search Collaboration campaign for student teams."}
+                    {ev.description || "International Asteroid Search Collaboration campaign."}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  {/* 4-Phase Schedule Box */}
+                  {/* Schedule */}
                   <div className="text-xs space-y-1.5 p-3 rounded-md border border-border bg-accent/40">
                     <div className="flex justify-between border-b border-border/50 pb-1">
-                      <span className="text-muted-foreground">1. User Reg:</span>
-                      <span>{ev.regStart ? new Date(ev.regStart).toLocaleDateString() : new Date(ev.startDate).toLocaleDateString()} – {ev.regEnd ? new Date(ev.regEnd).toLocaleDateString() : new Date(ev.endDate).toLocaleDateString()}</span>
+                      <span className="text-muted-foreground">Registration:</span>
+                      <span>{ev.regStart ? new Date(ev.regStart).toLocaleDateString() : new Date(ev.startDate).toLocaleDateString()} - {ev.regEnd ? new Date(ev.regEnd).toLocaleDateString() : new Date(ev.endDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between border-b border-border/50 pb-1">
-                      <span className="text-muted-foreground">2. Team Formation:</span>
-                      <span>{ev.teamFormationStart ? new Date(ev.teamFormationStart).toLocaleDateString() : new Date(ev.startDate).toLocaleDateString()} – {ev.teamFormationEnd ? new Date(ev.teamFormationEnd).toLocaleDateString() : new Date(ev.endDate).toLocaleDateString()}</span>
+                      <span className="text-muted-foreground">Team Formation:</span>
+                      <span>{ev.teamFormationStart ? new Date(ev.teamFormationStart).toLocaleDateString() : new Date(ev.startDate).toLocaleDateString()} - {ev.teamFormationEnd ? new Date(ev.teamFormationEnd).toLocaleDateString() : new Date(ev.endDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between border-b border-border/50 pb-1">
-                      <span className="text-primary font-semibold">3. Campaign Search:</span>
-                      <span className="font-semibold text-primary">{new Date(ev.startDate).toLocaleDateString()} – {new Date(ev.endDate).toLocaleDateString()}</span>
+                      <span className="text-primary font-semibold">Observation:</span>
+                      <span className="font-semibold text-primary">{new Date(ev.startDate).toLocaleDateString()} - {new Date(ev.endDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between pb-1">
-                      <span className="text-muted-foreground">4. Report Submission:</span>
-                      <span>{ev.submissionStart ? new Date(ev.submissionStart).toLocaleDateString() : new Date(ev.startDate).toLocaleDateString()} – {ev.submissionEnd ? new Date(ev.submissionEnd).toLocaleDateString() : new Date(ev.endDate).toLocaleDateString()}</span>
+                      <span className="text-muted-foreground">Report Submission:</span>
+                      <span>{ev.submissionStart ? new Date(ev.submissionStart).toLocaleDateString() : new Date(ev.startDate).toLocaleDateString()} - {ev.submissionEnd ? new Date(ev.submissionEnd).toLocaleDateString() : new Date(ev.endDate).toLocaleDateString()}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Squads: <strong className="text-foreground">{ev._count?.teams || 0} Active</strong></span>
-                    <span>Limit: <strong className="text-foreground">2 to 6 Members</strong></span>
+                    <span>Teams: <strong className="text-foreground">{ev._count?.teams || 0} Active</strong></span>
+                    <span>Team Limit: <strong className="text-foreground">2 to 6 Members</strong></span>
                   </div>
                 </CardContent>
 
@@ -385,7 +374,7 @@ export default function CampaignsPage() {
                     variant="default"
                     className="w-full"
                   >
-                    + Form New Team for Event
+                    Form Team for Event
                   </Button>
                 </CardFooter>
               </Card>
@@ -398,9 +387,9 @@ export default function CampaignsPage() {
       <Dialog open={!!requestTeam} onOpenChange={(open) => !open && setRequestTeam(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request to Join Squad</DialogTitle>
+            <DialogTitle>Request to Join Team</DialogTitle>
             <DialogDescription>
-              Sending request to: <strong>{requestTeam?.name}</strong> ({requestTeam?.event.code})
+              Team: <strong>{requestTeam?.name}</strong> ({requestTeam?.event.code})
             </DialogDescription>
           </DialogHeader>
 
@@ -413,11 +402,11 @@ export default function CampaignsPage() {
           <form onSubmit={handleSendJoinRequest} className="space-y-4">
             <div>
               <label className="block text-xs font-medium mb-1">
-                Cadet Message / Intro Pitch (Optional)
+                Note to Team Leader (Optional)
               </label>
               <Textarea
                 rows={3}
-                placeholder="e.g. Hi! I am a student with Astrometrica experience looking to analyze image sets."
+                placeholder="Introduce yourself or mention any relevant experience..."
                 value={requestMsg}
                 onChange={(e) => setRequestMsg(e.target.value)}
               />
@@ -428,7 +417,7 @@ export default function CampaignsPage() {
                 Cancel
               </Button>
               <Button type="submit" variant="default" disabled={requestLoading}>
-                {requestLoading ? "Sending..." : "Submit Join Request"}
+                {requestLoading ? "Sending..." : "Submit Request"}
               </Button>
             </DialogFooter>
           </form>
@@ -447,7 +436,7 @@ export default function CampaignsPage() {
 
           {createError && (
             <div className="p-2.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
-              ! {createError}
+              {createError}
             </div>
           )}
 
@@ -457,16 +446,16 @@ export default function CampaignsPage() {
               <Input
                 type="text"
                 required
-                placeholder="e.g. Haleakala Astro Cadets"
+                placeholder="Enter team name..."
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
               />
             </div>
 
             <div className="text-xs text-muted-foreground p-3 rounded-md border border-border bg-accent/30 space-y-1">
-              <div>• You will be designated as Team Leader.</div>
-              <div>• An invite code will be generated to invite teammates.</div>
-              <div>• Minimum 2 members required (max 6).</div>
+              <div>- You will be assigned as Team Leader.</div>
+              <div>- An invite code will be created to invite teammates.</div>
+              <div>- Teams require a minimum of 2 members (maximum 6).</div>
             </div>
 
             <DialogFooter>

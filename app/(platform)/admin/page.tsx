@@ -177,7 +177,7 @@ export default function AdminDashboardPage() {
       if (!data.success) {
         setAssignError(data.error || "Failed to assign student.");
       } else {
-        setAssignSuccess("Assigned successfully!");
+        setAssignSuccess("Assigned successfully.");
         fetchAdminData();
         setTimeout(() => {
           setAssigningUser(null);
@@ -196,23 +196,23 @@ export default function AdminDashboardPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="MATCHMAKING">
-            👥 Solo Matchmaking ({users.filter((u) => u.teamMembers.length === 0).length} Unassigned)
+            Unassigned Students ({users.filter((u) => u.teamMembers.length === 0).length})
           </TabsTrigger>
           <TabsTrigger value="TEAMS">
-            🚀 Teams Roster ({teams.length})
+            Teams ({teams.length})
           </TabsTrigger>
           <TabsTrigger value="EVENTS">
-            🪐 Campaigns ({events.length})
+            Campaign Events ({events.length})
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB 1: MATCHMAKING */}
+        {/* TAB 1: UNASSIGNED STUDENTS */}
         <TabsContent value="MATCHMAKING">
           <Card>
             <CardHeader>
-              <CardTitle>Solo Students / Free Agent Pool</CardTitle>
+              <CardTitle>Unassigned Students</CardTitle>
               <CardDescription>
-                Assign registered students who do not have a squad yet into teams with available slots (&lt; 6 members).
+                Assign registered students without a team into teams with open slots.
               </CardDescription>
             </CardHeader>
 
@@ -239,7 +239,7 @@ export default function AdminDashboardPage() {
                         </TableCell>
                         <TableCell>
                           {isSolo ? (
-                            <Badge variant="secondary">Looking for Team</Badge>
+                            <Badge variant="secondary">Unassigned</Badge>
                           ) : (
                             <Badge variant="default">In {u.teamMembers[0]?.team.name}</Badge>
                           )}
@@ -255,7 +255,7 @@ export default function AdminDashboardPage() {
                               setAssignSuccess(null);
                             }}
                           >
-                            + Assign to Team
+                            Assign to Team
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -267,12 +267,12 @@ export default function AdminDashboardPage() {
           </Card>
         </TabsContent>
 
-        {/* TAB 2: TEAMS ROSTER */}
+        {/* TAB 2: TEAMS */}
         <TabsContent value="TEAMS">
           <Card>
             <CardHeader>
-              <CardTitle>All Registered Campaign Teams</CardTitle>
-              <CardDescription>Inspect member rosters and campaign activity.</CardDescription>
+              <CardTitle>Registered Teams</CardTitle>
+              <CardDescription>Inspect member rosters and team status.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -285,20 +285,20 @@ export default function AdminDashboardPage() {
                       <div className="flex items-center justify-between text-xs mb-1.5">
                         <span className="font-semibold text-primary">{t.event.code}</span>
                         <Badge variant={t.members.length < 2 ? "secondary" : "default"}>
-                          {t.members.length < 2 ? "NEEDS 2" : `${t.members.length}/6 READY`}
+                          {t.members.length < 2 ? "Needs 2 Members" : `${t.members.length}/6 Members`}
                         </Badge>
                       </div>
                       <h3 className="font-bold text-sm mb-1">{t.name}</h3>
                       <div className="text-xs text-muted-foreground mb-3">Invite Code: {t.inviteCode}</div>
 
                       <div className="text-xs text-muted-foreground mb-4 space-y-1">
-                        <div>Roster: {t.members.map((m) => m.user.name).join(", ")}</div>
+                        <div>Members: {t.members.map((m) => m.user.name).join(", ")}</div>
                       </div>
                     </div>
 
                     <Link href={`/team/${t.id}`}>
                       <Button variant="outline" size="sm" className="w-full">
-                        Open Team Workspace &gt;
+                        Open Team Workspace
                       </Button>
                     </Link>
                   </div>
@@ -313,11 +313,11 @@ export default function AdminDashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Campaign Events Management</CardTitle>
-                <CardDescription>Create and publish multi-phase asteroid search events.</CardDescription>
+                <CardTitle>Campaign Events</CardTitle>
+                <CardDescription>Create and publish campaign events.</CardDescription>
               </div>
               <Button variant="default" size="sm" onClick={() => setShowEventModal(true)}>
-                + Create New Event
+                Create Event
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -348,27 +348,27 @@ export default function AdminDashboardPage() {
       <Dialog open={!!assigningUser} onOpenChange={(open) => !open && setAssigningUser(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Match Student to Team</DialogTitle>
+            <DialogTitle>Assign Student to Team</DialogTitle>
             <DialogDescription>
-              Assigning: <strong>{assigningUser?.name}</strong> ({assigningUser?.email})
+              Student: <strong>{assigningUser?.name}</strong> ({assigningUser?.email})
             </DialogDescription>
           </DialogHeader>
 
           {assignError && (
             <div className="p-2 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
-              ! {assignError}
+              {assignError}
             </div>
           )}
           {assignSuccess && (
             <div className="p-2 border border-emerald-500 bg-emerald-500/10 text-emerald-600 text-xs mb-3">
-              ✓ {assignSuccess}
+              {assignSuccess}
             </div>
           )}
 
           <form onSubmit={handleAssignStudent} className="space-y-4">
             <div>
               <label className="block text-xs font-medium mb-1.5">
-                Select Target Team (&lt; 6 members):
+                Select Team (less than 6 members):
               </label>
               <select
                 required
@@ -376,12 +376,12 @@ export default function AdminDashboardPage() {
                 onChange={(e) => setSelectedTeamId(e.target.value)}
                 className="w-full p-2 text-xs bg-card border border-border rounded-md"
               >
-                <option value="">-- Choose Target Team --</option>
+                <option value="">-- Choose Team --</option>
                 {teams
                   .filter((t) => t.members.length < 6)
                   .map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name} ({t.members.length}/6 members) — {t.event.code}
+                      {t.name} ({t.members.length}/6 members) - {t.event.code}
                     </option>
                   ))}
               </select>
@@ -404,12 +404,12 @@ export default function AdminDashboardPage() {
         <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>Create Campaign Event</DialogTitle>
-            <DialogDescription>Configure 4 distinct campaign date phases.</DialogDescription>
+            <DialogDescription>Configure campaign dates for registration, team formation, observation, and submissions.</DialogDescription>
           </DialogHeader>
 
           {eventError && (
             <div className="p-2 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
-              ! {eventError}
+              {eventError}
             </div>
           )}
 
@@ -474,7 +474,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <span className="block text-xs font-semibold text-primary uppercase pt-1">
-                3. Campaign Observation Phase
+                3. Observation Phase
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <Input
@@ -516,7 +516,7 @@ export default function AdminDashboardPage() {
                 rows={3}
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Campaign details and instructions..."
+                placeholder="Campaign details..."
               />
             </div>
 
@@ -525,7 +525,7 @@ export default function AdminDashboardPage() {
                 Cancel
               </Button>
               <Button type="submit" variant="default">
-                Publish Campaign &gt;
+                Publish Event
               </Button>
             </DialogFooter>
           </form>

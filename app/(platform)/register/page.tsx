@@ -49,13 +49,13 @@ export default function RegisterPage() {
     <div className="w-full max-w-md mx-auto py-8">
       <Card className="p-6">
         <CardHeader className="p-0 border-none mb-4">
-          <CardTitle>Register Student Cadet</CardTitle>
-          <CardDescription>Create your student account to join IASC campaigns and form squads.</CardDescription>
+          <CardTitle>Create Account</CardTitle>
+          <CardDescription>Create an account to participate in campaigns and form teams.</CardDescription>
         </CardHeader>
 
         {errorMsg && (
           <div className="mb-4 p-2.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-xs font-medium">
-            ! {errorMsg}
+            {errorMsg}
           </div>
         )}
 
@@ -76,7 +76,7 @@ export default function RegisterPage() {
             <Input
               type="email"
               required
-              placeholder="student@school.edu"
+              placeholder="user@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -86,7 +86,7 @@ export default function RegisterPage() {
             <label className="block text-xs font-medium mb-1">School / Institution</label>
             <Input
               type="text"
-              placeholder="e.g. Haleakala High School"
+              placeholder="e.g. Science Academy"
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
             />
@@ -114,13 +114,13 @@ export default function RegisterPage() {
           </div>
 
           <Button type="submit" variant="default" className="w-full mt-2" disabled={loading}>
-            {loading ? "Creating Cadet..." : "Create Account"}
+            {loading ? "Creating Account..." : "Create Account"}
           </Button>
 
           <div className="pt-4 text-center border-t border-border text-xs text-muted-foreground">
-            Already registered?{" "}
+            Already have an account?{" "}
             <Link href="/login" className="text-primary hover:underline font-semibold">
-              Sign In Here
+              Sign In
             </Link>
           </div>
         </form>

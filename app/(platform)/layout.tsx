@@ -15,8 +15,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   // Navigation Items
   const navItems = [
-    { title: "Campaigns Hub", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Team Workspace", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+    { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
+    { title: "Teams", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
   ];
 
   // @ts-ignore
@@ -31,17 +31,17 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   // Get Breadcrumb Page Name
   const getBreadcrumbName = () => {
-    if (pathname === "/campaigns") return "Campaigns Hub";
-    if (pathname === "/admin") return "Admin Command Console";
+    if (pathname === "/campaigns") return "Campaigns";
+    if (pathname === "/admin") return "Admin Console";
     if (pathname.startsWith("/team/")) return "Team Workspace";
     if (pathname === "/login") return "Sign In";
-    if (pathname === "/register") return "Student Registration";
-    return "IASC Platform";
+    if (pathname === "/register") return "Register";
+    return "Platform";
   };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground font-sans">
-      {/* Fixed Sticky Sidebar (w-64 / 256px) - never scrolls with page */}
+      {/* Fixed Sticky Sidebar (w-64 / 256px) */}
       <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col justify-between h-screen">
         <div>
           {/* Header */}
@@ -50,7 +50,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Sparkles className="size-4" />
               </div>
-              <span className="font-bold">SAVE DINO HQ</span>
+              <span className="font-bold">SaveDino</span>
             </Link>
           </div>
 
@@ -58,7 +58,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="p-4 space-y-6">
             <div>
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
-                IASC Operations
+                Navigation
               </div>
               <nav className="space-y-1">
                 {navItems.map((item) => (
@@ -80,24 +80,24 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           </div>
         </div>
 
-        {/* Footer Arcade Link */}
+        {/* Footer Link */}
         <div className="p-4 border-t border-border shrink-0">
           <Link
             href="/"
             className="flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
           >
             <Gamepad2 className="size-4 shrink-0" />
-            <span>Play Dino Game</span>
+            <span>Play Game</span>
           </Link>
         </div>
       </aside>
 
-      {/* Right Content Area (Fixed Height Container) */}
+      {/* Right Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Fixed Top Bar Header (never scrolls) */}
+        {/* Top Header */}
         <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground font-medium">Dino HQ</span>
+            <span className="text-xs text-muted-foreground font-medium">Dashboard</span>
             <Separator orientation="vertical" className="h-4" />
             <span className="text-xs font-semibold text-foreground">{getBreadcrumbName()}</span>
           </div>

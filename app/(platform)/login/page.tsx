@@ -42,13 +42,13 @@ export default function LoginPage() {
     <div className="w-full max-w-md mx-auto py-12">
       <Card className="p-6">
         <CardHeader className="p-0 border-none mb-4">
-          <CardTitle>Observatory Cadet Access</CardTitle>
-          <CardDescription>Enter your student or admin credentials to log into IASC Platform.</CardDescription>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>Enter your email and password to access your account.</CardDescription>
         </CardHeader>
 
         {errorMsg && (
           <div className="mb-4 p-2.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-xs font-medium">
-            ! {errorMsg}
+            {errorMsg}
           </div>
         )}
 
@@ -58,7 +58,7 @@ export default function LoginPage() {
             <Input
               type="email"
               required
-              placeholder="cadet@observatory.edu"
+              placeholder="user@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -76,13 +76,13 @@ export default function LoginPage() {
           </div>
 
           <Button type="submit" variant="default" className="w-full mt-2" disabled={loading}>
-            {loading ? "Authenticating..." : "Sign In"}
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
 
           <div className="pt-4 text-center border-t border-border text-xs text-muted-foreground">
-            New Cadet?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/register" className="text-primary hover:underline font-semibold">
-              Register Student Account
+              Create an Account
             </Link>
           </div>
         </form>

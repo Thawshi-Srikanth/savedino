@@ -220,7 +220,7 @@ export default function TeamWorkspacePage({
       if (!data.success) {
         setIngestMsg(`Error: ${data.error}`);
       } else {
-        setIngestMsg(`Success! Added ${data.totalAdded} image set(s).`);
+        setIngestMsg(`Added ${data.totalAdded} image set(s).`);
         setBulkText("");
         fetchTeamData();
         setTimeout(() => setShowIngestModal(false), 1500);
@@ -287,32 +287,32 @@ export default function TeamWorkspacePage({
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Team Banner Card */}
+      {/* Team Header Card */}
       <Card className="p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="default">{team?.event?.code || "IASC CAMPAIGN"}</Badge>
+              <Badge variant="default">{team?.event?.code || "CAMPAIGN"}</Badge>
               <Badge variant={memberCount < 2 ? "secondary" : "default"}>
-                {memberCount < 2 ? "FORMING (NEEDS 2)" : `READY (${memberCount}/6)`}
+                {memberCount < 2 ? "Needs 2 Members" : `${memberCount}/6 Members`}
               </Badge>
               {team?.isRecruiting ? (
-                <Badge variant="outline" className="border-emerald-500 text-emerald-600">RECRUITING OPEN</Badge>
+                <Badge variant="outline" className="border-emerald-500 text-emerald-600">Open for Join Requests</Badge>
               ) : (
-                <Badge variant="outline">RECRUITING CLOSED</Badge>
+                <Badge variant="outline">Recruitment Closed</Badge>
               )}
             </div>
 
             <h1 className="text-xl font-bold tracking-tight">{team?.name || "Team Workspace"}</h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Campaign: {team?.event?.title || "Active Pan-STARRS Asteroid Search"}
+              Campaign: {team?.event?.title || "Asteroid Search"}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             {isLeader && (
               <Button size="sm" variant="outline" onClick={() => setShowRecruitModal(true)}>
-                ⚙ Recruitment Stance
+                Recruitment Settings
               </Button>
             )}
 
@@ -320,23 +320,23 @@ export default function TeamWorkspacePage({
             <div className="flex items-center gap-3 bg-accent/40 border border-border p-3 rounded-md">
               <div>
                 <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
-                  TEAM INVITE CODE
+                  INVITE CODE
                 </span>
                 <span className="text-sm font-bold tracking-wider text-primary">
                   {team?.inviteCode || "AST-XXXX"}
                 </span>
               </div>
               <Button size="sm" variant="outline" onClick={handleCopyInvite}>
-                {copied ? "COPIED!" : "COPY"}
+                {copied ? "Copied" : "Copy"}
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Squad Capacity Progress Bar */}
+        {/* Capacity Progress Bar */}
         <div className="mt-5 space-y-1.5">
           <div className="flex justify-between items-center text-xs text-muted-foreground">
-            <span>Squad Capacity: {memberCount}/6 Members</span>
+            <span>Team Capacity: {memberCount}/6 Members</span>
             <span>{progressVal}%</span>
           </div>
           <Progress value={progressVal} className="h-2" />
@@ -345,7 +345,7 @@ export default function TeamWorkspacePage({
         {/* Members Roster */}
         <div className="mt-6 pt-4 border-t border-border">
           <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            Team Roster ({memberCount} / 6 Members):
+            Team Members ({memberCount} / 6):
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {team?.members?.map((m, idx) => (
@@ -362,7 +362,7 @@ export default function TeamWorkspacePage({
                   </Badge>
                 </div>
                 <div className="font-semibold truncate">{m.user.name}</div>
-                <div className="text-xs text-muted-foreground truncate">{m.user.country || "Cadet"}</div>
+                <div className="text-xs text-muted-foreground truncate">{m.user.country || "Member"}</div>
               </div>
             ))}
 
@@ -372,23 +372,20 @@ export default function TeamWorkspacePage({
                 key={`empty-${idx}`}
                 className="p-3 border border-dashed border-border/60 rounded-md text-xs flex flex-col items-center justify-center text-muted-foreground min-h-[64px]"
               >
-                <span className="text-xs font-medium">SLOT #{memberCount + idx + 1}</span>
-                <span className="text-[10px]">{memberCount + idx + 1 <= 2 ? "REQUIRED" : "OPEN"}</span>
+                <span className="text-xs font-medium">Slot #{memberCount + idx + 1}</span>
+                <span className="text-[10px]">{memberCount + idx + 1 <= 2 ? "Required" : "Open"}</span>
               </div>
             ))}
           </div>
         </div>
       </Card>
 
-      {/* PENDING JOIN REQUESTS CARD FOR TEAM LEADER */}
+      {/* PENDING JOIN REQUESTS */}
       {isLeader && (
-        <Card className="p-6 border-primary/40">
+        <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <span className="text-xs font-semibold text-primary uppercase">
-                CADET MATCHMAKING INBOX
-              </span>
-              <h2 className="text-sm font-bold tracking-tight mt-0.5">
+              <h2 className="text-sm font-bold tracking-tight">
                 Pending Join Requests ({pendingRequests.length})
               </h2>
             </div>
@@ -397,7 +394,7 @@ export default function TeamWorkspacePage({
 
           {pendingRequests.length === 0 ? (
             <div className="p-4 border border-dashed border-border rounded-md text-center text-xs text-muted-foreground">
-              No pending cadet join requests. Share your invite code or keep recruitment open!
+              No pending join requests.
             </div>
           ) : (
             <div className="space-y-3">
@@ -427,14 +424,14 @@ export default function TeamWorkspacePage({
                       variant="default"
                       onClick={() => handleRespondToRequest(req.id, "ACCEPT")}
                     >
-                      ✓ Accept Cadet
+                      Accept
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => handleRespondToRequest(req.id, "REJECT")}
                     >
-                      X Decline
+                      Decline
                     </Button>
                   </div>
                 </div>
@@ -448,30 +445,27 @@ export default function TeamWorkspacePage({
       <Card className="p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-4 mb-6">
           <div>
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              PAN-STARRS IMAGE SETS WORKSPACE
-            </span>
-            <h2 className="text-base font-bold tracking-tight mt-1">
-              Assigned Image Sets &amp; MPC Submissions
+            <h2 className="text-base font-bold tracking-tight">
+              Image Sets &amp; MPC Submissions
             </h2>
           </div>
 
           <Button variant="default" onClick={() => setShowIngestModal(true)}>
-            + Ingest Sets from IASC
+            Import Image Sets
           </Button>
         </div>
 
         {/* Kanban Columns */}
         {imageSets.length === 0 ? (
           <div className="py-12 text-center border border-dashed border-border rounded-md p-8 text-xs text-muted-foreground">
-            No image sets logged yet. Click &quot;+ Ingest Sets from IASC&quot; above to copy-paste your batch from your IASC dashboard.
+            No image sets added yet. Click &quot;Import Image Sets&quot; above to add set codes.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* 1. PENDING */}
             <div className="border border-border rounded-md p-3 bg-accent/20">
               <div className="flex items-center justify-between text-xs font-semibold uppercase mb-3 text-muted-foreground">
-                <span>📥 To Analyze</span>
+                <span>To Analyze</span>
                 <Badge variant="outline">{imageSets.filter((s) => s.status === "PENDING").length}</Badge>
               </div>
               <div className="space-y-2">
@@ -489,7 +483,7 @@ export default function TeamWorkspacePage({
                         variant="secondary"
                         className="w-full"
                       >
-                        Claim to Analyze
+                        Claim Set
                       </Button>
                     </div>
                   ))}
@@ -499,7 +493,7 @@ export default function TeamWorkspacePage({
             {/* 2. IN PROGRESS */}
             <div className="border border-border rounded-md p-3 bg-accent/20">
               <div className="flex items-center justify-between text-xs font-semibold uppercase mb-3 text-amber-600 dark:text-amber-400">
-                <span>🔍 In Analysis</span>
+                <span>In Analysis</span>
                 <Badge variant="secondary">{imageSets.filter((s) => s.status === "CLAIMED").length}</Badge>
               </div>
               <div className="space-y-2">
@@ -511,7 +505,7 @@ export default function TeamWorkspacePage({
                       className="p-3 bg-card border border-border rounded-md text-xs space-y-2"
                     >
                       <div className="font-bold text-primary">{s.setCode}</div>
-                      <div className="text-[10px] text-muted-foreground">Claimed: {s.claimedByUser?.name || "Cadet"}</div>
+                      <div className="text-[10px] text-muted-foreground">Claimed by: {s.claimedByUser?.name || "Member"}</div>
                       <div className="flex gap-1.5">
                         <Button
                           onClick={() => {
@@ -523,7 +517,7 @@ export default function TeamWorkspacePage({
                           variant="default"
                           className="flex-1"
                         >
-                          Submit MPC
+                          Submit Report
                         </Button>
                         <Button
                           onClick={() => handleClaimSet(s.id)}
@@ -532,7 +526,7 @@ export default function TeamWorkspacePage({
                           className="px-2"
                           title="Unclaim"
                         >
-                          X
+                          Release
                         </Button>
                       </div>
                     </div>
@@ -543,7 +537,7 @@ export default function TeamWorkspacePage({
             {/* 3. REPORTED DISCOVERIES */}
             <div className="border border-border rounded-md p-3 bg-accent/20">
               <div className="flex items-center justify-between text-xs font-semibold uppercase mb-3 text-emerald-600 dark:text-emerald-400">
-                <span>🚀 Candidates Found</span>
+                <span>Candidates Found</span>
                 <Badge variant="default">{imageSets.filter((s) => s.status === "REPORTED").length}</Badge>
               </div>
               <div className="space-y-2">
@@ -560,7 +554,7 @@ export default function TeamWorkspacePage({
                       </div>
                       {s.candidates.map((c) => (
                         <div key={c.id} className="text-[10px] bg-emerald-500/10 p-1.5 rounded border border-emerald-500/30">
-                          <strong>{c.candidateCode}</strong> — Mag: {c.magnitude}
+                          <strong>{c.candidateCode}</strong> - Mag: {c.magnitude}
                         </div>
                       ))}
                     </div>
@@ -571,7 +565,7 @@ export default function TeamWorkspacePage({
             {/* 4. CLEAN */}
             <div className="border border-border rounded-md p-3 bg-accent/20">
               <div className="flex items-center justify-between text-xs font-semibold uppercase mb-3 text-muted-foreground">
-                <span>✅ Clean (No Asteroid)</span>
+                <span>Clean (No Candidates)</span>
                 <Badge variant="outline">{imageSets.filter((s) => s.status === "CLEAN").length}</Badge>
               </div>
               <div className="space-y-2">
@@ -596,9 +590,9 @@ export default function TeamWorkspacePage({
       <Dialog open={showRecruitModal} onOpenChange={setShowRecruitModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Recruitment Stance Settings</DialogTitle>
+            <DialogTitle>Recruitment Settings</DialogTitle>
             <DialogDescription>
-              Configure whether your squad is open to cadet join requests from the Campaigns Hub.
+              Configure whether your team is open to join requests.
             </DialogDescription>
           </DialogHeader>
 
@@ -611,18 +605,18 @@ export default function TeamWorkspacePage({
                 onChange={(e) => setIsRecruiting(e.target.checked)}
                 className="w-4 h-4 cursor-pointer"
               />
-              <label htmlFor="isRecruitingCheckbox" className="text-xs font-medium uppercase cursor-pointer">
-                Open for Cadet Join Requests
+              <label htmlFor="isRecruitingCheckbox" className="text-xs font-medium cursor-pointer">
+                Open for Join Requests
               </label>
             </div>
 
             <div>
               <label className="block text-xs font-medium mb-1">
-                Recruitment Notes / Seeking Message
+                Recruitment Message / Notes
               </label>
               <Textarea
                 rows={3}
-                placeholder="e.g. Seeking 2 cadets with Astrometrica experience for Pan-STARRS search!"
+                placeholder="Mention what experience or availability you are looking for..."
                 value={recruitmentNotes}
                 onChange={(e) => setRecruitmentNotes(e.target.value)}
               />
@@ -633,20 +627,20 @@ export default function TeamWorkspacePage({
                 Cancel
               </Button>
               <Button type="submit" variant="default" disabled={recruitLoading}>
-                {recruitLoading ? "Saving..." : "Save Recruitment Stance"}
+                {recruitLoading ? "Saving..." : "Save Settings"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Bulk Ingest Modal */}
+      {/* Import Image Sets Modal */}
       <Dialog open={showIngestModal} onOpenChange={setShowIngestModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ingest Picture Sets from IASC</DialogTitle>
+            <DialogTitle>Import Image Sets</DialogTitle>
             <DialogDescription>
-              Paste text/table from your IASC dashboard (e.g. <code>PS1-26A-01, PS1-26A-02</code>). Our parser will auto-extract set codes.
+              Paste image set codes separated by commas or line breaks.
             </DialogDescription>
           </DialogHeader>
 
@@ -660,7 +654,7 @@ export default function TeamWorkspacePage({
             <Textarea
               required
               rows={5}
-              placeholder="Paste here: e.g. PS1-26A-01, PS1-26A-02, G96-24K02..."
+              placeholder="Paste here: PS1-26A-01, PS1-26A-02, G96-24K02..."
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
             />
@@ -670,7 +664,7 @@ export default function TeamWorkspacePage({
                 Cancel
               </Button>
               <Button type="submit" variant="default" disabled={ingestLoading || !bulkText}>
-                {ingestLoading ? "Parsing..." : "Ingest Sets"}
+                {ingestLoading ? "Importing..." : "Import Sets"}
               </Button>
             </DialogFooter>
           </form>
@@ -681,7 +675,7 @@ export default function TeamWorkspacePage({
       <Dialog open={!!activeSetForReport} onOpenChange={(open) => !open && setActiveSetForReport(null)}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Astrometrica MPC Report Parser</DialogTitle>
+            <DialogTitle>MPC Report Submission</DialogTitle>
             <DialogDescription>
               Submitting for Set: <strong>{activeSetForReport?.setCode}</strong>
             </DialogDescription>
@@ -689,12 +683,12 @@ export default function TeamWorkspacePage({
 
           {reportError && (
             <div className="p-2.5 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
-              ! {reportError}
+              {reportError}
             </div>
           )}
 
           <div className="p-3 border border-border rounded-md mb-4 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">No asteroids found in this set?</span>
+            <span className="text-xs text-muted-foreground">No candidates in this set?</span>
             <Button
               type="button"
               variant="outline"
@@ -709,7 +703,7 @@ export default function TeamWorkspacePage({
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-medium mb-1.5">
-                Upload MPCrep.txt from Astrometrica
+                Upload Report File (.txt or .rep)
               </label>
               <input
                 type="file"
@@ -725,7 +719,7 @@ export default function TeamWorkspacePage({
               </label>
               <Textarea
                 rows={6}
-                placeholder="COD F51&#10;CON Team SaveDino...&#10;     P10aBcD* C2026 09 03.24561 21 14 32.18 +14 22 18.4          21.4 R      F51..."
+                placeholder="Paste MPC report text here..."
                 value={mpcText}
                 onChange={(e) => setMpcText(e.target.value)}
               />
@@ -735,12 +729,12 @@ export default function TeamWorkspacePage({
             {parsedPreview && parsedPreview.candidates.length > 0 && (
               <div className="p-3 border border-emerald-500/50 bg-emerald-500/10 rounded-md text-xs space-y-2">
                 <div className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">
-                  ✓ Valid MPC Format! Found {parsedPreview.candidates.length} Candidate(s):
+                  Found {parsedPreview.candidates.length} Candidate(s):
                 </div>
                 {parsedPreview.candidates.map((c) => (
                   <div key={c.candidateCode} className="p-2 border border-emerald-500/30 bg-card rounded">
                     <div className="flex justify-between font-semibold">
-                      <span>Code: {c.candidateCode} {c.isNewDiscovery && "★ (NEW DISCOVERY)"}</span>
+                      <span>Code: {c.candidateCode} {c.isNewDiscovery && "(New Discovery)"}</span>
                       <span>Avg Mag: {c.avgMagnitude}</span>
                     </div>
                     <div className="text-[10px] text-muted-foreground mt-1">
