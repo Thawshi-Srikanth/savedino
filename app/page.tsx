@@ -159,24 +159,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer
-        className={`text-center text-[11px] font-tech select-none space-y-1 mt-12 transition-colors duration-700 ${
-          nightActive ? "text-[#80868b]" : "text-[#70757a]"
-        }`}
-      >
-        <p
-          className={`font-pixel text-[10px] uppercase transition-colors duration-700 ${
-            nightActive ? "text-[#e8eaed]" : "text-[#535353]"
-          }`}
-        >
-          SAVE DINO — ASTEROID DEFENSE
-        </p>
-        <p className="text-[10px]">
-          Chrome Dino with Laser Cannon & Falling Asteroids
-        </p>
-      </footer>
-
       {/* Help Modal */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </main>
