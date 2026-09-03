@@ -128,11 +128,11 @@ export default function Home() {
         {/* Chrome Dino Style "Page Not Found / No Internet" Section */}
         <div className="w-full mt-2 sm:mt-3 text-left select-text transition-colors duration-700 space-y-1">
           <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
-            No Internet
+            No Campaign Joined
           </h2>
 
           <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-            ERR_ASTEROID_APPROACHING
+            ERR_ASTEROID_CAMPAIGN_OFFLINE
           </p>
 
           <p className="text-[11px] font-mono font-bold text-foreground pt-1">
