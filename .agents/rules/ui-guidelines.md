@@ -1,15 +1,20 @@
-# UI Guidelines & Design System Rules
+# PostHog Design System & UI Guidelines
 
-## 1. Homepage Visual Consistency System
-- All platform routes and components must follow the homepage visual theme system:
-  - **Light Mode Canvas**: `#f4f4f4` background, `#f9f9f9` cards, `#535353` text, `#0284c7` primary accents.
-  - **Night Mode Canvas**: `#121212` background, `#1c1c1e` cards, `#e8eaed` text, `#38bdf8` primary accents.
-  - **Card Containers**: Bordered with `border-border` (`rgba(83,83,83,0.25)` light / `rgba(128,134,139,0.35)` dark).
+## 1. PostHog Theme System (`app/globals.css`)
+- **Light Mode ("Parchment Cream & Electric Orange")**:
+  - Background: `#f3f4ef` (PostHog parchment cream).
+  - Cards: `#ffffff` with solid dark border `#23241f`.
+  - Primary Accent: `#f54e00` (PostHog Electric Orange).
+  - Text: `#23241f` charcoal.
+- **Dark Mode ("PostHog Midnight Void")**:
+  - Background: `#151618` (PostHog midnight void).
+  - Cards: `#1d1e21` dark slate.
+  - Primary Accent: `#f54e00` (PostHog Electric Orange).
+  - Text: `#f3f4f6` off-white.
 
 ## 2. Component Design Specifications (`components/ui/*`)
-- **Badges**: Rounded-full pills with `font-mono uppercase text-[10px] tracking-wide`.
-- **Buttons**: Font-mono text with crisp borders (`border-border`), sky-blue primary fill (`bg-primary`), and hover transitions matching homepage controls.
-- **Inputs & Textareas**: Font-mono inputs with `border-border` borders and smooth focus rings.
+- **Buttons**: Font-mono bold text with solid borders (`border border-[#23241f]`), PostHog orange fill (`#f54e00`), and active press depth effect (`active:translate-y-[1px]`).
+- **Badges**: Rounded-full font-mono badges (`text-[10px] font-mono font-semibold uppercase tracking-wider`).
 - **Cards**: `rounded-lg border border-border bg-card text-card-foreground shadow-xs`.
 
 ## 3. No Raw Emojis in UI Text

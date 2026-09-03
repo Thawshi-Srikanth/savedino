@@ -5,24 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-mono font-medium tracking-wide transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-mono font-bold tracking-wide transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:translate-y-[1px] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground border border-primary/80 hover:bg-primary/90 font-bold shadow-xs",
+          "bg-primary text-primary-foreground border border-[#23241f] dark:border-[#38393e] hover:bg-[#d94400] font-bold shadow-xs",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold",
+          "bg-destructive text-destructive-foreground border border-[#23241f] dark:border-[#38393e] hover:bg-destructive/90 font-bold",
         outline:
-          "border border-border bg-card text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary",
+          "border border-border bg-card text-foreground hover:bg-[#f54e00] hover:text-white hover:border-[#f54e00]",
         secondary:
           "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground",
+          "border-transparent hover:bg-accent hover:text-accent-foreground",
         link:
-          "text-primary underline-offset-4 hover:underline",
+          "border-transparent text-primary underline-offset-4 hover:underline",
         pill:
-          "rounded-full border border-border bg-card text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary text-[10px] uppercase px-3 py-1",
+          "rounded-full border border-border bg-card text-foreground hover:bg-[#f54e00] hover:text-white hover:border-[#f54e00] text-[10px] uppercase px-3 py-1 font-mono",
       },
       size: {
         default: "h-9 px-4 py-2",
