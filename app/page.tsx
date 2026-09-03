@@ -100,7 +100,7 @@ export default function Home() {
 
   return (
     <main
-      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pb-2 sm:pb-4 px-2.5 sm:px-6 select-none overscroll-none transition-colors duration-700 ease-in-out ${
+      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
         nightActive ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
@@ -118,7 +118,7 @@ export default function Home() {
       />
 
       {/* Main Game Stage */}
-      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1">
+      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
           onNightModeChange={setIsNight}
@@ -126,7 +126,7 @@ export default function Home() {
         />
 
         {/* Chrome Dino Style "Page Not Found / No Internet" Section */}
-        <div className="w-full mt-2 sm:mt-3 text-left select-text transition-colors duration-700 space-y-1">
+        <div className="w-full mt-2 sm:mt-3 text-left select-text transition-colors duration-700 space-y-1 px-2 sm:px-0">
           <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
             No Campaign Joined
           </h2>
