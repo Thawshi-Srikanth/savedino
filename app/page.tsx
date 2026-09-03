@@ -125,21 +125,42 @@ export default function Home() {
           nightModeOverride={devNightOverride}
         />
 
-        {/* Compact, Non-Distracting PostHog Info Strip */}
-        <div className="w-full mt-2 sm:mt-4 p-3 rounded-lg border border-border bg-card text-left transition-colors duration-700 space-y-1.5 shadow-xs">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-[10px] sm:text-xs font-pixel font-bold tracking-wider uppercase text-foreground">
-              IASC Asteroid Search
-            </h2>
+        {/* Chrome Dino Style "Page Not Found / No Internet" Section */}
+        <div className="w-full mt-2 sm:mt-3 text-left select-text transition-colors duration-700 space-y-1">
+          <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
+            No Internet
+          </h2>
+
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            ERR_ASTEROID_APPROACHING
+          </p>
+
+          <p className="text-[11px] font-mono font-bold text-foreground pt-1">
+            Try:
+          </p>
+
+          <ul className="font-mono space-y-1 text-xs text-muted-foreground pl-1 leading-relaxed">
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Forming an IASC asteroid search team</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Analyzing telescope FITS image sets</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-[#10b981] font-bold">✓</span>
+              <span>Submitting discovery reports to MPC</span>
+            </li>
+          </ul>
+
+          <div className="pt-2 flex items-center gap-3">
             <Link href="/campaigns">
-              <Button size="sm" variant="default" className="text-[10px] h-7 px-3 font-bold">
-                <span>Campaigns &gt;</span>
+              <Button size="sm" variant="default" className="text-xs font-bold">
+                <span>Explore Campaigns &gt;</span>
               </Button>
             </Link>
           </div>
-          <p className="text-[11px] font-mono text-muted-foreground leading-tight">
-            Discover main-belt asteroids with NASA & IASC astronomical FITS image processing.
-          </p>
         </div>
       </div>
 
