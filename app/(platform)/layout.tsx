@@ -64,135 +64,133 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-[100dvh] w-full bg-background text-foreground font-sans">
-        {/* Official Responsive Collapsible shadcn Sidebar */}
-        <Sidebar collapsible="icon" className="border-r border-border bg-card">
-          <SidebarHeader className="h-14 flex items-center px-4 border-b border-border">
-            <Link href="/" className="flex items-center gap-2.5 font-semibold text-sm text-primary tracking-tight">
-              <Sparkles className="size-5 text-primary shrink-0" />
-              <span className="group-data-[collapsible=icon]:hidden font-bold">SAVE DINO HQ</span>
-            </Link>
-          </SidebarHeader>
+      {/* Official Responsive Collapsible shadcn Sidebar */}
+      <Sidebar collapsible="icon" className="border-r border-border bg-card">
+        <SidebarHeader className="h-14 flex items-center px-4 border-b border-border">
+          <Link href="/" className="flex items-center gap-2.5 font-semibold text-sm text-primary tracking-tight">
+            <Sparkles className="size-5 text-primary shrink-0" />
+            <span className="group-data-[collapsible=icon]:hidden font-bold">SAVE DINO HQ</span>
+          </Link>
+        </SidebarHeader>
 
-          <SidebarContent className="p-2 space-y-4">
-            <SidebarGroup>
-              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-xs text-muted-foreground font-medium px-2 mb-1">
-                IASC Operations
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {navItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={item.active}
-                        tooltip={item.title}
-                        className={
-                          item.active
-                            ? "bg-primary text-primary-foreground font-semibold"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        }
-                      >
-                        <Link href={item.url} className="flex items-center gap-2.5">
-                          <item.icon className="size-4 shrink-0" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup className="mt-auto">
-              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-xs text-muted-foreground font-medium px-2 mb-1">
-                Arcade
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
+        <SidebarContent className="p-2 space-y-4">
+          <SidebarGroup>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-xs text-muted-foreground font-medium px-2 mb-1">
+              IASC Operations
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      tooltip="Play Dino Game"
-                      className="text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-md"
+                      isActive={item.active}
+                      tooltip={item.title}
+                      className={
+                        item.active
+                          ? "bg-primary text-primary-foreground font-semibold"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }
                     >
-                      <Link href="/" className="flex items-center gap-2.5">
-                        <Gamepad2 className="size-4 shrink-0" />
-                        <span>Play Dino Game</span>
+                      <Link href={item.url} className="flex items-center gap-2.5">
+                        <item.icon className="size-4 shrink-0" />
+                        <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
 
-          <SidebarRail />
-        </Sidebar>
-
-        {/* Main Content Area using SidebarInset */}
-        <SidebarInset className="flex flex-col flex-1 min-w-0">
-          {/* Header */}
-          <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
-              <Separator orientation="vertical" className="h-4" />
-
-              {/* Breadcrumb */}
-              <Breadcrumb className="text-xs">
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-muted-foreground hover:text-foreground">
-                      Dino HQ
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="font-semibold text-foreground">
-                      {getBreadcrumbName()}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
-
-            {/* Session Info & Controls */}
-            <div className="flex items-center gap-3">
-              {session?.user ? (
-                <div className="flex items-center gap-2.5 text-xs">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full bg-accent/50">
-                    <User className="size-3.5 text-primary" />
-                    <span className="font-medium text-xs">{session.user.name}</span>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                    title="Sign Out"
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-xs text-muted-foreground font-medium px-2 mb-1">
+              Arcade
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip="Play Dino Game"
+                    className="text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-md"
                   >
-                    <LogOut className="size-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Link href="/login">
-                    <Button size="sm" variant="outline">Sign In</Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button size="sm" variant="default">Register</Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </header>
+                    <Link href="/" className="flex items-center gap-2.5">
+                      <Gamepad2 className="size-4 shrink-0" />
+                      <span>Play Dino Game</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
 
-          {/* Page Body */}
-          <main className="flex-1 p-4 sm:p-8 overflow-y-auto bg-background/50">
-            {children}
-          </main>
-        </SidebarInset>
-      </div>
+        <SidebarRail />
+      </Sidebar>
+
+      {/* Main Content Area using SidebarInset */}
+      <SidebarInset className="flex flex-col flex-1 min-w-0 bg-background text-foreground font-sans">
+        {/* Header */}
+        <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
+            <Separator orientation="vertical" className="h-4" />
+
+            {/* Breadcrumb */}
+            <Breadcrumb className="text-xs">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/" className="text-muted-foreground hover:text-foreground">
+                    Dino HQ
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="font-semibold text-foreground">
+                    {getBreadcrumbName()}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+
+          {/* Session Info & Controls */}
+          <div className="flex items-center gap-3">
+            {session?.user ? (
+              <div className="flex items-center gap-2.5 text-xs">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full bg-accent/50">
+                  <User className="size-3.5 text-primary" />
+                  <span className="font-medium text-xs">{session.user.name}</span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                  title="Sign Out"
+                >
+                  <LogOut className="size-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link href="/login">
+                  <Button size="sm" variant="outline">Sign In</Button>
+                </Link>
+                <Link href="/register">
+                  <Button size="sm" variant="default">Register</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Page Body */}
+        <main className="flex-1 p-4 sm:p-8 overflow-y-auto bg-background/50">
+          {children}
+        </main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
