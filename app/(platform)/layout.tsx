@@ -69,23 +69,23 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700">
-      {/* Top Navbar with Rich Arcade Palette */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur-md transition-colors duration-700 shadow-xs">
+      {/* Top Navbar with Genuine 8-Bit Arcade Styling */}
+      <header className="sticky top-0 z-40 w-full border-b-2 border-border bg-card/95 backdrop-blur-md transition-colors duration-700 shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo & Branding */}
+          {/* Logo & Branding - Featuring Press Start 2P Pixel Font */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+            <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
               <svg
                 className="w-4 h-4 fill-current text-primary transition-transform group-hover:scale-110"
                 viewBox="0 0 24 24"
               >
                 <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
               </svg>
-              <span className="font-sans font-bold text-xs tracking-wider uppercase text-foreground">
+              <span className="font-pixel text-[10px] tracking-widest uppercase text-foreground">
                 SAVE DINO
               </span>
-              <span className="hidden sm:inline-block text-[10px] uppercase tracking-wide px-2 py-0.5 border border-border rounded-full font-mono text-muted-foreground">
+              <span className="hidden sm:inline-block text-[9px] uppercase tracking-wider px-2 py-0.5 border border-border font-mono text-muted-foreground">
                 IASC PORTAL
               </span>
             </Link>
@@ -96,9 +96,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Link
                   key={item.title}
                   href={item.url}
-                  className={`text-[10px] uppercase tracking-wide px-3 py-1 border rounded-full font-mono transition-all cursor-pointer ${
+                  className={`text-[10px] uppercase tracking-wide px-3 py-1 border transition-all cursor-pointer font-mono ${
                     item.active
-                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                      ? "bg-primary text-primary-foreground border-primary font-bold"
                       : "border-border text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
                   }`}
                 >
@@ -113,7 +113,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             {/* Theme Switcher Button */}
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-full border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
+              className="w-8 h-8 border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-accent text-foreground"
               title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
@@ -125,14 +125,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
             <Link
               href="/"
-              className="text-[10px] uppercase tracking-wide px-3 py-1 border border-amber-500/60 rounded-full font-mono text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all cursor-pointer"
+              className="text-[10px] uppercase tracking-wide px-3 py-1 border border-amber-500 font-mono text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all cursor-pointer font-bold"
             >
               PLAY DINO GAME &gt;
             </Link>
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1 border border-border rounded-full text-xs font-mono bg-accent/40">
+                <div className="flex items-center gap-1.5 px-3 py-1 border border-border text-xs font-mono bg-accent/40">
                   <User className="size-3 text-primary" />
                   <span className="font-semibold">{session.user.name}</span>
                 </div>
@@ -162,7 +162,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleToggleTheme}
-              className="w-8 h-8 rounded-full border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
+              className="w-8 h-8 border border-border flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-foreground"
               title={isNight ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isNight ? (
@@ -179,10 +179,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
+              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r-2 border-border">
                 <div>
-                  <SheetHeader className="p-4 border-b border-border text-left">
-                    <SheetTitle className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-foreground">
+                  <SheetHeader className="p-4 border-b-2 border-border text-left">
+                    <SheetTitle className="flex items-center gap-2 font-pixel text-xs uppercase tracking-wider text-foreground">
                       <svg className="w-4 h-4 fill-current text-primary" viewBox="0 0 24 24">
                         <path d="M12 2C8 2 4 7 4 13c0 5 3.5 9 8 9s8-4 8-9c0-6-4-11-8-11zm0 18c-3.3 0-6-3.1-6-7 0-4.2 2.7-8.7 6-8.9 3.3.2 6 4.7 6 8.9 0 3.9-2.7 7-6 7z" />
                       </svg>
@@ -200,7 +200,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                           key={item.title}
                           href={item.url}
                           onClick={() => setMobileOpen(false)}
-                          className={`block text-[11px] uppercase tracking-wide px-3 py-2 border rounded-full font-mono transition-all ${
+                          className={`block text-[11px] uppercase tracking-wide px-3 py-2 border font-mono transition-all ${
                             item.active
                               ? "bg-primary text-primary-foreground border-primary font-bold"
                               : "border-border text-foreground hover:bg-accent"
@@ -213,11 +213,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   </div>
                 </div>
 
-                <div className="p-4 border-t border-border space-y-3 font-mono">
+                <div className="p-4 border-t-2 border-border space-y-3 font-mono">
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-center text-[10px] uppercase tracking-wide px-3 py-2 border border-amber-500 rounded-full text-amber-600 dark:text-amber-400 font-bold"
+                    className="block text-center text-[10px] uppercase tracking-wide px-3 py-2 border border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
                   >
                     PLAY DINO GAME &gt;
                   </Link>
