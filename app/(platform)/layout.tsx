@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
@@ -13,6 +13,44 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Theme Switcher State
+  const [isNight, setIsNight] = useState<boolean>(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("savedino_theme");
+    const isDark =
+      savedTheme === "dark" ||
+      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches) ||
+      document.documentElement.classList.contains("dark") ||
+      document.documentElement.classList.contains("night-mode");
+
+    if (isDark) {
+      setIsNight(true);
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add("night-mode");
+    } else {
+      setIsNight(false);
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove("night-mode");
+    }
+  }, []);
+
+  const handleToggleTheme = () => {
+    setIsNight((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.add("night-mode");
+        localStorage.setItem("savedino_theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.remove("night-mode");
+        localStorage.setItem("savedino_theme", "light");
+      }
+      return next;
+    });
+  };
 
   // Navigation Items
   const navItems = [
@@ -30,7 +68,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-[#f4f4f4] dark:bg-[#121212] text-[#535353] dark:text-[#e8eaed] font-sans">
+    <div className="min-h-screen w-full flex flex-col bg-[#f4f4f4] dark:bg-[#121212] text-[#535353] dark:text-[#e8eaed] font-sans transition-colors duration-700">
       {/* Top Navbar Matching Homepage Style Exactly */}
       <header className="sticky top-0 z-40 w-full border-b border-[#535353]/20 dark:border-[#80868b]/30 bg-[#f4f4f4]/95 dark:bg-[#121212]/95 backdrop-blur-md transition-colors duration-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
@@ -70,8 +108,27 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </nav>
           </div>
 
-          {/* Desktop Right Controls: Play Dino Game & User Session */}
+          {/* Desktop Right Controls: Play Dino Game, Theme Switcher & User Session */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Pixel Theme Switcher Button */}
+            <button
+              onClick={handleToggleTheme}
+              className="w-7 h-7 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 text-[#535353] dark:text-[#e8eaed]"
+              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+            >
+              {isNight ? (
+                /* Pixel Moon Icon */
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                  <path d="M6 1h2v1H6V1zm2 1h2v2H8V2zm2 2h1v2h-1V4zm1 2h1v4h-1V6zm-1 4h-1v2h1v-2zm-2 2H6v-1h2v1zm-2 0H4v-1h2v1zm-2-1H3v-2h1v2zm-1-2H1V7h1v2zm0-2h1V4H2v1z" />
+                </svg>
+              ) : (
+                /* Pixel Sun Icon */
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                  <path d="M7 0h2v2H7V0zm0 14h2v2H7v-2zM0 7h2v2H0V7zm14 0h2v2h-2V7zm-2-5h2v2h-2V2zM2 12h2v2H2v-2zm10 0h2v2h-2v-2zM2 2h2v2H2V2zm3 3h6v6H5V5z" />
+                </svg>
+              )}
+            </button>
+
             <Link
               href="/"
               className="text-[10px] uppercase tracking-wide px-3 py-1 border border-amber-500/60 rounded-full font-mono text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all cursor-pointer"
@@ -107,8 +164,24 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             )}
           </div>
 
-          {/* Mobile Menu Trigger */}
+          {/* Mobile Controls: Theme Switcher & Menu Trigger */}
           <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={handleToggleTheme}
+              className="w-7 h-7 rounded-full border border-[#535353]/60 dark:border-[#80868b] flex items-center justify-center transition-colors focus:outline-hidden cursor-pointer text-[#535353] dark:text-[#e8eaed]"
+              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+            >
+              {isNight ? (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                  <path d="M6 1h2v1H6V1zm2 1h2v2H8V2zm2 2h1v2h-1V4zm1 2h1v4h-1V6zm-1 4h-1v2h1v-2zm-2 2H6v-1h2v1zm-2 0H4v-1h2v1zm-2-1H3v-2h1v2zm-1-2H1V7h1v2zm0-2h1V4H2v1z" />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16" shapeRendering="crispEdges">
+                  <path d="M7 0h2v2H7V0zm0 14h2v2H7v-2zM0 7h2v2H0V7zm14 0h2v2h-2V7zm-2-5h2v2h-2V2zM2 12h2v2H2v-2zm10 0h2v2h-2v-2zM2 2h2v2H2V2zm3 3h6v6H5V5z" />
+                </svg>
+              )}
+            </button>
+
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="h-8 w-8">
