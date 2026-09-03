@@ -4,29 +4,32 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
-import { AppSidebar } from "@/components/app-sidebar";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarInset,
-} from "@/components/ui/sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { LogOut, User } from "lucide-react";
+import { Telescope, Users, ShieldAlert, Gamepad2, LogOut, User, Sparkles } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
 
+  // Navigation Items
+  const navItems = [
+    { title: "Campaigns Hub", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
+    { title: "Team Workspace", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+  ];
+
+  // @ts-ignore
+  if (session?.user?.role === "admin") {
+    navItems.push({
+      title: "Admin Console",
+      url: "/admin",
+      icon: ShieldAlert,
+      active: pathname === "/admin",
+    });
+  }
+
+  // Get Breadcrumb Page Name
   const getBreadcrumbName = () => {
     if (pathname === "/campaigns") return "Campaigns Hub";
     if (pathname === "/admin") return "Admin Command Console";
@@ -37,30 +40,69 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-card">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb className="text-xs">
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden sm:block">
-                  <BreadcrumbLink href="/" className="text-muted-foreground hover:text-foreground">
-                    Dino HQ
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden sm:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="font-semibold text-foreground">
-                    {getBreadcrumbName()}
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+    <div className="flex min-h-screen w-full bg-background text-foreground font-sans">
+      {/* Fixed Dedicated Width Left Navigation Sidebar (w-64 / 256px) */}
+      <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col justify-between min-h-screen">
+        <div>
+          {/* Header */}
+          <div className="h-16 px-6 flex items-center border-b border-border">
+            <Link href="/" className="flex items-center gap-2.5 font-bold text-sm text-primary tracking-tight">
+              <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Sparkles className="size-4" />
+              </div>
+              <span className="font-bold">SAVE DINO HQ</span>
+            </Link>
           </div>
 
+          {/* Navigation Links */}
+          <div className="p-4 space-y-6">
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+                IASC Operations
+              </div>
+              <nav className="space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.title}
+                    href={item.url}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                      item.active
+                        ? "bg-primary text-primary-foreground font-semibold"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    <item.icon className="size-4 shrink-0" />
+                    <span>{item.title}</span>
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Arcade Link */}
+        <div className="p-4 border-t border-border">
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
+          >
+            <Gamepad2 className="size-4 shrink-0" />
+            <span>Play Dino Game</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Right Main Content Area (occupies remaining width cleanly) */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Top Bar Header */}
+        <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground font-medium">Dino HQ</span>
+            <Separator orientation="vertical" className="h-4" />
+            <span className="text-xs font-semibold text-foreground">{getBreadcrumbName()}</span>
+          </div>
+
+          {/* Session Controls */}
           <div className="flex items-center gap-3">
             {session?.user ? (
               <div className="flex items-center gap-2.5 text-xs">
@@ -91,10 +133,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-6 bg-background">
+        {/* Main Body */}
+        <main className="flex-1 p-6 sm:p-8 overflow-y-auto bg-background/50">
           {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </main>
+      </div>
+    </div>
   );
 }
