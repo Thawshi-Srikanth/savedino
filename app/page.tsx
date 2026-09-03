@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { audioSynth } from "./components/AudioSynthesizer";
@@ -156,13 +157,17 @@ export default function Home() {
             </li>
             <li className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 bg-[#0284c7] inline-block flex-shrink-0"></span>
-              <span
-                className={`hover:underline cursor-pointer font-bold transition-colors duration-700 ${
+              <Link
+                href="/campaigns"
+                className={`hover:underline cursor-pointer font-bold transition-colors duration-700 flex items-center gap-1.5 ${
                   nightActive ? "text-[#38bdf8]" : "text-[#0284c7]"
                 }`}
               >
-                Initiating Asteroid Searching Campaign 2026
-              </span>
+                <span>Initiating Asteroid Searching Campaign 2026</span>
+                <span className="text-[10px] font-pixel px-1.5 py-0.5 border border-current rounded uppercase">
+                  ENTER &gt;
+                </span>
+              </Link>
             </li>
           </ul>
 

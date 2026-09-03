@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 interface HeaderProps {
   onOpenHelp: () => void;
@@ -39,6 +40,12 @@ export const Header: React.FC<HeaderProps> = ({
           <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 border rounded-full font-mono transition-colors duration-700 ${borderColor} ${textColor}`}>
             EXPERIMENT
           </span>
+          <Link
+            href="/campaigns"
+            className={`text-[10px] uppercase tracking-wide px-2.5 py-0.5 border rounded-full font-mono transition-colors duration-700 hover:bg-[#0284c7] hover:text-white hover:border-[#0284c7] cursor-pointer ${borderColor} ${textColor}`}
+          >
+            IASC TEAMS &gt;
+          </Link>
         </div>
 
         {/* Top Right Controls: Theme Toggle, Sound Toggle & Help */}

@@ -1,0 +1,200 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------------------------------------
+// BETTER AUTH CORE MODELS
+// -------------------------------------------------------------
+model User {
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique
+  emailVerified Boolean      @default(false)
+  image         String?
+  role          String       @default("user") // "user" | "admin"
+  institution   String?
+  country       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+  teamMembers   TeamMember[]
+  claimedSets   ImageSet[]
+  joinRequests  TeamJoinRequest[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  userId       String
+  accountId    String
+  providerId   String
+  accessToken  String?
+  refreshToken String?
+  idToken      String?
+  expiresAt    DateTime?
+  password     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// -------------------------------------------------------------
+// CAMPAIGNS, TEAMS, AND DISCOVERY MODELS
+// -------------------------------------------------------------
+model Event {
+  id                 String    @id @default(cuid())
+  title              String    // e.g. "IASC Pan-STARRS Campaign Oct 2026"
+  code               String    @unique // e.g. "IASC-2026-OCT"
+  description        String?
+  
+  // Phase 1: User Registration Period
+  regStart           DateTime
+  regEnd             DateTime
+  
+  // Phase 2: Team Formation Period
+  teamFormationStart DateTime
+  teamFormationEnd   DateTime
+  
+  // Phase 3: Campaign & Image Set Analysis Period
+  startDate          DateTime
+  endDate            DateTime
+  
+  // Phase 4: Report Submission Period
+  submissionStart    DateTime
+  submissionEnd      DateTime
+
+  status             String    @default("ACTIVE") // "UPCOMING" | "ACTIVE" | "COMPLETED"
+  minTeamMembers     Int       @default(2)
+  maxTeamMembers     Int       @default(6)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  teams              Team[]
+
+  @@map("event")
+}
+
+model Team {
+  id               String            @id @default(cuid())
+  eventId          String
+  name             String
+  inviteCode       String            @unique // 6-character code e.g. "AST-8492"
+  leaderId         String
+  status           String            @default("FORMING") // "FORMING" (<2) | "READY" (2-6) | "FULL" (6)
+  isRecruiting     Boolean           @default(true)      // Open for join requests
+  recruitmentNotes String?           // Seeking notes e.g. "Need 2 members with FITS experience"
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  event            Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  members          TeamMember[]
+  imageSets        ImageSet[]
+  candidates       Candidate[]
+  joinRequests     TeamJoinRequest[]
+
+  @@unique([eventId, name])
+  @@map("team")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      String   @default("MEMBER") // "LEADER" | "MEMBER"
+  joinedAt  DateTime @default(now())
+
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_member")
+}
+
+model TeamJoinRequest {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  message   String?  // Optional intro/pitch
+  status    String   @default("PENDING") // "PENDING" | "ACCEPTED" | "REJECTED"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_join_request")
+}
+
+model ImageSet {
+  id              String       @id @default(cuid())
+  teamId          String
+  setCode         String       // e.g. "PS1-26A-01"
+  claimedByUserId String?
+  status          String       @default("PENDING") // "PENDING" | "CLAIMED" | "CLEAN" | "REPORTED"
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  team            Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  claimedByUser   User?        @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
+  candidates      Candidate[]
+
+  @@unique([teamId, setCode])
+  @@map("image_set")
+}
+
+model Candidate {
+  id            String    @id @default(cuid())
+  teamId        String
+  imageSetId    String
+  candidateCode String    // e.g. "P10AbCd"
+  ra            String    // "21 14 32.18"
+  dec           String    // "+14 22 18.4"
+  magnitude     Float     // 21.4
+  observedAt    DateTime
+  status        String    @default("SUBMITTED") // "SUBMITTED" | "PRELIMINARY" | "PROVISIONAL"
+  rawMpcLine    String
+  createdAt     DateTime  @default(now())
+
+  team          Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  imageSet      ImageSet  @relation(fields: [imageSetId], references: [id], onDelete: Cascade)
+
+  @@map("candidate")
+}
