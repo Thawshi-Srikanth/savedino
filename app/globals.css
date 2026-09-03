@@ -48,69 +48,69 @@
   --sidebar-width-icon: 3rem;
   --radius: 0.5rem;
 
-  /* --- LIGHT COSMIC OBSERVATORY THEME --- */
-  --background: oklch(0.965 0.015 250);  /* #f0f4fa - Crisp Observatory Blue-White */
-  --foreground: oklch(0.20 0.04 265);     /* #0f172a - Deep Cosmic Midnight Text */
-  --card: oklch(0.99 0.01 250);         /* #ffffff - Elevated Observatory Card */
-  --card-foreground: oklch(0.20 0.04 265);
-  --popover: oklch(0.99 0.01 250);
-  --popover-foreground: oklch(0.20 0.04 265);
+  /* --- HOMEPAGE INSPIRED LIGHT MODE SYSTEM --- */
+  --background: #f4f4f4;
+  --foreground: #535353;
+  --card: #f9f9f9;
+  --card-foreground: #535353;
+  --popover: #ffffff;
+  --popover-foreground: #535353;
   
-  --primary: oklch(0.55 0.18 240);        /* Deep Cosmos Blue #0284c7 */
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.92 0.02 250);
-  --secondary-foreground: oklch(0.20 0.04 265);
-  --muted: oklch(0.92 0.02 250);
-  --muted-foreground: oklch(0.50 0.04 250);
-  --accent: oklch(0.92 0.02 250);
-  --accent-foreground: oklch(0.20 0.04 265);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.88 0.02 250);         /* Soft Celestial Border */
-  --input: oklch(0.88 0.02 250);
-  --ring: oklch(0.55 0.18 240);
+  --primary: #0284c7;                    /* Sky Blue accent from Homepage buttons */
+  --primary-foreground: #ffffff;
+  --secondary: #e5e5e5;
+  --secondary-foreground: #535353;
+  --muted: #e5e5e5;
+  --muted-foreground: #737373;
+  --accent: #e5e5e5;
+  --accent-foreground: #535353;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(83, 83, 83, 0.25);      /* Crisp subtle homepage border */
+  --input: rgba(83, 83, 83, 0.25);
+  --ring: #0284c7;
 
-  --sidebar: oklch(0.965 0.015 250);
-  --sidebar-foreground: oklch(0.20 0.04 265);
-  --sidebar-primary: oklch(0.55 0.18 240);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.92 0.02 250);
-  --sidebar-accent-foreground: oklch(0.20 0.04 265);
-  --sidebar-border: oklch(0.88 0.02 250);
-  --sidebar-ring: oklch(0.55 0.18 240);
+  --sidebar: #f4f4f4;
+  --sidebar-foreground: #535353;
+  --sidebar-primary: #0284c7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e5e5e5;
+  --sidebar-accent-foreground: #535353;
+  --sidebar-border: rgba(83, 83, 83, 0.25);
+  --sidebar-ring: #0284c7;
 }
 
 .dark, .night-mode {
-  /* --- DARK COSMIC DEEP SPACE NEBULA THEME --- */
-  --background: oklch(0.12 0.04 265);    /* #050714 - Deep Void Cosmic Space Black */
-  --foreground: oklch(0.95 0.02 240);     /* #f0f4ff - Starlight Off-White Text */
-  --card: oklch(0.18 0.05 265);           /* #0e1329 - Deep Starlight Navy Card */
-  --card-foreground: oklch(0.95 0.02 240);
-  --popover: oklch(0.18 0.05 265);
-  --popover-foreground: oklch(0.95 0.02 240);
+  /* --- HOMEPAGE INSPIRED NIGHT MODE SYSTEM --- */
+  --background: #121212;
+  --foreground: #e8eaed;
+  --card: #1c1c1e;
+  --card-foreground: #e8eaed;
+  --popover: #1c1c1e;
+  --popover-foreground: #e8eaed;
   
-  --primary: oklch(0.68 0.22 285);        /* Cosmic Nebula Purple #8b5cf6 */
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.24 0.06 265);
-  --secondary-foreground: oklch(0.95 0.02 240);
-  --muted: oklch(0.24 0.06 265);
-  --muted-foreground: oklch(0.70 0.06 250);
-  --accent: oklch(0.24 0.06 265);
-  --accent-foreground: oklch(0.95 0.02 240);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.26 0.06 265);         /* Starlight Cosmic Border #1e2942 */
-  --input: oklch(0.26 0.06 265);
-  --ring: oklch(0.68 0.22 285);
+  --primary: #38bdf8;                    /* Bright sky cyan accent */
+  --primary-foreground: #0f172a;
+  --secondary: #2c2c2e;
+  --secondary-foreground: #e8eaed;
+  --muted: #2c2c2e;
+  --muted-foreground: #9ca3af;
+  --accent: #2c2c2e;
+  --accent-foreground: #e8eaed;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(128, 134, 139, 0.35);    /* Homepage night mode border */
+  --input: rgba(128, 134, 139, 0.35);
+  --ring: #38bdf8;
 
-  --sidebar: oklch(0.12 0.04 265);
-  --sidebar-foreground: oklch(0.95 0.02 240);
-  --sidebar-primary: oklch(0.68 0.22 285);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.24 0.06 265);
-  --sidebar-accent-foreground: oklch(0.95 0.02 240);
-  --sidebar-border: oklch(0.26 0.06 265);
-  --sidebar-ring: oklch(0.68 0.22 285);
+  --sidebar: #121212;
+  --sidebar-foreground: #e8eaed;
+  --sidebar-primary: #38bdf8;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #2c2c2e;
+  --sidebar-accent-foreground: #e8eaed;
+  --sidebar-border: rgba(128, 134, 139, 0.35);
+  --sidebar-ring: #38bdf8;
 }
 
 @layer base {

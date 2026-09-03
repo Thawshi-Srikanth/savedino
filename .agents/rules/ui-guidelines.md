@@ -1,16 +1,20 @@
-# UI Guidelines & Best Practices
+# UI Guidelines & Design System Rules
 
-## 1. No Emojis in UI Text
-- Do **NOT** use raw inline emojis (e.g. `👥`, `🚀`, `🪐`, `✉`, `📥`, `🔍`, `✅`, `⚙`) in titles, navigation buttons, tabs, modal headers, or badges.
-- Always use standard `lucide-react` icons or clean, unadorned text.
+## 1. Homepage Visual Consistency System
+- All platform routes and components must follow the homepage visual theme system:
+  - **Light Mode Canvas**: `#f4f4f4` background, `#f9f9f9` cards, `#535353` text, `#0284c7` primary accents.
+  - **Night Mode Canvas**: `#121212` background, `#1c1c1e` cards, `#e8eaed` text, `#38bdf8` primary accents.
+  - **Card Containers**: Bordered with `border-border` (`rgba(83,83,83,0.25)` light / `rgba(128,134,139,0.35)` dark).
 
-## 2. No Unnecessary Badges or Visual Clutter
-- Avoid redundant or purely decorative badges.
-- Use badges strictly for meaningful system statuses (e.g. `ACTIVE`, `PENDING`, `OPEN`, `CLOSED`).
+## 2. Component Design Specifications (`components/ui/*`)
+- **Badges**: Rounded-full pills with `font-mono uppercase text-[10px] tracking-wide`.
+- **Buttons**: Font-mono text with crisp borders (`border-border`), sky-blue primary fill (`bg-primary`), and hover transitions matching homepage controls.
+- **Inputs & Textareas**: Font-mono inputs with `border-border` borders and smooth focus rings.
+- **Cards**: `rounded-lg border border-border bg-card text-card-foreground shadow-xs`.
 
-## 3. Clean, Professional English (No Jargon or Roleplay Text)
-- Keep UI text concise, plain, clear, and professional.
-- Do not use over-dramatic roleplay titles or jargon (e.g. use "Sign In" instead of "Observatory Cadet Access", "Members" instead of "Cadets", "Import Image Sets" instead of "Ingest Picture Sets from IASC").
+## 3. No Raw Emojis in UI Text
+- Do **NOT** use raw inline emojis in titles, navigation buttons, tabs, modal headers, or badges.
+- Use `lucide-react` icons or clean, unadorned text.
 
-## 4. Standard shadcn/ui Components
-- Use standard `@/components/ui/*` primitives (`Button`, `Card`, `Badge`, `Input`, `Textarea`, `Dialog`, `Tabs`, `Table`, `Progress`, `Sidebar`, `Breadcrumb`).
+## 4. Clear, Professional English Text
+- Use simple, plain, clear, professional UI text (e.g. "Sign In", "Create Account", "Campaigns", "Teams").
