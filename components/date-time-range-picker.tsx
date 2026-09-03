@@ -1,0 +1,375 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import {
+  addMonths,
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isEqual,
+  isValid,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  subDays,
+  subMonths,
+} from "date-fns";
+import { enUS, type Locale } from "date-fns/locale";
+import { CalendarIcon, CheckIcon, ChevronRightIcon } from "lucide-react";
+import * as React from "react";
+import { DateTimeInput } from "./date-time-input";
+
+export interface DateTimeRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+interface Preset {
+  name: string;
+  label: string;
+}
+
+const PRESETS: Preset[] = [
+  { name: "last7", label: "Last 7 days" },
+  { name: "last14", label: "Last 14 days" },
+  { name: "last30", label: "Last 30 days" },
+  { name: "thisWeek", label: "This Week" },
+  { name: "lastWeek", label: "Last Week" },
+  { name: "thisMonth", label: "This Month" },
+  { name: "lastMonth", label: "Last Month" },
+];
+
+export interface DateTimeRangePickerProps {
+  onUpdate?: (values: { range: DateTimeRange }) => void;
+  initialDateFrom?: Date | string;
+  initialDateTo?: Date | string;
+  align?: "start" | "center" | "end";
+  locale?: Locale;
+  className?: string;
+}
+
+const formatDateTime = (
+  date: Date | undefined,
+  locale: Locale = enUS,
+): string => {
+  if (!date || !isValid(date)) return "Select date";
+  return format(date, "PPP p", { locale });
+};
+
+const getDateAdjustedForTimezone = (
+  dateInput: Date | string | undefined,
+): Date | undefined => {
+  if (!dateInput) return undefined;
+  if (typeof dateInput === "string") {
+    const parts = dateInput.split("-").map((part) => Number.parseInt(part, 10));
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+  return new Date(dateInput);
+};
+
+export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
+  initialDateFrom,
+  initialDateTo,
+  onUpdate,
+  align = "center",
+  locale = enUS,
+  className,
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [range, setRange] = React.useState<DateTimeRange>({
+    from: getDateAdjustedForTimezone(initialDateFrom),
+    to: getDateAdjustedForTimezone(initialDateTo),
+  });
+
+  const openedRangeRef = React.useRef<DateTimeRange>(range);
+  const [selectedPreset, setSelectedPreset] = React.useState<
+    string | undefined
+  >(undefined);
+  const [calendarMonths, setCalendarMonths] = React.useState<[Date, Date]>([
+    new Date(),
+    addMonths(new Date(), 1),
+  ]);
+
+  const getPresetRange = React.useCallback(
+    (presetName: string): DateTimeRange => {
+      const now = new Date();
+      const today = startOfDay(now);
+      const endToday = endOfDay(now);
+
+      switch (presetName) {
+        case "today":
+          return { from: today, to: endToday };
+        case "yesterday": {
+          const yesterday = subDays(today, 1);
+          return { from: yesterday, to: endOfDay(yesterday) };
+        }
+        case "last7":
+          return { from: subDays(today, 6), to: endToday };
+        case "last14":
+          return { from: subDays(today, 13), to: endToday };
+        case "last30":
+          return { from: subDays(today, 29), to: endToday };
+        case "thisWeek":
+          return {
+            from: startOfWeek(today, { weekStartsOn: 0 }),
+            to: endToday,
+          };
+        case "lastWeek": {
+          const lastWeekStart = startOfWeek(subDays(today, 7), {
+            weekStartsOn: 0,
+          });
+          const lastWeekEnd = endOfWeek(lastWeekStart, { weekStartsOn: 0 });
+          return {
+            from: lastWeekStart,
+            to: lastWeekEnd,
+          };
+        }
+        case "thisMonth":
+          return {
+            from: startOfMonth(today),
+            to: endToday,
+          };
+        case "lastMonth": {
+          const lastMonth = subMonths(today, 1);
+          return {
+            from: startOfMonth(lastMonth),
+            to: endOfMonth(lastMonth),
+          };
+        }
+        default:
+          throw new Error(`Unknown date range preset: ${presetName}`);
+      }
+    },
+    [],
+  );
+
+  const setPreset = (preset: string): void => {
+    const newRange = getPresetRange(preset);
+    setRange(newRange);
+    setSelectedPreset(preset);
+    if (newRange.from) {
+      setCalendarMonths([newRange.from, addMonths(newRange.from, 1)]);
+    }
+  };
+
+  const checkPreset = React.useCallback(() => {
+    if (!range.from || !range.to) return;
+
+    for (const preset of PRESETS) {
+      const presetRange = getPresetRange(preset.name);
+      if (
+        isEqual(startOfDay(range.from), startOfDay(presetRange.from!)) &&
+        isEqual(endOfDay(range.to), endOfDay(presetRange.to!))
+      ) {
+        setSelectedPreset(preset.name);
+        return;
+      }
+    }
+    setSelectedPreset(undefined);
+  }, [range, getPresetRange]);
+
+  const resetValues = (): void => {
+    setRange({
+      from: getDateAdjustedForTimezone(initialDateFrom),
+      to: getDateAdjustedForTimezone(initialDateTo),
+    });
+    setSelectedPreset(undefined);
+    setCalendarMonths([new Date(), addMonths(new Date(), 1)]);
+  };
+
+  React.useEffect(() => {
+    checkPreset();
+  }, [checkPreset]);
+
+  const PresetButton = ({
+    preset,
+    label,
+    isSelected,
+  }: {
+    preset: string;
+    label: string;
+    isSelected: boolean;
+  }) => (
+    <Button
+      className={cn(
+        "justify-start text-xs font-mono h-8 cursor-pointer",
+        isSelected && "bg-[#8b5cf6]/15 text-[#8b5cf6] font-bold border border-[#8b5cf6]/30"
+      )}
+      variant="ghost"
+      onClick={() => setPreset(preset)}
+    >
+      <CheckIcon
+        className={cn("mr-1.5 h-3.5 w-3.5 text-[#8b5cf6]", isSelected ? "opacity-100" : "opacity-0")}
+      />
+      {label}
+    </Button>
+  );
+
+  const areRangesEqual = (a?: DateTimeRange, b?: DateTimeRange): boolean => {
+    if (!a || !b) return a === b;
+    return (
+      isEqual(a.from || new Date(), b.from || new Date()) &&
+      isEqual(a.to || new Date(), b.to || new Date())
+    );
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      openedRangeRef.current = range;
+    }
+  }, [isOpen, range]);
+
+  const handleFromDateTimeChange = (date: Date) => {
+    setRange((prev) => ({ ...prev, from: date }));
+  };
+
+  const handleToDateTimeChange = (date: Date) => {
+    setRange((prev) => ({ ...prev, to: date }));
+  };
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={cn(
+            "w-full justify-between text-left text-xs font-mono font-normal h-10 border-border bg-card cursor-pointer shadow-[0_2px_0_0_rgba(0,0,0,0.06)] dark:shadow-[0_2px_0_0_rgba(255,255,255,0.06)] hover:bg-card/90",
+            className,
+          )}
+        >
+          <div className="flex items-center gap-2 truncate">
+            <CalendarIcon className="h-4 w-4 text-[#8b5cf6]" />
+            <span>{formatDateTime(range.from, locale)}</span>
+            {range.to && (
+              <>
+                <ChevronRightIcon className="mx-1 h-3.5 w-3.5 opacity-50" />
+                <span>{formatDateTime(range.to, locale)}</span>
+              </>
+            )}
+          </div>
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent className="w-auto p-0 bg-card border border-border shadow-2xl rounded-2xl overflow-hidden" align={align} sideOffset={6}>
+        <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border">
+          {/* Calendar Section */}
+          <div className="space-y-4 p-4 md:p-6">
+            <div className="hidden lg:flex space-x-6 justify-center">
+              {/* Two calendars side by side for desktop */}
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={(newRange) =>
+                  newRange && setRange(newRange as DateTimeRange)
+                }
+                month={calendarMonths[0]}
+                onMonthChange={(month) =>
+                  setCalendarMonths([month, addMonths(month, 1)])
+                }
+                className="rounded-lg border border-border p-3 shadow-xs"
+              />
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={(newRange) =>
+                  newRange && setRange(newRange as DateTimeRange)
+                }
+                month={calendarMonths[1]}
+                onMonthChange={(month) =>
+                  setCalendarMonths([subMonths(month, 1), month])
+                }
+                className="rounded-lg border border-border p-3 shadow-xs"
+              />
+            </div>
+
+            {/* Single calendar for mobile */}
+            <div className="lg:hidden flex justify-center">
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={(newRange) =>
+                  newRange && setRange(newRange as DateTimeRange)
+                }
+                className="rounded-lg border border-border p-3 shadow-xs"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border">
+              <DateTimeInput
+                value={range.from}
+                onChange={handleFromDateTimeChange}
+                label="Start"
+              />
+              <ChevronRightIcon className="hidden sm:block mx-1 h-4 w-4 text-muted-foreground" />
+              <DateTimeInput
+                value={range.to}
+                onChange={handleToDateTimeChange}
+                label="End"
+              />
+            </div>
+          </div>
+
+          {/* Presets Section */}
+          <div className="w-full lg:w-48 p-4 md:p-6 space-y-3 bg-muted/20 flex flex-col justify-between">
+            <div>
+              <h3 className="font-mono font-bold text-xs uppercase tracking-wider text-foreground mb-2">Presets</h3>
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
+                {PRESETS.map((preset) => (
+                  <PresetButton
+                    key={preset.name}
+                    preset={preset.name}
+                    label={preset.label}
+                    isSelected={selectedPreset === preset.name}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between p-4 border-t border-border bg-muted/30">
+          <div className="text-xs font-mono text-muted-foreground hidden sm:block">
+            {range.from && range.to ? `${format(range.from, "MMM d, yyyy")} → ${format(range.to, "MMM d, yyyy")}` : "Select date range"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIsOpen(false);
+                resetValues();
+              }}
+              className="text-xs font-semibold cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => {
+                setIsOpen(false);
+                if (!areRangesEqual(range, openedRangeRef.current)) {
+                  onUpdate?.({ range });
+                }
+              }}
+              className="text-xs font-bold cursor-pointer"
+            >
+              Update Range
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+DateTimeRangePicker.displayName = "DateTimeRangePicker";

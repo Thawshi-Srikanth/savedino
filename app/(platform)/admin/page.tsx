@@ -6,12 +6,9 @@ import { useSession } from "@/lib/auth-client";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Gamepad2 } from "lucide-react";
+import { ShieldAlert, Users, Telescope, PlusCircle, Rocket } from "lucide-react";
 
 interface EventData {
   id: string;
@@ -78,21 +75,6 @@ export default function AdminDashboardPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // New Event Modal
-  const [showEventModal, setShowEventModal] = useState<boolean>(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newCode, setNewCode] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [newRegStart, setNewRegStart] = useState("");
-  const [newRegEnd, setNewRegEnd] = useState("");
-  const [newTeamStart, setNewTeamStart] = useState("");
-  const [newTeamEnd, setNewTeamEnd] = useState("");
-  const [newStart, setNewStart] = useState("");
-  const [newEnd, setNewEnd] = useState("");
-  const [newSubStart, setNewSubStart] = useState("");
-  const [newSubEnd, setNewSubEnd] = useState("");
-  const [eventError, setEventError] = useState<string | null>(null);
-
   // Matchmaking Modal State
   const [assigningUser, setAssigningUser] = useState<UserData | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
@@ -100,13 +82,27 @@ export default function AdminDashboardPage() {
   const [assignSuccess, setAssignSuccess] = useState<string | null>(null);
 
   const fetchAdminData = async () => {
+    setLoading(true);
     try {
-      const res = await fetch("/api/admin/matchmaking");
-      const data = await res.json();
-      if (data.success) {
-        setEvents(data.events || []);
-        setTeams(data.teams || []);
-        setUsers(data.users || []);
+      const [resEvents, resTeams, resUsers] = await Promise.all([
+        fetch("/api/events"),
+        fetch("/api/teams"),
+        fetch("/api/admin/users"),
+      ]);
+
+      if (resEvents.ok) {
+        const d = await resEvents.json();
+        if (d.success) setEvents(d.events || []);
+      }
+
+      if (resTeams.ok) {
+        const d = await resTeams.json();
+        if (d.success) setTeams(d.teams || []);
+      }
+
+      if (resUsers.ok) {
+        const d = await resUsers.json();
+        if (d.success) setUsers(d.users || []);
       }
     } catch (err) {
       console.error(err);
@@ -118,44 +114,6 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetchAdminData();
   }, []);
-
-  const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEventError(null);
-
-    try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newTitle.trim(),
-          code: newCode.trim(),
-          description: newDesc.trim(),
-          regStart: newRegStart,
-          regEnd: newRegEnd,
-          teamFormationStart: newTeamStart,
-          teamFormationEnd: newTeamEnd,
-          startDate: newStart,
-          endDate: newEnd,
-          submissionStart: newSubStart,
-          submissionEnd: newSubEnd,
-        }),
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        setEventError(data.error || "Failed to create event.");
-      } else {
-        setShowEventModal(false);
-        setNewTitle("");
-        setNewCode("");
-        setNewDesc("");
-        fetchAdminData();
-      }
-    } catch (err: any) {
-      setEventError(err.message || "An error occurred.");
-    }
-  };
 
   const handleAssignStudent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,41 +149,129 @@ export default function AdminDashboardPage() {
     }
   };
 
-  return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Tabs Interface */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start font-pixel text-[9px] uppercase tracking-wider font-bold">
-          <TabsTrigger value="MATCHMAKING">
-            Unassigned Students ({users.filter((u) => u.teamMembers.length === 0).length})
-          </TabsTrigger>
-          <TabsTrigger value="TEAMS">
-            Teams ({teams.length})
-          </TabsTrigger>
-          <TabsTrigger value="EVENTS">
-            Campaign Events ({events.length})
-          </TabsTrigger>
-        </TabsList>
+  const unassignedStudents = users.filter((u) => u.teamMembers.length === 0);
 
+  return (
+    <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 items-start font-sans">
+      {/* Admin Sidebar Navigation Panel (Clean PostHog 3D Style) */}
+      <aside className="w-full md:w-64 flex-shrink-0 bg-card border border-border rounded-xl p-4 shadow-xs space-y-6">
+        <div>
+          <div className="flex items-center gap-2 px-2 py-1">
+            <ShieldAlert className="size-4 text-[#8b5cf6]" />
+            <span className="font-bold text-xs uppercase tracking-wider text-foreground">
+              ADMIN CONSOLE
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground px-2 mt-0.5">
+            IASC Operations & Roster Management
+          </p>
+        </div>
+
+        {/* Sidebar Nav Buttons */}
+        <nav className="space-y-2">
+          <Button
+            type="button"
+            variant={activeTab === "MATCHMAKING" ? "default" : "outline"}
+            onClick={() => setActiveTab("MATCHMAKING")}
+            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Users className="size-4" />
+              <span>Unassigned</span>
+            </div>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-semibold">
+              {unassignedStudents.length}
+            </Badge>
+          </Button>
+
+          <Button
+            type="button"
+            variant={activeTab === "TEAMS" ? "default" : "outline"}
+            onClick={() => setActiveTab("TEAMS")}
+            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Telescope className="size-4" />
+              <span>Teams</span>
+            </div>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-semibold">
+              {teams.length}
+            </Badge>
+          </Button>
+
+          <Button
+            type="button"
+            variant={activeTab === "EVENTS" ? "default" : "outline"}
+            onClick={() => setActiveTab("EVENTS")}
+            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Rocket className="size-4" />
+              <span>Campaigns</span>
+            </div>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-semibold">
+              {events.length}
+            </Badge>
+          </Button>
+        </nav>
+
+        {/* Dedicated Page Action Link Button */}
+        <div className="pt-2 border-t border-border space-y-3">
+          <Link href="/admin/campaigns/new" className="block w-full">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full text-xs font-bold py-2.5 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <PlusCircle className="size-3.5" />
+              <span>New Campaign</span>
+            </Button>
+          </Link>
+
+          {/* Quick System Stats */}
+          <div className="p-3 bg-muted/40 rounded-lg border border-border space-y-1.5 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span>Total Students:</span>
+              <span className="font-bold text-foreground">{users.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Active Events:</span>
+              <span className="font-bold text-emerald-500">
+                {events.filter((e) => e.status === "ACTIVE").length}
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Workspace Area */}
+      <main className="flex-1 w-full space-y-6">
         {/* TAB 1: UNASSIGNED STUDENTS */}
-        <TabsContent value="MATCHMAKING">
+        {activeTab === "MATCHMAKING" && (
           <Card>
             <CardHeader>
-              <CardTitle>Unassigned Students</CardTitle>
-              <CardDescription>
-                Assign registered students without a team into teams with open slots.
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-bold text-foreground">Unassigned Students</CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                    Assign registered students without a team into teams with open slots.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-xs font-semibold">
+                  {unassignedStudents.length} Solo Students
+                </Badge>
+              </div>
             </CardHeader>
 
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Country / Institution</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead className="text-xs font-bold">Student Name</TableHead>
+                    <TableHead className="text-xs font-bold">Email</TableHead>
+                    <TableHead className="text-xs font-bold">Country / Institution</TableHead>
+                    <TableHead className="text-xs font-bold">Status</TableHead>
+                    <TableHead className="text-right text-xs font-bold">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -233,9 +279,9 @@ export default function AdminDashboardPage() {
                     const isSolo = u.teamMembers.length === 0;
                     return (
                       <TableRow key={u.id}>
-                        <TableCell className="font-semibold">{u.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                        <TableCell>
+                        <TableCell className="font-semibold text-xs">{u.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{u.email}</TableCell>
+                        <TableCell className="text-xs">
                           {u.country || "Global"} {u.institution ? `(${u.institution})` : ""}
                         </TableCell>
                         <TableCell>
@@ -255,6 +301,7 @@ export default function AdminDashboardPage() {
                               setAssignError(null);
                               setAssignSuccess(null);
                             }}
+                            className="text-xs font-semibold cursor-pointer"
                           >
                             Assign to Team
                           </Button>
@@ -266,123 +313,145 @@ export default function AdminDashboardPage() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {/* TAB 2: TEAMS */}
-        <TabsContent value="TEAMS">
+        {activeTab === "TEAMS" && (
           <Card>
             <CardHeader>
-              <CardTitle>Registered Teams</CardTitle>
-              <CardDescription>Inspect member rosters and team status.</CardDescription>
+              <CardTitle className="text-lg font-bold text-foreground">Campaign Teams & Members</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                Overview of all registered teams and their current member capacity.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {teams.map((t) => (
-                  <div
-                    key={t.id}
-                    className="p-4 border border-border rounded-md bg-card flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-semibold text-primary">{t.event.code}</span>
-                        <Badge variant={t.members.length < 2 ? "secondary" : "default"}>
-                          {t.members.length < 2 ? "Needs 2 Members" : `${t.members.length}/6 Members`}
-                        </Badge>
-                      </div>
-                      <h3 className="font-bold text-sm mb-1">{t.name}</h3>
-                      <div className="text-xs text-muted-foreground mb-3">Invite Code: {t.inviteCode}</div>
 
-                      <div className="text-xs text-muted-foreground mb-4 space-y-1">
-                        <div>Members: {t.members.map((m) => m.user.name).join(", ")}</div>
-                      </div>
-                    </div>
-
-                    <Link href={`/team/${t.id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Open Team Workspace
-                      </Button>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* TAB 3: EVENTS */}
-        <TabsContent value="EVENTS">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Campaign Events</CardTitle>
-                <CardDescription>Create and publish campaign events.</CardDescription>
-              </div>
-              <Button variant="default" size="sm" onClick={() => setShowEventModal(true)}>
-                Create Event
-              </Button>
-            </CardHeader>
             <CardContent className="space-y-4">
-              {events.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="p-4 border border-border rounded-md bg-card flex items-center justify-between"
-                >
-                  <div>
-                    <div className="text-xs font-semibold text-primary uppercase">
-                      {ev.code}
-                    </div>
-                    <div className="font-bold text-sm mt-0.5">{ev.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(ev.startDate).toLocaleDateString()} to {new Date(ev.endDate).toLocaleDateString()}
-                    </div>
-                  </div>
-
-                  <Badge variant={ev.status === "ACTIVE" ? "default" : "outline"}>{ev.status}</Badge>
+              {teams.length === 0 ? (
+                <div className="py-8 text-center text-xs text-muted-foreground">
+                  No teams registered yet.
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {teams.map((t) => (
+                    <div
+                      key={t.id}
+                      className="p-4 rounded-lg border border-border bg-card space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-primary font-bold">{t.name}</span>
+                        <Badge variant="outline">{t.members.length}/6 Members</Badge>
+                      </div>
+
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <div>
+                          Invite Code: <span className="font-bold text-foreground font-mono">{t.inviteCode}</span>
+                        </div>
+                        <div>
+                          Campaign: <span className="font-bold text-foreground">{t.event?.code || "AST"}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-border">
+                        <span className="block text-xs font-bold uppercase text-muted-foreground mb-1.5">
+                          Roster ({t.members.length}):
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {t.members.map((m) => (
+                            <Badge key={m.id} variant="secondary" className="text-xs">
+                              {m.user.name} {m.role === "leader" ? "👑" : ""}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        )}
 
-      {/* Matchmaking Modal */}
-      <Dialog open={!!assigningUser} onOpenChange={(open) => !open && setAssigningUser(null)}>
-        <DialogContent>
+        {/* TAB 3: CAMPAIGN EVENTS */}
+        {activeTab === "EVENTS" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-foreground">
+                  Campaign Events ({events.length})
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage active IASC search campaigns and registration schedules.
+                </p>
+              </div>
+
+              <Link href="/admin/campaigns/new">
+                <Button size="sm" variant="default" className="text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                  <PlusCircle className="size-3.5" />
+                  <span>New Campaign</span>
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {events.map((ev) => (
+                <Card key={ev.id} className="p-4 space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-xs text-primary font-bold uppercase font-mono">
+                        {ev.code}
+                      </span>
+                      <Badge variant={ev.status === "ACTIVE" ? "default" : "outline"}>
+                        {ev.status}
+                      </Badge>
+                    </div>
+
+                    <h3 className="font-bold text-base text-foreground">{ev.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {ev.description || "International Asteroid Search Collaboration campaign."}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-border text-xs text-muted-foreground space-y-1">
+                    <div>Start Date: {new Date(ev.startDate).toLocaleDateString()}</div>
+                    <div>End Date: {new Date(ev.endDate).toLocaleDateString()}</div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Matchmaking Assign Modal */}
+      <Dialog open={!!assigningUser} onOpenChange={() => setAssigningUser(null)}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Assign Student to Team</DialogTitle>
-            <DialogDescription>
-              Student: <strong>{assigningUser?.name}</strong> ({assigningUser?.email})
+            <DialogTitle className="text-base font-bold">
+              Assign Student to Team
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Assigning {assigningUser?.name} ({assigningUser?.email}) into an open team slot.
             </DialogDescription>
           </DialogHeader>
 
-          {assignError && (
-            <div className="p-2 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
-              {assignError}
-            </div>
-          )}
-          {assignSuccess && (
-            <div className="p-2 border border-emerald-500 bg-emerald-500/10 text-emerald-600 text-xs mb-3">
-              {assignSuccess}
-            </div>
-          )}
+          {assignError && <div className="text-xs text-destructive">{assignError}</div>}
+          {assignSuccess && <div className="text-xs text-emerald-500">{assignSuccess}</div>}
 
           <form onSubmit={handleAssignStudent} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium mb-1.5">
-                Select Team (less than 6 members):
-              </label>
+              <label className="block text-xs font-bold uppercase mb-1">Select Open Team</label>
               <select
-                required
+                className="w-full h-10 px-3 rounded-md border border-border bg-card text-xs text-foreground focus:outline-hidden"
                 value={selectedTeamId}
                 onChange={(e) => setSelectedTeamId(e.target.value)}
-                className="w-full p-2 text-xs bg-card border border-border rounded-md"
+                required
               >
-                <option value="">-- Choose Team --</option>
+                <option value="">-- Choose a Team --</option>
                 {teams
                   .filter((t) => t.members.length < 6)
                   .map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name} ({t.members.length}/6 members) - {t.event.code}
+                      {t.name} ({t.event?.code || "AST"}) - {t.members.length}/6 Members
                     </option>
                   ))}
               </select>
@@ -394,139 +463,6 @@ export default function AdminDashboardPage() {
               </Button>
               <Button type="submit" variant="default" disabled={!selectedTeamId}>
                 Confirm Assignment
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Event Modal */}
-      <Dialog open={showEventModal} onOpenChange={setShowEventModal}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Create Campaign Event</DialogTitle>
-            <DialogDescription>Configure campaign dates for registration, team formation, observation, and submissions.</DialogDescription>
-          </DialogHeader>
-
-          {eventError && (
-            <div className="p-2 border border-destructive/50 bg-destructive/10 text-destructive text-xs mb-3">
-              {eventError}
-            </div>
-          )}
-
-          <form onSubmit={handleCreateEvent} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium mb-1">Campaign Title</label>
-              <Input
-                type="text"
-                required
-                placeholder="e.g. Pan-STARRS Fall Search 2026"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-1">Campaign Code</label>
-              <Input
-                type="text"
-                required
-                placeholder="e.g. IASC-2026-FALL"
-                value={newCode}
-                onChange={(e) => setNewCode(e.target.value.toUpperCase())}
-              />
-            </div>
-
-            <div className="space-y-3 p-3 border border-border rounded-md bg-accent/20">
-              <span className="block text-xs font-semibold text-primary uppercase">
-                1. User Registration Phase
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="date"
-                  required
-                  value={newRegStart}
-                  onChange={(e) => setNewRegStart(e.target.value)}
-                />
-                <Input
-                  type="date"
-                  required
-                  value={newRegEnd}
-                  onChange={(e) => setNewRegEnd(e.target.value)}
-                />
-              </div>
-
-              <span className="block text-xs font-semibold text-primary uppercase pt-1">
-                2. Team Formation Phase
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="date"
-                  required
-                  value={newTeamStart}
-                  onChange={(e) => setNewTeamStart(e.target.value)}
-                />
-                <Input
-                  type="date"
-                  required
-                  value={newTeamEnd}
-                  onChange={(e) => setNewTeamEnd(e.target.value)}
-                />
-              </div>
-
-              <span className="block text-xs font-semibold text-primary uppercase pt-1">
-                3. Observation Phase
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="date"
-                  required
-                  value={newStart}
-                  onChange={(e) => setNewStart(e.target.value)}
-                />
-                <Input
-                  type="date"
-                  required
-                  value={newEnd}
-                  onChange={(e) => setNewEnd(e.target.value)}
-                />
-              </div>
-
-              <span className="block text-xs font-semibold text-primary uppercase pt-1">
-                4. Report Submission Phase
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="date"
-                  required
-                  value={newSubStart}
-                  onChange={(e) => setNewSubStart(e.target.value)}
-                />
-                <Input
-                  type="date"
-                  required
-                  value={newSubEnd}
-                  onChange={(e) => setNewSubEnd(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-1">Description</label>
-              <Textarea
-                rows={3}
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Campaign details..."
-              />
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setShowEventModal(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="default">
-                Publish Event
               </Button>
             </DialogFooter>
           </form>
