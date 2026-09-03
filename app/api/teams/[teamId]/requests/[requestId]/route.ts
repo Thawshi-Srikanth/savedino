@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { calculateTeamStatus } from "@/lib/campaign-engine";
 
 // PUT: Team Leader accepts or rejects a join request
 export async function PUT(
@@ -83,12 +84,7 @@ export async function PUT(
 
     // Recalculate team status
     const updatedMemberCount = team.members.length + 1;
-    let newStatus = "FORMING";
-    if (updatedMemberCount >= 6) {
-      newStatus = "FULL";
-    } else if (updatedMemberCount >= 2) {
-      newStatus = "READY";
-    }
+    const newStatus = calculateTeamStatus(updatedMemberCount);
 
     await prisma.team.update({
       where: { id: teamId },

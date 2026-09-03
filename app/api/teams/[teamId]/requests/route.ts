@@ -102,24 +102,29 @@ export async function POST(
     }
 
     // Create or update Join Request
-    const joinRequest = await prisma.teamJoinRequest.upsert({
+    const existing = await prisma.teamJoinRequest.findFirst({
       where: {
-        teamId_userId: {
-          teamId,
-          userId: session.user.id,
-        },
-      },
-      update: {
-        message,
-        status: "PENDING",
-      },
-      create: {
         teamId,
         userId: session.user.id,
-        message,
-        status: "PENDING",
       },
     });
+
+    let joinRequest;
+    if (existing) {
+      joinRequest = await prisma.teamJoinRequest.update({
+        where: { id: existing.id },
+        data: { message, status: "PENDING" },
+      });
+    } else {
+      joinRequest = await prisma.teamJoinRequest.create({
+        data: {
+          teamId,
+          userId: session.user.id,
+          message,
+          status: "PENDING",
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -4,46 +4,40 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { parseMpcReport } from "@/lib/mpc-parser";
 
-// POST /api/teams/[teamId]/image-sets/[setId]/report - Upload Astrometrica MPC Report
+// POST /api/teams/[teamId]/image-sets/[setId]/report - Submit MPC Discovery Report
 export async function POST(
   req: Request,
   context: { params: Promise<{ teamId: string; setId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
 
     const { teamId, setId } = await context.params;
     const body = await req.json();
     const { reportText, markClean } = body;
 
-    // Verify membership
-    const isMember = await prisma.teamMember.findUnique({
-      where: {
-        teamId_userId: {
-          teamId,
-          userId: session.user.id,
-        },
-      },
+    // Check set ownership
+    const currentSet = await prisma.imageSet.findUnique({
+      where: { id: setId },
     });
 
-    if (!isMember && session.user.role !== "admin") {
-      return NextResponse.json(
-        { success: false, error: "Only team members can submit reports." },
-        { status: 403 }
-      );
+    if (!currentSet) {
+      return NextResponse.json({ success: false, error: "Set not found." }, { status: 404 });
     }
 
     // 1. If marked clean (no asteroids in this set)
     if (markClean) {
       await prisma.imageSet.update({
         where: { id: setId },
-        data: { status: "CLEAN", claimedByUserId: session.user.id },
+        data: {
+          status: "SUBMITTED",
+          isClean: true,
+          claimedById: session.user.id,
+          submittedAt: new Date(),
+        },
       });
 
       return NextResponse.json({
@@ -62,53 +56,23 @@ export async function POST(
 
     const parsed = parseMpcReport(reportText);
 
-    if (parsed.candidates.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "No valid candidate observations found in this report. If no asteroids were detected, use 'Mark Clean'.",
-        },
-        { status: 400 }
-      );
-    }
-
-    // 3. Save candidates
-    const createdCandidates = [];
-    for (const cand of parsed.candidates) {
-      const firstObs = cand.observations[0];
-      const newCand = await prisma.candidate.create({
-        data: {
-          teamId,
-          imageSetId: setId,
-          candidateCode: cand.candidateCode,
-          ra: firstObs.raRaw,
-          dec: firstObs.decRaw,
-          magnitude: cand.avgMagnitude,
-          observedAt: cand.firstSeen,
-          status: cand.isNewDiscovery ? "PRELIMINARY" : "SUBMITTED",
-          rawMpcLine: firstObs.rawLine,
-        },
-      });
-      createdCandidates.push({
-        ...newCand,
-        speedArcsecPerHour: cand.speedArcsecPerHour,
-        observationCount: cand.observationCount,
-      });
-    }
-
-    // 4. Update image set to REPORTED
-    await prisma.imageSet.update({
+    // Save report on ImageSet
+    const updatedSet = await prisma.imageSet.update({
       where: { id: setId },
-      data: { status: "REPORTED", claimedByUserId: session.user.id },
+      data: {
+        status: "SUBMITTED",
+        mpcReportText: reportText,
+        claimedById: session.user.id,
+        submittedAt: new Date(),
+      },
     });
 
     return NextResponse.json({
       success: true,
       observatory: parsed.observatoryCode,
       telescope: parsed.telescope,
-      candidates: createdCandidates,
       totalObservations: parsed.totalObservations,
+      imageSet: updatedSet,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
