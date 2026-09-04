@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, User, Building, Globe, ArrowRight, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 function RegisterForm() {
   const router = useRouter();
@@ -18,7 +19,6 @@ function RegisterForm() {
   const [institution, setInstitution] = useState("");
   const [country, setCountry] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // If already authenticated, redirect to destination
   useEffect(() => {
@@ -34,7 +34,6 @@ function RegisterForm() {
     if (!email.trim() || !name.trim()) return;
 
     setLoading(true);
-    setErrorMsg(null);
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
@@ -49,14 +48,17 @@ function RegisterForm() {
       });
 
       if (res.error) {
-        setErrorMsg(res.error.message || "Failed to send link. Please try again.");
+        const msg = res.error.message || "Failed to send link. Please try again.";
+        toast.error(msg);
       } else {
+        toast.success("Account created! Check your email to sign in.");
         router.push(
           `/verify?email=${encodeURIComponent(normalizedEmail)}&redirectTo=${encodeURIComponent(redirectTo)}`
         );
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred. Please try again.");
+      const msg = err.message || "An error occurred. Please try again.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -111,12 +113,6 @@ function RegisterForm() {
               Enter your details to receive an account sign-in link.
             </p>
           </div>
-
-          {errorMsg && (
-            <div className="p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-sans text-center">
-              {errorMsg}
-            </div>
-          )}
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>

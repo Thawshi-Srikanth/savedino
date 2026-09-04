@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, ArrowRight, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 function VerifyContent() {
   const router = useRouter();
@@ -17,9 +18,7 @@ function VerifyContent() {
 
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(!!token);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(60);
-  const [resendSuccess, setResendSuccess] = useState(false);
 
   // If token is present in URL, verify token directly
   useEffect(() => {
@@ -27,7 +26,6 @@ function VerifyContent() {
 
     const verifyToken = async () => {
       setVerifying(true);
-      setErrorMsg(null);
       try {
         const res = await authClient.magicLink.verify({
           query: {
@@ -37,13 +35,16 @@ function VerifyContent() {
         });
 
         if (res.error) {
-          setErrorMsg(res.error.message || "This link has expired or has already been used.");
+          const msg = res.error.message || "This link has expired or has already been used.";
+          toast.error(msg);
           setVerifying(false);
         } else {
+          toast.success("Authenticated successfully!");
           router.push(redirectTo);
         }
       } catch (err: any) {
-        setErrorMsg(err.message || "Failed to verify link. Please request a new one.");
+        const msg = err.message || "Failed to verify link. Please request a new one.";
+        toast.error(msg);
         setVerifying(false);
       }
     };
@@ -64,11 +65,11 @@ function VerifyContent() {
   // Handle URL errors
   useEffect(() => {
     if (urlError) {
-      if (urlError === "INVALID_TOKEN") {
-        setErrorMsg("This link has expired or has already been used. Please request a new one.");
-      } else {
-        setErrorMsg("Authentication failed. Please request a new sign-in link.");
-      }
+      const msg =
+        urlError === "INVALID_TOKEN"
+          ? "This link has expired or has already been used. Please request a new one."
+          : "Authentication failed. Please request a new sign-in link.";
+      toast.error(msg);
     }
   }, [urlError]);
 
@@ -91,6 +92,7 @@ function VerifyContent() {
       try {
         const res = await authClient.getSession();
         if (res?.data?.session && isSubscribed) {
+          toast.success("Signed in successfully!");
           router.push(redirectTo);
         }
       } catch {
@@ -121,8 +123,6 @@ function VerifyContent() {
     if (!email || cooldown > 0) return;
 
     setLoading(true);
-    setErrorMsg(null);
-    setResendSuccess(false);
 
     try {
       const res = await authClient.signIn.magicLink({
@@ -131,17 +131,20 @@ function VerifyContent() {
       });
 
       if (res.error) {
-        setErrorMsg(res.error.message || "Failed to resend link. Please try again.");
+        const msg = res.error.message || "Failed to resend link. Please try again.";
+        toast.error(msg);
       } else {
-        setResendSuccess(true);
         setCooldown(60);
+        toast.success("A fresh sign-in link has been sent to your email!");
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred while resending the link.");
+      const msg = err.message || "An error occurred while resending the link.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
 
   const getEmailProviderInfo = (emailAddress: string) => {
     const domain = emailAddress.split("@")[1]?.toLowerCase() || "";
@@ -232,18 +235,6 @@ function VerifyContent() {
                   )}
                 </p>
               </div>
-
-              {errorMsg && (
-                <div className="p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-sans text-center">
-                  {errorMsg}
-                </div>
-              )}
-
-              {resendSuccess && !errorMsg && (
-                <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-[#10b981] text-xs font-sans text-center">
-                  A fresh sign-in link has been sent to your email.
-                </div>
-              )}
 
               <div className="space-y-3 pt-1">
                 {emailProvider ? (

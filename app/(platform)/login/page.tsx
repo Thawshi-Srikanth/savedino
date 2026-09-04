@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, ArrowRight, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 function LoginForm() {
   const router = useRouter();
@@ -16,7 +17,6 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // If already authenticated, redirect to destination
   useEffect(() => {
@@ -30,11 +30,11 @@ function LoginForm() {
   // Handle URL errors (e.g. expired tokens)
   useEffect(() => {
     if (urlError) {
-      if (urlError === "INVALID_TOKEN") {
-        setErrorMsg("This link has expired or has already been used. Please request a new one.");
-      } else {
-        setErrorMsg("Something went wrong. Please try again.");
-      }
+      const msg =
+        urlError === "INVALID_TOKEN"
+          ? "This link has expired or has already been used. Please request a new one."
+          : "Something went wrong. Please try again.";
+      toast.error(msg);
     }
   }, [urlError]);
 
@@ -43,7 +43,6 @@ function LoginForm() {
     if (!email.trim()) return;
 
     setLoading(true);
-    setErrorMsg(null);
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
@@ -53,18 +52,22 @@ function LoginForm() {
       });
 
       if (res.error) {
-        setErrorMsg(res.error.message || "Failed to send link. Please check your email and try again.");
+        const msg = res.error.message || "Failed to send link. Please check your email and try again.";
+        toast.error(msg);
       } else {
+        toast.success("Sign-in link sent! Check your inbox.");
         router.push(
           `/verify?email=${encodeURIComponent(normalizedEmail)}&redirectTo=${encodeURIComponent(redirectTo)}`
         );
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred. Please try again.");
+      const msg = err.message || "An error occurred. Please try again.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none transition-colors duration-700 bg-background text-foreground">
@@ -89,7 +92,7 @@ function LoginForm() {
         </Link>
       </div>
 
-      {/* Main Centered Auth Section */}
+        {/* Main Centered Auth Section */}
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center gap-2">
@@ -115,12 +118,6 @@ function LoginForm() {
               Enter your email address to receive a sign-in link.
             </p>
           </div>
-
-          {errorMsg && (
-            <div className="p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-sans text-center">
-              {errorMsg}
-            </div>
-          )}
 
           <form onSubmit={handleSendMagicLink} className="space-y-4">
             <div>
