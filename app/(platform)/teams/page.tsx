@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
@@ -83,7 +83,7 @@ interface CampaignEvent {
   status: string;
 }
 
-export default function TeamsPage() {
+function TeamsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlEventId = searchParams.get("eventId") || searchParams.get("event");
@@ -589,5 +589,19 @@ export default function TeamsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function TeamsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-xs font-mono text-muted-foreground">
+          Loading teams...
+        </div>
+      }
+    >
+      <TeamsContent />
+    </Suspense>
   );
 }

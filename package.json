@@ -7,6 +7,7 @@
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
     "db:seed": "npx tsx scripts/seed.ts"
   },
   "dependencies": {

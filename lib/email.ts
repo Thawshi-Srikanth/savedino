@@ -76,8 +76,8 @@ export async function subscribeToNewsletter(email: string) {
 
     // If contact already existed, ensure it is added to the segment
     try {
-      const lookup = await resend.contacts.get({ email });
-      const contactId = lookup.data?.id || data?.id;
+      const lookup: any = await resend.contacts.get({ email });
+      const contactId = lookup?.data?.id || (data as any)?.id;
       if (contactId && (resend.contacts as any)?.segments?.add) {
         await (resend.contacts as any).segments.add({
           contactId,

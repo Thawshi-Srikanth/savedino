@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
     const result = await subscribeToNewsletter(trimmedEmail);
 
     return NextResponse.json({
-      success: true,
+      success: result.success,
       message: "You're on the list! We'll notify you when the full platform launches.",
-      ...result,
+      data: (result as any).data,
     });
   } catch (error: any) {
     console.error("[Subscribe Route Error]:", error);
