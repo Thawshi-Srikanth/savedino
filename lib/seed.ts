@@ -3,7 +3,7 @@ import { prisma } from "./prisma";
 export async function seedDatabase() {
   console.log("🌱 Starting SaveDino Database Seeding...");
 
-  // 1. Create Users
+  // 1. Create Users with 4-Tier Roles (admin, staff, leader, user)
   const usersData = [
     {
       email: "admin@savedino.org",
@@ -16,7 +16,7 @@ export async function seedDatabase() {
     {
       email: "sarah.chen@mit.edu",
       name: "Sarah Chen",
-      role: "user",
+      role: "leader",
       institution: "MIT Astrophysics",
       country: "United States",
       emailVerified: true,
@@ -24,7 +24,7 @@ export async function seedDatabase() {
     {
       email: "kenji.sato@u-tokyo.ac.jp",
       name: "Kenji Sato",
-      role: "user",
+      role: "leader",
       institution: "University of Tokyo",
       country: "Japan",
       emailVerified: true,
@@ -32,7 +32,7 @@ export async function seedDatabase() {
     {
       email: "elena.rostova@cam.ac.uk",
       name: "Dr. Elena Rostova",
-      role: "user",
+      role: "leader",
       institution: "Cambridge Astronomy",
       country: "United Kingdom",
       emailVerified: true,
@@ -40,7 +40,7 @@ export async function seedDatabase() {
     {
       email: "marcus.vance@caltech.edu",
       name: "Marcus Vance",
-      role: "user",
+      role: "leader",
       institution: "Caltech",
       country: "United States",
       emailVerified: true,
@@ -48,9 +48,17 @@ export async function seedDatabase() {
     {
       email: "priya.patel@iisc.ac.in",
       name: "Priya Patel",
-      role: "user",
+      role: "staff",
       institution: "Indian Institute of Science",
       country: "India",
+      emailVerified: true,
+    },
+    {
+      email: "hina.takahashi@kyoto-u.ac.jp",
+      name: "Hina Takahashi",
+      role: "staff",
+      institution: "Kyoto University",
+      country: "Japan",
       emailVerified: true,
     },
     {
@@ -84,14 +92,6 @@ export async function seedDatabase() {
       role: "user",
       institution: "Carnegie Mellon University",
       country: "United States",
-      emailVerified: true,
-    },
-    {
-      email: "hina.takahashi@kyoto-u.ac.jp",
-      name: "Hina Takahashi",
-      role: "user",
-      institution: "Kyoto University",
-      country: "Japan",
       emailVerified: true,
     },
     {

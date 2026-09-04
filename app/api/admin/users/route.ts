@@ -10,9 +10,9 @@ export async function GET() {
       headers: await headers(),
     });
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || (session.user.role !== "admin" && session.user.role !== "staff")) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized. Admin privileges required." },
+        { success: false, error: "Unauthorized. Admin or Staff privileges required." },
         { status: 403 }
       );
     }
@@ -22,6 +22,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
+        emailVerified: true,
         institution: true,
         country: true,
         role: true,

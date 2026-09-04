@@ -7,6 +7,7 @@ import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { audioSynth } from "./components/AudioSynthesizer";
 import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 
 // Dynamically import DinoGameCanvas with SSR disabled
 const DinoGameCanvas = dynamic(
@@ -142,15 +143,15 @@ export default function Home() {
 
           <ul className="font-mono space-y-1 text-xs text-muted-foreground pl-1 leading-relaxed">
             <li className="flex items-center gap-2">
-              <span className="text-[#10b981] font-bold">✓</span>
+              <Check className="size-3.5 text-[#10b981] shrink-0" />
               <span>Forming an IASC asteroid search team</span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-[#10b981] font-bold">✓</span>
+              <Check className="size-3.5 text-[#10b981] shrink-0" />
               <span>Analyzing telescope FITS image sets</span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-[#10b981] font-bold">✓</span>
+              <Check className="size-3.5 text-[#10b981] shrink-0" />
               <span>Submitting discovery reports to MPC</span>
             </li>
           </ul>
