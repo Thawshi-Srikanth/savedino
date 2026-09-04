@@ -53,7 +53,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} ${outfit.variable} min-h-screen flex flex-col bg-background text-foreground font-sans antialiased overscroll-none`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <AudioRouteGuard />
           <Toaster position="top-right" />
           {children}

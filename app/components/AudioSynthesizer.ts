@@ -27,7 +27,7 @@ class AudioSynthesizer {
     if (!this.bgMusic && typeof window !== "undefined") {
       this.bgMusic = new Audio("/themesong.mp3");
       this.bgMusic.loop = true;
-      this.bgMusic.volume = 0.35;
+      this.bgMusic.volume = 0.10;
     }
   }
 
