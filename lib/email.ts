@@ -46,3 +46,51 @@ export async function sendMagicLinkEmail({ email, url, token }: SendMagicLinkPar
     throw err;
   }
 }
+
+export async function subscribeToNewsletter(email: string) {
+  if (!resend) {
+    console.log("=================================================");
+    console.log(`[NEWSLETTER SUBSCRIBE (SIMULATED FOR ${email})]`);
+    console.log("=================================================");
+    return { success: true, simulated: true };
+  }
+
+  const segmentId =
+    process.env.RESEND_SEGMENT_ID || "ed40a4c8-4b89-4a0b-94b5-1246d21b597c";
+
+  try {
+    // Resend SDK: Create contact and attach to segment
+    const { data, error } = await resend.contacts.create({
+      email,
+      unsubscribed: false,
+      segments: [{ id: segmentId }],
+    } as any);
+
+    if (!error && data) {
+      return { success: true, data };
+    }
+
+    if (error) {
+      console.warn("[Resend Contact Info]:", error.message);
+    }
+
+    // If contact already existed, ensure it is added to the segment
+    try {
+      const lookup = await resend.contacts.get({ email });
+      const contactId = lookup.data?.id || data?.id;
+      if (contactId && (resend.contacts as any)?.segments?.add) {
+        await (resend.contacts as any).segments.add({
+          contactId,
+          segmentId,
+        });
+      }
+    } catch (segErr) {
+      console.warn("[Resend Segment Add Warning]:", segErr);
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("[Subscribe Newsletter Exception]:", err);
+    return { success: true, warning: err.message };
+  }
+}

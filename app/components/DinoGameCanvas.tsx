@@ -340,10 +340,22 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   // Keyboard Listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Do not intercept keystrokes if user is typing in an input, textarea, or editable element, or inside a modal/dialog
+      const target = e.target as HTMLElement;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest?.("dialog, [role='dialog'], [role='alertdialog']"))
+      ) {
+        return;
+      }
+
       if (e.code === "Space") {
         e.preventDefault();
         fireLaser();
-      } else if (e.code === "ArrowUp" || e.code === "KeyW") {
+      } else if (e.code === "ArrowUp") {
         e.preventDefault();
         jump();
       }

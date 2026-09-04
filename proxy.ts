@@ -1,8 +1,32 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Demo Launch Mode: Controlled via NEXT_PUBLIC_DEMO_MODE or DEMO_MODE env variable
+const isDemoModeEnabled = () => {
+  return (
+    process.env.NEXT_PUBLIC_DEMO_MODE === "true" ||
+    process.env.DEMO_MODE === "true"
+  );
+};
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isDemo = isDemoModeEnabled();
+
+  // Allow root path, API routes, and static assets
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  // In Demo Mode: Redirect all platform pages to /
+  if (isDemo) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   // Retrieve session token from Better Auth cookies
   const sessionToken =
@@ -40,6 +64,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
