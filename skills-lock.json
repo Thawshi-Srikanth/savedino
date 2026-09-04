@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "resend": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/resend/SKILL.md",
+      "computedHash": "8db208d4ca936e078d15bedbe29713463b33eb0084c45eecc011d6a58e0f258b"
+    }
+  }
+}

@@ -25,7 +25,8 @@ function isTypingTarget(target: EventTarget | null) {
     target.isContentEditable ||
     target.tagName === "INPUT" ||
     target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT"
+    target.tagName === "SELECT" ||
+    Boolean(target.closest?.("dialog, [role='dialog'], [role='alertdialog']"))
   );
 }
 
@@ -34,7 +35,15 @@ function ThemeHotkey() {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+      if (!event || typeof event.key !== "string") {
+        return;
+      }
+
       if (event.defaultPrevented || event.repeat) {
+        return;
+      }
+
+      if (isTypingTarget(event.target)) {
         return;
       }
 
@@ -43,10 +52,6 @@ function ThemeHotkey() {
       }
 
       if (event.key.toLowerCase() !== "d") {
-        return;
-      }
-
-      if (isTypingTarget(event.target)) {
         return;
       }
 

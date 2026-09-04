@@ -28,11 +28,13 @@ class AudioSynthesizer {
       this.bgMusic = new Audio("/themesong.mp3");
       this.bgMusic.loop = true;
       this.bgMusic.volume = 0.35;
-      this.bgMusic.autoplay = true;
     }
   }
 
   public startMusic() {
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      return;
+    }
     this.initMusic();
     if (this.bgMusic && !this.muted) {
       this.bgMusic.play().then(() => {

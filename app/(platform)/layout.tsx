@@ -4,58 +4,45 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Sun, Moon, LogOut, User, Menu, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Theme Switcher State
-  const [isNight, setIsNight] = useState<boolean>(false);
+  // Unified Next-Themes Theme State
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("savedino_theme");
-    const isDark =
-      savedTheme === "dark" ||
-      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches) ||
-      document.documentElement.classList.contains("dark") ||
-      document.documentElement.classList.contains("night-mode");
-
-    if (isDark) {
-      setIsNight(true);
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.add("night-mode");
-    } else {
-      setIsNight(false);
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.remove("night-mode");
-    }
+    setMounted(true);
   }, []);
 
+  // Sync night-mode class for backwards-compatibility
+  useEffect(() => {
+    if (resolvedTheme === "dark") {
+      document.documentElement.classList.add("night-mode");
+    } else {
+      document.documentElement.classList.remove("night-mode");
+    }
+  }, [resolvedTheme]);
+
+  const isNight = mounted ? resolvedTheme === "dark" : false;
+
   const handleToggleTheme = () => {
-    setIsNight((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add("dark");
-        document.documentElement.classList.add("night-mode");
-        localStorage.setItem("savedino_theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.classList.remove("night-mode");
-        localStorage.setItem("savedino_theme", "light");
-      }
-      return next;
-    });
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  // Dedicated Full-Screen Layout for Login, Register & Signup (No Navbar)
-  if (pathname === "/login" || pathname === "/register" || pathname === "/signup") {
+  // Dedicated Full-Screen Layout for Login, Register & Verify (No Navbar)
+  if (pathname === "/login" || pathname === "/register" || pathname === "/verify") {
     return (
-      <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans transition-colors duration-700 select-none">
+      <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans select-none">
         {children}
       </div>
     );
@@ -64,7 +51,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   // Navigation Items
   const navItems = [
     { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Teams", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+    { title: "Teams", url: "/teams", icon: Users, active: pathname === "/teams" || pathname.startsWith("/team/") },
   ];
 
   // @ts-ignore
@@ -78,24 +65,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans transition-colors duration-700 relative">
-      {/* Top Navbar Matching PostHog Greyish Black Dark Palette */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md transition-colors duration-700">
+    <div className="min-h-screen w-full flex flex-col bg-background text-foreground font-sans relative">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* PostHog Style Slate & Violet Branding Logo */}
+          {/* SaveDino Branding Logo */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
-              {/* Slanted 3-Color Badge */}
-              <div className="flex items-center gap-1">
-                <div className="w-2.5 h-6 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-                <div className="w-2.5 h-6 bg-[#10b981] rounded-xs transform -skew-x-12" />
-                <div className="w-2.5 h-6 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-              </div>
-              <span className="font-pixel text-[11px] tracking-wider uppercase text-foreground">
-                SaveDino
-              </span>
-            </Link>
+            <Logo href="/" size="md" />
 
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
@@ -186,13 +163,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
                 <div>
                   <SheetHeader className="p-4 border-b border-border text-left">
-                    <SheetTitle className="flex items-center gap-2 font-pixel text-xs tracking-tight text-foreground">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-5 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-                        <div className="w-2 h-5 bg-[#10b981] rounded-xs transform -skew-x-12" />
-                        <div className="w-2 h-5 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-                      </div>
-                      <span>SaveDino</span>
+                    <SheetTitle className="flex items-center">
+                      <Logo href="/" size="sm" />
                     </SheetTitle>
                   </SheetHeader>
 
@@ -221,6 +193,20 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 </div>
 
                 <div className="p-4 border-t border-border space-y-3">
+                  {/* Mobile Theme Toggle */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToggleTheme}
+                    className="w-full justify-between text-xs font-bold"
+                  >
+                    <span className="flex items-center gap-2">
+                      {isNight ? <Sun className="size-4 text-amber-400" /> : <Moon className="size-4 text-[#8b5cf6]" />}
+                      <span>{isNight ? "Day Mode" : "Night Mode"}</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">{isNight ? "Dark" : "Light"}</span>
+                  </Button>
+
                   {session?.user ? (
                     <Button
                       variant="outline"

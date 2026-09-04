@@ -4,6 +4,10 @@ import React, { useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight, RefreshCw, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export default function JoinTeamPage({
   params,
@@ -15,16 +19,14 @@ export default function JoinTeamPage({
   const { data: session } = useSession();
 
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleJoin = async () => {
     if (!session) {
-      router.push(`/login?redirect=/join/${inviteCode}`);
+      router.push(`/login?redirectTo=/join/${inviteCode}`);
       return;
     }
 
     setLoading(true);
-    setErrorMsg(null);
 
     try {
       const res = await fetch("/api/teams/join", {
@@ -35,59 +37,69 @@ export default function JoinTeamPage({
       const data = await res.json();
 
       if (!data.success) {
-        setErrorMsg(data.error || "Failed to join team.");
+        toast.error(data.error || "Failed to join team.");
       } else {
+        toast.success("Successfully joined the team!");
         router.push(`/team/${data.teamId}`);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "An unexpected error occurred.");
+      toast.error(err.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 bg-[#f4f4f4] dark:bg-[#202124] text-[#535353] dark:text-[#e8eaed] transition-colors duration-700 select-none">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground select-none">
       <Link
-        href="/campaigns"
-        className="flex items-center gap-2 mb-6 text-xs font-pixel uppercase tracking-widest hover:underline opacity-80"
+        href="/teams"
+        className="flex items-center gap-1.5 mb-6 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
       >
-        &lt; Back to Campaigns Hub
+        <ArrowLeft className="size-3.5" />
+        <span>Back to Teams Directory</span>
       </Link>
 
-      <div className="w-full max-w-md bg-white dark:bg-[#2b2c2f] border-2 border-[#535353] dark:border-[#80868b] shadow-[6px_6px_0px_#000] p-6 sm:p-8">
-        <div className="border-b border-[#535353]/30 dark:border-[#80868b]/30 pb-3 mb-5">
-          <span className="text-[10px] font-mono text-[#0284c7] dark:text-[#38bdf8] uppercase tracking-widest font-bold">
-            TEAM INVITATION
-          </span>
-          <h1 className="text-base font-pixel font-bold uppercase mt-1">
-            Join Campaign Squad
+      <Card className="w-full max-w-md bg-[#8b5cf6] text-white border border-[#7c3aed] shadow-[0_6px_0_0_#6d28d9] dark:shadow-[0_6px_0_0_#5b21b6] rounded-2xl p-6 sm:p-8 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="size-11 rounded-full bg-white/15 text-white flex items-center justify-center mx-auto mb-1">
+            <Sparkles className="size-5 text-amber-300" />
+          </div>
+          <h1 className="text-2xl font-sans font-bold tracking-tight text-white">
+            Join Team
           </h1>
+          <p className="text-xs text-white/85 leading-relaxed">
+            You were invited to join an asteroid research team.
+          </p>
         </div>
 
-        <div className="p-4 bg-gray-50 dark:bg-[#202124] border border-[#535353]/40 dark:border-[#80868b]/40 mb-6 text-center">
-          <span className="block text-[10px] font-pixel text-gray-400 uppercase">
-            INVITATION CODE
+        <div className="p-4 bg-slate-950/30 border border-white/15 rounded-xl text-center space-y-1">
+          <span className="block text-[10px] font-mono text-white/70 uppercase tracking-wider font-semibold">
+            Invitation Code
           </span>
-          <span className="text-lg font-pixel font-bold tracking-wider text-[#0284c7] dark:text-[#38bdf8]">
+          <span className="text-xl font-mono font-bold tracking-widest text-white">
             {inviteCode.toUpperCase()}
           </span>
         </div>
 
-        {errorMsg && (
-          <div className="mb-5 p-3 border border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 text-xs font-mono">
-            ! {errorMsg}
-          </div>
-        )}
-
-        <button
+        <Button
           onClick={handleJoin}
           disabled={loading}
-          className="w-full py-3 px-4 border-2 border-[#535353] dark:border-[#80868b] bg-[#535353] text-white dark:bg-[#38bdf8] dark:text-[#202124] text-xs font-pixel uppercase tracking-widest shadow-[3px_3px_0px_#000] active:translate-y-0.5 cursor-pointer disabled:opacity-50"
+          variant="default"
+          className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2 cursor-pointer bg-slate-950 text-white hover:bg-slate-900 shadow-[0_3px_0_0_#020617] active:translate-y-0.5 transition-transform"
         >
-          {loading ? "ENROLLING..." : "CONFIRM & JOIN TEAM >"}
-        </button>
-      </div>
+          {loading ? (
+            <>
+              <RefreshCw className="size-4 animate-spin" />
+              <span>Joining Team...</span>
+            </>
+          ) : (
+            <>
+              <span>Confirm &amp; Join Team</span>
+              <ArrowRight className="size-4" />
+            </>
+          )}
+        </Button>
+      </Card>
     </div>
   );
 }
