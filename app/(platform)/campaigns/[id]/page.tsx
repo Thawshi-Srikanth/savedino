@@ -27,11 +27,12 @@ import {
   Clock,
   ArrowLeft,
   ArrowRight,
-  Sparkles,
-  FileText,
-  Layers,
-  Circle,
   Pin,
+  Check,
+  Radio,
+  Terminal,
+  FileCode,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -116,14 +117,50 @@ function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) 
   };
 }
 
-function getPhaseStatus(startDateStr: string, endDateStr: string) {
-  const now = new Date().getTime();
-  const start = new Date(startDateStr).getTime();
-  const end = new Date(endDateStr).getTime();
+function getStageTimelineData(startStr: string, endStr: string, now: number) {
+  const start = new Date(startStr).getTime();
+  const end = new Date(endStr).getTime();
 
-  if (now < start) return "UPCOMING";
-  if (now >= start && now <= end) return "ACTIVE";
-  return "COMPLETED";
+  let status: "UPCOMING" | "ACTIVE" | "COMPLETED" = "UPCOMING";
+  let progress = 0;
+
+  if (now >= end) {
+    status = "COMPLETED";
+    progress = 100;
+  } else if (now >= start) {
+    status = "ACTIVE";
+    const total = Math.max(1, end - start);
+    progress = Math.min(99, Math.max(1, Math.round(((now - start) / total) * 100)));
+  } else {
+    status = "UPCOMING";
+    progress = 0;
+  }
+
+  // Countdown timer calculation if <= 30 days
+  let timerText: string | null = null;
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  if (status === "ACTIVE") {
+    const diff = Math.max(0, end - now);
+    if (diff <= thirtyDaysMs) {
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      timerText = `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+    }
+  } else if (status === "UPCOMING") {
+    const diff = Math.max(0, start - now);
+    if (diff <= thirtyDaysMs) {
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      timerText = `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+    }
+  }
+
+  return { status, progress, timerText, start, end };
 }
 
 export default function CampaignDetailPage({
@@ -137,6 +174,15 @@ export default function CampaignDetailPage({
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  // Real-time 1s ticker for live countdowns
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Modals
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
@@ -253,7 +299,9 @@ export default function CampaignDetailPage({
     return (
       <div className="w-full py-24 text-center space-y-3 font-sans">
         <Rocket className="size-8 mx-auto text-primary animate-bounce" />
-        <div className="text-sm font-semibold text-foreground">Loading campaign details...</div>
+        <div className="text-sm font-semibold text-foreground">
+          Loading campaign details...
+        </div>
       </div>
     );
   }
@@ -261,9 +309,9 @@ export default function CampaignDetailPage({
   if (!event) {
     return (
       <div className="w-full py-20 text-center space-y-4 font-sans">
-        <div className="text-sm text-muted-foreground">Campaign could not be found.</div>
+        <div className="text-base font-semibold text-foreground">Campaign Not Found</div>
         <Link href="/campaigns">
-          <Button variant="outline" size="sm" className="gap-2 cursor-pointer">
+          <Button variant="outline" size="sm" className="gap-2 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
             <ArrowLeft className="size-4" />
             <span>Back to Campaigns</span>
           </Button>
@@ -275,176 +323,221 @@ export default function CampaignDetailPage({
   const regInfo = getRegistrationDeadlineInfo(event.regEnd, event.startDate);
   const squadCount = event._count?.teams || event.teams?.length || 0;
 
-  // Timeline Phases
-  const phases = [
+  // Pipeline Stages
+  const pipelineStages = [
     {
-      step: 1,
-      name: "Registration Period",
+      stage: "Stage 1",
+      code: "Registration",
+      name: "Researcher Onboarding & Account Setup",
       start: event.regStart,
       end: event.regEnd,
-      status: getPhaseStatus(event.regStart, event.regEnd),
-      description: "Sign up and create your researcher profile. Squad leaders establish rosters and generate private invite codes.",
     },
     {
-      step: 2,
-      name: "Squad Formation & Matching",
+      stage: "Stage 2",
+      code: "Team Formation",
+      name: "Squad Roster Assembly & Solo Matching",
       start: event.teamFormationStart || event.regStart,
       end: event.teamFormationEnd || event.startDate,
-      status: getPhaseStatus(event.teamFormationStart || event.regStart, event.teamFormationEnd || event.startDate),
-      description: "Recruit 2 to 6 teammates or request solo matchmaking to finalize your squad roster before observation starts.",
     },
     {
-      step: 3,
-      name: "Telescope Observation & Analysis",
+      stage: "Stage 3",
+      code: "Observation",
+      name: "Telescope Image Analysis & Asteroid Search",
       start: event.startDate,
       end: event.endDate,
-      status: getPhaseStatus(event.startDate, event.endDate),
-      description: "Official survey telescope FITS image sets released. Squads blink image sets and measure astrometry to discover moving asteroids.",
     },
     {
-      step: 4,
-      name: "Astrometry Discovery Report",
+      stage: "Stage 4",
+      code: "Discovery Report",
+      name: "Astrometry Verification & MPC Submission",
       start: event.submissionStart || event.startDate,
       end: event.submissionEnd || event.endDate,
-      status: getPhaseStatus(event.submissionStart || event.startDate, event.submissionEnd || event.endDate),
-      description: "Validate celestial coordinates and submit final MPC 80-column discovery report files for verification.",
     },
   ];
 
   return (
-    <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
-      {/* 1. TOP BREADCRUMB NAVIGATION */}
-      <div className="flex items-center justify-between pb-2 border-b border-border">
+    <div className="w-full space-y-8 font-sans max-w-6xl mx-auto py-2">
+      {/* 1. BREADCRUMB & HEADER STRIP */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-border text-xs font-sans">
         <Link
           href="/campaigns"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
         >
-          <ArrowLeft className="size-3.5" />
+          <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Campaigns</span>
         </Link>
 
-        <span className="text-xs font-mono font-bold text-primary px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
-          {event.code}
-        </span>
+        {/* Theme Spec Code Badge with 3D Shadow */}
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-xs font-medium">Campaign:</span>
+          <Badge variant="outline" className="font-sans font-bold bg-card border-border text-foreground px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
+            {event.code}
+          </Badge>
+        </div>
       </div>
 
-      {/* 2. MAIN 2-COLUMN LAYOUT: CONTENT ON LEFT, STICKY YELLOW ACTION CARD ON RIGHT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* === LEFT COLUMN: EMBEDDED CAMPAIGN CONTENT & VERTICAL TIMELINE (8 COLS) === */}
+      {/* 2. MAIN 2-COLUMN LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        {/* === LEFT COLUMN: PIPELINE TIMELINE (8 COLS) === */}
         <div className="lg:col-span-8 space-y-8">
           {/* Header & Overview */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               {event.status === "ACTIVE" ? (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] text-xs font-bold">
-                  <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
-                  <span>Active Observation</span>
-                </div>
+                <Badge className="bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/40 font-sans font-semibold text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]">
+                  <span className="size-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                  <span>Active Campaign</span>
+                </Badge>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted border border-border text-muted-foreground text-xs font-mono">
-                  <span>{event.status}</span>
-                </div>
+                <Badge variant="outline" className="text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
+                  {event.status}
+                </Badge>
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground font-sans">
               {event.title}
             </h1>
 
             <p className="text-sm text-muted-foreground leading-relaxed">
               {event.description || "International Astronomical Search Collaboration campaign for astrometric asteroid discovery."}
             </p>
-          </div>
 
-          {/* Quick Metrics Bar Embedded in Background */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <div className="p-3.5 rounded-xl border border-border bg-muted/15">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
-                Observation Window
+            {/* Campaign Specs Strip */}
+            <div className="pt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
+              <div>
+                <span className="text-muted-foreground">Timeline: </span>
+                <strong className="text-foreground font-sans">{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</strong>
               </div>
-              <div className="text-sm font-bold text-foreground font-mono mt-1">
-                {new Date(event.startDate).toLocaleDateString()} &ndash; {new Date(event.endDate).toLocaleDateString()}
-              </div>
-            </div>
 
-            <div className="p-3.5 rounded-xl border border-border bg-muted/15">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
-                Registered Squads
-              </div>
-              <div className="text-sm font-bold text-foreground font-mono mt-1 flex items-center justify-between">
-                <span>{squadCount} Teams Formed</span>
+              <div>
+                <span className="text-muted-foreground">Squads: </span>
+                <strong className="text-foreground">{squadCount} registered</strong>
                 <Link
                   href={`/teams?eventId=${event.id}`}
-                  className="text-xs text-primary font-sans hover:underline inline-flex items-center gap-1"
+                  className="text-primary font-sans hover:underline text-xs ml-1.5 font-semibold"
                 >
-                  <span>Explore</span>
-                  <ArrowRight className="size-3" />
+                  (view roster)
                 </Link>
+              </div>
+
+              <div>
+                <span className="text-muted-foreground">Data Type: </span>
+                <span className="text-foreground font-medium">16-bit FITS Images</span>
               </div>
             </div>
           </div>
 
-          {/* Detailed Vertical Milestone Timeline */}
-          <div className="space-y-5 pt-4 border-t border-border">
-            <div className="space-y-1">
-              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          {/* === SINGLE VERTICAL TIMELINE === */}
+          <div className="space-y-6 pt-4 border-t border-border">
+            <div className="flex items-center justify-between pb-2">
+              <div className="flex items-center gap-2">
                 <Calendar className="size-4 text-primary" />
-                <span>Campaign Schedule &amp; Milestones</span>
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                Chronological phases from initial sign-up to discovery verification.
-              </p>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">
+                  Campaign Schedule
+                </h2>
+              </div>
+
+              <span className="text-xs text-muted-foreground font-sans">
+                4 Stages
+              </span>
             </div>
 
-            {/* Vertical Stepper Embedded in Canvas */}
-            <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-border">
-              {phases.map((phase) => {
-                const isLive = phase.status === "ACTIVE";
-                const isDone = phase.status === "COMPLETED";
+            {/* Single Continuous Vertical Timeline */}
+            <div className="relative pl-6 sm:pl-8 border-l-2 border-border space-y-9 my-4 ml-3 sm:ml-4">
+              {pipelineStages.map((phase, idx) => {
+                const phaseData = getStageTimelineData(phase.start, phase.end, currentTime);
+                const isLive = phaseData.status === "ACTIVE";
+                const isDone = phaseData.status === "COMPLETED";
 
                 return (
-                  <div key={phase.step} className="relative group">
-                    {/* Step Circle */}
+                  <div key={phase.stage} className="relative">
+                    {/* Node Dot on Vertical Line */}
                     <div
-                      className={`absolute -left-6 sm:-left-8 top-0.5 size-6 sm:size-7 rounded-full flex items-center justify-center text-[11px] font-bold font-mono transition-transform ${
+                      className={`absolute -left-[31px] sm:-left-[39px] top-1.5 size-3.5 rounded-full border-2 transition-all flex items-center justify-center ${
                         isLive
-                          ? "bg-[#8b5cf6] text-white ring-4 ring-[#8b5cf6]/20 shadow-xs"
+                          ? "bg-[#8b5cf6] border-white dark:border-background ring-4 ring-[#8b5cf6]/30 shadow-xs"
                           : isDone
-                          ? "bg-[#10b981] text-white"
-                          : "bg-muted text-muted-foreground border border-border"
+                          ? "bg-[#10b981] border-white dark:border-background ring-2 ring-[#10b981]/20"
+                          : "bg-muted border-border"
                       }`}
                     >
-                      {isDone ? <CheckCircle2 className="size-3.5" /> : phase.step}
+                      {isDone && <Check className="size-2 text-white stroke-[3]" />}
+                      {isLive && <span className="size-1 rounded-full bg-white animate-ping" />}
                     </div>
 
-                    {/* Step Content */}
-                    <div className="p-4 rounded-xl border border-border/70 bg-muted/15 space-y-1.5 hover:border-border transition-colors">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-foreground">
-                            Phase {phase.step}: {phase.name}
+                    {/* Stage Details */}
+                    <div className="space-y-1.5">
+                      {/* Top Row: Stage Name & Theme Badges with 3D Shadow */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge
+                            variant={isLive ? "default" : "outline"}
+                            className={`font-sans font-semibold text-xs px-2.5 py-0.5 ${
+                              isLive
+                                ? "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                                : isDone
+                                ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]"
+                                : "bg-card text-foreground border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                            }`}
+                          >
+                            Stage {idx + 1}
+                          </Badge>
+
+                          <h3 className="text-base font-bold text-foreground font-sans">
+                            {phase.name}
                           </h3>
-                          {isLive && (
-                            <span className="text-[10px] font-bold text-white bg-[#8b5cf6] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                              Live Now
-                            </span>
-                          )}
-                          {isDone && (
-                            <span className="text-[10px] font-semibold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded">
-                              Completed
-                            </span>
-                          )}
                         </div>
 
-                        {/* Phase Dates */}
-                        <div className="text-xs font-mono text-muted-foreground">
-                          {new Date(phase.start).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &ndash; {new Date(phase.end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {/* Status / Countdown Timer Badges with 3D Shadow */}
+                        <div className="flex flex-wrap items-center gap-2 font-sans text-xs shrink-0">
+                          {/* Live countdown timer badge if within 30 days */}
+                          {phaseData.timerText && isLive && (
+                            <Badge className="bg-[#8b5cf6]/15 text-[#8b5cf6] dark:text-[#a78bfa] border border-[#8b5cf6]/30 font-sans font-medium text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#d8b4fe] dark:shadow-[0_2px_0_0_#5b21b6] animate-pulse">
+                              <Clock className="size-3 text-[#8b5cf6]" />
+                              <span>Ends in {phaseData.timerText}</span>
+                            </Badge>
+                          )}
+
+                          {phaseData.timerText && !isLive && !isDone && (
+                            <Badge variant="outline" className="bg-card text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
+                              <Clock className="size-3 text-muted-foreground" />
+                              <span>Starts in {phaseData.timerText}</span>
+                            </Badge>
+                          )}
+
+                          {isLive && (
+                            <Badge className="bg-[#8b5cf6] text-white border-0 font-sans font-semibold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]">
+                              Active
+                            </Badge>
+                          )}
+                          {isDone && (
+                            <Badge variant="outline" className="bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 font-sans font-semibold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]">
+                              Completed
+                            </Badge>
+                          )}
+                          {!isLive && !isDone && !phaseData.timerText && (
+                            <Badge variant="outline" className="bg-card text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
+                              Upcoming
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {phase.description}
-                      </p>
+                      {/* Start Date & End Date + Progress % */}
+                      <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-muted-foreground pt-0.5">
+                        <span className="text-foreground font-medium">
+                          Start: {new Date(phase.start).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                        <span className="text-muted-foreground/60">-</span>
+                        <span className="text-foreground font-medium">
+                          End: {new Date(phase.end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                        <span className="text-muted-foreground/50">|</span>
+                        <span className="text-muted-foreground text-xs">
+                          {phaseData.progress}% complete
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -453,34 +546,34 @@ export default function CampaignDetailPage({
           </div>
         </div>
 
-        {/* === RIGHT COLUMN: STICKY SOLID PURPLE ACTION & SQUAD BOX (4 COLS) === */}
+        {/* === RIGHT COLUMN: SOLID PURPLE STICKY ACTION CARD (4 COLS) === */}
         <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-4">
-          {/* Solid Electric Violet Highlight Card (No Outline, 3D Theme Shadow) */}
-          <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] transition-all">
-            {/* Top Tag */}
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider">
-                <Pin className="size-3 text-white" />
-                <span>Squad Action</span>
+          {/* Solid Electric Violet Sticky Card */}
+          <div className="relative rounded-2xl p-6 space-y-5 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
+            {/* Top Header Note Tape */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/20 font-sans text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-white">
+                <Pin className="size-3.5" />
+                <span>Squad Actions</span>
               </div>
-              <span className="text-[11px] font-mono font-bold text-white/90">
+              <Badge className="bg-white/20 hover:bg-white/20 text-white border-0 font-sans font-bold text-xs px-2 py-0.5 shadow-[0_2px_0_0_rgba(0,0,0,0.15)]">
                 {event.code}
-              </span>
+              </Badge>
             </div>
 
-            {/* Registration Deadline Alert Inside Purple Box */}
-            <div className="p-3 rounded-xl bg-black/20 border border-white/10 space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-white/80 flex items-center gap-1.5">
-                <Clock className="size-3.5 text-white" />
+            {/* Registration Deadline Alert Inside Purple Card */}
+            <div className="space-y-1.5 p-3.5 rounded-xl bg-black/20 border border-white/10">
+              <div className="text-xs font-medium uppercase tracking-wider text-white/80 flex items-center gap-1.5">
+                <Clock className="size-3 text-white/90" />
                 <span>Registration Deadline</span>
               </div>
-              <div className="text-base font-extrabold text-white font-mono">
+              <div className="text-base sm:text-lg font-bold font-sans text-white">
                 {regInfo.text}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-2 pt-1">
+            {/* 3D Action Buttons */}
+            <div className="space-y-2.5 pt-1">
               <Button
                 onClick={() => {
                   if (!session) {
@@ -492,7 +585,7 @@ export default function CampaignDetailPage({
                   setCreateModalOpen(true);
                 }}
                 variant="default"
-                className="w-full h-10 text-xs font-extrabold gap-2 cursor-pointer bg-white hover:bg-white/95 text-[#6d28d9] shadow-sm border-0"
+                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
               >
                 <PlusCircle className="size-4" />
                 <span>Form a Team</span>
@@ -509,16 +602,16 @@ export default function CampaignDetailPage({
                   setJoinModalOpen(true);
                 }}
                 variant="outline"
-                className="w-full h-10 text-xs font-bold gap-2 cursor-pointer border-0 bg-white/15 hover:bg-white/25 text-white"
+                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
               >
-                <KeyRound className="size-4 text-white" />
+                <KeyRound className="size-4" />
                 <span>Join with Code</span>
               </Button>
 
               <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                 <Button
                   variant="ghost"
-                  className="w-full h-9 text-xs font-semibold gap-1.5 cursor-pointer text-white/90 hover:bg-white/15 hover:text-white"
+                  className="w-full h-9 text-xs font-sans font-semibold gap-1.5 cursor-pointer text-white/90 hover:text-white hover:bg-white/15 rounded-xl"
                 >
                   <Users className="size-3.5" />
                   <span>View Joined Teams ({squadCount})</span>
@@ -526,15 +619,15 @@ export default function CampaignDetailPage({
               </Link>
             </div>
 
-            {/* Quick Squad Guidelines */}
-            <div className="pt-2 border-t border-white/20 text-[11px] text-white/85 space-y-1">
-              <div className="flex items-center gap-1.5 font-medium text-white">
+            {/* Squad Rules Checklist */}
+            <div className="pt-3 border-t border-white/20 text-xs font-sans text-white/85 space-y-1.5">
+              <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>2 to 6 researchers per squad</span>
+                <span>2 to 6 scientists per squad</span>
               </div>
-              <div className="flex items-center gap-1.5 font-medium text-white">
+              <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>Share invite codes with teammates</span>
+                <span>Share invite codes with colleagues</span>
               </div>
             </div>
           </div>
@@ -547,7 +640,7 @@ export default function CampaignDetailPage({
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <PlusCircle className="size-4 text-primary" />
-              <span>Form a Research Squad</span>
+              <span>Form Research Squad</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Registering a new squad for <strong className="text-foreground">{event.title}</strong> ({event.code}).
@@ -555,8 +648,8 @@ export default function CampaignDetailPage({
           </DialogHeader>
 
           {createError && (
-            <div className="p-2.5 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs">
-              {createError}
+            <div className="p-2.5 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-medium">
+              Error: {createError}
             </div>
           )}
 
@@ -568,7 +661,7 @@ export default function CampaignDetailPage({
               <Input
                 type="text"
                 required
-                placeholder="e.g. Orion Asteroid Hunters"
+                placeholder="e.g. Orion Asteroid Hunters, Team Kepler"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 className="h-9 text-xs bg-background font-sans"
@@ -597,6 +690,7 @@ export default function CampaignDetailPage({
                 size="sm"
                 onClick={() => setCreateModalOpen(false)}
                 disabled={createLoading}
+                className="text-xs shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
               >
                 Cancel
               </Button>
@@ -605,7 +699,7 @@ export default function CampaignDetailPage({
                 variant="default"
                 size="sm"
                 disabled={createLoading || !teamName.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
               >
                 {createLoading ? "Creating..." : "Create Squad"}
               </Button>
@@ -620,7 +714,7 @@ export default function CampaignDetailPage({
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <KeyRound className="size-4 text-primary" />
-              <span>Join a Research Squad</span>
+              <span>Join Research Squad</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Enter the private invite code provided by your squad leader for <strong className="text-foreground">{event.title}</strong>.
@@ -628,8 +722,8 @@ export default function CampaignDetailPage({
           </DialogHeader>
 
           {joinError && (
-            <div className="p-2.5 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs">
-              {joinError}
+            <div className="p-2.5 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-medium">
+              Error: {joinError}
             </div>
           )}
 
@@ -656,6 +750,7 @@ export default function CampaignDetailPage({
                 size="sm"
                 onClick={() => setJoinModalOpen(false)}
                 disabled={joinLoading}
+                className="text-xs shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
               >
                 Cancel
               </Button>
@@ -664,7 +759,7 @@ export default function CampaignDetailPage({
                 variant="default"
                 size="sm"
                 disabled={joinLoading || !joinCode.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
               >
                 {joinLoading ? "Joining..." : "Join Squad"}
               </Button>
