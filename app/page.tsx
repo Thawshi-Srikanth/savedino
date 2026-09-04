@@ -67,6 +67,7 @@ export default function Home() {
     return () => {
       window.removeEventListener("pointerdown", handleFirstGesture);
       window.removeEventListener("keydown", handleFirstGesture);
+      audioSynth.pauseMusic();
     };
   }, []);
 

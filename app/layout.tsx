@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, Space_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import { AudioRouteGuard } from "./components/AudioRouteGuard";
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -42,6 +43,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} min-h-screen flex flex-col bg-background text-foreground font-sans antialiased overscroll-none`}
       >
+        <AudioRouteGuard />
         {children}
       </body>
     </html>
