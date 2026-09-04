@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { audioSynth } from "./components/AudioSynthesizer";
@@ -37,8 +38,9 @@ export default function Home() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [isNight, setIsNight] = useState<boolean>(false);
   const [devNightOverride, setDevNightOverride] = useState<boolean | null>(null);
+
+  const { resolvedTheme, setTheme } = useTheme();
 
   const [score, setScore] = useState<number>(0);
   const [highScore, setHighScore] = useState<number>(0);
@@ -46,12 +48,6 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-
-    // Sync from local storage
-    const savedTheme = localStorage.getItem("savedino_theme");
-    if (savedTheme === "dark") {
-      setIsNight(true);
-    }
 
     // Start background theme audio
     audioSynth.startMusic();
@@ -72,19 +68,14 @@ export default function Home() {
     };
   }, []);
 
-  // Sync night-mode and dark class to document for seamless whole-page dark mode
+  // Sync night-mode class to document for backward compatibility
   useEffect(() => {
-    if (!mounted) return;
-    if (isNight) {
+    if (resolvedTheme === "dark") {
       document.documentElement.classList.add("night-mode");
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("savedino_theme", "dark");
     } else {
       document.documentElement.classList.remove("night-mode");
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("savedino_theme", "light");
     }
-  }, [isNight, mounted]);
+  }, [resolvedTheme]);
 
   const handleToggleMute = () => {
     const nextMuted = audioSynth.toggleMute();
@@ -97,12 +88,19 @@ export default function Home() {
     setMeteorsDestroyed(destroyed);
   };
 
+  const isNight = mounted ? resolvedTheme === "dark" : false;
   const effectiveNight = devNightOverride !== null ? devNightOverride : isNight;
   const nightActive = mounted && effectiveNight;
 
+  const handleToggleTheme = () => {
+    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    setDevNightOverride(nextTheme === "dark");
+  };
+
   return (
     <main
-      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none transition-colors duration-700 ease-in-out ${
+      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none ${
         nightActive ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
@@ -112,23 +110,19 @@ export default function Home() {
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
         isNight={nightActive}
-        onToggleTheme={() => {
-          const nextNight = devNightOverride !== null ? !devNightOverride : !isNight;
-          setDevNightOverride(nextNight);
-          setIsNight(nextNight);
-        }}
+        onToggleTheme={handleToggleTheme}
       />
 
       {/* Main Game Stage */}
       <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
-          onNightModeChange={setIsNight}
+          onNightModeChange={(night) => setTheme(night ? "dark" : "light")}
           nightModeOverride={devNightOverride}
         />
 
         {/* Chrome Dino Style "Page Not Found / No Internet" Section */}
-        <div className="w-full mt-4 sm:mt-4 text-left select-text transition-colors duration-700 space-y-1 px-3 sm:px-4">
+        <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-1 px-3 sm:px-4">
           <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
             No Campaign Joined
           </h2>

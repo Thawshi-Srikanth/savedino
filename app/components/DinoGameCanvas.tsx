@@ -944,7 +944,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   return (
     <div className="w-full flex flex-col items-center select-none gap-3">
       {/* HUD Header Bar: Seamlessly blended with the background (no container box) */}
-      <div className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 transition-colors duration-700 ${
+      <div className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 ${
         isNight ? "text-[#e8eaed]" : "text-[#535353]"
       }`}>
         {/* Left: 3 Circular Plasma Orbs + Blasted Counter */}
@@ -1017,14 +1017,14 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           </div>
 
           {/* Asteroid Destroyed Count (Clean & shortened on mobile) */}
-          <div className={`text-[10px] font-pixel tracking-wide transition-colors duration-700 ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
+          <div className={`text-[10px] font-pixel tracking-wide ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
             <span className="hidden sm:inline">BLASTED: </span>
             <span className="font-bold text-[#0284c7]">×{meteorsDestroyed}</span>
           </div>
         </div>
 
         {/* Right: Scores (HI 00000  00000) */}
-        <div className={`font-pixel text-[10px] sm:text-[11px] tracking-wider transition-colors duration-700 ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
+        <div className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
           <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span> {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;{Math.floor(score).toString().padStart(5, "0")}
         </div>
       </div>
@@ -1044,7 +1044,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       </div>
 
       {/* Controls Hint with Pixel Keyboard Keycap Sprites (Helper contents) */}
-      <div className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono transition-colors duration-700 ${
+      <div className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono ${
         isNight ? "text-[#9aa0a6]" : "text-[#535353]"
       }`}>
         <div className="flex items-center gap-3">

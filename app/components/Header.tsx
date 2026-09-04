@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
 }) => {
   return (
-    <header className="w-full relative px-2 py-3 flex flex-col items-center select-none transition-colors duration-700">
+    <header className="w-full relative px-2 py-3 flex flex-col items-center select-none">
       {/* Top Navigation Bar - Constrained to Game Window max-w-[600px] */}
       <div className="w-full max-w-[600px] flex items-center justify-between gap-3">
         {/* PostHog Style Slate & Violet Branding Logo */}

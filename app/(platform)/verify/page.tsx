@@ -166,7 +166,7 @@ function VerifyContent() {
   const emailProvider = getEmailProviderInfo(email);
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none transition-colors duration-700 bg-background text-foreground">
+    <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none bg-background text-foreground">
       {/* Top Left Code Comment Accent */}
       <div className="w-full max-w-6xl mx-auto flex items-center justify-between text-xs font-mono text-muted-foreground">
         <div className="space-y-0.5">

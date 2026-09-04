@@ -50,7 +50,7 @@ export default function JoinTeamPage({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground transition-colors duration-700 select-none">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground select-none">
       <Link
         href="/teams"
         className="flex items-center gap-1.5 mb-6 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
