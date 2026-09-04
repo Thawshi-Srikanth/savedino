@@ -1,0 +1,328 @@
+"use client";
+
+import React, { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { RefreshCw, ArrowRight, ArrowLeft } from "lucide-react";
+
+function VerifyContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+  const redirectTo = searchParams.get("redirectTo") || "/campaigns";
+  const token = searchParams.get("token");
+  const urlError = searchParams.get("error");
+
+  const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(!!token);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(60);
+  const [resendSuccess, setResendSuccess] = useState(false);
+
+  // If token is present in URL, verify token directly
+  useEffect(() => {
+    if (!token) return;
+
+    const verifyToken = async () => {
+      setVerifying(true);
+      setErrorMsg(null);
+      try {
+        const res = await authClient.magicLink.verify({
+          query: {
+            token,
+            callbackURL: redirectTo,
+          },
+        });
+
+        if (res.error) {
+          setErrorMsg(res.error.message || "This link has expired or has already been used.");
+          setVerifying(false);
+        } else {
+          router.push(redirectTo);
+        }
+      } catch (err: any) {
+        setErrorMsg(err.message || "Failed to verify link. Please request a new one.");
+        setVerifying(false);
+      }
+    };
+
+    verifyToken();
+  }, [token, redirectTo, router]);
+
+  // If already authenticated and not verifying token, forward to destination
+  useEffect(() => {
+    if (token) return;
+    authClient.getSession().then((res) => {
+      if (res?.data?.session) {
+        router.push(redirectTo);
+      }
+    }).catch(() => {});
+  }, [token, redirectTo, router]);
+
+  // Handle URL errors
+  useEffect(() => {
+    if (urlError) {
+      if (urlError === "INVALID_TOKEN") {
+        setErrorMsg("This link has expired or has already been used. Please request a new one.");
+      } else {
+        setErrorMsg("Authentication failed. Please request a new sign-in link.");
+      }
+    }
+  }, [urlError]);
+
+  // Countdown timer for resending link
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  // Poll for active session so this tab automatically redirects when user clicks link in email
+  useEffect(() => {
+    if (token) return;
+
+    let isSubscribed = true;
+
+    const checkSession = async () => {
+      try {
+        const res = await authClient.getSession();
+        if (res?.data?.session && isSubscribed) {
+          router.push(redirectTo);
+        }
+      } catch {
+        // Ignore polling errors
+      }
+    };
+
+    const interval = setInterval(checkSession, 2000);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === "visible") {
+        checkSession();
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+    };
+  }, [token, redirectTo, router]);
+
+  const handleResendLink = async () => {
+    if (!email || cooldown > 0) return;
+
+    setLoading(true);
+    setErrorMsg(null);
+    setResendSuccess(false);
+
+    try {
+      const res = await authClient.signIn.magicLink({
+        email: email.trim().toLowerCase(),
+        callbackURL: redirectTo,
+      });
+
+      if (res.error) {
+        setErrorMsg(res.error.message || "Failed to resend link. Please try again.");
+      } else {
+        setResendSuccess(true);
+        setCooldown(60);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "An error occurred while resending the link.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getEmailProviderInfo = (emailAddress: string) => {
+    const domain = emailAddress.split("@")[1]?.toLowerCase() || "";
+    if (domain.includes("gmail") || domain.includes("google")) {
+      return { name: "Gmail", url: "https://mail.google.com" };
+    }
+    if (domain.includes("outlook") || domain.includes("hotmail") || domain.includes("live") || domain.includes("microsoft")) {
+      return { name: "Outlook", url: "https://outlook.live.com" };
+    }
+    if (domain.includes("yahoo")) {
+      return { name: "Yahoo Mail", url: "https://mail.yahoo.com" };
+    }
+    if (domain.includes("proton")) {
+      return { name: "Proton Mail", url: "https://mail.proton.me" };
+    }
+    return null;
+  };
+
+  const emailProvider = getEmailProviderInfo(email);
+
+  return (
+    <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none transition-colors duration-700 bg-background text-foreground">
+      {/* Top Left Code Comment Accent */}
+      <div className="w-full max-w-6xl mx-auto flex items-center justify-between text-xs font-mono text-muted-foreground">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1">
+            <span>// email verification</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>// asteroid search</span>
+            <span className="w-2 h-3.5 bg-[#10b981] inline-block animate-pulse" />
+          </div>
+        </div>
+
+        {/* Back to Arcade */}
+        <Link
+          href="/"
+          className="hidden sm:inline-flex items-center gap-1 text-xs font-pixel text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span>&lt; Arcade Game</span>
+        </Link>
+      </div>
+
+      {/* Main Centered Verification Section */}
+      <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
+        {/* Brand Logo */}
+        <div className="flex flex-col items-center justify-center gap-2">
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-7 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
+              <div className="w-3 h-7 bg-[#10b981] rounded-xs transform -skew-x-12" />
+              <div className="w-3 h-7 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
+            </div>
+            <span className="font-pixel text-xl tracking-wider uppercase text-foreground">
+              SaveDino
+            </span>
+          </Link>
+        </div>
+
+        {/* Consistent Theme Verification Card */}
+        <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
+          {verifying ? (
+            <div className="text-center space-y-4 py-4">
+              <RefreshCw className="w-8 h-8 animate-spin mx-auto text-primary" />
+              <div className="space-y-1">
+                <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+                  Authenticating...
+                </h1>
+                <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
+                  Verifying your sign-in link and preparing your workspace.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="text-center space-y-1.5">
+                <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+                  Check your email
+                </h1>
+                <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
+                  {email ? (
+                    <>
+                      We sent a sign-in link to{" "}
+                      <span className="font-semibold text-foreground">{email}</span>
+                    </>
+                  ) : (
+                    "We sent a sign-in link to your email address."
+                  )}
+                </p>
+              </div>
+
+              {errorMsg && (
+                <div className="p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive text-xs font-sans text-center">
+                  {errorMsg}
+                </div>
+              )}
+
+              {resendSuccess && !errorMsg && (
+                <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-[#10b981] text-xs font-sans text-center">
+                  A fresh sign-in link has been sent to your email.
+                </div>
+              )}
+
+              <div className="space-y-3 pt-1">
+                {emailProvider ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                    onClick={() => window.open(emailProvider.url, "_blank")}
+                  >
+                    <span>Open {emailProvider.name}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                ) : null}
+
+                {email ? (
+                  <Button
+                    type="button"
+                    variant={emailProvider ? "outline" : "default"}
+                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                    disabled={loading || cooldown > 0}
+                    onClick={handleResendLink}
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                    <span>{cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Link"}</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="default"
+                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                    onClick={() => router.push("/login")}
+                  >
+                    <span>Back to Sign In</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+
+              <div className="text-center pt-2 border-t border-border">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Use a different email</span>
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Bottom Navigation */}
+        <div className="text-center text-xs font-sans text-muted-foreground">
+          Need an account?{" "}
+          <Link href="/register" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
+            <span>Create account</span>
+            <span>&rarr;</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Bottom Footer */}
+      <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
+        SaveDino — NASA &amp; IASC Asteroid Search Collaboration
+      </div>
+    </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">
+          Loading...
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
+  );
+}

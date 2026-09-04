@@ -52,8 +52,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     });
   };
 
-  // Dedicated Full-Screen Layout for Login, Register & Signup (No Navbar)
-  if (pathname === "/login" || pathname === "/register" || pathname === "/signup") {
+  // Dedicated Full-Screen Layout for Login, Register & Verify (No Navbar)
+  if (pathname === "/login" || pathname === "/register" || pathname === "/verify") {
     return (
       <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans transition-colors duration-700 select-none">
         {children}
@@ -64,7 +64,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   // Navigation Items
   const navItems = [
     { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Teams", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+    { title: "Teams", url: "/teams", icon: Users, active: pathname === "/teams" || pathname.startsWith("/team/") },
   ];
 
   // @ts-ignore

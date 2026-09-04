@@ -81,3 +81,99 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+// GET /api/teams - List all teams with search & filter support
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || "";
+    const eventId = searchParams.get("eventId") || "";
+    const isRecruiting = searchParams.get("isRecruiting");
+    const status = searchParams.get("status") || "";
+
+    const where: any = {};
+
+    if (eventId) {
+      where.eventId = eventId;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (isRecruiting === "true") {
+      where.isRecruiting = true;
+    } else if (isRecruiting === "false") {
+      where.isRecruiting = false;
+    }
+
+    if (search.trim()) {
+      const q = search.trim();
+      where.OR = [
+        { name: { contains: q, mode: "insensitive" } },
+        { recruitmentNotes: { contains: q, mode: "insensitive" } },
+        {
+          members: {
+            some: {
+              user: {
+                name: { contains: q, mode: "insensitive" },
+              },
+            },
+          },
+        },
+        {
+          event: {
+            OR: [
+              { title: { contains: q, mode: "insensitive" } },
+              { code: { contains: q, mode: "insensitive" } },
+            ],
+          },
+        },
+      ];
+    }
+
+    const teams = await prisma.team.findMany({
+      where,
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            code: true,
+            status: true,
+          },
+        },
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                institution: true,
+                country: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            joinRequests: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json({ success: true, teams });
+  } catch (error: any) {
+    console.error("GET /api/teams error:", error);
+    return NextResponse.json(
+      { success: false, error: error.message || "Failed to fetch teams." },
+      { status: 500 }
+    );
+  }
+}

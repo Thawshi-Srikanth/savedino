@@ -35,3 +35,8 @@ All components, designs, and pages created or modified in this repository MUST s
 
 ### 3. Component Consistency
 - Every new page, modal, form, or component must use CSS variables and Tailwind theme tokens (`bg-background`, `text-foreground`, `bg-card`, `border-border`, etc.) to align seamlessly with this style scheme.
+
+### 4. UI Copy & Language Simplicity (CRITICAL RULE)
+- **No Confusing Technical Jargon**: Never use overly complex terms or confusing technical jargon in user-facing copy (e.g., avoid "passwordless authentication", "cryptographic single-use tokens", "zero-password paradigm", etc.).
+- **Keep it Simple and Direct**: Use plain, clear, and friendly language across all titles, descriptions, buttons, and badges (e.g., "Sign in", "Create account", "Send link", "Check your email", "We sent a link to your email").
+
