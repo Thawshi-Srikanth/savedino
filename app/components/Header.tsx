@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sun, Moon, Volume2, VolumeX, HelpCircle, Telescope } from "lucide-react";
 
+import { Logo } from "@/components/Logo";
+
 interface HeaderProps {
   onOpenHelp: () => void;
   isMuted: boolean;
@@ -24,19 +26,9 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="w-full relative px-2 py-3 flex flex-col items-center select-none">
       {/* Top Navigation Bar - Constrained to Game Window max-w-[600px] */}
       <div className="w-full max-w-[600px] flex items-center justify-between gap-3">
-        {/* PostHog Style Slate & Violet Branding Logo */}
+        {/* SaveDino Branding Logo */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-            {/* Slanted 3-Color Badge */}
-            <div className="flex items-center gap-0.5 sm:gap-1">
-              <div className="w-2 h-5 sm:w-2.5 sm:h-6 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-              <div className="w-2 h-5 sm:w-2.5 sm:h-6 bg-[#10b981] rounded-xs transform -skew-x-12" />
-              <div className="w-2 h-5 sm:w-2.5 sm:h-6 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-            </div>
-            <span className="font-pixel text-[10px] sm:text-[11px] tracking-wider uppercase text-foreground">
-              SaveDino
-            </span>
-          </Link>
+          <Logo href="/" size="md" />
 
           {/* Action button shown only when not in Demo Mode */}
           {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (

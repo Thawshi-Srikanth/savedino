@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Sun, Moon, LogOut, User, Menu, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -69,19 +70,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* PostHog Style Slate & Violet Branding Logo */}
+          {/* SaveDino Branding Logo */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
-              {/* Slanted 3-Color Badge */}
-              <div className="flex items-center gap-1">
-                <div className="w-2.5 h-6 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-                <div className="w-2.5 h-6 bg-[#10b981] rounded-xs transform -skew-x-12" />
-                <div className="w-2.5 h-6 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-              </div>
-              <span className="font-pixel text-[11px] tracking-wider uppercase text-foreground">
-                SaveDino
-              </span>
-            </Link>
+            <Logo href="/" size="md" />
 
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
@@ -172,13 +163,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
                 <div>
                   <SheetHeader className="p-4 border-b border-border text-left">
-                    <SheetTitle className="flex items-center gap-2 font-pixel text-xs tracking-tight text-foreground">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-5 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-                        <div className="w-2 h-5 bg-[#10b981] rounded-xs transform -skew-x-12" />
-                        <div className="w-2 h-5 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-                      </div>
-                      <span>SaveDino</span>
+                    <SheetTitle className="flex items-center">
+                      <Logo href="/" size="sm" />
                     </SheetTitle>
                   </SheetHeader>
 

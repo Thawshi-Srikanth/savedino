@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
 
 function LoginForm() {
   const router = useRouter();
@@ -95,17 +96,8 @@ function LoginForm() {
         {/* Main Centered Auth Section */}
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
-        <div className="flex flex-col items-center justify-center gap-2">
-          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-7 bg-[#8b5cf6] rounded-xs transform -skew-x-12" />
-              <div className="w-3 h-7 bg-[#10b981] rounded-xs transform -skew-x-12" />
-              <div className="w-3 h-7 bg-[#38bdf8] rounded-xs transform -skew-x-12" />
-            </div>
-            <span className="font-pixel text-xl tracking-wider uppercase text-foreground">
-              SaveDino
-            </span>
-          </Link>
+        <div className="flex flex-col items-center justify-center">
+          <Logo href="/" size="lg" />
         </div>
 
         {/* Auth Card */}
