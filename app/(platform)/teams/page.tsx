@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -85,6 +85,8 @@ interface CampaignEvent {
 
 export default function TeamsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlEventId = searchParams.get("eventId") || searchParams.get("event");
   const { data: session } = useSession();
 
   // Data State
@@ -94,9 +96,15 @@ export default function TeamsPage() {
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedEventId, setSelectedEventId] = useState<string>("ALL");
+  const [selectedEventId, setSelectedEventId] = useState<string>(urlEventId || "ALL");
   const [recruitmentFilter, setRecruitmentFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
+  useEffect(() => {
+    if (urlEventId) {
+      setSelectedEventId(urlEventId);
+    }
+  }, [urlEventId]);
 
   // Join Request Modal State
   const [requestTeam, setRequestTeam] = useState<Team | null>(null);
