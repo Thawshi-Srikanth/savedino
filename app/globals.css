@@ -6,6 +6,7 @@
   --font-pixel: var(--font-pixel), "Press Start 2P", monospace;
   --font-mono: var(--font-tech), monospace;
   --font-sans: var(--font-sans), sans-serif;
+  --font-heading: var(--font-heading), "Outfit", sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -124,6 +125,10 @@
 
 .font-tech, .font-mono {
   font-family: var(--font-tech), monospace !important;
+}
+
+.font-heading {
+  font-family: var(--font-heading), "Outfit", sans-serif !important;
 }
 
 @layer base {

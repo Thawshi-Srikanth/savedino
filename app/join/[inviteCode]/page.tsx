@@ -66,10 +66,10 @@ export default function JoinTeamPage({
         </div>
 
         <div className="p-4 bg-gray-50 dark:bg-[#202124] border border-[#535353]/40 dark:border-[#80868b]/40 mb-6 text-center">
-          <span className="block text-[10px] font-pixel text-gray-400 uppercase">
+          <span className="block text-[10px] font-tech font-bold text-gray-400 uppercase tracking-wider">
             INVITATION CODE
           </span>
-          <span className="text-lg font-pixel font-bold tracking-wider text-[#0284c7] dark:text-[#38bdf8]">
+          <span className="text-lg font-tech font-bold tracking-wider text-[#0284c7] dark:text-[#38bdf8]">
             {inviteCode.toUpperCase()}
           </span>
         </div>

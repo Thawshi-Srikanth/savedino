@@ -127,7 +127,7 @@ export default function Home() {
         />
 
         {/* Chrome Dino Style "Page Not Found / No Internet" Section */}
-        <div className="w-full mt-4 sm:mt-4 text-left select-text transition-colors duration-700 space-y-1 px-2 sm:px-0">
+        <div className="w-full mt-4 sm:mt-4 text-left select-text transition-colors duration-700 space-y-1 px-3 sm:px-4">
           <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
             No Campaign Joined
           </h2>

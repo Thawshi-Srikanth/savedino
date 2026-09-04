@@ -319,10 +319,10 @@ export default function TeamWorkspacePage({
             {/* Invite Code Box */}
             <div className="flex items-center gap-3 bg-accent/40 border border-border p-3 rounded-md">
               <div>
-                <span className="block text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">
+                <span className="block text-[10px] font-tech font-bold uppercase tracking-widest text-muted-foreground">
                   INVITE CODE
                 </span>
-                <span className="text-xs font-pixel font-bold tracking-wider text-primary">
+                <span className="text-xs font-tech font-bold tracking-wider text-primary">
                   {team?.inviteCode || "AST-XXXX"}
                 </span>
               </div>
