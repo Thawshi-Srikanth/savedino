@@ -194,21 +194,21 @@ export default function Home() {
             </h2>
 
             <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-              SaveDino is currently in demo preview. Sharpen your skills in the arcade game while full squad features and campaigns are in development.
+              Get ready for the SaveDino Asteroid Search Challenge! Team up with your squad to spot real asteroids, submit discovery reports, and compete on the global leaderboard.
             </p>
 
             <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Squad tournaments and global high-score leaderboards</span>
+                <span>Form a squad with friends or join an open discovery team</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Co-op asteroid defense missions and community events</span>
+                <span>Inspect telescope survey image sets to hunt for moving asteroids</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Custom Dino skins, laser upgrades, and unlockable badges</span>
+                <span>Earn points, climb the leaderboard, and unlock discovery badges</span>
               </li>
             </ul>
 
@@ -240,15 +240,15 @@ export default function Home() {
             <ul className="font-sans space-y-1 text-xs text-muted-foreground pl-1 leading-relaxed pt-1">
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Form an IASC asteroid search research squad</span>
+                <span>Form an asteroid search research squad</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Analyze telescope FITS time-series images</span>
+                <span>Analyze telescope time-series images</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Submit asteroid discovery reports to MPC</span>
+                <span>Submit asteroid discovery reports</span>
               </li>
             </ul>
 
@@ -276,7 +276,7 @@ export default function Home() {
                   Get Notified
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground font-sans">
-                  Be the first to know when new challenges and features go live.
+                  Be the first to know when registrations open for the upcoming Asteroid Search Challenge.
                 </DialogDescription>
               </div>
             </div>
