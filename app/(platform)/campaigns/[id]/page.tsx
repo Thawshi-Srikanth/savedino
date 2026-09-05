@@ -105,15 +105,14 @@ function getHumanizedCountdown(targetDateMs: number, now: number): string {
   }
 }
 
-function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) {
+function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string, nowMs: number = Date.now()) {
   const targetStr = regEndStr || startDateStr;
   if (!targetStr) {
-    return { text: "TBA", formattedDate: "TBA", isUrgent: false, isClosed: false, daysLeft: null };
+    return { text: "TBA", formattedDate: "TBA", countdownText: null, isUrgent: false, isClosed: false, daysLeft: null };
   }
 
   const targetDate = new Date(targetStr);
-  const now = new Date();
-  const diffMs = targetDate.getTime() - now.getTime();
+  const diffMs = targetDate.getTime() - nowMs;
   const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
   const formattedDate = targetDate.toLocaleDateString("en-US", {
@@ -126,17 +125,19 @@ function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) 
     return {
       text: `Closed on ${formattedDate}`,
       formattedDate,
+      countdownText: "Closed",
       isUrgent: false,
       isClosed: true,
       daysLeft: 0,
     };
   }
 
-  const countdown = getHumanizedCountdown(targetDate.getTime(), now.getTime());
+  const countdown = getHumanizedCountdown(targetDate.getTime(), nowMs);
 
   return {
     text: `${formattedDate} (${countdown} left)`,
     formattedDate,
+    countdownText: `${countdown} left`,
     isUrgent: daysLeft <= 5,
     isClosed: false,
     daysLeft,
@@ -337,7 +338,7 @@ export default function CampaignDetailPage({
     );
   }
 
-  const regInfo = getRegistrationDeadlineInfo(event.regEnd, event.startDate);
+  const regInfo = getRegistrationDeadlineInfo(event.regEnd, event.startDate, currentTime);
   const squadCount = event._count?.teams || event.teams?.length || 0;
 
   // Simple, direct step stages without jargon
@@ -424,7 +425,7 @@ export default function CampaignDetailPage({
             <div className="pt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
               <div>
                 <span className="text-muted-foreground">Timeline: </span>
-                <strong className="text-foreground font-sans">{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</strong>
+                <strong className="text-foreground font-mono">{formatStageDate(event.startDate)} &ndash; {formatStageDate(event.endDate)}</strong>
               </div>
 
               <div>
@@ -534,9 +535,9 @@ export default function CampaignDetailPage({
                     )}
 
                     {/* 2. VERTICAL TWO-POINT TIMELINE (START TO END) */}
-                    <div className="relative pl-8 pt-3 pb-2">
+                    <div className="relative pl-9 pt-3 pb-2">
                       {/* Vertical Progress Line Track connecting Start to End */}
-                      <div className="absolute left-[11px] top-4 bottom-4 w-1 rounded-full bg-slate-200 dark:bg-[#28292e] overflow-hidden">
+                      <div className="absolute left-[12px] top-4 bottom-4 w-1 rounded-full bg-slate-200 dark:bg-[#28292e] overflow-hidden">
                         <div
                           className={`w-full transition-all duration-700 ease-out rounded-full ${
                             isDone
@@ -549,19 +550,21 @@ export default function CampaignDetailPage({
                         />
                       </div>
 
-                      {/* START POINT NODE (TOP) */}
+                      {/* START POINT NODE (TOP) - Themed Rounded Box with 3D Shadow */}
                       <div className="relative flex items-center gap-3">
                         <div
-                          className={`absolute -left-8 size-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                            isDone || isLive
-                              ? "bg-[#10b981] border-white dark:border-[#121315] text-white shadow-xs ring-2 ring-[#10b981]/20"
-                              : "bg-background border-border text-muted-foreground"
+                          className={`absolute -left-9 size-7 rounded-lg border flex items-center justify-center transition-all ${
+                            isDone
+                              ? "bg-[#10b981] border-[#059669] text-white shadow-[0_2px_0_0_#059669] dark:shadow-[0_2px_0_0_#047857]"
+                              : isLive
+                              ? "bg-[#8b5cf6] border-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                              : "bg-card border-border text-muted-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
                           }`}
                         >
                           {isDone || isLive ? (
-                            <Check className="size-3 stroke-[3]" />
+                            <Check className="size-3.5 stroke-[3]" />
                           ) : (
-                            <span className="size-1.5 rounded-full bg-muted-foreground/60" />
+                            <span className="size-1.5 rounded-xs bg-muted-foreground/60" />
                           )}
                         </div>
 
@@ -599,21 +602,21 @@ export default function CampaignDetailPage({
                         )}
                       </div>
 
-                      {/* END POINT NODE (BOTTOM) */}
+                      {/* END POINT NODE (BOTTOM) - Themed Rounded Box with 3D Shadow */}
                       <div className="relative flex items-center gap-3">
                         <div
-                          className={`absolute -left-8 size-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                          className={`absolute -left-9 size-7 rounded-lg border flex items-center justify-center transition-all ${
                             isDone
-                              ? "bg-[#10b981] border-white dark:border-[#121315] text-white shadow-xs ring-2 ring-[#10b981]/20"
+                              ? "bg-[#10b981] border-[#059669] text-white shadow-[0_2px_0_0_#059669] dark:shadow-[0_2px_0_0_#047857]"
                               : isLive
-                              ? "bg-background border-[#8b5cf6] text-[#8b5cf6] ring-2 ring-[#8b5cf6]/20"
-                              : "bg-background border-border text-muted-foreground"
+                              ? "bg-card border-[#8b5cf6] text-[#8b5cf6] shadow-[0_2px_0_0_#8b5cf6]/30"
+                              : "bg-card border-border text-muted-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
                           }`}
                         >
                           {isDone ? (
-                            <Check className="size-3 stroke-[3]" />
+                            <Check className="size-3.5 stroke-[3]" />
                           ) : (
-                            <Flag className="size-2.5" />
+                            <Flag className="size-3" />
                           )}
                         </div>
 
@@ -634,34 +637,34 @@ export default function CampaignDetailPage({
           </div>
         </div>
 
-        {/* === RIGHT COLUMN: SOLID PURPLE STICKY ACTION CARD (4 COLS) === */}
-        <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-4">
-          {/* Solid Electric Violet Sticky Card */}
-          <div className="relative rounded-2xl p-6 space-y-5 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
-            {/* Top Header Note Tape */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/20 font-sans text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-white">
-                <Pin className="size-3.5" />
-                <span>Team Actions</span>
-              </div>
-              <Badge className="bg-white/20 hover:bg-white/20 text-white border-0 font-sans font-bold text-xs px-2 py-0.5 shadow-[0_2px_0_0_rgba(0,0,0,0.15)]">
-                {event.code}
-              </Badge>
+        {/* === RIGHT COLUMN: STICKY SIDEBAR (4 COLS) === */}
+        <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-4 font-sans">
+          {/* 1. Registration Deadline (Direct text with theme 3D text shadow) */}
+          <div className="space-y-1.5 px-2.5">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
+              Registration Deadline
             </div>
 
-            {/* Registration Deadline Alert Inside Purple Card */}
-            <div className="space-y-1.5 p-3.5 rounded-xl bg-black/20 border border-white/10">
-              <div className="text-xs font-medium uppercase tracking-wider text-white/80 flex items-center gap-1.5">
-                <Clock className="size-3 text-white/90" />
-                <span>Registration Deadline</span>
-              </div>
-              <div className="text-base sm:text-lg font-bold font-sans text-white">
-                {regInfo.text}
-              </div>
+            <div
+              className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-foreground select-none"
+              style={{
+                textShadow: "0 3px 0 var(--border), 0 4px 6px rgba(0,0,0,0.06)",
+              }}
+            >
+              {regInfo.formattedDate}
             </div>
 
+            {regInfo.countdownText && (
+              <div className={`text-xs font-mono font-semibold ${regInfo.isUrgent ? "text-amber-500" : "text-muted-foreground"}`}>
+                {regInfo.countdownText}
+              </div>
+            )}
+          </div>
+
+          {/* 2. Solid Electric Violet Action Card */}
+          <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
             {/* 3D Action Buttons */}
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2.5">
               <Button
                 onClick={() => {
                   if (!session) {

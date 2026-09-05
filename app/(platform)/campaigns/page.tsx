@@ -589,7 +589,7 @@ export default function CampaignsPage() {
                           Observation Period
                         </div>
                         <div className="text-foreground font-medium mt-0.5">
-                          {new Date(currentActiveEvent.startDate).toLocaleDateString()} &ndash; {new Date(currentActiveEvent.endDate).toLocaleDateString()}
+                          {new Date(currentActiveEvent.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} &ndash; {new Date(currentActiveEvent.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </div>
                       </div>
                     </div>
