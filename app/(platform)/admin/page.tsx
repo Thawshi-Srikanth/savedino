@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -649,209 +650,194 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="w-full flex flex-col md:flex-row gap-6 items-start font-sans">
-      {/* 1. ADMIN SIDEBAR NAVIGATION */}
-      <aside className="w-full md:w-64 flex-shrink-0 bg-card border border-border rounded-xl p-4 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-6">
-        <div>
-          <div className="flex items-center gap-2 px-2 py-1">
-            <ShieldAlert className="size-4 text-[#8b5cf6]" />
-            <span className="font-bold text-xs uppercase tracking-wider text-foreground">
-              ADMIN CONSOLE
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground px-2 mt-0.5">
-            IASC Operations &amp; Governance
-          </p>
-        </div>
-
-        {/* Sidebar Nav Buttons */}
-        <nav className="space-y-1.5">
-          <Button
-            type="button"
-            variant={activeTab === "USERS" ? "default" : "outline"}
-            onClick={() => setActiveTab("USERS")}
-            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Users className="size-4" />
-              <span>User &amp; Roles</span>
-            </div>
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-semibold font-mono">
-              {users.length}
-            </Badge>
-          </Button>
-
-          <Button
-            type="button"
-            variant={activeTab === "MATCHMAKING" ? "default" : "outline"}
-            onClick={() => setActiveTab("MATCHMAKING")}
-            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <UserPlus className="size-4" />
-              <span>Solo Matchmaking</span>
-            </div>
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-semibold font-mono">
-              {unassignedCount}
-            </Badge>
-          </Button>
-
-          <Button
-            type="button"
-            variant={activeTab === "TEAMS" ? "default" : "outline"}
-            onClick={() => setActiveTab("TEAMS")}
-            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Telescope className="size-4" />
-              <span>Squads &amp; Rosters</span>
-            </div>
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-semibold font-mono">
-              {teams.length}
-            </Badge>
-          </Button>
-
-          <Button
-            type="button"
-            variant={activeTab === "EVENTS" ? "default" : "outline"}
-            onClick={() => setActiveTab("EVENTS")}
-            className="w-full justify-between h-10 px-3 text-xs font-bold cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Rocket className="size-4" />
-              <span>Campaign Events</span>
-            </div>
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-semibold font-mono">
-              {events.length}
-            </Badge>
-          </Button>
-        </nav>
-
-        {/* Quick Campaign Action */}
-        <div className="pt-2 border-t border-border space-y-3">
-          <Link href="/admin/campaigns/new" className="block w-full">
-            <Button
-              variant="default"
-              size="sm"
-              className="w-full text-xs font-bold py-2.5 flex items-center justify-center gap-2 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
+    <div className="w-full space-y-4 font-sans">
+      {/* TABS NAVIGATION & WORKSPACE */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(val as any)}
+        className="w-full space-y-4"
+      >
+        <div className="overflow-x-auto pb-1 scrollbar-none">
+          <TabsList className="h-11 p-1 bg-muted/60 border border-border rounded-xl inline-flex min-w-full sm:min-w-0 sm:w-auto shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] gap-1">
+            <TabsTrigger
+              value="USERS"
+              className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_2px_0_0_#e2e8f0] dark:data-[state=active]:shadow-[0_2px_0_0_#27282d] data-[state=active]:border-border border border-transparent rounded-lg"
             >
-              <PlusCircle className="size-3.5" />
-              <span>New Campaign</span>
-            </Button>
-          </Link>
-
-          {/* Quick System Stats */}
-          <div className="p-3 bg-muted/40 rounded-lg border border-border space-y-1.5 text-xs text-muted-foreground">
-            <div className="flex justify-between">
-              <span>Total Accounts:</span>
-              <span className="font-bold text-foreground font-mono">{users.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Staff &amp; Admins:</span>
-              <span className="font-bold text-[#8b5cf6] font-mono">{adminCount + staffCount}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Active Squads:</span>
-              <span className="font-bold text-foreground font-mono">{teams.length}</span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. MAIN WORKSPACE (Locked min-w-0 to prevent width jumping) */}
-      <div className="flex-1 w-full min-w-0 space-y-4">
-        {/* TAB 1: USER & ROLE MANAGEMENT */}
-        {activeTab === "USERS" && (
-          <div className="space-y-4 w-full">
-            {/* Interactive Role Distribution Stat Cards (Clickable quick filters) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <button
-                type="button"
-                onClick={() => setRoleFilter(roleFilter === "admin" ? "ALL" : "admin")}
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  roleFilter === "admin"
-                    ? "bg-[#8b5cf6]/10 border-[#8b5cf6] shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
+              <Users className="size-3.5" />
+              <span>Users &amp; Roles</span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 font-semibold font-mono"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                {users.length}
+              </Badge>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="MATCHMAKING"
+              className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_2px_0_0_#e2e8f0] dark:data-[state=active]:shadow-[0_2px_0_0_#27282d] data-[state=active]:border-border border border-transparent rounded-lg"
+            >
+              <UserPlus className="size-3.5" />
+              <span>Solo Matchmaking</span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 font-semibold font-mono"
+              >
+                {unassignedCount}
+              </Badge>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="TEAMS"
+              className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_2px_0_0_#e2e8f0] dark:data-[state=active]:shadow-[0_2px_0_0_#27282d] data-[state=active]:border-border border border-transparent rounded-lg"
+            >
+              <Telescope className="size-3.5" />
+              <span>Squads &amp; Rosters</span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 font-semibold font-mono"
+              >
+                {teams.length}
+              </Badge>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="EVENTS"
+              className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_2px_0_0_#e2e8f0] dark:data-[state=active]:shadow-[0_2px_0_0_#27282d] data-[state=active]:border-border border border-transparent rounded-lg"
+            >
+              <Rocket className="size-3.5" />
+              <span>Campaign Events</span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 font-semibold font-mono"
+              >
+                {events.length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* TAB 1: USER & ROLE MANAGEMENT */}
+        <TabsContent value="USERS" className="mt-0 focus-visible:outline-none space-y-4">
+          <div className="flex flex-col md:flex-row gap-4 items-start w-full">
+            {/* Left Role Filter Sidebar */}
+            <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-[0_3px_0_0_#e2e8f0] dark:shadow-[0_3px_0_0_#27282d] space-y-2.5">
+              <div className="px-2 py-1 flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
+                  Researcher Roles
+                </span>
+                <Badge variant="secondary" className="text-[10px] font-mono font-bold px-1.5 py-0">
+                  {users.length}
+                </Badge>
+              </div>
+
+              <nav className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setRoleFilter("ALL")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    roleFilter === "ALL"
+                      ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="size-3.5" />
+                    <span>All Roles</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold">
+                    {users.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRoleFilter(roleFilter === "admin" ? "ALL" : "admin")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    roleFilter === "admin"
+                      ? "bg-[#8b5cf6]/15 text-[#8b5cf6] border border-[#8b5cf6]/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <Crown className="size-3.5 text-[#8b5cf6]" />
                     <span>Admins</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-[#8b5cf6]">
+                    {adminCount}
                   </span>
-                  {roleFilter === "admin" && (
-                    <span className="text-[9px] font-bold text-[#8b5cf6] uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-[#8b5cf6] mt-1.5">{adminCount}</div>
-              </button>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setRoleFilter(roleFilter === "staff" ? "ALL" : "staff")}
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  roleFilter === "staff"
-                    ? "bg-[#10b981]/10 border-[#10b981] shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setRoleFilter(roleFilter === "staff" ? "ALL" : "staff")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    roleFilter === "staff"
+                      ? "bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <Shield className="size-3.5 text-[#10b981]" />
                     <span>Staff / Ops</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-[#10b981]">
+                    {staffCount}
                   </span>
-                  {roleFilter === "staff" && (
-                    <span className="text-[9px] font-bold text-[#10b981] uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-[#10b981] mt-1.5">{staffCount}</div>
-              </button>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setRoleFilter(roleFilter === "leader" ? "ALL" : "leader")}
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  roleFilter === "leader"
-                    ? "bg-amber-500/10 border-amber-500 shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setRoleFilter(roleFilter === "leader" ? "ALL" : "leader")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    roleFilter === "leader"
+                      ? "bg-amber-500/15 text-amber-500 border border-amber-500/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <Star className="size-3.5 text-amber-500" />
                     <span>Leaders</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-amber-500">
+                    {leaderCount}
                   </span>
-                  {roleFilter === "leader" && (
-                    <span className="text-[9px] font-bold text-amber-500 uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-amber-500 mt-1.5">{leaderCount}</div>
-              </button>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setRoleFilter(roleFilter === "user" ? "ALL" : "user")}
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  roleFilter === "user"
-                    ? "bg-[#38bdf8]/10 border-[#38bdf8] shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setRoleFilter(roleFilter === "user" ? "ALL" : "user")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    roleFilter === "user"
+                      ? "bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <Users className="size-3.5 text-[#38bdf8]" />
                     <span>Citizens</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-[#38bdf8]">
+                    {citizenCount}
                   </span>
-                  {roleFilter === "user" && (
-                    <span className="text-[9px] font-bold text-[#38bdf8] uppercase">Active</span>
-                  )}
+                </button>
+              </nav>
+
+              {/* Quick Summary Pill */}
+              <div className="pt-2.5 border-t border-border space-y-1.5 text-[11px] text-muted-foreground px-1">
+                <div className="flex justify-between">
+                  <span>In Squad:</span>
+                  <span className="font-bold text-foreground font-mono">{users.length - unassignedCount}</span>
                 </div>
-                <div className="text-xl font-bold font-mono text-foreground mt-1.5">{citizenCount}</div>
-              </button>
-            </div>
+                <div className="flex justify-between">
+                  <span>Unassigned:</span>
+                  <span className="font-bold text-amber-500 font-mono">{unassignedCount}</span>
+                </div>
+              </div>
+            </aside>
 
             {/* Main User Management Table Card - Fixed Height Container with Pinned Header & Pinned Pagination */}
-            <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border w-full">
+            <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border flex-1 min-w-0 w-full">
               {/* Header & Controls Toolbar */}
               <div className="p-3.5 border-b border-border space-y-3 shrink-0 bg-card">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1216,10 +1202,10 @@ export default function AdminDashboardPage() {
               </div>
             </Card>
           </div>
-        )}
+        </TabsContent>
 
         {/* TAB 2: SOLO MATCHMAKING */}
-        {activeTab === "MATCHMAKING" && (
+        <TabsContent value="MATCHMAKING" className="mt-0 focus-visible:outline-none space-y-4">
           <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border w-full">
             <CardHeader className="p-3.5 border-b border-border shrink-0 bg-card">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1301,10 +1287,10 @@ export default function AdminDashboardPage() {
               )}
             </div>
           </Card>
-        )}
+        </TabsContent>
 
         {/* TAB 3: TEAMS & ROSTERS */}
-        {activeTab === "TEAMS" && (
+        <TabsContent value="TEAMS" className="mt-0 focus-visible:outline-none space-y-4">
           <Card className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -1356,120 +1342,148 @@ export default function AdminDashboardPage() {
               ))}
             </div>
           </Card>
-        )}
+        </TabsContent>
 
         {/* TAB 4: CAMPAIGN EVENTS (Full Admin Management) */}
-        {activeTab === "EVENTS" && (
-          <div className="space-y-4 w-full">
-            {/* Interactive Campaign Status Stat Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <button
-                type="button"
-                onClick={() => setCampaignStatusFilter("ALL")}
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  campaignStatusFilter === "ALL"
-                    ? "bg-primary/10 border-primary shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Rocket className="size-3.5 text-primary" />
-                    <span>Total Campaigns</span>
-                  </span>
-                  {campaignStatusFilter === "ALL" && (
-                    <span className="text-[9px] font-bold text-primary uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-foreground mt-1.5">
+        <TabsContent value="EVENTS" className="mt-0 focus-visible:outline-none space-y-4">
+          <div className="flex flex-col md:flex-row gap-4 items-start w-full">
+            {/* Left Campaign Status Filter Sidebar */}
+            <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-[0_3px_0_0_#e2e8f0] dark:shadow-[0_3px_0_0_#27282d] space-y-2.5">
+              <div className="px-2 py-1 flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
+                  Campaign Status
+                </span>
+                <Badge variant="secondary" className="text-[10px] font-mono font-bold px-1.5 py-0">
                   {events.length}
-                </div>
-              </button>
+                </Badge>
+              </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setCampaignStatusFilter(
-                    campaignStatusFilter === "ACTIVE" ? "ALL" : "ACTIVE"
-                  )
-                }
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  campaignStatusFilter === "ACTIVE"
-                    ? "bg-[#10b981]/10 border-[#10b981] shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+              <nav className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setCampaignStatusFilter("ALL")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    campaignStatusFilter === "ALL"
+                      ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Rocket className="size-3.5" />
+                    <span>All Campaigns</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold">
+                    {events.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCampaignStatusFilter(
+                      campaignStatusFilter === "ACTIVE" ? "ALL" : "ACTIVE"
+                    )
+                  }
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    campaignStatusFilter === "ACTIVE"
+                      ? "bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <span className="size-2 rounded-full bg-[#10b981] animate-pulse" />
                     <span>Active Now</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-[#10b981]">
+                    {activeCampCount}
                   </span>
-                  {campaignStatusFilter === "ACTIVE" && (
-                    <span className="text-[9px] font-bold text-[#10b981] uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-[#10b981] mt-1.5">
-                  {activeCampCount}
-                </div>
-              </button>
+                </button>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setCampaignStatusFilter(
-                    campaignStatusFilter === "UPCOMING" ? "ALL" : "UPCOMING"
-                  )
-                }
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  campaignStatusFilter === "UPCOMING"
-                    ? "bg-sky-500/10 border-sky-500 shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCampaignStatusFilter(
+                      campaignStatusFilter === "UPCOMING" ? "ALL" : "UPCOMING"
+                    )
+                  }
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    campaignStatusFilter === "UPCOMING"
+                      ? "bg-sky-500/15 text-sky-500 border border-sky-500/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <Clock className="size-3.5 text-sky-500" />
                     <span>Upcoming</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-sky-500">
+                    {upcomingCampCount}
                   </span>
-                  {campaignStatusFilter === "UPCOMING" && (
-                    <span className="text-[9px] font-bold text-sky-500 uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-sky-500 mt-1.5">
-                  {upcomingCampCount}
-                </div>
-              </button>
+                </button>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setCampaignStatusFilter(
-                    campaignStatusFilter === "COMPLETED" ? "ALL" : "COMPLETED"
-                  )
-                }
-                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                  campaignStatusFilter === "COMPLETED"
-                    ? "bg-slate-700/10 border-slate-600 shadow-sm"
-                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCampaignStatusFilter(
+                      campaignStatusFilter === "SUBMISSION_OPEN"
+                        ? "ALL"
+                        : "SUBMISSION_OPEN"
+                    )
+                  }
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    campaignStatusFilter === "SUBMISSION_OPEN"
+                      ? "bg-amber-500/15 text-amber-500 border border-amber-500/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="size-3.5 text-amber-500" />
+                    <span>Submissions</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-amber-500">
+                    {subOpenCampCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCampaignStatusFilter(
+                      campaignStatusFilter === "COMPLETED" ? "ALL" : "COMPLETED"
+                    )
+                  }
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    campaignStatusFilter === "COMPLETED"
+                      ? "bg-slate-700/20 text-slate-400 border border-slate-600/40 font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
                     <CheckCircle2 className="size-3.5 text-slate-500" />
                     <span>Completed</span>
+                  </div>
+                  <span className="font-mono text-[11px] font-bold text-slate-400">
+                    {completedCampCount}
                   </span>
-                  {campaignStatusFilter === "COMPLETED" && (
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">Active</span>
-                  )}
-                </div>
-                <div className="text-xl font-bold font-mono text-slate-400 mt-1.5">
-                  {completedCampCount}
-                </div>
-              </button>
-            </div>
+                </button>
+              </nav>
+
+              {/* Create New Campaign Shortcut */}
+              <div className="pt-2.5 border-t border-border">
+                <Link href="/admin/campaigns/new" className="block w-full">
+                  <Button
+                    size="sm"
+                    className="w-full text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
+                  >
+                    <PlusCircle className="size-3.5" />
+                    <span>New Campaign</span>
+                  </Button>
+                </Link>
+              </div>
+            </aside>
 
             {/* Main Campaign Management Table Card - Fixed Height Container with Pinned Header & Pinned Pagination */}
-            <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border w-full">
+            <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border flex-1 min-w-0 w-full">
               {/* Header & Controls Toolbar */}
               <div className="p-3.5 border-b border-border space-y-3 shrink-0 bg-card">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1867,8 +1881,8 @@ export default function AdminDashboardPage() {
               </div>
             </Card>
           </div>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
 
       {/* EDIT USER & ROLE MODAL */}
       <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
