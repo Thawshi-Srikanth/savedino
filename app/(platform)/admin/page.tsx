@@ -41,8 +41,12 @@ export default function AdminDashboardPage() {
   // Solo Matchmaking Filter
   const [soloSearch, setSoloSearch] = useState<string>("");
 
-  // Teams & Squads Filter
+  // Teams & Squads State
   const [teamSearch, setTeamSearch] = useState<string>("");
+  const [teamCapacityFilter, setTeamCapacityFilter] = useState<string>("ALL");
+  const [teamCampaignFilter, setTeamCampaignFilter] = useState<string>("ALL");
+  const [teamCurrentPage, setTeamCurrentPage] = useState<number>(1);
+  const [teamPageSize, setTeamPageSize] = useState<number>(10);
 
   // Matchmaking Assign Modal State
   const [assigningUser, setAssigningUser] = useState<UserData | null>(null);
@@ -179,18 +183,65 @@ export default function AdminDashboardPage() {
       });
   }, [users, soloSearch]);
 
+  // Derived Squad Stats
+  const openSquadsCount = useMemo(() => teams.filter((t) => t.members.length < 6).length, [teams]);
+  const fullSquadsCount = useMemo(() => teams.filter((t) => t.members.length >= 6).length, [teams]);
+  const totalSquadMembers = useMemo(() => teams.reduce((acc, t) => acc + t.members.length, 0), [teams]);
+  const totalOpenSlots = useMemo(() => teams.reduce((acc, t) => acc + Math.max(0, 6 - t.members.length), 0), [teams]);
+
   // Squads Filtered List
   const filteredTeams = useMemo(() => {
-    if (!teamSearch.trim()) return teams;
-    const q = teamSearch.toLowerCase();
-    return teams.filter(
-      (t) =>
+    return teams.filter((t) => {
+      const q = teamSearch.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
         t.name.toLowerCase().includes(q) ||
         t.inviteCode.toLowerCase().includes(q) ||
         (t.event?.code && t.event.code.toLowerCase().includes(q)) ||
-        t.members.some((m) => m.user.name.toLowerCase().includes(q))
-    );
-  }, [teams, teamSearch]);
+        (t.event?.title && t.event.title.toLowerCase().includes(q)) ||
+        t.members.some(
+          (m) =>
+            m.user?.name?.toLowerCase().includes(q) ||
+            m.user?.email?.toLowerCase().includes(q)
+        );
+
+      const matchesCapacity =
+        teamCapacityFilter === "ALL" ||
+        (teamCapacityFilter === "OPEN" && t.members.length < 6) ||
+        (teamCapacityFilter === "FULL" && t.members.length >= 6);
+
+      const matchesCampaign =
+        teamCampaignFilter === "ALL" ||
+        t.eventId === teamCampaignFilter ||
+        t.event?.code === teamCampaignFilter;
+
+      return matchesSearch && matchesCapacity && matchesCampaign;
+    });
+  }, [teams, teamSearch, teamCapacityFilter, teamCampaignFilter]);
+
+  // Paginated Sliced Squads
+  const totalTeamPages = Math.max(1, Math.ceil(filteredTeams.length / teamPageSize));
+  const paginatedTeams = useMemo(() => {
+    const start = (teamCurrentPage - 1) * teamPageSize;
+    return filteredTeams.slice(start, start + teamPageSize);
+  }, [filteredTeams, teamCurrentPage, teamPageSize]);
+
+  // Pagination page numbers helper for teams
+  const getTeamPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalTeamPages <= 7) {
+      for (let i = 1; i <= totalTeamPages; i++) pages.push(i);
+    } else {
+      if (teamCurrentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, "...", totalTeamPages);
+      } else if (teamCurrentPage >= totalTeamPages - 3) {
+        pages.push(1, "...", totalTeamPages - 4, totalTeamPages - 3, totalTeamPages - 2, totalTeamPages - 1, totalTeamPages);
+      } else {
+        pages.push(1, "...", teamCurrentPage - 1, teamCurrentPage, teamCurrentPage + 1, "...", totalTeamPages);
+      }
+    }
+    return pages;
+  };
 
   // Filtered Campaigns List
   const filteredCampaigns = useMemo(() => {
@@ -601,9 +652,26 @@ export default function AdminDashboardPage() {
           {/* TAB 3: TEAMS & ROSTERS */}
           <TabsContent value="TEAMS" className="mt-0 focus-visible:outline-none space-y-4">
             <TeamsTab
+              teams={teams}
+              events={events}
               filteredTeams={filteredTeams}
+              paginatedTeams={paginatedTeams}
               teamSearch={teamSearch}
               setTeamSearch={setTeamSearch}
+              teamCapacityFilter={teamCapacityFilter}
+              setTeamCapacityFilter={setTeamCapacityFilter}
+              teamCampaignFilter={teamCampaignFilter}
+              setTeamCampaignFilter={setTeamCampaignFilter}
+              teamCurrentPage={teamCurrentPage}
+              setTeamCurrentPage={setTeamCurrentPage}
+              teamPageSize={teamPageSize}
+              setTeamPageSize={setTeamPageSize}
+              totalTeamPages={totalTeamPages}
+              getTeamPageNumbers={getTeamPageNumbers}
+              openSquadsCount={openSquadsCount}
+              fullSquadsCount={fullSquadsCount}
+              totalSquadMembers={totalSquadMembers}
+              totalOpenSlots={totalOpenSlots}
               loading={loading}
               fetchAdminData={fetchAdminData}
             />
