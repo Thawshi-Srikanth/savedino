@@ -60,6 +60,15 @@ import {
   ChevronsRight,
   MoreHorizontal,
   Copy,
+  Calendar,
+  Clock,
+  ExternalLink,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  FileCode,
+  Tag,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,10 +76,20 @@ interface EventData {
   id: string;
   title: string;
   code: string;
-  description: string;
+  description?: string;
+  regStart?: string;
+  regEnd?: string;
+  teamFormationStart?: string;
+  teamFormationEnd?: string;
   startDate: string;
   endDate: string;
+  submissionStart?: string;
+  submissionEnd?: string;
   status: string;
+  _count?: {
+    teams: number;
+    imageSets?: number;
+  };
 }
 
 interface TeamData {
@@ -160,6 +179,163 @@ export default function AdminDashboardPage() {
   const [deletingUser, setDeletingUser] = useState<UserData | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+  // Campaign Management State
+  const [campaignSearch, setCampaignSearch] = useState<string>("");
+  const [campaignStatusFilter, setCampaignStatusFilter] = useState<string>("ALL");
+  const [campaignCurrentPage, setCampaignCurrentPage] = useState<number>(1);
+  const [campaignPageSize, setCampaignPageSize] = useState<number>(10);
+  const [editingCampaign, setEditingCampaign] = useState<EventData | null>(null);
+  const [deletingCampaign, setDeletingCampaign] = useState<EventData | null>(null);
+
+  // Edit Campaign Form State
+  const [editCampTitle, setEditCampTitle] = useState<string>("");
+  const [editCampCode, setEditCampCode] = useState<string>("");
+  const [editCampDesc, setEditCampDesc] = useState<string>("");
+  const [editCampStatus, setEditCampStatus] = useState<string>("ACTIVE");
+  const [editCampRegStart, setEditCampRegStart] = useState<string>("");
+  const [editCampRegEnd, setEditCampRegEnd] = useState<string>("");
+  const [editCampTeamStart, setEditCampTeamStart] = useState<string>("");
+  const [editCampTeamEnd, setEditCampTeamEnd] = useState<string>("");
+  const [editCampStart, setEditCampStart] = useState<string>("");
+  const [editCampEnd, setEditCampEnd] = useState<string>("");
+  const [editCampSubStart, setEditCampSubStart] = useState<string>("");
+  const [editCampSubEnd, setEditCampSubEnd] = useState<string>("");
+  const [editCampTab, setEditCampTab] = useState<string>("overview");
+  const [editCampLoading, setEditCampLoading] = useState<boolean>(false);
+  const [deleteCampLoading, setDeleteCampLoading] = useState<boolean>(false);
+
+  // Helper date conversions
+  const toLocalInput = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const YYYY = d.getFullYear();
+    const MM = pad(d.getMonth() + 1);
+    const DD = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mm = pad(d.getMinutes());
+    return `${YYYY}-${MM}-${DD}T${hh}:${mm}`;
+  };
+
+  const formatAdminDate = (dateStr?: string) => {
+    if (!dateStr) return "TBA";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "TBA";
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Open Edit Campaign Modal
+  const handleOpenEditCampaign = (ev: EventData) => {
+    setEditingCampaign(ev);
+    setEditCampTitle(ev.title);
+    setEditCampCode(ev.code);
+    setEditCampDesc(ev.description || "");
+    setEditCampStatus(ev.status || "ACTIVE");
+    setEditCampRegStart(toLocalInput(ev.regStart));
+    setEditCampRegEnd(toLocalInput(ev.regEnd));
+    setEditCampTeamStart(toLocalInput(ev.teamFormationStart));
+    setEditCampTeamEnd(toLocalInput(ev.teamFormationEnd));
+    setEditCampStart(toLocalInput(ev.startDate));
+    setEditCampEnd(toLocalInput(ev.endDate));
+    setEditCampSubStart(toLocalInput(ev.submissionStart));
+    setEditCampSubEnd(toLocalInput(ev.submissionEnd));
+    setEditCampTab("overview");
+  };
+
+  // Save Campaign Changes
+  const handleSaveCampaign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCampaign) return;
+
+    setEditCampLoading(true);
+
+    try {
+      const res = await fetch(`/api/events/${editingCampaign.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editCampTitle,
+          code: editCampCode.toUpperCase().trim(),
+          description: editCampDesc,
+          status: editCampStatus,
+          regStart: editCampRegStart ? new Date(editCampRegStart).toISOString() : undefined,
+          regEnd: editCampRegEnd ? new Date(editCampRegEnd).toISOString() : undefined,
+          teamFormationStart: editCampTeamStart ? new Date(editCampTeamStart).toISOString() : undefined,
+          teamFormationEnd: editCampTeamEnd ? new Date(editCampTeamEnd).toISOString() : undefined,
+          startDate: editCampStart ? new Date(editCampStart).toISOString() : undefined,
+          endDate: editCampEnd ? new Date(editCampEnd).toISOString() : undefined,
+          submissionStart: editCampSubStart ? new Date(editCampSubStart).toISOString() : undefined,
+          submissionEnd: editCampSubEnd ? new Date(editCampSubEnd).toISOString() : undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.error || "Failed to update campaign.");
+      } else {
+        toast.success(`Campaign '${data.event.title}' updated successfully.`);
+        setEditingCampaign(null);
+        fetchAdminData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred.");
+    } finally {
+      setEditCampLoading(false);
+    }
+  };
+
+  // Quick Status Switcher for Campaigns
+  const handleQuickCampaignStatus = async (eventId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/events/${eventId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.error || "Failed to update status.");
+      } else {
+        toast.success(`Status updated to ${newStatus}.`);
+        fetchAdminData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred.");
+    }
+  };
+
+  // Delete Campaign
+  const handleDeleteCampaign = async () => {
+    if (!deletingCampaign) return;
+
+    setDeleteCampLoading(true);
+
+    try {
+      const res = await fetch(`/api/events/${deletingCampaign.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.error || "Failed to delete campaign.");
+      } else {
+        toast.success(data.message || `Campaign '${deletingCampaign.title}' deleted.`);
+        setDeletingCampaign(null);
+        fetchAdminData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred.");
+    } finally {
+      setDeleteCampLoading(false);
+    }
+  };
+
   const fetchAdminData = async () => {
     setLoading(true);
     try {
@@ -199,6 +375,10 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [userSearch, roleFilter, teamStatusFilter, pageSize]);
+
+  useEffect(() => {
+    setCampaignCurrentPage(1);
+  }, [campaignSearch, campaignStatusFilter, campaignPageSize]);
 
   // Open Edit User Modal
   const handleOpenEditUser = (user: UserData) => {
@@ -358,6 +538,52 @@ export default function AdminDashboardPage() {
   const leaderCount = useMemo(() => users.filter((u) => u.role === "leader").length, [users]);
   const citizenCount = useMemo(() => users.filter((u) => u.role === "user" || !u.role).length, [users]);
   const unassignedCount = useMemo(() => users.filter((u) => u.teamMembers.length === 0).length, [users]);
+
+  // Derived Campaign Stats
+  const activeCampCount = useMemo(() => events.filter((e) => e.status === "ACTIVE").length, [events]);
+  const upcomingCampCount = useMemo(() => events.filter((e) => e.status === "UPCOMING").length, [events]);
+  const subOpenCampCount = useMemo(() => events.filter((e) => e.status === "SUBMISSION_OPEN").length, [events]);
+  const completedCampCount = useMemo(() => events.filter((e) => e.status === "COMPLETED").length, [events]);
+
+  // Filtered Campaigns List
+  const filteredCampaigns = useMemo(() => {
+    return events.filter((ev) => {
+      const matchesSearch =
+        !campaignSearch.trim() ||
+        ev.title.toLowerCase().includes(campaignSearch.toLowerCase()) ||
+        ev.code.toLowerCase().includes(campaignSearch.toLowerCase()) ||
+        (ev.description && ev.description.toLowerCase().includes(campaignSearch.toLowerCase()));
+
+      const matchesStatus =
+        campaignStatusFilter === "ALL" || ev.status === campaignStatusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [events, campaignSearch, campaignStatusFilter]);
+
+  // Paginated Sliced Campaigns
+  const totalCampaignPages = Math.max(1, Math.ceil(filteredCampaigns.length / campaignPageSize));
+  const paginatedCampaigns = useMemo(() => {
+    const start = (campaignCurrentPage - 1) * campaignPageSize;
+    return filteredCampaigns.slice(start, start + campaignPageSize);
+  }, [filteredCampaigns, campaignCurrentPage, campaignPageSize]);
+
+  // Helper to generate campaign page numbers
+  const getCampaignPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalCampaignPages <= 5) {
+      for (let i = 1; i <= totalCampaignPages; i++) pages.push(i);
+    } else {
+      if (campaignCurrentPage <= 3) {
+        pages.push(1, 2, 3, 4, "...", totalCampaignPages);
+      } else if (campaignCurrentPage >= totalCampaignPages - 2) {
+        pages.push(1, "...", totalCampaignPages - 3, totalCampaignPages - 2, totalCampaignPages - 1, totalCampaignPages);
+      } else {
+        pages.push(1, "...", campaignCurrentPage - 1, campaignCurrentPage, campaignCurrentPage + 1, "...", totalCampaignPages);
+      }
+    }
+    return pages;
+  };
 
   // Helper to get initials
   const getInitials = (name: string) => {
@@ -1132,51 +1358,514 @@ export default function AdminDashboardPage() {
           </Card>
         )}
 
-        {/* TAB 4: CAMPAIGN EVENTS */}
+        {/* TAB 4: CAMPAIGN EVENTS (Full Admin Management) */}
         {activeTab === "EVENTS" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-foreground">Campaign Events ({events.length})</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage active IASC search campaigns and registration schedules.
-                </p>
-              </div>
+          <div className="space-y-4 w-full">
+            {/* Interactive Campaign Status Stat Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button
+                type="button"
+                onClick={() => setCampaignStatusFilter("ALL")}
+                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                  campaignStatusFilter === "ALL"
+                    ? "bg-primary/10 border-primary shadow-sm"
+                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Rocket className="size-3.5 text-primary" />
+                    <span>Total Campaigns</span>
+                  </span>
+                  {campaignStatusFilter === "ALL" && (
+                    <span className="text-[9px] font-bold text-primary uppercase">Active</span>
+                  )}
+                </div>
+                <div className="text-xl font-bold font-mono text-foreground mt-1.5">
+                  {events.length}
+                </div>
+              </button>
 
-              <Link href="/admin/campaigns/new">
-                <Button size="sm" variant="default" className="text-xs font-bold flex items-center gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white">
-                  <PlusCircle className="size-3.5" />
-                  <span>New Campaign</span>
-                </Button>
-              </Link>
+              <button
+                type="button"
+                onClick={() =>
+                  setCampaignStatusFilter(
+                    campaignStatusFilter === "ACTIVE" ? "ALL" : "ACTIVE"
+                  )
+                }
+                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                  campaignStatusFilter === "ACTIVE"
+                    ? "bg-[#10b981]/10 border-[#10b981] shadow-sm"
+                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-[#10b981] animate-pulse" />
+                    <span>Active Now</span>
+                  </span>
+                  {campaignStatusFilter === "ACTIVE" && (
+                    <span className="text-[9px] font-bold text-[#10b981] uppercase">Active</span>
+                  )}
+                </div>
+                <div className="text-xl font-bold font-mono text-[#10b981] mt-1.5">
+                  {activeCampCount}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setCampaignStatusFilter(
+                    campaignStatusFilter === "UPCOMING" ? "ALL" : "UPCOMING"
+                  )
+                }
+                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                  campaignStatusFilter === "UPCOMING"
+                    ? "bg-sky-500/10 border-sky-500 shadow-sm"
+                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Clock className="size-3.5 text-sky-500" />
+                    <span>Upcoming</span>
+                  </span>
+                  {campaignStatusFilter === "UPCOMING" && (
+                    <span className="text-[9px] font-bold text-sky-500 uppercase">Active</span>
+                  )}
+                </div>
+                <div className="text-xl font-bold font-mono text-sky-500 mt-1.5">
+                  {upcomingCampCount}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setCampaignStatusFilter(
+                    campaignStatusFilter === "COMPLETED" ? "ALL" : "COMPLETED"
+                  )
+                }
+                className={`text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                  campaignStatusFilter === "COMPLETED"
+                    ? "bg-slate-700/10 border-slate-600 shadow-sm"
+                    : "bg-card border-border hover:border-muted-foreground/40 shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <CheckCircle2 className="size-3.5 text-slate-500" />
+                    <span>Completed</span>
+                  </span>
+                  {campaignStatusFilter === "COMPLETED" && (
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">Active</span>
+                  )}
+                </div>
+                <div className="text-xl font-bold font-mono text-slate-400 mt-1.5">
+                  {completedCampCount}
+                </div>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {events.map((ev) => (
-                <Card key={ev.id} className="p-4 space-y-3 flex flex-col justify-between">
+            {/* Main Campaign Management Table Card - Fixed Height Container with Pinned Header & Pinned Pagination */}
+            <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border w-full">
+              {/* Header & Controls Toolbar */}
+              <div className="p-3.5 border-b border-border space-y-3 shrink-0 bg-card">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-xs text-primary font-bold uppercase font-mono">
-                        {ev.code}
-                      </span>
-                      <Badge variant={ev.status === "ACTIVE" ? "default" : "outline"}>
-                        {ev.status}
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-foreground">Campaign Events Management</h2>
+                      <Badge variant="outline" className="text-[10px] font-mono font-medium">
+                        {filteredCampaigns.length} total
                       </Badge>
                     </div>
-
-                    <h3 className="font-bold text-base text-foreground">{ev.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {ev.description || "International Asteroid Search Collaboration campaign."}
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Configure campaign codes, status states, milestone schedules, and squads.
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-border text-xs text-muted-foreground space-y-1 font-mono">
-                    <div>Start Date: {new Date(ev.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
-                    <div>End Date: {new Date(ev.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={fetchAdminData}
+                      className="h-7 px-2.5 text-xs gap-1.5 cursor-pointer"
+                    >
+                      <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+                      <span>Refresh</span>
+                    </Button>
+
+                    <Link href="/admin/campaigns/new">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
+                      >
+                        <PlusCircle className="size-3.5" />
+                        <span>New Campaign</span>
+                      </Button>
+                    </Link>
                   </div>
-                </Card>
-              ))}
-            </div>
+                </div>
+
+                {/* Filter Controls */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  {/* Search Input */}
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search campaign title, code, or description..."
+                      value={campaignSearch}
+                      onChange={(e) => setCampaignSearch(e.target.value)}
+                      className="pl-8 text-xs h-7.5 bg-background font-sans"
+                    />
+                    {campaignSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setCampaignSearch("")}
+                        className="absolute right-2.5 top-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Status Filter Selector */}
+                  <Select value={campaignStatusFilter} onValueChange={setCampaignStatusFilter}>
+                    <SelectTrigger className="h-7.5 text-xs font-sans bg-background w-full sm:w-[170px]">
+                      <SelectValue placeholder="All Statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Statuses ({events.length})</SelectItem>
+                      <SelectItem value="ACTIVE">Active ({activeCampCount})</SelectItem>
+                      <SelectItem value="UPCOMING">Upcoming ({upcomingCampCount})</SelectItem>
+                      <SelectItem value="SUBMISSION_OPEN">Submissions Open ({subOpenCampCount})</SelectItem>
+                      <SelectItem value="COMPLETED">Completed ({completedCampCount})</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Scrollable Table Area */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative">
+                {loading ? (
+                  <div className="py-16 text-center text-xs text-muted-foreground animate-pulse">
+                    Loading campaigns list...
+                  </div>
+                ) : filteredCampaigns.length === 0 ? (
+                  <div className="py-16 text-center text-xs text-muted-foreground space-y-2">
+                    <Rocket className="size-8 mx-auto text-muted-foreground/30 mb-1" />
+                    <div className="font-semibold text-sm text-foreground">No matching campaigns found</div>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                      No campaigns match your active search and status filter criteria. Try clearing filters.
+                    </p>
+                    {(campaignSearch || campaignStatusFilter !== "ALL") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setCampaignSearch("");
+                          setCampaignStatusFilter("ALL");
+                        }}
+                        className="h-7 text-xs mt-2"
+                      >
+                        Reset Filters
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <Table className="w-full table-fixed">
+                    <TableHeader className="sticky top-0 z-20 bg-card">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[33%] border-b border-border shadow-xs">Campaign</TableHead>
+                        <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[17%] border-b border-border shadow-xs">Status</TableHead>
+                        <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[12%] border-b border-border shadow-xs">Squads</TableHead>
+                        <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[32%] border-b border-border shadow-xs">Milestone Schedules</TableHead>
+                        <TableHead className="sticky top-0 z-20 bg-card text-right text-xs font-bold py-2.5 px-3 w-[6%] border-b border-border shadow-xs"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedCampaigns.map((ev) => (
+                        <TableRow key={ev.id} className="hover:bg-muted/30 border-b border-border/60">
+                          {/* Campaign Code & Title */}
+                          <TableCell className="py-2.5 px-3 w-[33%] min-w-0 overflow-hidden">
+                            <div className="space-y-1 min-w-0">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-[10px] font-mono font-bold text-foreground px-1.5 py-0.5 rounded bg-muted border border-border shrink-0">
+                                  {ev.code}
+                                </span>
+                                <Link
+                                  href={`/campaigns/${ev.id}`}
+                                  className="font-bold text-xs text-foreground hover:text-primary transition-colors truncate block"
+                                  title={ev.title}
+                                >
+                                  {ev.title}
+                                </Link>
+                              </div>
+                              <div className="text-[11px] text-muted-foreground truncate leading-tight">
+                                {ev.description || "International Asteroid Search Collaboration campaign."}
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          {/* Quick Status Switcher Dropdown in Table Cell */}
+                          <TableCell className="py-2.5 px-3 w-[17%] whitespace-nowrap overflow-hidden">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="cursor-pointer focus:outline-hidden inline-flex items-center"
+                                  title="Click to change status"
+                                >
+                                  {ev.status === "ACTIVE" ? (
+                                    <Badge className="bg-[#10b981] hover:bg-[#059669] text-white border-0 font-sans font-bold text-[10px] px-2 py-0.5 shadow-[0_2px_0_0_#059669] rounded-md gap-1">
+                                      <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                                      <span>Active</span>
+                                    </Badge>
+                                  ) : ev.status === "UPCOMING" ? (
+                                    <Badge className="bg-sky-500 hover:bg-sky-600 text-white border-0 font-sans font-bold text-[10px] px-2 py-0.5 shadow-[0_2px_0_0_#0284c7] rounded-md">
+                                      Upcoming
+                                    </Badge>
+                                  ) : ev.status === "SUBMISSION_OPEN" ? (
+                                    <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 font-sans font-bold text-[10px] px-2 py-0.5 shadow-[0_2px_0_0_#d97706] rounded-md">
+                                      Submissions Open
+                                    </Badge>
+                                  ) : (
+                                    <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 font-sans font-bold text-[10px] px-2 py-0.5 shadow-[0_2px_0_0_#334155] rounded-md">
+                                      {ev.status}
+                                    </Badge>
+                                  )}
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="text-xs font-sans bg-card border-border">
+                                <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase font-mono tracking-wider">
+                                  Change Status
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleQuickCampaignStatus(ev.id, "ACTIVE")}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  Set Active
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleQuickCampaignStatus(ev.id, "UPCOMING")}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  Set Upcoming
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleQuickCampaignStatus(ev.id, "SUBMISSION_OPEN")}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  Set Submissions Open
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleQuickCampaignStatus(ev.id, "COMPLETED")}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  Set Completed
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+
+                          {/* Squads Count */}
+                          <TableCell className="py-2.5 px-3 w-[12%] whitespace-nowrap overflow-hidden">
+                            <span className="font-mono font-bold text-xs text-foreground">
+                              {ev._count?.teams || 0}
+                            </span>
+                          </TableCell>
+
+                          {/* Milestone Schedules */}
+                          <TableCell className="py-2.5 px-3 w-[32%] min-w-0 overflow-hidden text-xs">
+                            <div className="space-y-0.5 text-[11px] font-mono leading-tight">
+                              <div className="truncate text-muted-foreground">
+                                <span className="text-foreground font-sans font-semibold text-[10px] uppercase mr-1">Reg:</span>
+                                <span>{formatAdminDate(ev.regStart)} &ndash; {formatAdminDate(ev.regEnd)}</span>
+                              </div>
+                              <div className="truncate text-muted-foreground">
+                                <span className="text-foreground font-sans font-semibold text-[10px] uppercase mr-1">Search:</span>
+                                <span>{formatAdminDate(ev.startDate)} &ndash; {formatAdminDate(ev.endDate)}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          {/* 3-Dot Actions Menu */}
+                          <TableCell className="py-2.5 px-3 w-[6%] text-right whitespace-nowrap overflow-hidden">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+                                  title="Campaign actions"
+                                >
+                                  <MoreHorizontal className="size-4" />
+                                  <span className="sr-only">Actions</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48 bg-card border-border shadow-md">
+                                <DropdownMenuLabel className="text-[10px] uppercase font-mono text-muted-foreground tracking-wider">
+                                  Campaign Actions
+                                </DropdownMenuLabel>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href={`/campaigns/${ev.id}`}
+                                    className="flex items-center gap-2 text-xs cursor-pointer"
+                                  >
+                                    <ExternalLink className="size-3.5 text-muted-foreground" />
+                                    <span>View Public Page</span>
+                                  </Link>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                  onClick={() => handleOpenEditCampaign(ev)}
+                                  className="gap-2 text-xs cursor-pointer"
+                                >
+                                  <Edit2 className="size-3.5 text-primary" />
+                                  <span>Edit Campaign</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(ev.code);
+                                    toast.success(`Copied campaign code '${ev.code}' to clipboard`);
+                                  }}
+                                  className="gap-2 text-xs cursor-pointer"
+                                >
+                                  <Copy className="size-3.5 text-muted-foreground" />
+                                  <span>Copy Campaign Code</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+
+                                <DropdownMenuItem
+                                  onClick={() => setDeletingCampaign(ev)}
+                                  className="gap-2 text-xs cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                  <span>Delete Campaign</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+
+              {/* PINNED BOTTOM PAGINATION BAR */}
+              <div className="p-2.5 border-t border-border bg-card shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
+                {/* Items & Rows Info */}
+                <div className="flex items-center gap-2.5 text-muted-foreground">
+                  <span>
+                    Showing{" "}
+                    <strong className="text-foreground font-mono">
+                      {filteredCampaigns.length === 0 ? 0 : (campaignCurrentPage - 1) * campaignPageSize + 1}
+                    </strong>
+                    &ndash;
+                    <strong className="text-foreground font-mono">
+                      {Math.min(campaignCurrentPage * campaignPageSize, filteredCampaigns.length)}
+                    </strong>{" "}
+                    of <strong className="text-foreground font-mono">{filteredCampaigns.length}</strong>
+                  </span>
+
+                  {/* Rows selector */}
+                  <div className="flex items-center gap-1 pl-2 border-l border-border">
+                    <span className="text-[11px]">Rows:</span>
+                    <select
+                      value={campaignPageSize}
+                      onChange={(e) => setCampaignPageSize(Number(e.target.value))}
+                      className="h-6.5 px-1.5 rounded border border-border bg-background text-[11px] font-mono text-foreground cursor-pointer"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Numbered Page Navigation Controls */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCampaignCurrentPage(1)}
+                    disabled={campaignCurrentPage === 1}
+                    className="h-6.5 px-1.5 text-xs"
+                    title="First Page"
+                  >
+                    <ChevronsLeft className="size-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCampaignCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={campaignCurrentPage === 1}
+                    className="h-6.5 px-2 text-xs"
+                    title="Previous Page"
+                  >
+                    <ChevronLeft className="size-3.5" />
+                  </Button>
+
+                  {/* Numbered Page Buttons */}
+                  <div className="flex items-center gap-1 mx-1">
+                    {getCampaignPageNumbers().map((pNum, idx) => {
+                      if (pNum === "...") {
+                        return (
+                          <span key={`camp-ellipsis-${idx}`} className="px-1 text-muted-foreground text-xs font-mono">
+                            ...
+                          </span>
+                        );
+                      }
+                      const pageIndex = Number(pNum);
+                      const isActive = campaignCurrentPage === pageIndex;
+                      return (
+                        <button
+                          key={`camp-page-${pageIndex}`}
+                          type="button"
+                          onClick={() => setCampaignCurrentPage(pageIndex)}
+                          className={`h-6.5 min-w-[26px] px-1.5 text-[11px] font-mono font-semibold rounded border cursor-pointer transition-colors ${
+                            isActive
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-muted-foreground border-border hover:text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {pageIndex}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCampaignCurrentPage((p) => Math.min(totalCampaignPages, p + 1))}
+                    disabled={campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0}
+                    className="h-6.5 px-2 text-xs"
+                    title="Next Page"
+                  >
+                    <ChevronRight className="size-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCampaignCurrentPage(totalCampaignPages)}
+                    disabled={campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0}
+                    className="h-6.5 px-1.5 text-xs"
+                    title="Last Page"
+                  >
+                    <ChevronsRight className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
       </div>
@@ -1343,6 +2032,303 @@ export default function AdminDashboardPage() {
               className="font-bold"
             >
               {deleteLoading ? "Deleting..." : "Delete User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT CAMPAIGN MODAL */}
+      <Dialog
+        open={!!editingCampaign}
+        onOpenChange={(open) => !open && setEditingCampaign(null)}
+      >
+        <DialogContent className="sm:max-w-2xl bg-card border-border font-sans max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <Edit2 className="size-4 text-primary" />
+              <span>Edit Campaign &bull; {editingCampaign?.code}</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Modify campaign metadata, public descriptions, and timeline milestone dates.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveCampaign} className="space-y-4 pt-1">
+            {/* Nav Tabs for Edit Modal */}
+            <div className="flex border-b border-border text-xs">
+              <button
+                type="button"
+                onClick={() => setEditCampTab("overview")}
+                className={`pb-2 px-3 font-bold border-b-2 transition-colors cursor-pointer ${
+                  editCampTab === "overview"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Overview &amp; Identity
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditCampTab("schedule")}
+                className={`pb-2 px-3 font-bold border-b-2 transition-colors cursor-pointer ${
+                  editCampTab === "schedule"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Timeline &amp; Milestone Schedules
+              </button>
+            </div>
+
+            {editCampTab === "overview" ? (
+              <div className="space-y-3.5">
+                {/* Title */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Campaign Title</label>
+                  <Input
+                    required
+                    value={editCampTitle}
+                    onChange={(e) => setEditCampTitle(e.target.value)}
+                    placeholder="e.g. IASC Pan-STARRS Campaign 2026-A"
+                    className="h-9 text-xs bg-background"
+                  />
+                </div>
+
+                {/* Code & Status */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-foreground">Campaign Code</label>
+                    <Input
+                      required
+                      value={editCampCode}
+                      onChange={(e) => setEditCampCode(e.target.value.toUpperCase())}
+                      placeholder="e.g. IASC-2026-A"
+                      className="h-9 text-xs font-mono font-bold bg-background"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-foreground">Status</label>
+                    <Select value={editCampStatus} onValueChange={setEditCampStatus}>
+                      <SelectTrigger className="h-9 text-xs bg-background">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">Active (Ongoing)</SelectItem>
+                        <SelectItem value="UPCOMING">Upcoming</SelectItem>
+                        <SelectItem value="SUBMISSION_OPEN">Submissions Open</SelectItem>
+                        <SelectItem value="COMPLETED">Completed / Concluded</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Description</label>
+                  <textarea
+                    value={editCampDesc}
+                    onChange={(e) => setEditCampDesc(e.target.value)}
+                    rows={3}
+                    placeholder="Campaign details, telescope source, and research objective..."
+                    className="w-full p-2.5 rounded-lg border border-border bg-background text-xs text-foreground focus:outline-hidden leading-relaxed font-sans"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {/* 1. Registration Window */}
+                <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Calendar className="size-3.5 text-primary" />
+                    <span>Stage 1: Student Registration Window</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Registration Opens</label>
+                      <Input
+                        type="datetime-local"
+                        value={editCampRegStart}
+                        onChange={(e) => setEditCampRegStart(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Registration Closes</label>
+                      <Input
+                        type="datetime-local"
+                        value={editCampRegEnd}
+                        onChange={(e) => setEditCampRegEnd(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Team Formation Window */}
+                <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Users className="size-3.5 text-primary" />
+                    <span>Stage 2: Team Formation Window</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Team Setup Opens</label>
+                      <Input
+                        type="datetime-local"
+                        value={editCampTeamStart}
+                        onChange={(e) => setEditCampTeamStart(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Team Setup Closes</label>
+                      <Input
+                        type="datetime-local"
+                        value={editCampTeamEnd}
+                        onChange={(e) => setEditCampTeamEnd(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Image Search Window */}
+                <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Telescope className="size-3.5 text-[#8b5cf6]" />
+                    <span>Stage 3: Telescope Image Search Window</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Campaign Starts</label>
+                      <Input
+                        type="datetime-local"
+                        required
+                        value={editCampStart}
+                        onChange={(e) => setEditCampStart(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Campaign Ends</label>
+                      <Input
+                        type="datetime-local"
+                        required
+                        value={editCampEnd}
+                        onChange={(e) => setEditCampEnd(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Submission Window */}
+                <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <FileCode className="size-3.5 text-emerald-500" />
+                    <span>Stage 4: Report Submission Window</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Submissions Open</label>
+                      <Input
+                        type="datetime-local"
+                        value={editCampSubStart}
+                        onChange={(e) => setEditCampSubStart(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-muted-foreground">Submissions Deadline</label>
+                      <Input
+                        type="datetime-local"
+                        value={editCampSubEnd}
+                        onChange={(e) => setEditCampSubEnd(e.target.value)}
+                        className="h-8 text-xs bg-background font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingCampaign(null)}
+                disabled={editCampLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="default"
+                size="sm"
+                disabled={editCampLoading}
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+              >
+                {editCampLoading ? "Saving Changes..." : "Save Campaign"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE CAMPAIGN CONFIRMATION DIALOG */}
+      <Dialog
+        open={!!deletingCampaign}
+        onOpenChange={(open) => !open && setDeletingCampaign(null)}
+      >
+        <DialogContent className="sm:max-w-md bg-card border-border font-sans">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-destructive flex items-center gap-2">
+              <Trash2 className="size-4" />
+              <span>Delete Campaign Event</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground space-y-2">
+              <span>
+                Are you sure you want to permanently delete{" "}
+                <strong className="text-foreground">{deletingCampaign?.title}</strong> (
+                <span className="font-mono font-bold text-foreground">
+                  {deletingCampaign?.code}
+                </span>
+                )?
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs space-y-1">
+            <div className="font-bold flex items-center gap-1.5">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              <span>Permanent Deletion Warning</span>
+            </div>
+            <p className="text-[11px] leading-relaxed">
+              This will permanently delete this campaign event along with all associated teams, squad memberships, and image set observation logs.
+            </p>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDeletingCampaign(null)}
+              disabled={deleteCampLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteCampaign}
+              disabled={deleteCampLoading}
+              className="font-bold"
+            >
+              {deleteCampLoading ? "Deleting..." : "Delete Campaign"}
             </Button>
           </DialogFooter>
         </DialogContent>
