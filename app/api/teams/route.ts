@@ -114,6 +114,7 @@ export async function GET(req: Request) {
     const eventId = searchParams.get("eventId") || "";
     const isRecruiting = searchParams.get("isRecruiting");
     const status = searchParams.get("status") || "";
+    const includeDisqualified = searchParams.get("includeDisqualified") === "true";
 
     const where: any = {};
 
@@ -121,8 +122,10 @@ export async function GET(req: Request) {
       where.eventId = eventId;
     }
 
-    if (status) {
+    if (status && status !== "ALL") {
       where.status = status;
+    } else if (!includeDisqualified) {
+      where.status = { not: "DISQUALIFIED" };
     }
 
     if (isRecruiting === "true") {

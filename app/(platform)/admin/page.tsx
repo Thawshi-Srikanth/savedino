@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
     try {
       const [evRes, tmRes, usRes] = await Promise.all([
         fetch("/api/events"),
-        fetch("/api/teams"),
+        fetch("/api/teams?includeDisqualified=true"),
         fetch("/api/admin/users"),
       ]);
 

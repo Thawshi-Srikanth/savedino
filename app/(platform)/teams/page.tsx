@@ -7,7 +7,6 @@ import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   Select,
@@ -27,17 +26,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Search,
-  Users,
   UserPlus,
   RefreshCw,
   X,
   ArrowRight,
-  Sparkles,
-  Globe,
-  Crown,
-  Compass,
-  SlidersHorizontal,
-  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,7 +58,7 @@ interface Team {
   id: string;
   name: string;
   inviteCode: string;
-  status: "FORMING" | "READY" | "FULL" | "DISQUALIFIED" | string;
+  status: "FORMING" | "ACTIVE" | "SUBMITTED" | "DISQUALIFIED" | string;
   isRecruiting: boolean;
   recruitmentNotes?: string | null;
   disqualificationReason?: string | null;
@@ -84,10 +78,18 @@ interface CampaignEvent {
   status: string;
 }
 
+function getInitials(name?: string) {
+  if (!name) return "??";
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 function TeamsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlEventId = searchParams.get("eventId") || searchParams.get("event");
+  const urlJoinCode = searchParams.get("join");
   const { data: session } = useSession();
 
   // Data State
@@ -98,8 +100,22 @@ function TeamsContent() {
   // Filters State
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedEventId, setSelectedEventId] = useState<string>(urlEventId || "ALL");
-  const [recruitmentFilter, setRecruitmentFilter] = useState<string>("ALL");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [activeTabFilter, setActiveTabFilter] = useState<"ALL" | "RECRUITING" | "FORMING" | "FULL" | "MY_SQUADS">("ALL");
+
+  // Pagination & Load More State
+  const [paginationMode, setPaginationMode] = useState<"LOAD_MORE" | "PAGINATED">("LOAD_MORE");
+  const [pageSize, setPageSize] = useState<number>(6);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [visibleCount, setVisibleCount] = useState<number>(6);
+
+  // Join by Invite Code
+  const [joinCodeInput, setJoinCodeInput] = useState<string>(urlJoinCode || "");
+  const [joinCodeLoading, setJoinCodeLoading] = useState<boolean>(false);
+
+  // Join Request Modal State
+  const [requestTeam, setRequestTeam] = useState<Team | null>(null);
+  const [requestMsg, setRequestMsg] = useState<string>("");
+  const [requestLoading, setRequestLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (urlEventId) {
@@ -107,14 +123,17 @@ function TeamsContent() {
     }
   }, [urlEventId]);
 
-  // Join Request Modal State
-  const [requestTeam, setRequestTeam] = useState<Team | null>(null);
-  const [requestMsg, setRequestMsg] = useState<string>("");
-  const [requestLoading, setRequestLoading] = useState<boolean>(false);
+  useEffect(() => {
+    if (urlJoinCode) {
+      setJoinCodeInput(urlJoinCode.toUpperCase());
+    }
+  }, [urlJoinCode]);
 
-  // Join by Invite Code
-  const [joinCodeInput, setJoinCodeInput] = useState<string>("");
-  const [joinCodeLoading, setJoinCodeLoading] = useState<boolean>(false);
+  // Reset pagination on filter or batch size changes
+  useEffect(() => {
+    setVisibleCount(pageSize);
+    setCurrentPage(1);
+  }, [searchQuery, selectedEventId, activeTabFilter, pageSize]);
 
   // Fetch campaign events for filter dropdown
   const fetchEvents = useCallback(async () => {
@@ -136,9 +155,6 @@ function TeamsContent() {
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       if (selectedEventId !== "ALL") params.set("eventId", selectedEventId);
-      if (statusFilter !== "ALL") params.set("status", statusFilter);
-      if (recruitmentFilter === "RECRUITING") params.set("isRecruiting", "true");
-      if (recruitmentFilter === "CLOSED") params.set("isRecruiting", "false");
 
       const res = await fetch(`/api/teams?${params.toString()}`);
       const data = await res.json();
@@ -151,7 +167,7 @@ function TeamsContent() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, selectedEventId, recruitmentFilter, statusFilter]);
+  }, [searchQuery, selectedEventId]);
 
   useEffect(() => {
     fetchEvents();
@@ -161,22 +177,75 @@ function TeamsContent() {
     fetchTeams();
   }, [fetchTeams]);
 
-  // Derived Stats
-  const recruitingCount = useMemo(() => {
-    return teams.filter((t) => t.isRecruiting && (t.members?.length || 0) < 6).length;
+  // STRICT GUARD: Exclude all DISQUALIFIED squads completely from public directory
+  const validTeams = useMemo(() => {
+    return teams.filter((t) => t.status !== "DISQUALIFIED");
   }, [teams]);
 
-  const totalScientists = useMemo(() => {
-    return teams.reduce((acc, t) => acc + (t.members?.length || 0), 0);
-  }, [teams]);
+  // Filtered teams list based on active tab & query
+  const filteredTeams = useMemo(() => {
+    return validTeams.filter((t) => {
+      const memberCount = t.members?.length || 0;
+      const isUserMember = session?.user?.id
+        ? t.members?.some((m) => m.user?.id === session.user.id)
+        : false;
 
-  // Reset all filters
-  const handleResetFilters = () => {
-    setSearchQuery("");
-    setSelectedEventId("ALL");
-    setRecruitmentFilter("ALL");
-    setStatusFilter("ALL");
+      if (activeTabFilter === "RECRUITING") {
+        return t.isRecruiting && memberCount < 6;
+      }
+      if (activeTabFilter === "FORMING") {
+        return memberCount < 2 || t.status === "FORMING";
+      }
+      if (activeTabFilter === "FULL") {
+        return memberCount >= 6;
+      }
+      if (activeTabFilter === "MY_SQUADS") {
+        return isUserMember;
+      }
+      return true;
+    });
+  }, [validTeams, activeTabFilter, session]);
+
+  // Total Pages Calculation
+  const totalPages = Math.max(1, Math.ceil(filteredTeams.length / pageSize));
+
+  // Paginated/Sliced Teams for Load More vs Paginated Mode
+  const displayedTeams = useMemo(() => {
+    if (paginationMode === "LOAD_MORE") {
+      return filteredTeams.slice(0, visibleCount);
+    }
+    const startIdx = (currentPage - 1) * pageSize;
+    return filteredTeams.slice(startIdx, startIdx + pageSize);
+  }, [filteredTeams, paginationMode, visibleCount, currentPage, pageSize]);
+
+  const hasMore = visibleCount < filteredTeams.length;
+  const remainingCount = Math.max(0, filteredTeams.length - visibleCount);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(filteredTeams.length, prev + pageSize));
   };
+
+  const handleShowAll = () => {
+    setVisibleCount(filteredTeams.length);
+  };
+
+  // Derived Counts
+  const countAll = validTeams.length;
+  const countRecruiting = useMemo(() => validTeams.filter((t) => t.isRecruiting && (t.members?.length || 0) < 6).length, [validTeams]);
+  const countForming = useMemo(() => validTeams.filter((t) => (t.members?.length || 0) < 2 || t.status === "FORMING").length, [validTeams]);
+  const countFull = useMemo(() => validTeams.filter((t) => (t.members?.length || 0) >= 6).length, [validTeams]);
+  const countMySquads = useMemo(() => {
+    if (!session?.user?.id) return 0;
+    return validTeams.filter((t) => t.members?.some((m) => m.user?.id === session.user.id)).length;
+  }, [validTeams, session]);
+
+  const totalResearchers = useMemo(() => {
+    return validTeams.reduce((acc, t) => acc + (t.members?.length || 0), 0);
+  }, [validTeams]);
+
+  const totalOpenSlots = useMemo(() => {
+    return validTeams.reduce((acc, t) => acc + Math.max(0, 6 - (t.members?.length || 0)), 0);
+  }, [validTeams]);
 
   // Submit Join Request
   const handleSendJoinRequest = async () => {
@@ -205,7 +274,7 @@ function TeamsContent() {
     }
   };
 
-  // Join via direct Invite Code
+  // Join by Invite Code Handler
   const handleJoinByCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinCodeInput.trim()) return;
@@ -217,97 +286,308 @@ function TeamsContent() {
     setJoinCodeLoading(true);
 
     try {
-      const code = joinCodeInput.trim().toUpperCase();
-      router.push(`/join/${code}`);
+      const res = await fetch("/api/teams/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteCode: joinCodeInput.trim().toUpperCase() }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        toast.error(data.error || "Invalid invite code or squad is full.");
+      } else {
+        toast.success("Joined research squad successfully!");
+        setJoinCodeInput("");
+        router.push(`/team/${data.teamId || data.team?.id}`);
+      }
     } catch (err: any) {
-      toast.error(err.message || "Invalid invite code.");
+      toast.error(err.message || "Failed to join team.");
+    } finally {
       setJoinCodeLoading(false);
     }
   };
 
-  const hasActiveFilters =
-    searchQuery.trim() !== "" ||
-    selectedEventId !== "ALL" ||
-    recruitmentFilter !== "ALL" ||
-    statusFilter !== "ALL";
+  const hasActiveFilters = searchQuery.trim() !== "" || selectedEventId !== "ALL" || activeTabFilter !== "ALL";
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedEventId("ALL");
+    setActiveTabFilter("ALL");
+  };
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* 1. TOP HEADER & METRIC STATS GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Main Header Info Card */}
-        <Card className="lg:col-span-2 p-5 sm:p-6 flex flex-col justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono text-muted-foreground">// teams directory</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-sans font-bold tracking-tight text-foreground">
-              Teams &amp; Research Squads
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
-              Join active asteroid analysis teams across global research campaigns or use an invite code to join directly.
-            </p>
-          </div>
+    <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
+      {/* 1. TOP HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Research Squads
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Browse active research squads, join open teams, or enter an invite code to join directly.
+          </p>
+        </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 mt-4 border-t border-border/60">
-            <div>
-              <span className="text-[10px] uppercase font-mono text-muted-foreground block">Total Teams</span>
-              <span className="text-lg sm:text-xl font-bold font-mono text-foreground">{teams.length}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase font-mono text-muted-foreground block">Open for Join</span>
-              <span className="text-lg sm:text-xl font-bold font-mono text-[#10b981]">{recruitingCount}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase font-mono text-muted-foreground block">Active Members</span>
-              <span className="text-lg sm:text-xl font-bold font-mono text-foreground">{totalScientists}</span>
-            </div>
-          </div>
-        </Card>
-
-        {/* Join With Invite Code Box - Purple Theme Card with 3D Bottom Shadow */}
-        <Card className="p-5 sm:p-6 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] flex flex-col justify-between space-y-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-              <Sparkles className="size-3.5 text-amber-300" />
-              <span>Join with Invite Code</span>
-            </div>
-            <p className="text-xs text-white/85 leading-relaxed">
-              Have an invite code from a squad leader? Enter it here to join directly.
-            </p>
-          </div>
-
-          <form onSubmit={handleJoinByCode} className="space-y-2.5">
-            <Input
-              type="text"
-              placeholder="AST-XXXX"
-              value={joinCodeInput}
-              onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-              className="w-full uppercase text-xs h-9 font-mono font-bold tracking-wider bg-white text-slate-950 placeholder:text-slate-400 border-none shadow-inner"
-            />
-            <Button
-              type="submit"
-              disabled={joinCodeLoading || !joinCodeInput.trim()}
-              size="sm"
-              className="w-full h-9 text-xs font-bold gap-1.5 cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_3px_0_0_#ca8a04] active:translate-y-0.5 transition-transform uppercase tracking-wider"
-            >
-              {joinCodeLoading ? "Joining..." : "Join Team"}
-              <ArrowRight className="size-3.5" />
-            </Button>
-          </form>
-        </Card>
+        <Link href="/campaigns">
+          <Button
+            variant="outline"
+            className="h-8 px-3 text-xs font-semibold gap-1.5 cursor-pointer bg-background shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 shrink-0"
+          >
+            <span>Explore Campaigns</span>
+            <ArrowRight className="size-3.5" />
+          </Button>
+        </Link>
       </div>
 
-      {/* 2. FILTER & CONTROLS TOOLBAR */}
-      <Card className="p-4 space-y-3">
-        <div className="flex flex-col lg:flex-row gap-3">
-          {/* Main Search Input */}
-          <div className="relative flex-1">
+      {/* 2. TWO-COLUMN LAYOUT: STICKY SIDEBAR + MAIN SQUADS GRID */}
+      <div className="flex flex-col lg:flex-row items-start gap-6">
+        {/* LEFT STICKY SIDEBAR: JOIN SQUAD & FILTERS */}
+        <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-20 space-y-4">
+          {/* Join with Invite Code Card */}
+          <Card className="p-4 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] space-y-3">
+            <div className="space-y-1">
+              <span className="text-xs font-bold block text-white">Join with Invite Code</span>
+              <p className="text-[11px] text-white/85 leading-relaxed">
+                Have a code from a team leader? Enter it here to join directly.
+              </p>
+            </div>
+
+            <form onSubmit={handleJoinByCode} className="space-y-2">
+              <Input
+                type="text"
+                placeholder="AST-XXXX"
+                value={joinCodeInput}
+                onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
+                className="w-full uppercase text-xs h-8 font-mono font-bold tracking-wider bg-white text-slate-950 placeholder:text-slate-400 border-none shadow-inner"
+              />
+              <Button
+                type="submit"
+                disabled={joinCodeLoading || !joinCodeInput.trim()}
+                size="sm"
+                className="w-full h-8 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform uppercase tracking-wider"
+              >
+                {joinCodeLoading ? "Joining..." : "Join Squad"}
+              </Button>
+            </form>
+          </Card>
+
+          {/* Filters Sidebar Card */}
+          <Card className="p-4 space-y-4 bg-card border-border">
+            {/* Status Filter Tabs */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                Status Filter
+              </span>
+              <div className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTabFilter("ALL")}
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+                    activeTabFilter === "ALL"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span>All Squads</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    activeTabFilter === "ALL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                  }`}>
+                    {countAll}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTabFilter("RECRUITING")}
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+                    activeTabFilter === "RECRUITING"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span>Open to Join</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    activeTabFilter === "RECRUITING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                  }`}>
+                    {countRecruiting}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTabFilter("FORMING")}
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+                    activeTabFilter === "FORMING"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span>Forming</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    activeTabFilter === "FORMING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                  }`}>
+                    {countForming}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTabFilter("FULL")}
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+                    activeTabFilter === "FULL"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span>Full Squads</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    activeTabFilter === "FULL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                  }`}>
+                    {countFull}
+                  </span>
+                </button>
+
+                {session && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabFilter("MY_SQUADS")}
+                    className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+                      activeTabFilter === "MY_SQUADS"
+                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <span>My Squads</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                      activeTabFilter === "MY_SQUADS" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                    }`}>
+                      {countMySquads}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Campaign Select Filter */}
+            <div className="space-y-1.5 pt-2 border-t border-border">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                Campaign Filter
+              </span>
+              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                <SelectTrigger className="h-8 text-xs font-sans bg-background">
+                  <SelectValue placeholder="All Campaigns" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Campaigns ({events.length})</SelectItem>
+                  {events.map((ev) => (
+                    <SelectItem key={ev.id} value={ev.id}>
+                      {ev.code} ({ev.title.slice(0, 16)}...)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Pagination Style & Batch Size */}
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span className="font-semibold text-foreground">Browsing Mode:</span>
+                <div className="flex items-center bg-muted/60 p-0.5 rounded border border-border">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaginationMode("LOAD_MORE");
+                      setVisibleCount(pageSize);
+                    }}
+                    className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium cursor-pointer transition-colors ${
+                      paginationMode === "LOAD_MORE"
+                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Load More
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaginationMode("PAGINATED");
+                      setCurrentPage(1);
+                    }}
+                    className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium cursor-pointer transition-colors ${
+                      paginationMode === "PAGINATED"
+                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Pages
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>Batch Size:</span>
+                <div className="flex items-center gap-1">
+                  {[6, 12, 24].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        setPageSize(size);
+                        setVisibleCount(size);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-2 py-0.5 rounded font-mono text-[10px] cursor-pointer transition-colors ${
+                        pageSize === size
+                          ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                onClick={handleResetFilters}
+                size="sm"
+                variant="outline"
+                className="w-full h-8 text-xs font-semibold cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+              >
+                Reset All Filters
+              </Button>
+            )}
+          </Card>
+
+          {/* Directory Summary Stats Card */}
+          <Card className="p-3.5 bg-muted/30 border-border text-xs font-mono space-y-2">
+            <span className="text-[10px] uppercase font-bold text-muted-foreground block tracking-wider">
+              Directory Stats
+            </span>
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <span className="text-muted-foreground block text-[10px]">Open Slots:</span>
+                <span className="font-bold text-[#10b981]">{totalOpenSlots} Slots</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground block text-[10px]">Researchers:</span>
+                <span className="font-bold text-foreground">{totalResearchers}</span>
+              </div>
+            </div>
+          </Card>
+        </aside>
+
+        {/* RIGHT MAIN CONTENT AREA: SEARCH & SQUADS GRID */}
+        <main className="flex-1 min-w-0 space-y-4">
+          {/* Search Input Bar */}
+          <div className="relative">
             <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search by team name, member name, or campaign..."
+              placeholder="Search by squad name, leader, member, or campaign..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-8 text-xs h-9 font-sans bg-background"
@@ -317,286 +597,346 @@ function TeamsContent() {
                 type="button"
                 onClick={() => setSearchQuery("")}
                 className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                aria-label="Clear search"
               >
                 <X className="size-4" />
               </button>
             )}
           </div>
 
-          {/* Campaign Select Filter */}
-          <div className="w-full lg:w-48">
-            <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-              <SelectTrigger className="h-9 text-xs font-sans bg-background">
-                <SelectValue placeholder="All Campaigns" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Campaigns</SelectItem>
-                {events.map((ev) => (
-                  <SelectItem key={ev.id} value={ev.id}>
-                    {ev.code} ({ev.title})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Recruitment Status Filter */}
-          <div className="w-full lg:w-40">
-            <Select value={recruitmentFilter} onValueChange={setRecruitmentFilter}>
-              <SelectTrigger className="h-9 text-xs font-sans bg-background">
-                <SelectValue placeholder="Recruitment" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="RECRUITING">Open to Join</SelectItem>
-                <SelectItem value="CLOSED">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Team Capacity Filter */}
-          <div className="w-full lg:w-36">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 text-xs font-sans bg-background">
-                <SelectValue placeholder="Capacity" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Capacity</SelectItem>
-                <SelectItem value="FORMING">Forming (&lt; 2)</SelectItem>
-                <SelectItem value="READY">Ready (2-5)</SelectItem>
-                <SelectItem value="FULL">Full (6/6)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {hasActiveFilters && (
-            <Button
-              type="button"
-              onClick={handleResetFilters}
-              size="sm"
-              variant="outline"
-              className="h-9 px-3 text-xs font-semibold gap-1 text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
-            >
-              <RefreshCw className="size-3.5" />
-              <span>Reset</span>
-            </Button>
-          )}
-        </div>
-
-        {/* Results summary / active filters */}
-        {hasActiveFilters && (
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-border text-muted-foreground">
+          {/* Results Counter */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              Showing <strong className="text-foreground">{teams.length}</strong> matching {teams.length === 1 ? "team" : "teams"}
+              {paginationMode === "LOAD_MORE" ? (
+                <>
+                  Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
+                  <strong className="text-foreground">{filteredTeams.length}</strong> {filteredTeams.length === 1 ? "squad" : "squads"}
+                </>
+              ) : (
+                <>
+                  Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                  <strong className="text-foreground">{totalPages}</strong> ({filteredTeams.length} total {filteredTeams.length === 1 ? "squad" : "squads"})
+                </>
+              )}
             </span>
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="text-xs text-primary hover:underline font-semibold cursor-pointer"
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
-      </Card>
-
-      {/* 3. TEAMS RESPONSIVE GRID */}
-      {loading ? (
-        <div className="py-20 text-center text-sm text-muted-foreground flex flex-col items-center gap-3">
-          <RefreshCw className="size-6 animate-spin text-primary" />
-          <span className="font-sans text-xs text-muted-foreground">
-            Loading teams...
-          </span>
-        </div>
-      ) : teams.length === 0 ? (
-        <Card className="p-12 text-center text-sm text-muted-foreground space-y-3 border-dashed">
-          <Compass className="size-10 mx-auto text-muted-foreground/50" />
-          <div className="font-sans font-bold text-foreground text-base">No Matching Teams Found</div>
-          <p className="max-w-md mx-auto text-xs leading-relaxed">
-            No teams match your active search or filter criteria. Try adjusting your query.
-          </p>
-          {hasActiveFilters && (
-            <Button onClick={handleResetFilters} variant="outline" size="sm" className="mt-2 text-xs">
-              Clear All Filters
-            </Button>
-          )}
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {teams.map((team) => {
-            const memberCount = team.members?.length || 0;
-            const isFull = memberCount >= 6;
-            const capacityPercent = Math.min(100, Math.round((memberCount / 6) * 100));
-
-            const isUserMember = session?.user?.id
-              ? team.members?.some((m) => m.user?.id === session.user.id)
-              : false;
-
-            const leaderMember = team.members?.find((m) => m.role === "LEADER") || team.members?.[0];
-
-            return (
-              <Card
-                key={team.id}
-                className="hover:border-primary/50 hover:shadow-[0_6px_0_0_#8b5cf6]/30 hover:-translate-y-0.5 transition-all p-5 flex flex-col justify-between space-y-4"
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-primary hover:underline font-semibold cursor-pointer"
               >
-                <div className="space-y-3">
-                  {/* Top Bar: Campaign Code & Status Pill */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-mono font-bold text-primary">
-                      {team.event?.code || "CAMPAIGN"}
-                    </span>
+                Clear filters
+              </button>
+            )}
+          </div>
 
-                    <div className="flex items-center gap-1.5">
-                      {team.status === "DISQUALIFIED" ? (
-                        <Badge
-                          variant="destructive"
-                          className="text-[10px] font-sans font-bold px-2 py-0.5"
-                        >
-                          Disabled
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] font-sans font-medium px-2 py-0.5"
-                        >
-                          {team.status === "FORMING"
-                            ? "Forming"
-                            : team.status === "READY"
-                            ? "Ready"
-                            : "Full"}
-                        </Badge>
-                      )}
-
-                      {team.status === "DISQUALIFIED" ? (
-                        <span className="text-[10px] font-sans font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
-                          Locked
-                        </span>
-                      ) : team.isRecruiting && !isFull ? (
-                        <span className="text-[10px] font-sans font-semibold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded-full">
-                          Open
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-sans text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                          Closed
-                        </span>
-                      )}
-                    </div>
+          {/* Squad Cards Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: pageSize }).map((_, idx) => (
+                <Card key={idx} className="p-4 space-y-3 bg-card border-border animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-20 bg-muted rounded" />
+                    <div className="h-4 w-16 bg-muted rounded" />
                   </div>
-
-                  {/* Team Name */}
-                  <h3 className="font-sans font-bold text-base text-foreground leading-snug">
-                    {team.name}
-                  </h3>
-
-                  {/* Member Capacity Progress */}
+                  <div className="h-5 w-3/4 bg-muted rounded" />
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-muted-foreground">Members</span>
-                      <span className="font-bold text-foreground">{memberCount}/6</span>
-                    </div>
-                    <Progress value={capacityPercent} className="h-1.5" />
+                    <div className="h-3 w-1/2 bg-muted rounded" />
+                    <div className="h-1.5 w-full bg-muted rounded" />
                   </div>
-
-                  {/* Recruitment Note / Disabled Reason */}
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[32px]">
-                    {team.status === "DISQUALIFIED"
-                      ? team.disqualificationReason
-                        ? `Disabled: ${team.disqualificationReason}`
-                        : "Squad disabled by platform administration."
-                      : team.recruitmentNotes || "Active asteroid search team analyzing telescope image sets."}
-                  </p>
-
-                  {/* Members & Leader Info */}
-                  <div className="pt-2 border-t border-border/60 space-y-2">
-                    {leaderMember && (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Crown className="size-3.5 text-amber-500 shrink-0" />
-                        <span className="truncate">
-                          Leader: <strong className="text-foreground">{leaderMember.user.name}</strong>
-                          {leaderMember.user.country && (
-                            <span className="text-muted-foreground font-normal ml-1">({leaderMember.user.country})</span>
-                          )}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex flex-wrap gap-1">
-                      {team.members.map((m) => (
-                        <span
-                          key={m.id}
-                          className="inline-flex items-center text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground font-sans"
-                        >
-                          {m.user.name}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="h-8 w-full bg-muted/60 rounded" />
+                  <div className="pt-2 border-t border-border flex items-center gap-2">
+                    <div className="size-5 rounded-full bg-muted" />
+                    <div className="h-3 w-32 bg-muted rounded" />
                   </div>
-                </div>
+                  <div className="h-8 w-full bg-muted rounded mt-2" />
+                </Card>
+              ))}
+            </div>
+          ) : filteredTeams.length === 0 ? (
+            <Card className="p-12 text-center text-sm text-muted-foreground space-y-2 border-dashed">
+              <div className="font-sans font-bold text-foreground text-sm">No Matching Squads Found</div>
+              <p className="max-w-md mx-auto text-xs leading-relaxed text-muted-foreground">
+                No research squads match your current search and filter criteria. Try adjusting your filters or enter an invite code on the sidebar.
+              </p>
+              {hasActiveFilters && (
+                <Button onClick={handleResetFilters} variant="outline" size="sm" className="mt-2 text-xs">
+                  Reset Filters
+                </Button>
+              )}
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {displayedTeams.map((team) => {
+                  const memberCount = team.members?.length || 0;
+                  const isFull = memberCount >= 6;
+                  const openSlots = Math.max(0, 6 - memberCount);
+                  const capacityPercent = Math.min(100, Math.round((memberCount / 6) * 100));
 
-                {/* Card Bottom Action Button */}
-                <div className="pt-3 border-t border-border/60">
-                  {isUserMember ? (
-                    <Link href={`/team/${team.id}`}>
-                      <Button variant="default" size="sm" className="w-full text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white">
-                        <span>Open Workspace</span>
-                        <ArrowRight className="size-3.5" />
-                      </Button>
-                    </Link>
-                  ) : team.status === "DISQUALIFIED" ? (
-                    <Button variant="outline" size="sm" disabled className="w-full text-xs text-destructive border-destructive/30 bg-destructive/5 cursor-not-allowed">
-                      Squad Disabled
-                    </Button>
-                  ) : team.isRecruiting && !isFull ? (
-                    <Button
-                      onClick={() => {
-                        if (!session) {
-                          router.push("/login");
-                          return;
-                        }
-                        setRequestTeam(team);
-                        setRequestMsg("");
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs font-bold gap-1.5 text-foreground hover:bg-accent cursor-pointer"
+                  const isUserMember = session?.user?.id
+                    ? team.members?.some((m) => m.user?.id === session.user.id)
+                    : false;
+
+                  const leaderMember = team.members?.find((m) => m.role === "LEADER" || m.role === "leader") || team.members?.[0];
+
+                  return (
+                    <Card
+                      key={team.id}
+                      className="p-4 flex flex-col justify-between space-y-3 bg-card border-border hover:border-primary/40 hover:shadow-[0_2px_0_0_#8b5cf6]/20 transition-all"
                     >
-                      <UserPlus className="size-3.5 text-[#10b981]" />
-                      <span>Request to Join</span>
-                    </Button>
+                      <div className="space-y-2.5">
+                        {/* Top Bar: Campaign Code Badge & Capacity Pill */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-mono font-bold text-primary truncate">
+                            {team.event?.code || "CAMPAIGN"}
+                          </span>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {isFull ? (
+                              <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded bg-[#8b5cf6] text-white shadow-xs">
+                                6/6 Full
+                              </span>
+                            ) : team.isRecruiting ? (
+                              <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded bg-[#10b981] text-white shadow-xs">
+                                {openSlots} Open {openSlots === 1 ? "Slot" : "Slots"}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                                {memberCount}/6 Closed
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Squad Name */}
+                        <h3 className="font-sans font-bold text-sm text-foreground leading-snug truncate">
+                          {team.name}
+                        </h3>
+
+                        {/* Member Capacity Progress */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                            <span>Capacity</span>
+                            <span className="font-bold text-foreground">{memberCount}/6 Members</span>
+                          </div>
+                          <Progress value={capacityPercent} className="h-1.5" />
+                        </div>
+
+                        {/* Recruitment Notes */}
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[32px]">
+                          {team.recruitmentNotes || "Active asteroid search squad analyzing telescope image sets."}
+                        </p>
+
+                        {/* Squad Leader & Members Roster */}
+                        <div className="pt-2 border-t border-border/60 space-y-2">
+                          {leaderMember && (
+                            <div className="flex items-center gap-2">
+                              <div className="size-5 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[9px] font-bold text-foreground shrink-0">
+                                {getInitials(leaderMember.user.name)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-semibold text-foreground truncate">
+                                  Leader: {leaderMember.user.name}
+                                  {leaderMember.user.country && (
+                                    <span className="text-muted-foreground font-normal ml-1 font-mono text-[10px]">
+                                      ({leaderMember.user.country})
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Member Name Chips */}
+                          <div className="flex flex-wrap gap-1">
+                            {team.members.map((m) => (
+                              <span
+                                key={m.id}
+                                className="inline-flex items-center text-[10px] px-1.5 py-0.2 rounded bg-muted text-muted-foreground font-sans"
+                                title={m.user.name}
+                              >
+                                {m.user.name.split(" ")[0]}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Bottom Action Button */}
+                      <div className="pt-2 border-t border-border/60">
+                        {isUserMember ? (
+                          <Link href={`/team/${team.id}`} className="block w-full">
+                            <Button
+                              size="sm"
+                              className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
+                            >
+                              <span>Open Workspace</span>
+                              <ArrowRight className="size-3.5" />
+                            </Button>
+                          </Link>
+                        ) : team.isRecruiting && !isFull ? (
+                          <Button
+                            onClick={() => {
+                              if (!session) {
+                                router.push("/login");
+                                return;
+                              }
+                              setRequestTeam(team);
+                              setRequestMsg("");
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="w-full h-8 text-xs font-bold gap-1.5 text-foreground hover:bg-accent cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                          >
+                            <UserPlus className="size-3.5 text-[#10b981]" />
+                            <span>Request to Join</span>
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" disabled className="w-full h-8 text-xs opacity-50 cursor-not-allowed">
+                            Recruitment Closed
+                          </Button>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* PAGINATION / LOAD MORE FOOTER */}
+              {filteredTeams.length > 0 && (
+                <div className="pt-3 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/60">
+                  {paginationMode === "LOAD_MORE" ? (
+                    <>
+                      <div className="text-xs text-muted-foreground font-mono">
+                        Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
+                        <strong className="text-foreground">{filteredTeams.length}</strong> squads
+                      </div>
+
+                      {hasMore ? (
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <Button
+                            onClick={handleLoadMore}
+                            variant="outline"
+                            className="h-8 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-background hover:bg-accent text-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex-1 sm:flex-initial"
+                          >
+                            <span>Load More Squads (+{Math.min(pageSize, remainingCount)})</span>
+                          </Button>
+
+                          <Button
+                            onClick={handleShowAll}
+                            variant="ghost"
+                            className="h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                          >
+                            <span>Show All</span>
+                          </Button>
+                        </div>
+                      ) : filteredTeams.length > pageSize ? (
+                        <div className="text-xs text-muted-foreground font-sans flex items-center gap-2">
+                          <span>All matching squads loaded</span>
+                          <Button
+                            onClick={() => setVisibleCount(pageSize)}
+                            variant="ghost"
+                            className="h-7 px-2 text-xs text-primary hover:underline font-semibold cursor-pointer"
+                          >
+                            Collapse to {pageSize}
+                          </Button>
+                        </div>
+                      ) : null}
+                    </>
                   ) : (
-                    <Button variant="outline" size="sm" disabled className="w-full text-xs opacity-50">
-                      Recruitment Closed
-                    </Button>
+                    <>
+                      <div className="text-xs text-muted-foreground font-mono">
+                        Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                        <strong className="text-foreground">{totalPages}</strong> ({filteredTeams.length} squads)
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          disabled={currentPage <= 1}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                        >
+                          <ChevronLeft className="size-3.5" />
+                          <span>Prev</span>
+                        </Button>
+
+                        {Array.from({ length: totalPages }).map((_, idx) => {
+                          const pageNum = idx + 1;
+                          if (
+                            pageNum === 1 ||
+                            pageNum === totalPages ||
+                            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                          ) {
+                            return (
+                              <button
+                                key={pageNum}
+                                type="button"
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`size-8 rounded text-xs font-mono font-bold cursor-pointer transition-colors ${
+                                  currentPage === pageNum
+                                    ? "bg-[#8b5cf6] text-white shadow-xs"
+                                    : "bg-muted text-muted-foreground hover:text-foreground"
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          }
+                          if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                            return (
+                              <span key={pageNum} className="text-xs text-muted-foreground px-0.5 font-mono">
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
+
+                        <Button
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={currentPage >= totalPages}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                        >
+                          <span>Next</span>
+                          <ChevronRight className="size-3.5" />
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+              )}
+            </div>
+          )}
+        </main>
+      </div>
 
-      {/* 4. JOIN REQUEST DIALOG */}
+      {/* 3. JOIN REQUEST MODAL */}
       <Dialog open={!!requestTeam} onOpenChange={(open) => !open && setRequestTeam(null)}>
-        <DialogContent className="sm:max-w-md bg-card border-border">
+        <DialogContent className="sm:max-w-md bg-card border-border font-sans">
           <DialogHeader>
-            <DialogTitle className="font-sans text-lg font-bold">
-              Join Request for {requestTeam?.name}
+            <DialogTitle className="font-bold text-base text-foreground">
+              Join Request: {requestTeam?.name}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Send a request to the team leader for campaign <strong className="text-foreground">{requestTeam?.event?.code}</strong>.
+              Send a request to join campaign squad <strong className="text-foreground font-mono">{requestTeam?.event?.code}</strong>.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
             <label className="text-xs font-semibold text-foreground">
-              Message to Team Leader (Optional)
+              Message to Squad Leader (Optional)
             </label>
             <Textarea
               placeholder="Hi! I am active daily and ready to analyze image sets with your team."
               value={requestMsg}
               onChange={(e) => setRequestMsg(e.target.value)}
               rows={3}
-              className="text-xs font-sans bg-background"
+              className="text-xs font-sans bg-background resize-none"
             />
           </div>
 
@@ -604,7 +944,12 @@ function TeamsContent() {
             <Button variant="outline" size="sm" onClick={() => setRequestTeam(null)} disabled={requestLoading}>
               Cancel
             </Button>
-            <Button size="sm" onClick={handleSendJoinRequest} disabled={requestLoading} variant="default" className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold">
+            <Button
+              size="sm"
+              onClick={handleSendJoinRequest}
+              disabled={requestLoading}
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 cursor-pointer"
+            >
               {requestLoading ? "Sending..." : "Submit Request"}
             </Button>
           </DialogFooter>
@@ -618,8 +963,8 @@ export default function TeamsPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-8 text-center text-xs font-mono text-muted-foreground">
-          Loading teams...
+        <div className="p-12 text-center text-xs font-mono text-muted-foreground">
+          Loading research squads...
         </div>
       }
     >
