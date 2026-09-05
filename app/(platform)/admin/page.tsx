@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +71,7 @@ import {
   FileCode,
   Tag,
   Eye,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -161,6 +163,12 @@ export default function AdminDashboardPage() {
   const [teamStatusFilter, setTeamStatusFilter] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+
+  // Solo Matchmaking Filter
+  const [soloSearch, setSoloSearch] = useState<string>("");
+
+  // Teams & Squads Filter
+  const [teamSearch, setTeamSearch] = useState<string>("");
 
   // Matchmaking Assign Modal State
   const [assigningUser, setAssigningUser] = useState<UserData | null>(null);
@@ -546,6 +554,35 @@ export default function AdminDashboardPage() {
   const subOpenCampCount = useMemo(() => events.filter((e) => e.status === "SUBMISSION_OPEN").length, [events]);
   const completedCampCount = useMemo(() => events.filter((e) => e.status === "COMPLETED").length, [events]);
 
+  // Solo Matchmaking Filtered List
+  const unassignedSoloUsers = useMemo(() => {
+    return users
+      .filter((u) => u.teamMembers.length === 0)
+      .filter((u) => {
+        if (!soloSearch.trim()) return true;
+        const q = soloSearch.toLowerCase();
+        return (
+          u.name.toLowerCase().includes(q) ||
+          u.email.toLowerCase().includes(q) ||
+          (u.institution && u.institution.toLowerCase().includes(q)) ||
+          (u.country && u.country.toLowerCase().includes(q))
+        );
+      });
+  }, [users, soloSearch]);
+
+  // Squads Filtered List
+  const filteredTeams = useMemo(() => {
+    if (!teamSearch.trim()) return teams;
+    const q = teamSearch.toLowerCase();
+    return teams.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.inviteCode.toLowerCase().includes(q) ||
+        (t.event?.code && t.event.code.toLowerCase().includes(q)) ||
+        t.members.some((m) => m.user.name.toLowerCase().includes(q))
+    );
+  }, [teams, teamSearch]);
+
   // Filtered Campaigns List
   const filteredCampaigns = useMemo(() => {
     return events.filter((ev) => {
@@ -650,7 +687,8 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="w-full space-y-4 font-sans">
+    <TooltipProvider delayDuration={50}>
+      <div className="w-full space-y-4 font-sans">
       {/* TABS NAVIGATION & WORKSPACE */}
       <Tabs
         value={activeTab}
@@ -838,48 +876,24 @@ export default function AdminDashboardPage() {
 
             {/* Main User Management Table Card - Fixed Height Container with Pinned Header & Pinned Pagination */}
             <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border flex-1 min-w-0 w-full">
-              {/* Header & Controls Toolbar */}
-              <div className="p-3.5 border-b border-border space-y-3 shrink-0 bg-card">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-bold text-foreground">User &amp; Role Management</h2>
-                      <Badge variant="outline" className="text-[10px] font-mono font-medium">
-                        {filteredUsers.length} total
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Manage 4-tier roles, researcher permissions, and team allocations.
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={fetchAdminData}
-                    className="h-7 px-2.5 text-xs gap-1.5 self-start sm:self-auto cursor-pointer"
-                  >
-                    <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
-                    <span>Refresh</span>
-                  </Button>
-                </div>
-
-                {/* Filter Controls */}
+              {/* Controls Toolbar */}
+              <div className="p-3 border-b border-border shrink-0 bg-card">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   {/* Search Input */}
                   <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
+                    <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
                     <Input
                       type="text"
                       placeholder="Search name, email, institution, country..."
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
-                      className="pl-8 text-xs h-7.5 bg-background font-sans"
+                      className="pl-8 text-xs h-8 bg-background font-sans"
                     />
                     {userSearch && (
                       <button
                         type="button"
                         onClick={() => setUserSearch("")}
-                        className="absolute right-2.5 top-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         <X className="size-3.5" />
                       </button>
@@ -888,7 +902,7 @@ export default function AdminDashboardPage() {
 
                   {/* Role Filter Selector */}
                   <Select value={roleFilter} onValueChange={setRoleFilter}>
-                    <SelectTrigger className="h-7.5 text-xs font-sans bg-background w-full sm:w-[140px]">
+                    <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[130px]">
                       <SelectValue placeholder="All Roles" />
                     </SelectTrigger>
                     <SelectContent>
@@ -902,15 +916,56 @@ export default function AdminDashboardPage() {
 
                   {/* Team Status Filter Selector */}
                   <Select value={teamStatusFilter} onValueChange={setTeamStatusFilter}>
-                    <SelectTrigger className="h-7.5 text-xs font-sans bg-background w-full sm:w-[150px]">
+                    <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[130px]">
                       <SelectValue placeholder="All Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ALL">All Statuses</SelectItem>
                       <SelectItem value="IN_TEAM">In Squad ({users.length - unassignedCount})</SelectItem>
-                      <SelectItem value="UNASSIGNED">Unassigned Solo ({unassignedCount})</SelectItem>
+                      <SelectItem value="UNASSIGNED">Unassigned ({unassignedCount})</SelectItem>
                     </SelectContent>
                   </Select>
+
+                  {/* Refresh Icon Button with Tooltip */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={fetchAdminData}
+                        className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                      >
+                        <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      Refresh data
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* Info Tooltip (Ghost Icon Button) */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0 cursor-help text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg"
+                        aria-label="User & Role guide"
+                      >
+                        <HelpCircle className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+                      <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                        <HelpCircle className="size-3.5 text-[#8b5cf6]" />
+                        <span>User &amp; Role Management</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Manage 4-tier platform roles (Admin, Staff, Leader, Citizen), researcher permissions, and team allocations.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
 
@@ -1207,23 +1262,72 @@ export default function AdminDashboardPage() {
         {/* TAB 2: SOLO MATCHMAKING */}
         <TabsContent value="MATCHMAKING" className="mt-0 focus-visible:outline-none space-y-4">
           <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border w-full">
-            <CardHeader className="p-3.5 border-b border-border shrink-0 bg-card">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-sm font-bold text-foreground">
-                      Solo Researcher Matchmaking
-                    </CardTitle>
-                    <Badge variant="secondary" className="text-[10px] font-mono font-bold">
-                      {unassignedCount} Solo
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                    Match unassigned citizen scientists and students into active research squads with open slots.
-                  </CardDescription>
+            {/* Controls Toolbar */}
+            <div className="p-3 border-b border-border shrink-0 bg-card">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                {/* Search Input */}
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search unassigned researcher by name, email, institution, country..."
+                    value={soloSearch}
+                    onChange={(e) => setSoloSearch(e.target.value)}
+                    className="pl-8 text-xs h-8 bg-background font-sans"
+                  />
+                  {soloSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setSoloSearch("")}
+                      className="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
                 </div>
+
+                {/* Refresh Icon Button with Tooltip */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={fetchAdminData}
+                      className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                    >
+                      <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Refresh data
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Info Tooltip (Ghost Icon Button) */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 shrink-0 cursor-help text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg"
+                      aria-label="Matchmaking guide"
+                    >
+                      <HelpCircle className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+                    <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                      <HelpCircle className="size-3.5 text-[#10b981]" />
+                      <span>Solo Researcher Matchmaking</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Match unassigned citizen scientists and solo students into active research squads with available slots.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-            </CardHeader>
+            </div>
 
             <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative">
               {users.filter((u) => u.teamMembers.length === 0).length === 0 ? (
@@ -1231,6 +1335,12 @@ export default function AdminDashboardPage() {
                   <Users className="size-8 mx-auto text-muted-foreground/30 mb-1" />
                   <div className="font-semibold text-sm text-foreground">All researchers are assigned!</div>
                   <p>There are no unassigned solo students at this moment.</p>
+                </div>
+              ) : unassignedSoloUsers.length === 0 ? (
+                <div className="py-16 text-center text-xs text-muted-foreground space-y-1">
+                  <Search className="size-8 mx-auto text-muted-foreground/30 mb-1" />
+                  <div className="font-semibold text-sm text-foreground">No matching researchers</div>
+                  <p>No unassigned researchers match your search term.</p>
                 </div>
               ) : (
                 <Table className="w-full table-fixed">
@@ -1243,9 +1353,7 @@ export default function AdminDashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users
-                      .filter((u) => u.teamMembers.length === 0)
-                      .map((u) => (
+                    {unassignedSoloUsers.map((u) => (
                         <TableRow key={u.id} className="hover:bg-muted/30 border-b border-border/60">
                           <TableCell className="py-2 px-3 w-[35%] min-w-0 overflow-hidden">
                             <div className="flex items-center gap-2.5 min-w-0">
@@ -1291,21 +1399,80 @@ export default function AdminDashboardPage() {
 
         {/* TAB 3: TEAMS & ROSTERS */}
         <TabsContent value="TEAMS" className="mt-0 focus-visible:outline-none space-y-4">
-          <Card className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-foreground">Campaign Squads &amp; Rosters</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Overview of all registered teams, active members, and leader assignments.
-                </p>
+          <Card className="p-3 space-y-3 border border-border">
+            {/* Controls Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search squad name, invite code, campaign code, or member..."
+                  value={teamSearch}
+                  onChange={(e) => setTeamSearch(e.target.value)}
+                  className="pl-8 text-xs h-8 bg-background font-sans"
+                />
+                {teamSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setTeamSearch("")}
+                    className="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
               </div>
-              <Badge variant="secondary" className="font-mono text-xs font-bold">
-                {teams.length} Squads
-              </Badge>
+
+              {/* Refresh Icon Button with Tooltip */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={fetchAdminData}
+                    className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                  >
+                    <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  Refresh data
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Info Tooltip (Ghost Icon Button) */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 shrink-0 cursor-help text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg"
+                    aria-label="Squads guide"
+                  >
+                    <HelpCircle className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+                  <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                    <HelpCircle className="size-3.5 text-amber-500" />
+                    <span>Campaign Squads &amp; Rosters</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Overview of all registered teams, active members, squad invite codes, and team leader assignments.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {teams.map((t) => (
+            {filteredTeams.length === 0 ? (
+              <div className="py-12 text-center text-xs text-muted-foreground space-y-1">
+                <Telescope className="size-8 mx-auto text-muted-foreground/30 mb-1" />
+                <div className="font-semibold text-sm text-foreground">No squads found</div>
+                <p>No campaign squads match your search criteria.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {filteredTeams.map((t) => (
                 <Card key={t.id} className="p-4 bg-card border-border space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-foreground">{t.name}</span>
@@ -1340,7 +1507,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </Card>
               ))}
-            </div>
+              </div>
+            )}
           </Card>
         </TabsContent>
 
@@ -1481,65 +1649,26 @@ export default function AdminDashboardPage() {
                 </Link>
               </div>
             </aside>
-
             {/* Main Campaign Management Table Card - Fixed Height Container with Pinned Header & Pinned Pagination */}
             <Card className="p-0 overflow-hidden flex flex-col h-[560px] border border-border flex-1 min-w-0 w-full">
-              {/* Header & Controls Toolbar */}
-              <div className="p-3.5 border-b border-border space-y-3 shrink-0 bg-card">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-bold text-foreground">Campaign Events Management</h2>
-                      <Badge variant="outline" className="text-[10px] font-mono font-medium">
-                        {filteredCampaigns.length} total
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Configure campaign codes, status states, milestone schedules, and squads.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={fetchAdminData}
-                      className="h-7 px-2.5 text-xs gap-1.5 cursor-pointer"
-                    >
-                      <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
-                      <span>Refresh</span>
-                    </Button>
-
-                    <Link href="/admin/campaigns/new">
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="h-7 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
-                      >
-                        <PlusCircle className="size-3.5" />
-                        <span>New Campaign</span>
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Filter Controls */}
+              {/* Controls Toolbar */}
+              <div className="p-3 border-b border-border shrink-0 bg-card">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   {/* Search Input */}
                   <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
+                    <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
                     <Input
                       type="text"
                       placeholder="Search campaign title, code, or description..."
                       value={campaignSearch}
                       onChange={(e) => setCampaignSearch(e.target.value)}
-                      className="pl-8 text-xs h-7.5 bg-background font-sans"
+                      className="pl-8 text-xs h-8 bg-background font-sans"
                     />
                     {campaignSearch && (
                       <button
                         type="button"
                         onClick={() => setCampaignSearch("")}
-                        className="absolute right-2.5 top-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         <X className="size-3.5" />
                       </button>
@@ -1548,17 +1677,70 @@ export default function AdminDashboardPage() {
 
                   {/* Status Filter Selector */}
                   <Select value={campaignStatusFilter} onValueChange={setCampaignStatusFilter}>
-                    <SelectTrigger className="h-7.5 text-xs font-sans bg-background w-full sm:w-[170px]">
+                    <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[160px]">
                       <SelectValue placeholder="All Statuses" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ALL">All Statuses ({events.length})</SelectItem>
-                      <SelectItem value="ACTIVE">Active ({activeCampCount})</SelectItem>
+                      <SelectItem value="ACTIVE">Active Now ({activeCampCount})</SelectItem>
                       <SelectItem value="UPCOMING">Upcoming ({upcomingCampCount})</SelectItem>
-                      <SelectItem value="SUBMISSION_OPEN">Submissions Open ({subOpenCampCount})</SelectItem>
+                      <SelectItem value="SUBMISSION_OPEN">Submissions ({subOpenCampCount})</SelectItem>
                       <SelectItem value="COMPLETED">Completed ({completedCampCount})</SelectItem>
                     </SelectContent>
                   </Select>
+
+                  {/* Refresh Icon Button with Tooltip */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={fetchAdminData}
+                        className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                      >
+                        <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      Refresh data
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* Info Tooltip (Ghost Icon Button) */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0 cursor-help text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg"
+                        aria-label="Campaign events guide"
+                      >
+                        <HelpCircle className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+                      <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                        <HelpCircle className="size-3.5 text-[#8b5cf6]" />
+                        <span>Campaign Events Management</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Configure campaign codes, status stages, milestone schedules, dataset allocations, and squad limits.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* New Campaign Button */}
+                  <Link href="/admin/campaigns/new">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="h-8 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shrink-0"
+                    >
+                      <PlusCircle className="size-3.5" />
+                      <span>New Campaign</span>
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
@@ -2347,6 +2529,7 @@ export default function AdminDashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
