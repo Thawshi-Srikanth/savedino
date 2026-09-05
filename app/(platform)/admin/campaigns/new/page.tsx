@@ -297,14 +297,14 @@ export default function CreateCampaignPage() {
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px] uppercase font-bold">Student Registration</span>
                     <span className="font-bold text-foreground">
-                      {newRegStart ? new Date(newRegStart).toLocaleDateString() : "-"} → {newRegEnd ? new Date(newRegEnd).toLocaleDateString() : "-"}
+                      {newRegStart ? new Date(newRegStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"} → {newRegEnd ? new Date(newRegEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}
                     </span>
                   </div>
 
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px] uppercase font-bold">Observation Campaign</span>
                     <span className="font-bold text-foreground">
-                      {newStart ? new Date(newStart).toLocaleDateString() : "-"} → {newEnd ? new Date(newEnd).toLocaleDateString() : "-"}
+                      {newStart ? new Date(newStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"} → {newEnd ? new Date(newEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}
                     </span>
                   </div>
                 </div>

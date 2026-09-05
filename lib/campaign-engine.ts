@@ -56,7 +56,7 @@ export async function checkUserEventConcurrency(
       return {
         canEnroll: false,
         conflictingEventTitle: existingEvent.title,
-        reason: `You are already participating in '${existingEvent.title}' which runs concurrently from ${existingEvent.startDate.toLocaleDateString()} to ${existingEvent.endDate.toLocaleDateString()}. Multiple simultaneous event participation is not allowed.`,
+        reason: `You are already participating in '${existingEvent.title}' which runs concurrently from ${existingEvent.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} to ${existingEvent.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}. Multiple simultaneous event participation is not allowed.`,
       };
     }
   }

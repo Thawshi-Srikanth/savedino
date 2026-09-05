@@ -1171,8 +1171,8 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="pt-2 border-t border-border text-xs text-muted-foreground space-y-1 font-mono">
-                    <div>Start Date: {new Date(ev.startDate).toLocaleDateString()}</div>
-                    <div>End Date: {new Date(ev.endDate).toLocaleDateString()}</div>
+                    <div>Start Date: {new Date(ev.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                    <div>End Date: {new Date(ev.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
                   </div>
                 </Card>
               ))}

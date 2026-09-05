@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -376,21 +384,45 @@ export default function CampaignDetailPage({
   return (
     <div className="w-full space-y-8 font-sans max-w-6xl mx-auto py-2">
       {/* 1. STICKY BREADCRUMB & HEADER STRIP */}
-      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
-        <Link
-          href="/campaigns"
-          className="inline-flex items-center gap-2 font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
-        >
-          <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Back to Campaigns</span>
-        </Link>
+      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-3 text-xs font-sans">
+        <Breadcrumb>
+          <BreadcrumbList className="text-xs">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link
+                  href="/campaigns"
+                  className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+                >
+                  <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  <span>Campaigns</span>
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="text-muted-foreground/40" />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-mono font-bold text-foreground">
+                {event.code}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-        {/* Theme Spec Code Badge with 3D Shadow */}
+        {/* Theme Status Pill with 3D Shadow */}
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs font-medium">Campaign:</span>
-          <Badge variant="outline" className="font-sans font-bold bg-card border-border text-foreground px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-            {event.code}
-          </Badge>
+          {event.status === "ACTIVE" ? (
+            <Badge className="bg-[#10b981] hover:bg-[#059669] text-white border-0 font-sans font-bold text-xs px-2.5 py-1 gap-1.5 shadow-[0_2px_0_0_#047857] rounded-lg">
+              <span className="size-1.5 rounded-full bg-white animate-pulse" />
+              <span>Active</span>
+            </Badge>
+          ) : event.status === "UPCOMING" ? (
+            <Badge className="bg-sky-500 hover:bg-sky-600 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-[0_2px_0_0_#0284c7] rounded-lg">
+              Upcoming
+            </Badge>
+          ) : (
+            <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-[0_2px_0_0_#334155] rounded-lg">
+              {event.status}
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -400,19 +432,6 @@ export default function CampaignDetailPage({
         <div className="lg:col-span-8 space-y-8">
           {/* Header & Overview */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              {event.status === "ACTIVE" ? (
-                <Badge className="bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/40 font-sans font-semibold text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]">
-                  <span className="size-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                  <span>Active Campaign</span>
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                  {event.status}
-                </Badge>
-              )}
-            </div>
-
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground font-sans">
               {event.title}
             </h1>
@@ -422,26 +441,21 @@ export default function CampaignDetailPage({
             </p>
 
             {/* Campaign Specs Strip */}
-            <div className="pt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
-              <div>
-                <span className="text-muted-foreground">Timeline: </span>
+            <div className="pt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
+              <div className="inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground">Timeline:</span>
                 <strong className="text-foreground font-mono">{formatStageDate(event.startDate)} &ndash; {formatStageDate(event.endDate)}</strong>
               </div>
 
-              <div>
-                <span className="text-muted-foreground">Teams: </span>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground">Teams:</span>
                 <strong className="text-foreground">{squadCount} registered</strong>
                 <Link
                   href={`/teams?eventId=${event.id}`}
-                  className="text-primary font-sans hover:underline text-xs ml-1.5 font-semibold"
+                  className="text-primary font-sans hover:underline font-semibold"
                 >
                   (view teams)
                 </Link>
-              </div>
-
-              <div>
-                <span className="text-muted-foreground">Data Type: </span>
-                <span className="text-foreground font-medium">16-bit FITS Images</span>
               </div>
             </div>
           </div>
@@ -483,11 +497,11 @@ export default function CampaignDetailPage({
                       <div className="flex flex-wrap items-center gap-2.5">
                         <Badge
                           variant={isLive ? "default" : "outline"}
-                          className={`font-sans font-bold text-xs px-2.5 py-0.5 ${
+                          className={`font-sans font-bold text-xs px-2.5 py-0.5 rounded-lg ${
                             isLive
                               ? "bg-[#8b5cf6] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
                               : isDone
-                              ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]"
+                              ? "bg-[#10b981] text-white border-0 shadow-[0_2px_0_0_#059669]"
                               : "bg-muted text-muted-foreground border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
                           }`}
                         >
@@ -701,10 +715,9 @@ export default function CampaignDetailPage({
 
               <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                 <Button
-                  variant="ghost"
-                  className="w-full h-9 text-xs font-sans font-semibold gap-1.5 cursor-pointer text-white/90 hover:text-white hover:bg-white/15 rounded-xl"
+                  className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
                 >
-                  <Users className="size-3.5" />
+                  <Users className="size-4" />
                   <span>View Joined Teams ({squadCount})</span>
                 </Button>
               </Link>
