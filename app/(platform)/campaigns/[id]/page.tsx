@@ -652,89 +652,289 @@ export default function CampaignDetailPage({
         </div>
 
         {/* === RIGHT COLUMN: STICKY SIDEBAR (4 COLS) === */}
-        <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-4 font-sans">
-          {/* 1. Registration Deadline (Direct text with theme 3D text shadow) */}
-          <div className="space-y-1.5 px-2.5">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
-              Registration Deadline
-            </div>
+        <div className="lg:col-span-4 lg:sticky lg:top-36 z-20 space-y-4 font-sans">
+          {(() => {
+            const activePipelineStage = pipelineStages.find((phase) => {
+              const data = getStageTimelineData(phase.start, phase.end, currentTime);
+              return data.status === "ACTIVE";
+            });
+            const allStagesCompleted = pipelineStages.every((phase) => {
+              const data = getStageTimelineData(phase.start, phase.end, currentTime);
+              return data.status === "COMPLETED";
+            });
 
-            <div
-              className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-foreground select-none"
-              style={{
-                textShadow: "0 3px 0 var(--border), 0 4px 6px rgba(0,0,0,0.06)",
-              }}
-            >
-              {regInfo.formattedDate}
-            </div>
+            return (
+              <>
+                {/* 1. Dynamic Deadline & Countdown */}
+                <div className="space-y-1.5 px-2.5">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
+                    {allStagesCompleted
+                      ? "Campaign Status"
+                      : activePipelineStage?.name === "Image Search"
+                      ? "Search Window Closes"
+                      : activePipelineStage?.name === "Submit Reports"
+                      ? "Submission Deadline"
+                      : "Registration Deadline"}
+                  </div>
 
-            {regInfo.countdownText && (
-              <div className={`text-xs font-mono font-semibold ${regInfo.isUrgent ? "text-amber-500" : "text-muted-foreground"}`}>
-                {regInfo.countdownText}
-              </div>
-            )}
-          </div>
+                  <div
+                    className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-foreground select-none"
+                    style={{
+                      textShadow: "0 3px 0 var(--border), 0 4px 6px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    {allStagesCompleted
+                      ? "Completed"
+                      : activePipelineStage?.name === "Image Search"
+                      ? formatStageDate(event.endDate)
+                      : activePipelineStage?.name === "Submit Reports"
+                      ? formatStageDate(event.submissionEnd || event.endDate)
+                      : regInfo.formattedDate}
+                  </div>
 
-          {/* 2. Solid Electric Violet Action Card */}
-          <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
-            {/* 3D Action Buttons */}
-            <div className="space-y-2.5">
-              <Button
-                onClick={() => {
-                  if (!session) {
-                    router.push("/login");
-                    return;
-                  }
-                  setCreateError(null);
-                  setTeamName("");
-                  setCreateModalOpen(true);
-                }}
-                variant="default"
-                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
-              >
-                <PlusCircle className="size-4" />
-                <span>Form a Team</span>
-              </Button>
+                  {(() => {
+                    if (allStagesCompleted) {
+                      return (
+                        <div className="text-xs font-mono font-semibold text-muted-foreground">
+                          All phases concluded
+                        </div>
+                      );
+                    }
+                    if (activePipelineStage?.name === "Image Search") {
+                      const searchTimeline = getStageTimelineData(event.startDate, event.endDate, currentTime);
+                      return searchTimeline.countdownText ? (
+                        <div className="text-xs font-mono font-semibold text-[#8b5cf6]">
+                          {searchTimeline.countdownText} remaining
+                        </div>
+                      ) : null;
+                    }
+                    if (activePipelineStage?.name === "Submit Reports") {
+                      const submitTimeline = getStageTimelineData(
+                        event.submissionStart || event.startDate,
+                        event.submissionEnd || event.endDate,
+                        currentTime
+                      );
+                      return submitTimeline.countdownText ? (
+                        <div className="text-xs font-mono font-semibold text-emerald-500">
+                          {submitTimeline.countdownText} remaining
+                        </div>
+                      ) : null;
+                    }
+                    return regInfo.countdownText ? (
+                      <div
+                        className={`text-xs font-mono font-semibold ${
+                          regInfo.isUrgent ? "text-amber-500" : "text-muted-foreground"
+                        }`}
+                      >
+                        {regInfo.countdownText}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
 
-              <Button
-                onClick={() => {
-                  if (!session) {
-                    router.push("/login");
-                    return;
-                  }
-                  setJoinError(null);
-                  setJoinCode("");
-                  setJoinModalOpen(true);
-                }}
-                variant="outline"
-                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
-              >
-                <KeyRound className="size-4" />
-                <span>Join with Code</span>
-              </Button>
+                {/* 2. Solid Theme Action Card with dynamic buttons based on active stage */}
+                <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
+                  {/* Header / Active Stage Status */}
+                  <div className="flex items-center justify-between pb-1 border-b border-white/20">
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-white/90">
+                      {allStagesCompleted
+                        ? "Campaign Concluded"
+                        : activePipelineStage?.name === "Image Search"
+                        ? "Image Search Live"
+                        : activePipelineStage?.name === "Submit Reports"
+                        ? "Submissions Open"
+                        : "Registration Active"}
+                    </span>
+                    <span className="size-2 rounded-full bg-white animate-pulse" />
+                  </div>
 
-              <Link href={`/teams?eventId=${event.id}`} className="block w-full">
-                <Button
-                  className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
-                >
-                  <Users className="size-4" />
-                  <span>View Joined Teams ({squadCount})</span>
-                </Button>
-              </Link>
-            </div>
+                  {/* 3D Action Buttons */}
+                  <div className="space-y-2.5">
+                    {/* If Image Search is active */}
+                    {activePipelineStage?.name === "Image Search" && (
+                      <>
+                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Button
+                            variant="default"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                          >
+                            <Telescope className="size-4" />
+                            <span>Start Image Search</span>
+                          </Button>
+                        </Link>
 
-            {/* Team Rules Checklist */}
-            <div className="pt-3 border-t border-white/20 text-xs font-sans text-white/85 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>2 to 6 members per team</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>Share invite code with teammates</span>
-              </div>
-            </div>
-          </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={() => {
+                              if (!session) {
+                                router.push("/login");
+                                return;
+                              }
+                              setCreateError(null);
+                              setTeamName("");
+                              setCreateModalOpen(true);
+                            }}
+                            variant="outline"
+                            className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                          >
+                            <PlusCircle className="size-3.5" />
+                            <span>Form Team</span>
+                          </Button>
+
+                          <Button
+                            onClick={() => {
+                              if (!session) {
+                                router.push("/login");
+                                return;
+                              }
+                              setJoinError(null);
+                              setJoinCode("");
+                              setJoinModalOpen(true);
+                            }}
+                            variant="outline"
+                            className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                          >
+                            <KeyRound className="size-3.5" />
+                            <span>Join Code</span>
+                          </Button>
+                        </div>
+                      </>
+                    )}
+
+                    {/* If Submit Reports is active */}
+                    {activePipelineStage?.name === "Submit Reports" && (
+                      <>
+                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Button
+                            variant="default"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-[0_3px_0_0_#059669] active:translate-y-0.5 border-0 rounded-xl"
+                          >
+                            <CheckCircle2 className="size-4" />
+                            <span>Submit Reports</span>
+                          </Button>
+                        </Link>
+
+                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Button
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
+                          >
+                            <Users className="size-4" />
+                            <span>View Teams ({squadCount})</span>
+                          </Button>
+                        </Link>
+                      </>
+                    )}
+
+                    {/* If Completed */}
+                    {allStagesCompleted && (
+                      <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                        <Button
+                          variant="default"
+                          className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                        >
+                          <Sparkles className="size-4" />
+                          <span>View Results & Teams ({squadCount})</span>
+                        </Button>
+                      </Link>
+                    )}
+
+                    {/* Default: Registration / Team Formation / Upcoming */}
+                    {!allStagesCompleted &&
+                      activePipelineStage?.name !== "Image Search" &&
+                      activePipelineStage?.name !== "Submit Reports" && (
+                        <>
+                          <Button
+                            onClick={() => {
+                              if (!session) {
+                                router.push("/login");
+                                return;
+                              }
+                              setCreateError(null);
+                              setTeamName("");
+                              setCreateModalOpen(true);
+                            }}
+                            variant="default"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                          >
+                            <PlusCircle className="size-4" />
+                            <span>Form a Team</span>
+                          </Button>
+
+                          <Button
+                            onClick={() => {
+                              if (!session) {
+                                router.push("/login");
+                                return;
+                              }
+                              setJoinError(null);
+                              setJoinCode("");
+                              setJoinModalOpen(true);
+                            }}
+                            variant="outline"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                          >
+                            <KeyRound className="size-4" />
+                            <span>Join with Code</span>
+                          </Button>
+
+                          <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                            <Button
+                              className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
+                            >
+                              <Users className="size-4" />
+                              <span>View Joined Teams ({squadCount})</span>
+                            </Button>
+                          </Link>
+                        </>
+                      )}
+                  </div>
+
+                  {/* Checklist / Status Details */}
+                  <div className="pt-3 border-t border-white/20 text-xs font-sans text-white/85 space-y-1.5">
+                    {activePipelineStage?.name === "Image Search" ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Claim image sets from team workspace</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Blink 4 frames to detect moving asteroids</span>
+                        </div>
+                      </>
+                    ) : activePipelineStage?.name === "Submit Reports" ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Review astrometry measurements</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Export and submit MPC format reports</span>
+                        </div>
+                      </>
+                    ) : allStagesCompleted ? (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                        <span>Campaign observations completed and archived</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>2 to 6 members per team</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Share invite code with teammates</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
 

@@ -33,6 +33,8 @@ import {
   Sparkles,
   ArrowRight,
   ExternalLink,
+  Check,
+  Pin,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -52,6 +54,134 @@ interface EventItem {
   status: string;
   _count?: {
     teams: number;
+  };
+}
+
+function formatStageDate(dateStr?: string) {
+  if (!dateStr) return "TBA";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "TBA";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getEventStages(ev: EventItem, now: number = Date.now()) {
+  const s3Start = ev.startDate ? new Date(ev.startDate).getTime() : NaN;
+  const s3End = ev.endDate ? new Date(ev.endDate).getTime() : NaN;
+
+  const s1Start = ev.regStart
+    ? new Date(ev.regStart).getTime()
+    : !isNaN(s3Start)
+    ? s3Start - 14 * 86400000
+    : NaN;
+  const s1End = ev.regEnd
+    ? new Date(ev.regEnd).getTime()
+    : !isNaN(s3Start)
+    ? s3Start
+    : NaN;
+
+  const s2Start = ev.teamFormationStart
+    ? new Date(ev.teamFormationStart).getTime()
+    : s1End;
+  const s2End = ev.teamFormationEnd
+    ? new Date(ev.teamFormationEnd).getTime()
+    : !isNaN(s3Start)
+    ? s3Start
+    : NaN;
+
+  const s4Start = ev.submissionStart
+    ? new Date(ev.submissionStart).getTime()
+    : s3Start;
+  const s4End = ev.submissionEnd
+    ? new Date(ev.submissionEnd).getTime()
+    : s3End;
+
+  const getStatus = (start: number, end: number): "COMPLETED" | "ACTIVE" | "UPCOMING" => {
+    if (isNaN(start) || isNaN(end)) return "UPCOMING";
+    if (now >= end) return "COMPLETED";
+    if (now >= start && now < end) return "ACTIVE";
+    return "UPCOMING";
+  };
+
+  return [
+    { name: "Registration", start: ev.regStart || ev.startDate, status: getStatus(s1Start, s1End) },
+    {
+      name: "Team Setup",
+      start: ev.teamFormationStart || ev.regStart || ev.startDate,
+      status: getStatus(s2Start, s2End),
+    },
+    { name: "Image Search", start: ev.startDate, status: getStatus(s3Start, s3End) },
+    { name: "Submit", start: ev.submissionStart || ev.endDate, status: getStatus(s4Start, s4End) },
+  ];
+}
+
+function getStageAction(ev: EventItem, now: number = Date.now()) {
+  const stages = getEventStages(ev, now);
+  const s3Start = ev.startDate ? new Date(ev.startDate).getTime() : NaN;
+  const s3End = ev.endDate ? new Date(ev.endDate).getTime() : NaN;
+  const s4End = ev.submissionEnd ? new Date(ev.submissionEnd).getTime() : s3End;
+
+  // 1. Completed
+  if (ev.status === "COMPLETED" || (!isNaN(s4End) && now >= s4End)) {
+    return {
+      isModal: false,
+      label: "View Results",
+      href: `/campaigns/${ev.id}`,
+      icon: ArrowRight,
+      className: "bg-slate-700 hover:bg-slate-800 text-white shadow-[0_2px_0_0_#334155]",
+    };
+  }
+
+  // 2. Submit Reports stage
+  const submitStage = stages.find((s) => s.name === "Submit");
+  if (submitStage?.status === "ACTIVE" || (!isNaN(s3End) && now >= s3End && now < s4End)) {
+    return {
+      isModal: false,
+      label: "Submit Reports",
+      href: `/campaigns/${ev.id}`,
+      icon: CheckCircle2,
+      className: "bg-[#10b981] hover:bg-[#059669] text-white shadow-[0_2px_0_0_#059669]",
+    };
+  }
+
+  // 3. Image Search stage (Live telescope analysis)
+  const imageSearchStage = stages.find((s) => s.name === "Image Search");
+  if (
+    imageSearchStage?.status === "ACTIVE" ||
+    (ev.status === "ACTIVE" && !isNaN(s3Start) && now >= s3Start && (isNaN(s3End) || now < s3End))
+  ) {
+    return {
+      isModal: false,
+      label: "Start Image Search",
+      href: `/campaigns/${ev.id}`,
+      icon: Telescope,
+      className: "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]",
+    };
+  }
+
+  // 4. Registration or Team Setup (Active)
+  const regStage = stages.find((s) => s.name === "Registration");
+  const teamStage = stages.find((s) => s.name === "Team Setup");
+  if (regStage?.status === "ACTIVE" || teamStage?.status === "ACTIVE" || ev.status === "ACTIVE") {
+    return {
+      isModal: true,
+      label: "Form a Team",
+      href: null,
+      icon: PlusCircle,
+      className: "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]",
+    };
+  }
+
+  // 5. Default / Upcoming
+  return {
+    isModal: false,
+    label: "View Campaign",
+    href: `/campaigns/${ev.id}`,
+    icon: ArrowRight,
+    className: "bg-muted hover:bg-muted/80 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]",
   };
 }
 
@@ -336,36 +466,34 @@ export default function CampaignsPage() {
   const countUpcoming = events.filter((e) => e.status === "UPCOMING").length;
 
   return (
-    <div className="w-full space-y-6 font-sans">
-      {/* 1. TOP HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border">
+    <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
+      {/* 1. TOP HEADER (Sticky) */}
+      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <Telescope className="size-6 text-primary" />
-            <span>Search Campaigns</span>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Telescope className="size-5 text-primary" />
+            <span>Campaigns</span>
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Discover Near-Earth Asteroids with survey telescope data.
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Search for asteroids with your team.
           </p>
         </div>
 
-        {/* Global Join with Invite Code Button */}
-        <div className="flex items-center gap-2.5">
-          <Button
-            onClick={() => handleOpenJoinModal()}
-            variant="outline"
-            className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shrink-0"
-          >
-            <KeyRound className="size-3.5 text-primary" />
-            <span>Join with Code</span>
-          </Button>
-        </div>
+        {/* Global Join with Code Button */}
+        <Button
+          onClick={() => handleOpenJoinModal()}
+          variant="outline"
+          className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl shrink-0"
+        >
+          <KeyRound className="size-3.5 text-primary" />
+          <span>Join with Code</span>
+        </Button>
       </div>
 
       {/* 2. MAIN LAYOUT: SIDEBAR FILTER + CAMPAIGN CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* === LEFT COLUMN: SIDEBAR FILTERS (THEMED BUTTONS LIKE ADMIN PANEL) === */}
-        <div className="lg:col-span-1 space-y-4">
+        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop) === */}
+        <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
           <Card className="p-3 bg-card border-border shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-3">
             {/* Search Input */}
             <div className="relative">
@@ -378,7 +506,7 @@ export default function CampaignsPage() {
               />
             </div>
 
-            {/* Status Themed Navigation Buttons */}
+            {/* Status Navigation Buttons */}
             <div className="space-y-1.5 pt-1">
               <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1 pb-0.5">
                 Filter Campaigns
@@ -462,14 +590,14 @@ export default function CampaignsPage() {
             </div>
           </Card>
 
-          {/* Quick Info Box */}
+          {/* Quick Team Info Box */}
           <Card className="p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5">
             <div className="font-semibold text-foreground flex items-center gap-1.5 text-[11px]">
               <Sparkles className="size-3.5 text-[#8b5cf6]" />
-              <span>Squad Guidelines</span>
+              <span>Team Rules</span>
             </div>
             <p className="text-[11px] leading-relaxed">
-              Squads have <strong>2 to 6 researchers</strong>. Squad leaders can invite members via private invite code.
+              Teams have <strong>2 to 6 members</strong>. Team leaders can invite members using a private invite code.
             </p>
           </Card>
         </div>
@@ -479,48 +607,39 @@ export default function CampaignsPage() {
           {/* A. ACTIVE SPOTLIGHT CAROUSEL (If filtering ALL or ACTIVE) */}
           {(selectedStatusFilter === "ALL" || selectedStatusFilter === "ACTIVE") && !searchQuery && (
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                    Featured Active Campaign
+              {/* Carousel Controls (If multiple active campaigns) */}
+              {activeEvents.length > 1 && (
+                <div className="flex items-center justify-end gap-2 pb-0.5">
+                  <span className="text-xs font-mono text-muted-foreground">
+                    <strong className="text-foreground">{activeEventIndex + 1}</strong> of {activeEvents.length}
                   </span>
-                </div>
-
-                {/* Carousel Controls */}
-                {activeEvents.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-muted-foreground">
-                      <strong className="text-foreground">{activeEventIndex + 1}</strong> of {activeEvents.length}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handlePrevActive}
-                        className="h-7 w-7 p-0 cursor-pointer"
-                        title="Previous Campaign"
-                      >
-                        <ChevronLeft className="size-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleNextActive}
-                        className="h-7 w-7 p-0 cursor-pointer"
-                        title="Next Campaign"
-                      >
-                        <ChevronRight className="size-3.5" />
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handlePrevActive}
+                      className="h-7 w-7 p-0 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                      title="Previous Campaign"
+                    >
+                      <ChevronLeft className="size-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleNextActive}
+                      className="h-7 w-7 p-0 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                      title="Next Campaign"
+                    >
+                      <ChevronRight className="size-3.5" />
+                    </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {loading ? (
                 <div className="py-12 text-center text-xs text-muted-foreground animate-pulse space-y-2">
                   <Rocket className="size-6 mx-auto text-muted-foreground/30 animate-bounce" />
-                  <div>Loading campaign spotlight...</div>
+                  <div>Loading campaign...</div>
                 </div>
               ) : !currentActiveEvent ? null : (
                 <div
@@ -530,103 +649,141 @@ export default function CampaignsPage() {
                   onTouchEnd={onTouchEnd}
                 >
                   <Card className="p-5 bg-card border-border shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-4">
-                    {/* Top Header */}
+                    {/* Top Header with Pin Badge */}
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] whitespace-nowrap">
                             {currentActiveEvent.code}
                           </span>
-                          <span className="text-[10px] font-bold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded-full uppercase">
-                            Live
-                          </span>
+                          <Badge className="bg-[#8b5cf6] text-white border-0 font-sans font-bold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] rounded-lg gap-1 whitespace-nowrap">
+                            <Pin className="size-3 fill-white -rotate-45" />
+                            <span>Featured</span>
+                          </Badge>
+                          <Badge className="bg-[#10b981] hover:bg-[#10b981] text-white border-0 font-sans font-bold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#059669] rounded-lg gap-1.5 whitespace-nowrap">
+                            <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                            <span>Active</span>
+                          </Badge>
                         </div>
                         <Link
                           href={`/campaigns/${currentActiveEvent.id}`}
                           className="hover:text-primary transition-colors block"
                         >
-                          <h2 className="text-lg font-bold text-foreground hover:underline">
+                          <h2 className="text-lg sm:text-xl font-bold text-foreground hover:underline leading-snug">
                             {currentActiveEvent.title}
                           </h2>
                         </Link>
-                        <p className="text-xs text-muted-foreground max-w-xl line-clamp-2">
-                          {currentActiveEvent.description || "International Astronomical Search Collaboration campaign for astrometric asteroid discovery."}
+                        <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                          {currentActiveEvent.description || "International Astronomical Search Collaboration campaign for asteroid discovery."}
                         </p>
                       </div>
 
-                      {/* Squad Count */}
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/40 shrink-0 self-start">
+                      {/* Team Count */}
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/40 shrink-0 self-start shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
                         <Users className="size-3.5 text-primary" />
                         <span className="text-xs font-mono font-bold text-foreground">
                           {currentActiveEvent._count?.teams || 0}
                         </span>
-                        <span className="text-[11px] text-muted-foreground">Squads</span>
+                        <span className="text-[11px] text-muted-foreground">Teams</span>
                       </div>
                     </div>
 
-                    {/* KEY HIGHLIGHT: REGISTRATION DEADLINE & DATES */}
-                    <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`p-2 rounded-lg shrink-0 ${
-                          currentActiveRegInfo?.isUrgent
-                            ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                            : "bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20"
-                        }`}>
-                          <Clock className="size-4" />
-                        </div>
-                        <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Registration Deadline
-                          </div>
-                          <div className="text-xs font-bold text-foreground mt-0.5 font-mono">
-                            {currentActiveRegInfo?.text}
-                          </div>
-                        </div>
-                      </div>
+                    {/* Horizontal Dashed Timeline (Start Dates Only) */}
+                    <div className="pt-3 pb-1 border-t border-border">
+                      <div className="grid grid-cols-4 items-center relative">
+                        {getEventStages(currentActiveEvent).map((stage, sIdx) => {
+                          const isLive = stage.status === "ACTIVE";
+                          const isDone = stage.status === "COMPLETED";
 
-                      <div className="text-xs font-mono text-muted-foreground sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-border/50">
-                        <div className="text-[10px] font-sans font-semibold uppercase text-muted-foreground">
-                          Observation Period
-                        </div>
-                        <div className="text-foreground font-medium mt-0.5">
-                          {new Date(currentActiveEvent.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} &ndash; {new Date(currentActiveEvent.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </div>
+                          return (
+                            <div key={stage.name} className="flex flex-col items-center text-center space-y-1.5 z-10">
+                              <span
+                                className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[80px] sm:max-w-none ${
+                                  isLive ? "text-[#8b5cf6]" : isDone ? "text-[#10b981]" : "text-muted-foreground"
+                                }`}
+                              >
+                                {stage.name}
+                              </span>
+                              <div
+                                className={`size-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold transition-all ${
+                                  isLive
+                                    ? "bg-[#8b5cf6] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] ring-2 ring-[#8b5cf6]/40 scale-105"
+                                    : isDone
+                                    ? "bg-[#10b981] text-white border-0 shadow-[0_2px_0_0_#059669]"
+                                    : "bg-card text-muted-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                                }`}
+                              >
+                                {isDone ? <Check className="size-3.5 stroke-[3]" /> : sIdx + 1}
+                              </div>
+                              <span
+                                className={`text-[11px] font-mono font-semibold ${
+                                  isLive ? "text-[#8b5cf6] font-bold" : isDone ? "text-foreground" : "text-muted-foreground"
+                                }`}
+                              >
+                                {formatStageDate(stage.start)}
+                              </span>
+                            </div>
+                          );
+                        })}
+
+                        {/* Dashed Connecting Line */}
+                        <div className="absolute top-[32px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
                       </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-border">
                       <Link href={`/campaigns/${currentActiveEvent.id}`}>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
+                          className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer font-medium"
                         >
-                          <span>View Campaign Details</span>
+                          <span>View Details</span>
                           <ArrowRight className="size-3.5" />
                         </Button>
                       </Link>
 
                       <div className="flex items-center gap-2">
-                        <Button
-                          onClick={() => handleOpenJoinModal(currentActiveEvent)}
-                          variant="outline"
-                          size="sm"
-                          className="h-9 px-4 text-xs font-semibold gap-1.5 cursor-pointer border-border hover:bg-muted"
-                        >
-                          <UserPlus className="size-3.5 text-primary" />
-                          <span>Join a Team</span>
-                        </Button>
+                        {(() => {
+                          const action = getStageAction(currentActiveEvent);
+                          return (
+                            <>
+                              <Button
+                                onClick={() => handleOpenJoinModal(currentActiveEvent)}
+                                variant="outline"
+                                size="sm"
+                                className="h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl"
+                              >
+                                <UserPlus className="size-3.5 text-primary" />
+                                <span>Join with Code</span>
+                              </Button>
 
-                        <Button
-                          onClick={() => handleOpenCreateModal(currentActiveEvent)}
-                          variant="default"
-                          size="sm"
-                          className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
-                        >
-                          <PlusCircle className="size-3.5" />
-                          <span>Form a Team</span>
-                        </Button>
+                              {action.isModal ? (
+                                <Button
+                                  onClick={() => handleOpenCreateModal(currentActiveEvent)}
+                                  variant="default"
+                                  size="sm"
+                                  className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5 rounded-xl border-0"
+                                >
+                                  <action.icon className="size-3.5" />
+                                  <span>{action.label}</span>
+                                </Button>
+                              ) : (
+                                <Link href={action.href || `/campaigns/${currentActiveEvent.id}`}>
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    className={`h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer ${action.className} active:translate-y-0.5 rounded-xl border-0`}
+                                  >
+                                    <action.icon className="size-3.5" />
+                                    <span>{action.label}</span>
+                                  </Button>
+                                </Link>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </Card>
@@ -661,7 +818,7 @@ export default function CampaignsPage() {
                 <Calendar className="size-4 text-primary" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   {selectedStatusFilter === "ALL"
-                    ? "Campaigns Schedule"
+                    ? "Campaigns List"
                     : selectedStatusFilter === "ACTIVE"
                     ? "Active Campaigns"
                     : selectedStatusFilter === "REGISTRATION"
@@ -683,87 +840,140 @@ export default function CampaignsPage() {
                 No campaigns match the selected filter.
               </Card>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {filteredEvents.map((ev) => {
-                  const regInfo = getRegistrationDeadlineInfo(ev.regEnd, ev.startDate);
-
                   return (
                     <Card
                       key={ev.id}
-                      className="p-4 bg-card border-border shadow-xs hover:border-primary/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                      className="p-4 sm:p-5 bg-card border-border shadow-[0_3px_0_0_#e2e8f0] dark:shadow-[0_3px_0_0_#27282d] hover:border-primary/40 transition-all space-y-3.5"
                     >
-                      {/* Left: Info */}
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                      {/* Top Header: Code + Status on one line, Teams on right */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] whitespace-nowrap">
                             {ev.code}
                           </span>
-                          <span className="text-[10px] font-mono text-muted-foreground">
-                            {ev.status}
-                          </span>
+                          {ev.status === "ACTIVE" ? (
+                            <Badge className="bg-[#10b981] text-white border-0 font-sans font-bold text-[11px] px-2.5 py-0.5 shadow-[0_2px_0_0_#059669] rounded-lg gap-1.5 whitespace-nowrap">
+                              <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                              <span>Active</span>
+                            </Badge>
+                          ) : ev.status === "UPCOMING" ? (
+                            <Badge className="bg-sky-500 text-white border-0 font-sans font-bold text-[11px] px-2.5 py-0.5 shadow-[0_2px_0_0_#0284c7] rounded-lg whitespace-nowrap">
+                              Upcoming
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-slate-700 text-white border-0 font-sans font-bold text-[11px] px-2.5 py-0.5 shadow-[0_2px_0_0_#334155] rounded-lg whitespace-nowrap">
+                              {ev.status}
+                            </Badge>
+                          )}
                         </div>
+
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                          <Users className="size-3.5 text-primary" />
+                          <span className="font-mono font-bold text-foreground">{ev._count?.teams || 0}</span>
+                          <span>Teams</span>
+                        </div>
+                      </div>
+
+                      {/* Main Title & Description (Untruncated title) */}
+                      <div className="space-y-1">
                         <Link
                           href={`/campaigns/${ev.id}`}
                           className="hover:text-primary transition-colors block"
                         >
-                          <h4 className="text-sm font-bold text-foreground truncate hover:underline">
+                          <h4 className="text-base sm:text-lg font-bold text-foreground hover:underline leading-snug">
                             {ev.title}
                           </h4>
                         </Link>
-                        <p className="text-xs text-muted-foreground line-clamp-1">
-                          {ev.description || "International Asteroid Search Collaboration campaign."}
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                          {ev.description || "International Asteroid Search Collaboration campaign for asteroid discovery."}
                         </p>
                       </div>
 
-                      {/* Middle: Prominent Registration Deadline */}
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className={`p-2 rounded-lg border text-center min-w-[135px] ${
-                          regInfo.isUrgent
-                            ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
-                            : regInfo.isClosed
-                            ? "bg-muted/40 border-border text-muted-foreground"
-                            : "bg-[#8b5cf6]/10 border-[#8b5cf6]/25 text-[#8b5cf6]"
-                        }`}>
-                          <div className="text-[9px] uppercase font-sans font-bold">
-                            Registration Deadline
-                          </div>
-                          <div className="text-[11px] font-bold mt-0.5 text-foreground font-mono">
-                            {regInfo.text}
-                          </div>
+                      {/* Horizontal Dashed Timeline (Start Dates Only) */}
+                      <div className="pt-3 border-t border-border space-y-3">
+                        <div className="grid grid-cols-4 items-center relative py-1">
+                          {getEventStages(ev).map((stage, sIdx) => {
+                            const isLive = stage.status === "ACTIVE";
+                            const isDone = stage.status === "COMPLETED";
+
+                            return (
+                              <div key={stage.name} className="flex flex-col items-center text-center space-y-1.5 z-10">
+                                <span
+                                  className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[80px] sm:max-w-none ${
+                                    isLive ? "text-[#8b5cf6]" : isDone ? "text-[#10b981]" : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {stage.name}
+                                </span>
+                                <div
+                                  className={`size-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold transition-all ${
+                                    isLive
+                                      ? "bg-[#8b5cf6] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] ring-2 ring-[#8b5cf6]/40 scale-105"
+                                      : isDone
+                                      ? "bg-[#10b981] text-white border-0 shadow-[0_2px_0_0_#059669]"
+                                      : "bg-card text-muted-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                                  }`}
+                                >
+                                  {isDone ? <Check className="size-3.5 stroke-[3]" /> : sIdx + 1}
+                                </div>
+                                <span
+                                  className={`text-[11px] font-mono font-semibold ${
+                                    isLive ? "text-[#8b5cf6] font-bold" : isDone ? "text-foreground" : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {formatStageDate(stage.start)}
+                                </span>
+                              </div>
+                            );
+                          })}
+
+                          {/* Dashed Connecting Line */}
+                          <div className="absolute top-[32px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
                         </div>
 
-                        {/* Observation Window */}
-                        <div className="hidden sm:block p-2 rounded-lg border border-border bg-muted/20 text-center min-w-[125px] font-mono text-xs">
-                          <div className="text-[9px] uppercase font-sans font-semibold text-muted-foreground">
-                            Observation
-                          </div>
-                          <div className="text-[11px] text-foreground mt-0.5">
-                            {new Date(ev.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &ndash; {new Date(ev.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          </div>
+                        {/* Actions */}
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50">
+                          <Link href={`/campaigns/${ev.id}`}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 px-3.5 text-xs font-semibold cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl"
+                            >
+                              <span>Details</span>
+                            </Button>
+                          </Link>
+
+                          {(() => {
+                            const action = getStageAction(ev);
+                            if (action.isModal) {
+                              return (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => handleOpenCreateModal(ev)}
+                                  className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 rounded-xl border-0"
+                                >
+                                  <action.icon className="size-3.5" />
+                                  <span>{action.label}</span>
+                                </Button>
+                              );
+                            }
+                            return (
+                              <Link href={action.href || `/campaigns/${ev.id}`}>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className={`h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer ${action.className} active:translate-y-0.5 rounded-xl border-0`}
+                                >
+                                  <action.icon className="size-3.5" />
+                                  <span>{action.label}</span>
+                                </Button>
+                              </Link>
+                            );
+                          })()}
                         </div>
-                      </div>
-
-                      {/* Right: Actions */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Link href={`/campaigns/${ev.id}`}>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-2.5 text-xs font-semibold cursor-pointer border-border hover:bg-muted"
-                          >
-                            <span>Details</span>
-                          </Button>
-                        </Link>
-
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handleOpenCreateModal(ev)}
-                          className="h-8 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
-                        >
-                          <PlusCircle className="size-3" />
-                          <span>Form Squad</span>
-                        </Button>
                       </div>
                     </Card>
                   );
@@ -783,10 +993,10 @@ export default function CampaignsPage() {
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <PlusCircle className="size-4 text-primary" />
-              <span>Form a Research Squad</span>
+              <span>Form a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Registering a new squad for <strong className="text-foreground">{selectedEventForTeam?.title}</strong> ({selectedEventForTeam?.code}).
+              Register a team for <strong className="text-foreground">{selectedEventForTeam?.title}</strong> ({selectedEventForTeam?.code}).
             </DialogDescription>
           </DialogHeader>
 
@@ -799,7 +1009,7 @@ export default function CampaignsPage() {
           <form onSubmit={handleCreateTeam} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-foreground">
-                Squad / Team Name
+                Team Name
               </label>
               <Input
                 type="text"
@@ -814,7 +1024,7 @@ export default function CampaignsPage() {
             <div className="text-xs text-muted-foreground p-3 rounded-lg border border-border bg-muted/40 space-y-1.5">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>You will be registered as the <strong>Squad Leader</strong>.</span>
+                <span>You will be registered as the <strong>Team Leader</strong>.</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
@@ -822,7 +1032,7 @@ export default function CampaignsPage() {
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Squads allow a minimum of 2 and maximum of 6 researchers.</span>
+                <span>Teams allow 2 to 6 members.</span>
               </div>
             </div>
 
@@ -841,9 +1051,9 @@ export default function CampaignsPage() {
                 variant="default"
                 size="sm"
                 disabled={createLoading || !teamName.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-[0_2px_0_0_#6d28d9] active:translate-y-0.5 rounded-lg"
               >
-                {createLoading ? "Creating..." : "Create Squad"}
+                {createLoading ? "Creating..." : "Create Team"}
               </Button>
             </DialogFooter>
           </form>
@@ -856,12 +1066,12 @@ export default function CampaignsPage() {
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <KeyRound className="size-4 text-primary" />
-              <span>Join a Research Squad</span>
+              <span>Join a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               {selectedEventForJoin
-                ? `Enter the invite code provided by your squad leader for ${selectedEventForJoin.title}.`
-                : "Enter the private 8-character invite code provided by your squad leader."}
+                ? `Enter the invite code from your team leader for ${selectedEventForJoin.title}.`
+                : "Enter the private invite code provided by your team leader."}
             </DialogDescription>
           </DialogHeader>
 
@@ -874,7 +1084,7 @@ export default function CampaignsPage() {
           <form onSubmit={handleJoinTeamByCode} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-foreground">
-                Squad Invite Code
+                Team Invite Code
               </label>
               <Input
                 type="text"
@@ -888,7 +1098,7 @@ export default function CampaignsPage() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Invite codes are generated when a squad leader creates the squad for an active or upcoming campaign.
+              Invite codes are generated when a team leader creates a team for a campaign.
             </p>
 
             <DialogFooter className="gap-2 sm:gap-0">
@@ -906,9 +1116,9 @@ export default function CampaignsPage() {
                 variant="default"
                 size="sm"
                 disabled={joinLoading || !joinCode.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-[0_2px_0_0_#6d28d9] active:translate-y-0.5 rounded-lg"
               >
-                {joinLoading ? "Joining..." : "Join Squad"}
+                {joinLoading ? "Joining..." : "Join Team"}
               </Button>
             </DialogFooter>
           </form>
