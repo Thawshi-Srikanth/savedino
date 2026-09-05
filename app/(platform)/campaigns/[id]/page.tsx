@@ -33,6 +33,7 @@ import {
   Terminal,
   FileCode,
   Sparkles,
+  Flag,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +62,49 @@ interface EventDetail {
   };
 }
 
+function formatStageDate(dateStr?: string) {
+  if (!dateStr) return "TBA";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "TBA";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getDurationDays(startStr?: string, endStr?: string) {
+  if (!startStr || !endStr) return null;
+  const start = new Date(startStr).getTime();
+  const end = new Date(endStr).getTime();
+  if (isNaN(start) || isNaN(end) || end <= start) return null;
+  return Math.round((end - start) / (1000 * 60 * 60 * 24));
+}
+
+function getHumanizedCountdown(targetDateMs: number, now: number): string {
+  const diffMs = targetDateMs - now;
+  if (diffMs <= 0) return "Ending now";
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (totalDays > 1) {
+    const remHours = totalHours % 24;
+    return remHours > 0 ? `${totalDays} days ${remHours}h` : `${totalDays} days`;
+  } else if (totalDays === 1) {
+    const remHours = totalHours % 24;
+    return remHours > 0 ? `1 day ${remHours}h` : `1 day`;
+  } else if (totalHours >= 1) {
+    const remMinutes = totalMinutes % 60;
+    return remMinutes > 0 ? `${totalHours}h ${remMinutes}m` : `${totalHours} hours`;
+  } else if (totalMinutes >= 1) {
+    return `${totalMinutes} minutes`;
+  } else {
+    return "Less than a minute";
+  }
+}
+
 function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) {
   const targetStr = regEndStr || startDateStr;
   if (!targetStr) {
@@ -78,7 +122,7 @@ function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) 
     year: "numeric",
   });
 
-  if (daysLeft < 0) {
+  if (diffMs <= 0) {
     return {
       text: `Closed on ${formattedDate}`,
       formattedDate,
@@ -88,28 +132,10 @@ function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) 
     };
   }
 
-  if (daysLeft === 0) {
-    return {
-      text: `Closes Today (${formattedDate})`,
-      formattedDate,
-      isUrgent: true,
-      isClosed: false,
-      daysLeft: 0,
-    };
-  }
-
-  if (daysLeft === 1) {
-    return {
-      text: `Closes Tomorrow (${formattedDate})`,
-      formattedDate,
-      isUrgent: true,
-      isClosed: false,
-      daysLeft: 1,
-    };
-  }
+  const countdown = getHumanizedCountdown(targetDate.getTime(), now.getTime());
 
   return {
-    text: `${formattedDate} (${daysLeft} days left)`,
+    text: `${formattedDate} (${countdown} left)`,
     formattedDate,
     isUrgent: daysLeft <= 5,
     isClosed: false,
@@ -117,9 +143,17 @@ function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) 
   };
 }
 
-function getStageTimelineData(startStr: string, endStr: string, now: number) {
+function getStageTimelineData(startStr?: string, endStr?: string, now: number = Date.now()) {
+  if (!startStr || !endStr) {
+    return { status: "UPCOMING" as const, progress: 0, countdownText: null, start: 0, end: 0 };
+  }
+
   const start = new Date(startStr).getTime();
   const end = new Date(endStr).getTime();
+
+  if (isNaN(start) || isNaN(end)) {
+    return { status: "UPCOMING" as const, progress: 0, countdownText: null, start: 0, end: 0 };
+  }
 
   let status: "UPCOMING" | "ACTIVE" | "COMPLETED" = "UPCOMING";
   let progress = 0;
@@ -136,31 +170,14 @@ function getStageTimelineData(startStr: string, endStr: string, now: number) {
     progress = 0;
   }
 
-  // Countdown timer calculation if <= 30 days
-  let timerText: string | null = null;
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-
+  let countdownText: string | null = null;
   if (status === "ACTIVE") {
-    const diff = Math.max(0, end - now);
-    if (diff <= thirtyDaysMs) {
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-      timerText = `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
-    }
+    countdownText = getHumanizedCountdown(end, now);
   } else if (status === "UPCOMING") {
-    const diff = Math.max(0, start - now);
-    if (diff <= thirtyDaysMs) {
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-      timerText = `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
-    }
+    countdownText = getHumanizedCountdown(start, now);
   }
 
-  return { status, progress, timerText, start, end };
+  return { status, progress, countdownText, start, end };
 }
 
 export default function CampaignDetailPage({
@@ -176,7 +193,7 @@ export default function CampaignDetailPage({
   const [loading, setLoading] = useState<boolean>(true);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
-  // Real-time 1s ticker for live countdowns
+  // Real-time 1s ticker for live countdowns & progress
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(Date.now());
@@ -226,7 +243,7 @@ export default function CampaignDetailPage({
     if (!event) return;
 
     if (!teamName.trim()) {
-      setCreateError("Please provide a name for your research squad.");
+      setCreateError("Please enter a team name.");
       return;
     }
 
@@ -245,9 +262,9 @@ export default function CampaignDetailPage({
       const data = await res.json();
 
       if (!data.success) {
-        setCreateError(data.error || "Failed to create squad.");
+        setCreateError(data.error || "Failed to create team.");
       } else {
-        toast.success("Squad formed successfully!");
+        toast.success("Team created successfully!");
         setCreateModalOpen(false);
         router.push(`/team/${data.team.id}`);
       }
@@ -282,9 +299,9 @@ export default function CampaignDetailPage({
       const data = await res.json();
 
       if (!data.success) {
-        setJoinError(data.error || "Failed to join squad.");
+        setJoinError(data.error || "Failed to join team.");
       } else {
-        toast.success("Joined squad successfully!");
+        toast.success("Joined team successfully!");
         setJoinModalOpen(false);
         router.push(`/team/${data.teamId}`);
       }
@@ -323,33 +340,33 @@ export default function CampaignDetailPage({
   const regInfo = getRegistrationDeadlineInfo(event.regEnd, event.startDate);
   const squadCount = event._count?.teams || event.teams?.length || 0;
 
-  // Pipeline Stages
+  // Simple, direct step stages without jargon
   const pipelineStages = [
     {
       stage: "Stage 1",
-      code: "Registration",
-      name: "Researcher Onboarding & Account Setup",
+      name: "Registration",
+      description: "Sign up and create your account to participate.",
       start: event.regStart,
       end: event.regEnd,
     },
     {
       stage: "Stage 2",
-      code: "Team Formation",
-      name: "Squad Roster Assembly & Solo Matching",
+      name: "Team Formation",
+      description: "Create a team of 2 to 6 members or join with an invite code.",
       start: event.teamFormationStart || event.regStart,
       end: event.teamFormationEnd || event.startDate,
     },
     {
       stage: "Stage 3",
-      code: "Observation",
-      name: "Telescope Image Analysis & Asteroid Search",
+      name: "Image Search",
+      description: "Analyze telescope images to find and track moving asteroids.",
       start: event.startDate,
       end: event.endDate,
     },
     {
       stage: "Stage 4",
-      code: "Discovery Report",
-      name: "Astrometry Verification & MPC Submission",
+      name: "Submit Reports",
+      description: "Submit your final discovery reports and measurements.",
       start: event.submissionStart || event.startDate,
       end: event.submissionEnd || event.endDate,
     },
@@ -357,8 +374,8 @@ export default function CampaignDetailPage({
 
   return (
     <div className="w-full space-y-8 font-sans max-w-6xl mx-auto py-2">
-      {/* 1. BREADCRUMB & HEADER STRIP */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-border text-xs font-sans">
+      {/* 1. STICKY BREADCRUMB & HEADER STRIP */}
+      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
         <Link
           href="/campaigns"
           className="inline-flex items-center gap-2 font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
@@ -400,7 +417,7 @@ export default function CampaignDetailPage({
             </h1>
 
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {event.description || "International Astronomical Search Collaboration campaign for astrometric asteroid discovery."}
+              {event.description || "International Astronomical Search Collaboration campaign for asteroid discovery."}
             </p>
 
             {/* Campaign Specs Strip */}
@@ -411,13 +428,13 @@ export default function CampaignDetailPage({
               </div>
 
               <div>
-                <span className="text-muted-foreground">Squads: </span>
+                <span className="text-muted-foreground">Teams: </span>
                 <strong className="text-foreground">{squadCount} registered</strong>
                 <Link
                   href={`/teams?eventId=${event.id}`}
                   className="text-primary font-sans hover:underline text-xs ml-1.5 font-semibold"
                 >
-                  (view roster)
+                  (view teams)
                 </Link>
               </div>
 
@@ -428,115 +445,186 @@ export default function CampaignDetailPage({
             </div>
           </div>
 
-          {/* === SINGLE VERTICAL TIMELINE === */}
+          {/* === VERTICAL STAGE FLOW (START & END CONNECTED WITH VERTICAL PROGRESS LINE) === */}
           <div className="space-y-6 pt-4 border-t border-border">
-            <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2">
                 <Calendar className="size-4 text-primary" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">
-                  Campaign Schedule
+                  Schedule & Steps
                 </h2>
               </div>
 
-              <span className="text-xs text-muted-foreground font-sans">
-                4 Stages
+              <span className="text-xs text-muted-foreground font-sans font-medium">
+                4 Steps
               </span>
             </div>
 
-            {/* Single Continuous Vertical Timeline */}
-            <div className="relative pl-6 sm:pl-8 border-l-2 border-border space-y-9 my-4 ml-3 sm:ml-4">
+            {/* Vertical Non-Containerized Flow for All Stages */}
+            <div className="space-y-8 pt-2">
               {pipelineStages.map((phase, idx) => {
                 const phaseData = getStageTimelineData(phase.start, phase.end, currentTime);
                 const isLive = phaseData.status === "ACTIVE";
                 const isDone = phaseData.status === "COMPLETED";
+                const durationDays = getDurationDays(phase.start, phase.end);
+                const startDateFormatted = formatStageDate(phase.start);
+                const endDateFormatted = formatStageDate(phase.end);
 
                 return (
-                  <div key={phase.stage} className="relative">
-                    {/* Node Dot on Vertical Line */}
-                    <div
-                      className={`absolute -left-[31px] sm:-left-[39px] top-1.5 size-3.5 rounded-full border-2 transition-all flex items-center justify-center ${
-                        isLive
-                          ? "bg-[#8b5cf6] border-white dark:border-background ring-4 ring-[#8b5cf6]/30 shadow-xs"
-                          : isDone
-                          ? "bg-[#10b981] border-white dark:border-background ring-2 ring-[#10b981]/20"
-                          : "bg-muted border-border"
-                      }`}
-                    >
-                      {isDone && <Check className="size-2 text-white stroke-[3]" />}
-                      {isLive && <span className="size-1 rounded-full bg-white animate-ping" />}
+                  <div
+                    key={phase.stage}
+                    className={`space-y-3 pb-8 ${
+                      idx < pipelineStages.length - 1 ? "border-b border-border/50" : ""
+                    }`}
+                  >
+                    {/* 1. STAGE HEADER - Direct & Simple */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <Badge
+                          variant={isLive ? "default" : "outline"}
+                          className={`font-sans font-bold text-xs px-2.5 py-0.5 ${
+                            isLive
+                              ? "bg-[#8b5cf6] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                              : isDone
+                              ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]"
+                              : "bg-muted text-muted-foreground border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                          }`}
+                        >
+                          Step {idx + 1}
+                        </Badge>
+
+                        <h3 className="text-base sm:text-lg font-bold text-foreground font-sans">
+                          {phase.name}
+                        </h3>
+
+                        {durationDays && (
+                          <span className="text-xs font-mono text-muted-foreground">
+                            ({durationDays} days)
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Status indicator text (Not inside badge) */}
+                      <div className="flex items-center gap-2 text-xs font-sans">
+                        {isLive && (
+                          <span className="inline-flex items-center gap-1.5 font-bold text-[#8b5cf6] dark:text-[#a78bfa]">
+                            <span className="size-2 rounded-full bg-[#8b5cf6] animate-pulse" />
+                            <span>Active Now</span>
+                          </span>
+                        )}
+                        {isDone && (
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-[#10b981]">
+                            <Check className="size-3.5 stroke-[3]" />
+                            <span>Completed</span>
+                          </span>
+                        )}
+                        {!isLive && !isDone && (
+                          <span className="font-medium text-muted-foreground">
+                            Upcoming
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Stage Details */}
-                    <div className="space-y-1.5">
-                      {/* Top Row: Stage Name & Theme Badges with 3D Shadow */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge
-                            variant={isLive ? "default" : "outline"}
-                            className={`font-sans font-semibold text-xs px-2.5 py-0.5 ${
-                              isLive
-                                ? "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
-                                : isDone
-                                ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]"
-                                : "bg-card text-foreground border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
-                            }`}
-                          >
-                            Stage {idx + 1}
-                          </Badge>
+                    {/* Stage Description */}
+                    {phase.description && (
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {phase.description}
+                      </p>
+                    )}
 
-                          <h3 className="text-base font-bold text-foreground font-sans">
-                            {phase.name}
-                          </h3>
+                    {/* 2. VERTICAL TWO-POINT TIMELINE (START TO END) */}
+                    <div className="relative pl-8 pt-3 pb-2">
+                      {/* Vertical Progress Line Track connecting Start to End */}
+                      <div className="absolute left-[11px] top-4 bottom-4 w-1 rounded-full bg-slate-200 dark:bg-[#28292e] overflow-hidden">
+                        <div
+                          className={`w-full transition-all duration-700 ease-out rounded-full ${
+                            isDone
+                              ? "bg-[#10b981]"
+                              : isLive
+                              ? "bg-gradient-to-b from-[#8b5cf6] to-[#a855f7]"
+                              : "bg-transparent"
+                          }`}
+                          style={{ height: `${phaseData.progress}%` }}
+                        />
+                      </div>
+
+                      {/* START POINT NODE (TOP) */}
+                      <div className="relative flex items-center gap-3">
+                        <div
+                          className={`absolute -left-8 size-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isDone || isLive
+                              ? "bg-[#10b981] border-white dark:border-[#121315] text-white shadow-xs ring-2 ring-[#10b981]/20"
+                              : "bg-background border-border text-muted-foreground"
+                          }`}
+                        >
+                          {isDone || isLive ? (
+                            <Check className="size-3 stroke-[3]" />
+                          ) : (
+                            <span className="size-1.5 rounded-full bg-muted-foreground/60" />
+                          )}
                         </div>
 
-                        {/* Status / Countdown Timer Badges with 3D Shadow */}
-                        <div className="flex flex-wrap items-center gap-2 font-sans text-xs shrink-0">
-                          {/* Live countdown timer badge if within 30 days */}
-                          {phaseData.timerText && isLive && (
-                            <Badge className="bg-[#8b5cf6]/15 text-[#8b5cf6] dark:text-[#a78bfa] border border-[#8b5cf6]/30 font-sans font-medium text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#d8b4fe] dark:shadow-[0_2px_0_0_#5b21b6] animate-pulse">
-                              <Clock className="size-3 text-[#8b5cf6]" />
-                              <span>Ends in {phaseData.timerText}</span>
-                            </Badge>
-                          )}
-
-                          {phaseData.timerText && !isLive && !isDone && (
-                            <Badge variant="outline" className="bg-card text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                              <Clock className="size-3 text-muted-foreground" />
-                              <span>Starts in {phaseData.timerText}</span>
-                            </Badge>
-                          )}
-
-                          {isLive && (
-                            <Badge className="bg-[#8b5cf6] text-white border-0 font-sans font-semibold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]">
-                              Active
-                            </Badge>
-                          )}
-                          {isDone && (
-                            <Badge variant="outline" className="bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 font-sans font-semibold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]">
-                              Completed
-                            </Badge>
-                          )}
-                          {!isLive && !isDone && !phaseData.timerText && (
-                            <Badge variant="outline" className="bg-card text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                              Upcoming
-                            </Badge>
-                          )}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-sans">
+                          <span className="font-mono font-bold text-foreground">
+                            {startDateFormatted}
+                          </span>
+                          <span className="text-muted-foreground text-xs font-medium">
+                            (Start)
+                          </span>
                         </div>
                       </div>
 
-                      {/* Start Date & End Date + Progress % */}
-                      <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-muted-foreground pt-0.5">
-                        <span className="text-foreground font-medium">
-                          Start: {new Date(phase.start).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
-                        <span className="text-muted-foreground/60">-</span>
-                        <span className="text-foreground font-medium">
-                          End: {new Date(phase.end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
-                        <span className="text-muted-foreground/50">|</span>
-                        <span className="text-muted-foreground text-xs">
-                          {phaseData.progress}% complete
-                        </span>
+                      {/* IN-PLACE COUNTDOWN FLOW (EXPANDED HEIGHT, NO PERCENTAGE) */}
+                      <div className="my-7 pl-2 py-3 min-h-[64px] flex flex-col justify-center space-y-1.5 text-xs font-sans">
+                        {isLive && phaseData.countdownText && (
+                          <div className="flex items-center gap-2 text-foreground font-medium">
+                            <Clock className="size-3.5 text-[#8b5cf6]" />
+                            <span>{phaseData.countdownText} remaining</span>
+                          </div>
+                        )}
+
+                        {!isLive && !isDone && phaseData.countdownText && (
+                          <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                            <Clock className="size-3.5 text-muted-foreground" />
+                            <span>Starts in {phaseData.countdownText}</span>
+                          </div>
+                        )}
+
+                        {isDone && (
+                          <div className="text-xs text-[#10b981] font-semibold flex items-center gap-1.5">
+                            <Check className="size-3.5 stroke-[3]" />
+                            <span>Completed</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* END POINT NODE (BOTTOM) */}
+                      <div className="relative flex items-center gap-3">
+                        <div
+                          className={`absolute -left-8 size-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isDone
+                              ? "bg-[#10b981] border-white dark:border-[#121315] text-white shadow-xs ring-2 ring-[#10b981]/20"
+                              : isLive
+                              ? "bg-background border-[#8b5cf6] text-[#8b5cf6] ring-2 ring-[#8b5cf6]/20"
+                              : "bg-background border-border text-muted-foreground"
+                          }`}
+                        >
+                          {isDone ? (
+                            <Check className="size-3 stroke-[3]" />
+                          ) : (
+                            <Flag className="size-2.5" />
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-sans">
+                          <span className="font-mono font-bold text-foreground">
+                            {endDateFormatted}
+                          </span>
+                          <span className="text-muted-foreground text-xs font-medium">
+                            (End)
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -547,14 +635,14 @@ export default function CampaignDetailPage({
         </div>
 
         {/* === RIGHT COLUMN: SOLID PURPLE STICKY ACTION CARD (4 COLS) === */}
-        <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-4">
+        <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-4">
           {/* Solid Electric Violet Sticky Card */}
           <div className="relative rounded-2xl p-6 space-y-5 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
             {/* Top Header Note Tape */}
             <div className="flex items-center justify-between pb-3 border-b border-white/20 font-sans text-xs">
               <div className="flex items-center gap-1.5 font-bold text-white">
                 <Pin className="size-3.5" />
-                <span>Squad Actions</span>
+                <span>Team Actions</span>
               </div>
               <Badge className="bg-white/20 hover:bg-white/20 text-white border-0 font-sans font-bold text-xs px-2 py-0.5 shadow-[0_2px_0_0_rgba(0,0,0,0.15)]">
                 {event.code}
@@ -619,31 +707,31 @@ export default function CampaignDetailPage({
               </Link>
             </div>
 
-            {/* Squad Rules Checklist */}
+            {/* Team Rules Checklist */}
             <div className="pt-3 border-t border-white/20 text-xs font-sans text-white/85 space-y-1.5">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>2 to 6 scientists per squad</span>
+                <span>2 to 6 members per team</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>Share invite codes with colleagues</span>
+                <span>Share invite code with teammates</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* FORM SQUAD MODAL */}
+      {/* FORM TEAM MODAL */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
         <DialogContent className="sm:max-w-md bg-card border-border font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <PlusCircle className="size-4 text-primary" />
-              <span>Form Research Squad</span>
+              <span>Form a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Registering a new squad for <strong className="text-foreground">{event.title}</strong> ({event.code}).
+              Create a new team for <strong className="text-foreground">{event.title}</strong> ({event.code}).
             </DialogDescription>
           </DialogHeader>
 
@@ -656,12 +744,12 @@ export default function CampaignDetailPage({
           <form onSubmit={handleCreateTeam} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-foreground">
-                Squad / Team Name
+                Team Name
               </label>
               <Input
                 type="text"
                 required
-                placeholder="e.g. Orion Asteroid Hunters, Team Kepler"
+                placeholder="e.g. Orion Hunters, Team Kepler"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 className="h-9 text-xs bg-background font-sans"
@@ -671,15 +759,15 @@ export default function CampaignDetailPage({
             <div className="text-xs text-muted-foreground p-3 rounded-lg border border-border bg-muted/40 space-y-1.5">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>You will be registered as the <strong>Squad Leader</strong>.</span>
+                <span>You will be the <strong>Team Leader</strong>.</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>A private <strong>invite code</strong> will be generated for your teammates.</span>
+                <span>An <strong>invite code</strong> will be generated for your teammates.</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Squads allow a minimum of 2 and maximum of 6 researchers.</span>
+                <span>Teams have 2 to 6 members.</span>
               </div>
             </div>
 
@@ -701,7 +789,7 @@ export default function CampaignDetailPage({
                 disabled={createLoading || !teamName.trim()}
                 className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
               >
-                {createLoading ? "Creating..." : "Create Squad"}
+                {createLoading ? "Creating..." : "Create Team"}
               </Button>
             </DialogFooter>
           </form>
@@ -714,10 +802,10 @@ export default function CampaignDetailPage({
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <KeyRound className="size-4 text-primary" />
-              <span>Join Research Squad</span>
+              <span>Join a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Enter the private invite code provided by your squad leader for <strong className="text-foreground">{event.title}</strong>.
+              Enter the invite code from your team leader for <strong className="text-foreground">{event.title}</strong>.
             </DialogDescription>
           </DialogHeader>
 
@@ -730,7 +818,7 @@ export default function CampaignDetailPage({
           <form onSubmit={handleJoinTeamByCode} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-foreground">
-                Squad Invite Code
+                Team Invite Code
               </label>
               <Input
                 type="text"
@@ -761,7 +849,7 @@ export default function CampaignDetailPage({
                 disabled={joinLoading || !joinCode.trim()}
                 className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
               >
-                {joinLoading ? "Joining..." : "Join Squad"}
+                {joinLoading ? "Joining..." : "Join Team"}
               </Button>
             </DialogFooter>
           </form>
