@@ -108,6 +108,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (team.status === "DISQUALIFIED") {
+      return NextResponse.json(
+        { success: false, error: "Cannot assign members to a disabled/disqualified squad." },
+        { status: 400 }
+      );
+    }
+
     if (team.members.length >= 6) {
       return NextResponse.json(
         { success: false, error: "Team is already full (max 6 members)." },

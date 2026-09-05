@@ -33,6 +33,7 @@ import {
   Settings,
   Plus,
   RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -89,6 +90,7 @@ interface TeamData {
   leaderId: string;
   isRecruiting: boolean;
   recruitmentNotes?: string;
+  disqualificationReason?: string;
   event: {
     id: string;
     title: string;
@@ -368,6 +370,30 @@ export default function TeamWorkspacePage({
         </Link>
       </div>
 
+      {/* Disabled / Disqualified Warning Banner */}
+      {team?.status === "DISQUALIFIED" && (
+        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive flex items-start gap-3 shadow-xs">
+          <AlertTriangle className="size-5 shrink-0 mt-0.5" />
+          <div className="space-y-1.5 flex-1">
+            <div className="font-bold text-sm">Squad Disabled by Platform Administration</div>
+            <p className="text-xs text-destructive/90 leading-relaxed font-sans">
+              This squad has been disabled by platform administrators. Recruitment, invitations, and roster modifications are permanently locked.
+            </p>
+            {team.disqualificationReason ? (
+              <div className="mt-1.5 text-xs font-sans bg-background text-foreground p-3 rounded-md border border-destructive/30 space-y-0.5">
+                <span className="font-bold block text-[11px] uppercase tracking-wider text-destructive">Disqualification Reason:</span>
+                <p className="text-muted-foreground whitespace-pre-wrap">{team.disqualificationReason}</p>
+              </div>
+            ) : team.recruitmentNotes ? (
+              <div className="mt-1.5 text-xs font-sans bg-background/80 text-foreground p-2.5 rounded-md border border-border">
+                <span className="font-bold block text-[11px] uppercase tracking-wider text-muted-foreground mb-0.5">Admin Moderation Notice:</span>
+                {team.recruitmentNotes}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
       {/* 1. TEAM HEADER & INFO CARD */}
       <Card className="p-5 sm:p-6 bg-card border-border space-y-5">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -378,10 +404,22 @@ export default function TeamWorkspacePage({
               </span>
               <span className="text-[11px] text-muted-foreground">&bull;</span>
               <span className="text-xs text-muted-foreground">{team?.event?.title || "Asteroid Search"}</span>
-              <Badge variant="secondary" className="text-[10px] font-sans font-medium px-2 py-0.5 ml-1">
-                {memberCount}/6 Members
-              </Badge>
-              {team?.isRecruiting ? (
+              
+              {team?.status === "DISQUALIFIED" ? (
+                <Badge variant="destructive" className="text-[10px] font-sans font-bold px-2 py-0.5 ml-1">
+                  Disabled
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[10px] font-sans font-medium px-2 py-0.5 ml-1">
+                  {memberCount}/6 Members
+                </Badge>
+              )}
+
+              {team?.status === "DISQUALIFIED" ? (
+                <span className="text-[10px] font-sans font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                  Recruitment Locked
+                </span>
+              ) : team?.isRecruiting ? (
                 <span className="text-[10px] font-sans font-semibold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded-full">
                   Open for Join Requests
                 </span>
@@ -403,8 +441,10 @@ export default function TeamWorkspacePage({
               <Button
                 size="sm"
                 variant="outline"
+                disabled={team?.status === "DISQUALIFIED"}
                 onClick={() => setShowRecruitModal(true)}
-                className="h-9 text-xs font-semibold gap-1.5 bg-background"
+                className="h-9 text-xs font-semibold gap-1.5 bg-background disabled:opacity-50 disabled:cursor-not-allowed"
+                title={team?.status === "DISQUALIFIED" ? "Recruitment locked - squad is disabled" : "Recruitment Settings"}
               >
                 <Settings className="size-3.5 text-muted-foreground" />
                 <span>Recruitment Settings</span>
@@ -422,9 +462,10 @@ export default function TeamWorkspacePage({
               <Button
                 size="sm"
                 variant="ghost"
+                disabled={team?.status === "DISQUALIFIED"}
                 onClick={handleCopyInvite}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                title="Copy Invite Code"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                title={team?.status === "DISQUALIFIED" ? "Invite code deactivated" : "Copy Invite Code"}
               >
                 {copied ? <Check className="size-3.5 text-[#10b981]" /> : <Copy className="size-3.5" />}
               </Button>

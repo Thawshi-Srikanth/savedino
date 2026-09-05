@@ -22,7 +22,11 @@ export interface TeamData {
   id: string;
   name: string;
   inviteCode: string;
-  status: string;
+  status: "FORMING" | "ACTIVE" | "SUBMITTED" | "DISQUALIFIED" | string;
+  isRecruiting?: boolean;
+  recruitmentNotes?: string | null;
+  disqualificationReason?: string | null;
+  leaderId?: string;
   eventId: string;
   event: {
     title: string;
@@ -31,6 +35,7 @@ export interface TeamData {
   members: Array<{
     id: string;
     role: string;
+    userId?: string;
     user: {
       id: string;
       name: string;
@@ -39,8 +44,10 @@ export interface TeamData {
     };
   }>;
   _count?: {
-    candidates: number;
-    imageSets: number;
+    members?: number;
+    joinRequests?: number;
+    candidates?: number;
+    imageSets?: number;
   };
 }
 

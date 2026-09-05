@@ -50,7 +50,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Check Event Registration Deadline
+    // 2. Check if team is disabled / disqualified by administration
+    if (team.status === "DISQUALIFIED") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "This squad has been disabled by platform administration and is not accepting new members.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Check Event Registration Deadline
     if (team.event) {
       const regCheck = isRegistrationClosed(team.event);
       if (regCheck.closed) {

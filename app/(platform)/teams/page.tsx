@@ -64,9 +64,10 @@ interface Team {
   id: string;
   name: string;
   inviteCode: string;
-  status: "FORMING" | "READY" | "FULL";
+  status: "FORMING" | "READY" | "FULL" | "DISQUALIFIED" | string;
   isRecruiting: boolean;
   recruitmentNotes?: string | null;
+  disqualificationReason?: string | null;
   createdAt: string;
   event: TeamEvent;
   members: TeamMember[];
@@ -446,18 +447,31 @@ function TeamsContent() {
                     </span>
 
                     <div className="flex items-center gap-1.5">
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] font-sans font-medium px-2 py-0.5"
-                      >
-                        {team.status === "FORMING"
-                          ? "Forming"
-                          : team.status === "READY"
-                          ? "Ready"
-                          : "Full"}
-                      </Badge>
+                      {team.status === "DISQUALIFIED" ? (
+                        <Badge
+                          variant="destructive"
+                          className="text-[10px] font-sans font-bold px-2 py-0.5"
+                        >
+                          Disabled
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] font-sans font-medium px-2 py-0.5"
+                        >
+                          {team.status === "FORMING"
+                            ? "Forming"
+                            : team.status === "READY"
+                            ? "Ready"
+                            : "Full"}
+                        </Badge>
+                      )}
 
-                      {team.isRecruiting && !isFull ? (
+                      {team.status === "DISQUALIFIED" ? (
+                        <span className="text-[10px] font-sans font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                          Locked
+                        </span>
+                      ) : team.isRecruiting && !isFull ? (
                         <span className="text-[10px] font-sans font-semibold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded-full">
                           Open
                         </span>
@@ -483,9 +497,13 @@ function TeamsContent() {
                     <Progress value={capacityPercent} className="h-1.5" />
                   </div>
 
-                  {/* Recruitment Note */}
+                  {/* Recruitment Note / Disabled Reason */}
                   <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[32px]">
-                    {team.recruitmentNotes || "Active asteroid search team analyzing telescope image sets."}
+                    {team.status === "DISQUALIFIED"
+                      ? team.disqualificationReason
+                        ? `Disabled: ${team.disqualificationReason}`
+                        : "Squad disabled by platform administration."
+                      : team.recruitmentNotes || "Active asteroid search team analyzing telescope image sets."}
                   </p>
 
                   {/* Members & Leader Info */}
@@ -524,6 +542,10 @@ function TeamsContent() {
                         <ArrowRight className="size-3.5" />
                       </Button>
                     </Link>
+                  ) : team.status === "DISQUALIFIED" ? (
+                    <Button variant="outline" size="sm" disabled className="w-full text-xs text-destructive border-destructive/30 bg-destructive/5 cursor-not-allowed">
+                      Squad Disabled
+                    </Button>
                   ) : team.isRecruiting && !isFull ? (
                     <Button
                       onClick={() => {

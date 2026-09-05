@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,12 +19,47 @@ import { DeleteUserDialog } from "./components/delete-user-dialog";
 import { AssignUserModal } from "./components/assign-user-modal";
 import { EditCampaignModal } from "./components/edit-campaign-modal";
 import { DeleteCampaignDialog } from "./components/delete-campaign-dialog";
+import { EditTeamModal } from "./components/edit-team-modal";
+import { DeleteTeamDialog } from "./components/delete-team-dialog";
+import { ReportTeamModal } from "./components/report-team-modal";
+
+type AdminTab = "USERS" | "MATCHMAKING" | "TEAMS" | "EVENTS";
+
+function parseTabQuery(tabQuery: string | null): AdminTab {
+  if (!tabQuery) return "USERS";
+  const upper = tabQuery.toUpperCase();
+  if (upper === "USERS" || upper === "MATCHMAKING" || upper === "TEAMS" || upper === "EVENTS") {
+    return upper as AdminTab;
+  }
+  if (upper === "CAMPAIGNS") return "EVENTS";
+  if (upper === "SQUADS") return "TEAMS";
+  return "USERS";
+}
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  // Navigation Tabs
-  const [activeTab, setActiveTab] = useState<"USERS" | "MATCHMAKING" | "TEAMS" | "EVENTS">("USERS");
+  // Navigation Tabs synchronized with URL query (?tab=users, etc.)
+  const [activeTab, setActiveTab] = useState<AdminTab>(() => parseTabQuery(searchParams.get("tab")));
+
+  // Synchronize state when URL query changes (e.g. Back/Forward button)
+  useEffect(() => {
+    const tabFromUrl = parseTabQuery(searchParams.get("tab"));
+    if (tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Tab switch handler that updates the URL query string
+  const handleTabChange = (newTab: AdminTab) => {
+    setActiveTab(newTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", newTab.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   // Data States
   const [events, setEvents] = useState<EventData[]>([]);
@@ -52,6 +88,25 @@ export default function AdminDashboardPage() {
   const [assigningUser, setAssigningUser] = useState<UserData | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [assignLoading, setAssignLoading] = useState<boolean>(false);
+
+  // Edit Squad Modal State
+  const [editingTeam, setEditingTeam] = useState<TeamData | null>(null);
+  const [editTeamName, setEditTeamName] = useState<string>("");
+  const [editTeamInviteCode, setEditTeamInviteCode] = useState<string>("");
+  const [editTeamStatus, setEditTeamStatus] = useState<string>("ACTIVE");
+  const [editTeamIsRecruiting, setEditTeamIsRecruiting] = useState<boolean>(true);
+  const [editTeamRecruitmentNotes, setEditTeamRecruitmentNotes] = useState<string>("");
+  const [editTeamDisqualificationReason, setEditTeamDisqualificationReason] = useState<string>("");
+  const [editTeamLeaderId, setEditTeamLeaderId] = useState<string>("");
+  const [editTeamLoading, setEditTeamLoading] = useState<boolean>(false);
+
+  // Delete Squad Dialog State
+  const [deletingTeam, setDeletingTeam] = useState<TeamData | null>(null);
+  const [deleteTeamLoading, setDeleteTeamLoading] = useState<boolean>(false);
+
+  // Report Squad Modal State
+  const [reportingTeam, setReportingTeam] = useState<TeamData | null>(null);
+  const [reportTeamLoading, setReportTeamLoading] = useState<boolean>(false);
 
   // Edit User / Role Modal State
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
@@ -414,6 +469,151 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Quick Squad Status Action (Toggle Active / Disqualified / Forming)
+  const handleQuickTeamStatus = async (teamId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/teams/${teamId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update squad status");
+      }
+      const data = await res.json();
+      setTeams((prev) =>
+        prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t))
+      );
+      toast.success(`Squad status updated to ${newStatus}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update squad status.");
+    }
+  };
+
+  // Quick Squad Rotate Invite Code Action
+  const handleRotateInviteCode = async (teamId: string) => {
+    try {
+      const res = await fetch(`/api/teams/${teamId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rotateInviteCode: true }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to rotate invite code");
+      }
+      const data = await res.json();
+      setTeams((prev) =>
+        prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t))
+      );
+      toast.success(`Generated new invite code: ${data.team.inviteCode}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to rotate invite code.");
+    }
+  };
+
+  // Squad Edit Handlers
+  const handleOpenEditTeam = (team: TeamData) => {
+    setEditingTeam(team);
+    setEditTeamName(team.name);
+    setEditTeamInviteCode(team.inviteCode);
+    setEditTeamStatus(team.status || "ACTIVE");
+    setEditTeamIsRecruiting(team.isRecruiting ?? true);
+    setEditTeamRecruitmentNotes(team.recruitmentNotes || "");
+    setEditTeamDisqualificationReason(team.disqualificationReason || "");
+    const leaderMember = team.members.find((m) => m.role === "LEADER" || m.role === "leader");
+    setEditTeamLeaderId(team.leaderId || (leaderMember ? leaderMember.user.id : ""));
+  };
+
+  const handleSaveTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTeam) return;
+    setEditTeamLoading(true);
+    try {
+      const res = await fetch(`/api/teams/${editingTeam.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editTeamName,
+          inviteCode: editTeamInviteCode,
+          status: editTeamStatus,
+          isRecruiting: editTeamIsRecruiting,
+          recruitmentNotes: editTeamRecruitmentNotes,
+          disqualificationReason: editTeamStatus === "DISQUALIFIED" ? editTeamDisqualificationReason : null,
+          leaderId: editTeamLeaderId,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save squad");
+      }
+      const data = await res.json();
+      setTeams((prev) =>
+        prev.map((t) => (t.id === editingTeam.id ? { ...t, ...data.team } : t))
+      );
+      toast.success("Squad details updated successfully.");
+      setEditingTeam(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update squad.");
+    } finally {
+      setEditTeamLoading(false);
+    }
+  };
+
+  // Squad Moderation / Report Handlers
+  const handleConfirmReportTeam = async (teamId: string, action: "DISQUALIFY" | "WARN", reason: string) => {
+    setReportTeamLoading(true);
+    try {
+      const res = await fetch(`/api/teams/${teamId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: action === "DISQUALIFY" ? "DISQUALIFIED" : undefined,
+          disqualificationReason: action === "DISQUALIFY" ? reason : undefined,
+          recruitmentNotes: action === "WARN" ? `[ADMIN WARNING ${new Date().toLocaleDateString()}]: ${reason}` : undefined,
+          isRecruiting: action === "DISQUALIFY" ? false : undefined,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to process squad report");
+      }
+      const data = await res.json();
+      setTeams((prev) =>
+        prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t))
+      );
+      toast.success(action === "DISQUALIFY" ? "Squad has been disqualified and disabled." : "Report logged.");
+      setReportingTeam(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to report squad.");
+    } finally {
+      setReportTeamLoading(false);
+    }
+  };
+
+  // Squad Delete Handlers
+  const handleConfirmDeleteTeam = async () => {
+    if (!deletingTeam) return;
+    setDeleteTeamLoading(true);
+    try {
+      const res = await fetch(`/api/teams/${deletingTeam.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete squad");
+      }
+      setTeams((prev) => prev.filter((t) => t.id !== deletingTeam.id));
+      toast.success(`Squad '${deletingTeam.name}' deleted.`);
+      setDeletingTeam(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete squad.");
+    } finally {
+      setDeleteTeamLoading(false);
+    }
+  };
+
   // Quick Campaign Status Action
   const handleQuickCampaignStatus = async (eventId: string, newStatus: string) => {
     try {
@@ -524,7 +724,7 @@ export default function AdminDashboardPage() {
         {/* TABS NAVIGATION & WORKSPACE */}
         <Tabs
           value={activeTab}
-          onValueChange={(val) => setActiveTab(val as any)}
+          onValueChange={(val) => handleTabChange(val as AdminTab)}
           className="w-full space-y-4"
         >
           {/* STICKY TABS HEADER (sticks directly below the h-16 navbar) */}
@@ -674,6 +874,11 @@ export default function AdminDashboardPage() {
               totalOpenSlots={totalOpenSlots}
               loading={loading}
               fetchAdminData={fetchAdminData}
+              onQuickStatusChange={handleQuickTeamStatus}
+              onRotateInviteCode={handleRotateInviteCode}
+              onEditTeam={handleOpenEditTeam}
+              onReportTeam={setReportingTeam}
+              onDeleteTeam={setDeletingTeam}
             />
           </TabsContent>
 
@@ -779,6 +984,42 @@ export default function AdminDashboardPage() {
           setDeletingCampaign={setDeletingCampaign}
           deleteCampLoading={deleteCampLoading}
           onConfirmDelete={handleDeleteCampaign}
+        />
+
+        {/* SQUAD MODALS & DIALOGS */}
+        <EditTeamModal
+          editingTeam={editingTeam}
+          setEditingTeam={setEditingTeam}
+          editName={editTeamName}
+          setEditName={setEditTeamName}
+          editInviteCode={editTeamInviteCode}
+          setEditInviteCode={setEditTeamInviteCode}
+          editStatus={editTeamStatus}
+          setEditStatus={setEditTeamStatus}
+          editIsRecruiting={editTeamIsRecruiting}
+          setEditIsRecruiting={setEditTeamIsRecruiting}
+          editRecruitmentNotes={editTeamRecruitmentNotes}
+          setEditRecruitmentNotes={setEditTeamRecruitmentNotes}
+          editDisqualificationReason={editTeamDisqualificationReason}
+          setEditDisqualificationReason={setEditTeamDisqualificationReason}
+          editLeaderId={editTeamLeaderId}
+          setEditLeaderId={setEditTeamLeaderId}
+          editLoading={editTeamLoading}
+          onSave={handleSaveTeam}
+        />
+
+        <DeleteTeamDialog
+          deletingTeam={deletingTeam}
+          setDeletingTeam={setDeletingTeam}
+          deleteLoading={deleteTeamLoading}
+          onConfirmDelete={handleConfirmDeleteTeam}
+        />
+
+        <ReportTeamModal
+          reportingTeam={reportingTeam}
+          setReportingTeam={setReportingTeam}
+          reportLoading={reportTeamLoading}
+          onConfirmReport={handleConfirmReportTeam}
         />
       </div>
     </TooltipProvider>

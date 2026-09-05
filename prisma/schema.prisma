@@ -125,9 +125,10 @@ model Team {
   name             String
   inviteCode       String       @unique // Short 6-char shareable code e.g. "AST-X9Y"
   status           TeamStatus   @default(FORMING)
-  isRecruiting     Boolean      @default(true) // Open for solo student matching
-  recruitmentNotes String?
-  leaderId         String // User ID of Team Creator / Leader
+  isRecruiting           Boolean      @default(true) // Open for solo student matching
+  recruitmentNotes       String?
+  disqualificationReason String?      // Admin moderation reason if team is disabled/disqualified
+  leaderId               String // User ID of Team Creator / Leader
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 

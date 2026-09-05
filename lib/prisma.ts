@@ -13,7 +13,8 @@ const createPrismaClient = () => {
   return new PrismaClient({ adapter });
 };
 
-const basePrisma = globalForPrisma.prisma ?? createPrismaClient();
+// Force fresh instance to pick up newly generated schema models
+const basePrisma = createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = basePrisma;
 

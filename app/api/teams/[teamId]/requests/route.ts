@@ -87,6 +87,13 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Team not found." }, { status: 404 });
     }
 
+    if (team.status === "DISQUALIFIED") {
+      return NextResponse.json(
+        { success: false, error: "This squad has been disabled by platform administration and is not accepting join requests." },
+        { status: 403 }
+      );
+    }
+
     if (!team.isRecruiting) {
       return NextResponse.json({ success: false, error: "This team is currently not accepting join requests." }, { status: 400 });
     }

@@ -6,6 +6,7 @@ export async function GET() {
     const teams = await prisma.team.findMany({
       where: {
         isRecruiting: true,
+        status: { not: "DISQUALIFIED" },
       },
       include: {
         event: {

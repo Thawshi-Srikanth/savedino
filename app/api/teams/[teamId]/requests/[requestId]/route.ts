@@ -63,6 +63,13 @@ export async function PUT(
     }
 
     // Action === "ACCEPT"
+    if (team.status === "DISQUALIFIED") {
+      return NextResponse.json(
+        { success: false, error: "This squad has been disabled by platform administration and cannot accept new members." },
+        { status: 403 }
+      );
+    }
+
     if (team.members.length >= 6) {
       return NextResponse.json({ success: false, error: "Team is already at max capacity (6 members)." }, { status: 400 });
     }
