@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { checkUserEventConcurrency, generateInviteCode } from "@/lib/campaign-engine";
+import {
+  checkUserEventConcurrency,
+  generateInviteCode,
+  isRegistrationClosed,
+} from "@/lib/campaign-engine";
 
 // POST /api/teams - Create a team in an event
 export async function POST(req: Request) {
@@ -28,7 +32,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Enforce Event Concurrency Rule
+    // 1. Check Event Existence & Registration Deadline
+    const targetEvent = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!targetEvent) {
+      return NextResponse.json(
+        { success: false, error: "Campaign not found." },
+        { status: 404 }
+      );
+    }
+
+    const regCheck = isRegistrationClosed(targetEvent);
+    if (regCheck.closed) {
+      return NextResponse.json(
+        { success: false, error: regCheck.reason || "Registration has closed for this campaign." },
+        { status: 400 }
+      );
+    }
+
+    // 2. Enforce Event Concurrency Rule
     const concurrency = await checkUserEventConcurrency(session.user.id, eventId);
     if (!concurrency.canEnroll) {
       return NextResponse.json(
@@ -37,7 +61,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Generate unique invite code
+    // 3. Generate unique invite code
     let inviteCode = generateInviteCode();
     while (await prisma.team.findUnique({ where: { inviteCode } })) {
       inviteCode = generateInviteCode();

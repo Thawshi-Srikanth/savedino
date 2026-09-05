@@ -251,6 +251,13 @@ export default function CampaignDetailPage({
     }
     if (!event) return;
 
+    // Check registration deadline
+    const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+    if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
+      setCreateError("Registration and team formation for this campaign has closed.");
+      return;
+    }
+
     if (!teamName.trim()) {
       setCreateError("Please enter a team name.");
       return;
@@ -288,6 +295,14 @@ export default function CampaignDetailPage({
     e.preventDefault();
     if (!session) {
       router.push("/login");
+      return;
+    }
+    if (!event) return;
+
+    // Check registration deadline
+    const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+    if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
+      setJoinError("Team registration for this campaign has closed.");
       return;
     }
 
@@ -663,6 +678,11 @@ export default function CampaignDetailPage({
               return data.status === "COMPLETED";
             });
 
+            const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+            const isRegClosed = regDeadlineStr
+              ? currentTime > new Date(regDeadlineStr).getTime()
+              : false;
+
             return (
               <>
                 {/* 1. Dynamic Deadline & Countdown */}
@@ -701,7 +721,11 @@ export default function CampaignDetailPage({
                       );
                     }
                     if (activePipelineStage?.name === "Image Search") {
-                      const searchTimeline = getStageTimelineData(event.startDate, event.endDate, currentTime);
+                      const searchTimeline = getStageTimelineData(
+                        event.startDate,
+                        event.endDate,
+                        currentTime
+                      );
                       return searchTimeline.countdownText ? (
                         <div className="text-xs font-mono font-semibold text-[#8b5cf6]">
                           {searchTimeline.countdownText} remaining
@@ -743,6 +767,8 @@ export default function CampaignDetailPage({
                         ? "Image Search Live"
                         : activePipelineStage?.name === "Submit Reports"
                         ? "Submissions Open"
+                        : isRegClosed
+                        ? "Registration Closed"
                         : "Registration Active"}
                     </span>
                     <span className="size-2 rounded-full bg-white animate-pulse" />
@@ -763,41 +789,52 @@ export default function CampaignDetailPage({
                           </Button>
                         </Link>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            onClick={() => {
-                              if (!session) {
-                                router.push("/login");
-                                return;
-                              }
-                              setCreateError(null);
-                              setTeamName("");
-                              setCreateModalOpen(true);
-                            }}
-                            variant="outline"
-                            className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
-                          >
-                            <PlusCircle className="size-3.5" />
-                            <span>Form Team</span>
-                          </Button>
+                        {!isRegClosed ? (
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              onClick={() => {
+                                if (!session) {
+                                  router.push("/login");
+                                  return;
+                                }
+                                setCreateError(null);
+                                setTeamName("");
+                                setCreateModalOpen(true);
+                              }}
+                              variant="outline"
+                              className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                            >
+                              <PlusCircle className="size-3.5" />
+                              <span>Form Team</span>
+                            </Button>
 
-                          <Button
-                            onClick={() => {
-                              if (!session) {
-                                router.push("/login");
-                                return;
-                              }
-                              setJoinError(null);
-                              setJoinCode("");
-                              setJoinModalOpen(true);
-                            }}
-                            variant="outline"
-                            className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
-                          >
-                            <KeyRound className="size-3.5" />
-                            <span>Join Code</span>
-                          </Button>
-                        </div>
+                            <Button
+                              onClick={() => {
+                                if (!session) {
+                                  router.push("/login");
+                                  return;
+                                }
+                                setJoinError(null);
+                                setJoinCode("");
+                                setJoinModalOpen(true);
+                              }}
+                              variant="outline"
+                              className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                            >
+                              <KeyRound className="size-3.5" />
+                              <span>Join Code</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                            <Button
+                              className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
+                            >
+                              <Users className="size-4" />
+                              <span>View Joined Teams ({squadCount})</span>
+                            </Button>
+                          </Link>
+                        )}
                       </>
                     )}
 
@@ -843,39 +880,51 @@ export default function CampaignDetailPage({
                       activePipelineStage?.name !== "Image Search" &&
                       activePipelineStage?.name !== "Submit Reports" && (
                         <>
-                          <Button
-                            onClick={() => {
-                              if (!session) {
-                                router.push("/login");
-                                return;
-                              }
-                              setCreateError(null);
-                              setTeamName("");
-                              setCreateModalOpen(true);
-                            }}
-                            variant="default"
-                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
-                          >
-                            <PlusCircle className="size-4" />
-                            <span>Form a Team</span>
-                          </Button>
+                          {isRegClosed ? (
+                            <Button
+                              disabled
+                              className="w-full h-11 text-xs font-sans font-bold gap-2 opacity-70 bg-white/20 text-white border border-white/30 rounded-xl cursor-not-allowed"
+                            >
+                              <Clock className="size-4" />
+                              <span>Registration Closed</span>
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() => {
+                                  if (!session) {
+                                    router.push("/login");
+                                    return;
+                                  }
+                                  setCreateError(null);
+                                  setTeamName("");
+                                  setCreateModalOpen(true);
+                                }}
+                                variant="default"
+                                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                              >
+                                <PlusCircle className="size-4" />
+                                <span>Form a Team</span>
+                              </Button>
 
-                          <Button
-                            onClick={() => {
-                              if (!session) {
-                                router.push("/login");
-                                return;
-                              }
-                              setJoinError(null);
-                              setJoinCode("");
-                              setJoinModalOpen(true);
-                            }}
-                            variant="outline"
-                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
-                          >
-                            <KeyRound className="size-4" />
-                            <span>Join with Code</span>
-                          </Button>
+                              <Button
+                                onClick={() => {
+                                  if (!session) {
+                                    router.push("/login");
+                                    return;
+                                  }
+                                  setJoinError(null);
+                                  setJoinCode("");
+                                  setJoinModalOpen(true);
+                                }}
+                                variant="outline"
+                                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                              >
+                                <KeyRound className="size-4" />
+                                <span>Join with Code</span>
+                              </Button>
+                            </>
+                          )}
 
                           <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                             <Button

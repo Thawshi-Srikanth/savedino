@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { checkUserEventConcurrency, calculateTeamStatus } from "@/lib/campaign-engine";
+import {
+  checkUserEventConcurrency,
+  calculateTeamStatus,
+  isRegistrationClosed,
+} from "@/lib/campaign-engine";
 
 // POST /api/teams/join - Join a team via invite code
 export async function POST(req: Request) {
@@ -46,7 +50,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Check if team is full (Max 6 members)
+    // 2. Check Event Registration Deadline
+    if (team.event) {
+      const regCheck = isRegistrationClosed(team.event);
+      if (regCheck.closed) {
+        return NextResponse.json(
+          { success: false, error: regCheck.reason || "Team registration has closed for this campaign." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. Check if team is full (Max 6 members)
     if (team.members.length >= 6) {
       return NextResponse.json(
         { success: false, error: "This team has already reached the maximum limit of 6 members." },

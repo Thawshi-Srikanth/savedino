@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { parseMpcReport } from "@/lib/mpc-parser";
+import { isSubmissionClosed } from "@/lib/campaign-engine";
 
 // POST /api/teams/[teamId]/image-sets/[setId]/report - Submit MPC Discovery Report
 export async function POST(
@@ -18,6 +19,22 @@ export async function POST(
     const { teamId, setId } = await context.params;
     const body = await req.json();
     const { reportText, markClean } = body;
+
+    // Check team & event submission deadline
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+      include: { event: true },
+    });
+
+    if (team?.event) {
+      const subCheck = isSubmissionClosed(team.event);
+      if (subCheck.closed) {
+        return NextResponse.json(
+          { success: false, error: subCheck.reason || "The report submission window for this campaign has closed." },
+          { status: 400 }
+        );
+      }
+    }
 
     // Check set ownership
     const currentSet = await prisma.imageSet.findUnique({

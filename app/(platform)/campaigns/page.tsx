@@ -124,10 +124,15 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
   const s3End = ev.endDate ? new Date(ev.endDate).getTime() : NaN;
   const s4End = ev.submissionEnd ? new Date(ev.submissionEnd).getTime() : s3End;
 
+  const regDeadline = ev.teamFormationEnd || ev.regEnd || ev.startDate;
+  const regDeadlineMs = regDeadline ? new Date(regDeadline).getTime() : NaN;
+  const isRegClosed = !isNaN(regDeadlineMs) && now > regDeadlineMs;
+
   // 1. Completed
   if (ev.status === "COMPLETED" || (!isNaN(s4End) && now >= s4End)) {
     return {
       isModal: false,
+      isClosed: false,
       label: "View Results",
       href: `/campaigns/${ev.id}`,
       icon: ArrowRight,
@@ -140,6 +145,7 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
   if (submitStage?.status === "ACTIVE" || (!isNaN(s3End) && now >= s3End && now < s4End)) {
     return {
       isModal: false,
+      isClosed: false,
       label: "Submit Reports",
       href: `/campaigns/${ev.id}`,
       icon: CheckCircle2,
@@ -155,6 +161,7 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
   ) {
     return {
       isModal: false,
+      isClosed: false,
       label: "Start Image Search",
       href: `/campaigns/${ev.id}`,
       icon: Telescope,
@@ -162,12 +169,16 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
     };
   }
 
-  // 4. Registration or Team Setup (Active)
+  // 4. Registration or Team Setup (Active & Open)
   const regStage = stages.find((s) => s.name === "Registration");
   const teamStage = stages.find((s) => s.name === "Team Setup");
-  if (regStage?.status === "ACTIVE" || teamStage?.status === "ACTIVE" || ev.status === "ACTIVE") {
+  if (
+    (regStage?.status === "ACTIVE" || teamStage?.status === "ACTIVE" || ev.status === "ACTIVE") &&
+    !isRegClosed
+  ) {
     return {
       isModal: true,
+      isClosed: false,
       label: "Form a Team",
       href: null,
       icon: PlusCircle,
@@ -175,10 +186,23 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
     };
   }
 
-  // 5. Default / Upcoming
+  // 5. If registration is closed before start date
+  if (isRegClosed && !isNaN(s3Start) && now < s3Start) {
+    return {
+      isModal: false,
+      isClosed: true,
+      label: "Registration Closed",
+      href: `/campaigns/${ev.id}`,
+      icon: Clock,
+      className: "bg-muted text-muted-foreground border border-border opacity-80 cursor-not-allowed shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]",
+    };
+  }
+
+  // 6. Default / Upcoming
   return {
     isModal: false,
-    label: "View Campaign",
+    isClosed: false,
+    label: "Explore Campaign",
     href: `/campaigns/${ev.id}`,
     icon: ArrowRight,
     className: "bg-muted hover:bg-muted/80 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]",
@@ -732,23 +756,25 @@ export default function CampaignsPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-border">
-                      <Link href={`/campaigns/${currentActiveEvent.id}`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer font-medium"
-                        >
-                          <span>View Details</span>
-                          <ArrowRight className="size-3.5" />
-                        </Button>
-                      </Link>
-
-                      <div className="flex items-center gap-2">
-                        {(() => {
-                          const action = getStageAction(currentActiveEvent);
+                    <div className="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-border">
+                      {(() => {
+                        const action = getStageAction(currentActiveEvent);
+                        if (action.isClosed) {
                           return (
-                            <>
+                            <Button
+                              disabled
+                              variant="outline"
+                              size="sm"
+                              className="h-9 px-4 text-xs font-bold gap-1.5 opacity-60 border-border bg-muted rounded-xl"
+                            >
+                              <Clock className="size-3.5" />
+                              <span>Registration Closed</span>
+                            </Button>
+                          );
+                        }
+                        if (action.isModal) {
+                          return (
+                            <div className="flex items-center gap-2">
                               <Button
                                 onClick={() => handleOpenJoinModal(currentActiveEvent)}
                                 variant="outline"
@@ -759,32 +785,34 @@ export default function CampaignsPage() {
                                 <span>Join with Code</span>
                               </Button>
 
-                              {action.isModal ? (
-                                <Button
-                                  onClick={() => handleOpenCreateModal(currentActiveEvent)}
-                                  variant="default"
-                                  size="sm"
-                                  className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5 rounded-xl border-0"
-                                >
-                                  <action.icon className="size-3.5" />
-                                  <span>{action.label}</span>
-                                </Button>
-                              ) : (
-                                <Link href={action.href || `/campaigns/${currentActiveEvent.id}`}>
-                                  <Button
-                                    variant="default"
-                                    size="sm"
-                                    className={`h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer ${action.className} active:translate-y-0.5 rounded-xl border-0`}
-                                  >
-                                    <action.icon className="size-3.5" />
-                                    <span>{action.label}</span>
-                                  </Button>
-                                </Link>
-                              )}
-                            </>
+                              <Button
+                                onClick={() => handleOpenCreateModal(currentActiveEvent)}
+                                variant="default"
+                                size="sm"
+                                className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5 rounded-xl border-0"
+                              >
+                                <action.icon className="size-3.5" />
+                                <span>{action.label}</span>
+                              </Button>
+                            </div>
                           );
-                        })()}
-                      </div>
+                        }
+
+                        return (
+                          <div className="flex items-center gap-2">
+                            <Link href={action.href || `/campaigns/${currentActiveEvent.id}`}>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className={`h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer ${action.className} active:translate-y-0.5 rounded-xl border-0`}
+                              >
+                                <action.icon className="size-3.5" />
+                                <span>{action.label}</span>
+                              </Button>
+                            </Link>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </Card>
 
@@ -935,18 +963,21 @@ export default function CampaignsPage() {
 
                         {/* Actions */}
                         <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50">
-                          <Link href={`/campaigns/${ev.id}`}>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-9 px-3.5 text-xs font-semibold cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl"
-                            >
-                              <span>Details</span>
-                            </Button>
-                          </Link>
-
                           {(() => {
                             const action = getStageAction(ev);
+                            if (action.isClosed) {
+                              return (
+                                <Button
+                                  disabled
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-9 px-4 text-xs font-bold gap-1.5 opacity-60 border-border bg-muted rounded-xl"
+                                >
+                                  <Clock className="size-3.5" />
+                                  <span>Registration Closed</span>
+                                </Button>
+                              );
+                            }
                             if (action.isModal) {
                               return (
                                 <Button
