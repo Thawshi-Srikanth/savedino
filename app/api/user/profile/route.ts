@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET /api/user/profile - Fetch current user profile, team history, and event activity
 export async function GET(req: Request) {
   try {

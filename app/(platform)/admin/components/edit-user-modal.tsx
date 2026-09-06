@@ -65,17 +65,16 @@ export function EditUserModal({
             />
           </div>
 
-          {/* 4-Tier Platform Role Select */}
+          {/* Platform Role Select */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-foreground">Platform Role (4 Tiers)</label>
+            <label className="text-xs font-semibold text-foreground">Platform Role</label>
             <Select value={editRole} onValueChange={setEditRole}>
               <SelectTrigger className="h-9 text-xs font-sans bg-background">
                 <SelectValue placeholder="Select Role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="admin">Administrator (Full Platform Control)</SelectItem>
-                <SelectItem value="staff">Staff (Moderator &amp; Campaign Operations)</SelectItem>
-                <SelectItem value="leader">Squad Leader (Squad &amp; Data Analysis Lead)</SelectItem>
+                <SelectItem value="staff">Staff (Moderator &amp; Operations)</SelectItem>
                 <SelectItem value="user">Citizen Scientist (General Participant)</SelectItem>
               </SelectContent>
             </Select>

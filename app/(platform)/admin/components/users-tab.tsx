@@ -48,7 +48,6 @@ interface UsersTabProps {
   getPageNumbers: () => (number | string)[];
   adminCount: number;
   staffCount: number;
-  leaderCount: number;
   citizenCount: number;
   unassignedCount: number;
   loading: boolean;
@@ -76,7 +75,6 @@ export function UsersTab({
   getPageNumbers,
   adminCount,
   staffCount,
-  leaderCount,
   citizenCount,
   unassignedCount,
   loading,
@@ -97,12 +95,6 @@ export function UsersTab({
         return (
           <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#10b981] text-white shadow-xs tracking-wide">
             Staff
-          </span>
-        );
-      case "leader":
-        return (
-          <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#f59e0b] text-[#0f172a] shadow-xs tracking-wide">
-            Leader
           </span>
         );
       default:
@@ -169,19 +161,6 @@ export function UsersTab({
 
           <button
             type="button"
-            onClick={() => setRoleFilter(roleFilter === "leader" ? "ALL" : "leader")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
-              roleFilter === "leader"
-                ? "bg-[#f59e0b] text-[#0f172a] font-bold shadow-[0_2px_0_0_#d97706] active:translate-y-0.5"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-            }`}
-          >
-            <span>Leaders</span>
-            <span className={`font-mono text-[11px] font-bold ${roleFilter === "leader" ? "text-[#0f172a]" : "text-muted-foreground"}`}>{leaderCount}</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setRoleFilter(roleFilter === "user" ? "ALL" : "user")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               roleFilter === "user"
@@ -242,7 +221,6 @@ export function UsersTab({
                 <SelectItem value="ALL">All Roles ({users.length})</SelectItem>
                 <SelectItem value="admin">Admin ({adminCount})</SelectItem>
                 <SelectItem value="staff">Staff ({staffCount})</SelectItem>
-                <SelectItem value="leader">Leader ({leaderCount})</SelectItem>
                 <SelectItem value="user">Citizen ({citizenCount})</SelectItem>
               </SelectContent>
             </Select>
@@ -396,13 +374,6 @@ export function UsersTab({
                             >
                               <Shield className="size-3.5 text-[#10b981]" />
                               <span>Staff / Ops</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onQuickRoleChange(u.id, "leader")}
-                              className="text-xs cursor-pointer gap-2"
-                            >
-                              <Star className="size-3.5 text-amber-500" />
-                              <span>Squad Leader</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => onQuickRoleChange(u.id, "user")}

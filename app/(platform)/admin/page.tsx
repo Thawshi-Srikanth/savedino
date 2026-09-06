@@ -151,9 +151,9 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       const [evRes, tmRes, usRes] = await Promise.all([
-        fetch("/api/events"),
-        fetch("/api/teams?includeDisqualified=true"),
-        fetch("/api/admin/users"),
+        fetch("/api/events", { cache: "no-store", headers: { "Cache-Control": "no-cache" } }),
+        fetch("/api/teams?includeDisqualified=true", { cache: "no-store", headers: { "Cache-Control": "no-cache" } }),
+        fetch("/api/admin/users", { cache: "no-store", headers: { "Cache-Control": "no-cache" } }),
       ]);
 
       if (evRes.ok) {
@@ -212,7 +212,6 @@ export default function AdminDashboardPage() {
   // Derived Role Distribution Stats
   const adminCount = useMemo(() => users.filter((u) => u.role === "admin").length, [users]);
   const staffCount = useMemo(() => users.filter((u) => u.role === "staff").length, [users]);
-  const leaderCount = useMemo(() => users.filter((u) => u.role === "leader").length, [users]);
   const citizenCount = useMemo(() => users.filter((u) => u.role === "user" || !u.role).length, [users]);
   const unassignedCount = useMemo(() => users.filter((u) => u.teamMembers.length === 0).length, [users]);
 
@@ -822,7 +821,6 @@ export default function AdminDashboardPage() {
               getPageNumbers={getPageNumbers}
               adminCount={adminCount}
               staffCount={staffCount}
-              leaderCount={leaderCount}
               citizenCount={citizenCount}
               unassignedCount={unassignedCount}
               loading={loading}

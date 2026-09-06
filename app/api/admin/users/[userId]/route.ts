@@ -3,7 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-const VALID_ROLES = ["admin", "staff", "leader", "user"] as const;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const VALID_ROLES = ["admin", "staff", "user"] as const;
 
 // PATCH /api/admin/users/[userId] - Update user role, profile details, or emailVerified
 export async function PATCH(
@@ -53,10 +56,14 @@ export async function PATCH(
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        ...(name !== undefined && { name: name.trim() }),
+        ...(name !== undefined && { name: typeof name === "string" ? name.trim() : "" }),
         ...(role !== undefined && { role }),
-        ...(institution !== undefined && { institution: institution.trim() }),
-        ...(country !== undefined && { country: country.trim() }),
+        ...(institution !== undefined && {
+          institution: typeof institution === "string" ? (institution.trim() || null) : null,
+        }),
+        ...(country !== undefined && {
+          country: typeof country === "string" ? (country.trim() || null) : null,
+        }),
         ...(emailVerified !== undefined && { emailVerified: Boolean(emailVerified) }),
       },
     });

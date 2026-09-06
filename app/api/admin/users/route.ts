@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET /api/admin/users - List all registered users with their team memberships
 export async function GET() {
   try {

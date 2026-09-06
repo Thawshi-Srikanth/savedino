@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { PixelAvatar, PixelBanner } from "@/components/pixel-avatar";
+import { PixelAvatar } from "@/components/pixel-avatar";
 import { getRandomSeed, generateSeedProfile } from "@/lib/seed-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,7 +150,10 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/user/profile");
+      const res = await fetch("/api/user/profile", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       const data = await res.json();
 
       if (data.success && data.user) {
@@ -280,79 +283,79 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* 1. HERO BANNER & PROFILE OVERVIEW */}
-      <PixelBanner seed={savedAvatarSeed} className="shadow-lg">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          {/* Avatar & User Details */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left">
-            <PixelAvatar seed={savedAvatarSeed} size={84} className="ring-4 ring-white/10 shadow-xl" />
+      {/* 1. CLEAN PROFILE HEADER CARD */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Left: Avatar & Identity Details */}
+        <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+          <PixelAvatar seed={savedAvatarSeed} size={56} className="shadow-md shrink-0 ring-2 ring-primary/20" />
 
-            <div className="space-y-1.5 min-w-0">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  {user?.name || "Citizen Scientist"}
-                </h1>
+          <div className="space-y-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-base sm:text-lg font-bold text-foreground truncate">
+                {user?.name || "Citizen Scientist"}
+              </h1>
 
-                {user?.role === "admin" ? (
-                  <Badge className="bg-[#8b5cf6] text-white border-0 text-[11px] font-bold shadow-[0_2px_0_0_#6d28d9]">
-                    <ShieldCheck className="size-3 mr-1" />
-                    Admin
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-[11px] font-medium backdrop-blur-sm">
-                    Citizen Scientist
-                  </Badge>
-                )}
-              </div>
+              {user?.role === "admin" ? (
+                <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold px-1.5 py-0 shadow-[0_1.5px_0_0_#6d28d9]">
+                  <ShieldCheck className="size-3 mr-0.5" />
+                  Admin
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0">
+                  Citizen Scientist
+                </Badge>
+              )}
+            </div>
 
-              {/* Email & Details */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs text-white/80 font-sans">
-                <span className="inline-flex items-center gap-1.5">
-                  <Mail className="size-3.5 opacity-75" />
-                  <span>{user?.email}</span>
+            {/* Email & Affiliation */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground font-sans">
+              <span className="inline-flex items-center gap-1 truncate">
+                <Mail className="size-3 opacity-70 shrink-0" />
+                <span className="truncate">{user?.email}</span>
+              </span>
+
+              {user?.institution && (
+                <span className="inline-flex items-center gap-1">
+                  <span className="opacity-40">•</span>
+                  <Building2 className="size-3 opacity-70 shrink-0" />
+                  <span>{user.institution}</span>
                 </span>
+              )}
 
-                {user?.institution && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Building2 className="size-3.5 opacity-75" />
-                    <span>{user.institution}</span>
-                  </span>
-                )}
-
-                {user?.country && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Globe className="size-3.5 opacity-75" />
-                    <span>{user.country}</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Join Date */}
-              <div className="pt-1 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <span className="text-[11px] text-white/60 font-mono">
-                  Joined {new Date(user?.createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+              {user?.country && (
+                <span className="inline-flex items-center gap-1">
+                  <span className="opacity-40">•</span>
+                  <Globe className="size-3 opacity-70 shrink-0" />
+                  <span>{user.country}</span>
                 </span>
-              </div>
-            </div>
-          </div>
+              )}
 
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-black/30 backdrop-blur-md rounded-xl p-3 border border-white/10 self-center md:self-auto">
-            <div className="flex flex-col items-center text-center px-2">
-              <span className="text-lg sm:text-xl font-bold font-mono text-white">{stats.campaignsCount}</span>
-              <span className="text-[10px] text-white/70 font-sans uppercase font-medium">Campaigns</span>
-            </div>
-            <div className="flex flex-col items-center text-center px-2 border-x border-white/10">
-              <span className="text-lg sm:text-xl font-bold font-mono text-white">{stats.teamsCount}</span>
-              <span className="text-[10px] text-white/70 font-sans uppercase font-medium">Squads</span>
-            </div>
-            <div className="flex flex-col items-center text-center px-2">
-              <span className="text-lg sm:text-xl font-bold font-mono text-[#38bdf8]">{stats.claimedSetsCount}</span>
-              <span className="text-[10px] text-white/70 font-sans uppercase font-medium">Analyzed</span>
+              <span className="inline-flex items-center gap-1 text-[11px] opacity-75 font-mono">
+                <span className="opacity-40">•</span>
+                Joined {new Date(user?.createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+              </span>
             </div>
           </div>
         </div>
-      </PixelBanner>
+
+        {/* Right: Quick Stats Pills */}
+        <div className="flex items-center gap-2 sm:gap-2.5 self-start sm:self-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-border/60">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
+            <span className="font-mono font-bold text-foreground">{stats.campaignsCount}</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-medium">Campaigns</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
+            <span className="font-mono font-bold text-foreground">{stats.teamsCount}</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-medium">Squads</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
+            <span className="font-mono font-bold text-[#38bdf8]">{stats.claimedSetsCount}</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-medium">Analyzed</span>
+          </div>
+        </div>
+      </div>
 
       {/* 2. TABBED CONTENT: EDIT PROFILE, CAMPAIGNS, SQUADS, ACTIVITY */}
       <Tabs
