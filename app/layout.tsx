@@ -47,7 +47,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} ${outfit.variable} h-full antialiased overscroll-none`}
+      className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} ${outfit.variable} min-h-full antialiased overscroll-none`}
     >
       <body
         suppressHydrationWarning

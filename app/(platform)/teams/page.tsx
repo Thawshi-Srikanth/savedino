@@ -25,13 +25,21 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Search,
+  User,
   UserPlus,
   RefreshCw,
   X,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,13 +84,6 @@ interface CampaignEvent {
   title: string;
   code: string;
   status: string;
-}
-
-function getInitials(name?: string) {
-  if (!name) return "??";
-  const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 function TeamsContent() {
@@ -239,14 +240,6 @@ function TeamsContent() {
     return validTeams.filter((t) => t.members?.some((m) => m.user?.id === session.user.id)).length;
   }, [validTeams, session]);
 
-  const totalResearchers = useMemo(() => {
-    return validTeams.reduce((acc, t) => acc + (t.members?.length || 0), 0);
-  }, [validTeams]);
-
-  const totalOpenSlots = useMemo(() => {
-    return validTeams.reduce((acc, t) => acc + Math.max(0, 6 - (t.members?.length || 0)), 0);
-  }, [validTeams]);
-
   // Submit Join Request
   const handleSendJoinRequest = async () => {
     if (!requestTeam || !session) return;
@@ -316,16 +309,13 @@ function TeamsContent() {
   };
 
   return (
-    <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
-      {/* 1. TOP HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+    <div className="w-full font-sans max-w-6xl mx-auto">
+      {/* 1. TOP HEADER - STICKY UNDER NAVBAR */}
+      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Research Squads
+            Citizen Teams
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Browse active research squads, join open teams, or enter an invite code to join directly.
-          </p>
         </div>
 
         <Link href="/campaigns">
@@ -339,42 +329,90 @@ function TeamsContent() {
         </Link>
       </div>
 
-      {/* 2. TWO-COLUMN LAYOUT: STICKY SIDEBAR + MAIN SQUADS GRID */}
-      <div className="flex flex-col lg:flex-row items-start gap-6">
-        {/* LEFT STICKY SIDEBAR: JOIN SQUAD & FILTERS */}
-        <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-20 space-y-4">
+      {/* 2. TWO-COLUMN LAYOUT: STICKY SIDEBAR + MAIN TEAMS GRID */}
+      <div className="flex flex-col md:flex-row items-start gap-6 relative">
+        {/* LEFT STICKY SIDEBAR: JOIN TEAM & FILTERS */}
+        <aside className="w-full md:w-64 lg:w-72 shrink-0 md:sticky md:top-[8.5rem] md:self-start space-y-4 max-h-[calc(100vh-9.5rem)] overflow-y-auto pb-4 pr-0.5 pt-1 z-20">
           {/* Join with Invite Code Card */}
-          <Card className="p-4 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] space-y-3">
-            <div className="space-y-1">
-              <span className="text-xs font-bold block text-white">Join with Invite Code</span>
-              <p className="text-[11px] text-white/85 leading-relaxed">
-                Have a code from a team leader? Enter it here to join directly.
-              </p>
+          <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] space-y-2.5">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-bold text-white tracking-wide">Join with Code</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-white/80 hover:text-white transition-colors cursor-pointer p-0.5 rounded hover:bg-white/10"
+                      aria-label="Invite code help"
+                    >
+                      <HelpCircle className="size-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="text-xs max-w-xs bg-slate-900 text-white border-slate-700 shadow-lg">
+                    Have a code from a team leader? Enter it here to join directly.
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
-            <form onSubmit={handleJoinByCode} className="space-y-2">
+            <form onSubmit={handleJoinByCode} className="flex items-center gap-1.5">
               <Input
                 type="text"
                 placeholder="AST-XXXX"
                 value={joinCodeInput}
                 onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                className="w-full uppercase text-xs h-8 font-mono font-bold tracking-wider bg-white text-slate-950 placeholder:text-slate-400 border-none shadow-inner"
+                className="flex-1 uppercase text-xs h-8 font-mono font-bold tracking-wider bg-white text-slate-950 placeholder:text-slate-400 border-none shadow-inner min-w-0"
               />
               <Button
                 type="submit"
                 disabled={joinCodeLoading || !joinCodeInput.trim()}
                 size="sm"
-                className="w-full h-8 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform uppercase tracking-wider"
+                className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
+                title="Join Team"
               >
-                {joinCodeLoading ? "Joining..." : "Join Squad"}
+                {joinCodeLoading ? (
+                  <RefreshCw className="size-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <span>Join</span>
+                    <ArrowRight className="size-3.5" />
+                  </>
+                )}
               </Button>
             </form>
           </Card>
 
-          {/* Filters Sidebar Card */}
+          {/* Search & Filters Sidebar Card */}
           <Card className="p-4 space-y-4 bg-card border-border">
+            {/* Search Input in Sidebar */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                Search Teams
+              </span>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Name, member, code..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 pr-7 text-xs h-8 font-sans bg-background"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    aria-label="Clear search"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Status Filter Tabs */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-2 border-t border-border">
               <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
                 Status Filter
               </span>
@@ -388,7 +426,7 @@ function TeamsContent() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
-                  <span>All Squads</span>
+                  <span>All Teams</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
                     activeTabFilter === "ALL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
                   }`}>
@@ -439,7 +477,7 @@ function TeamsContent() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
-                  <span>Full Squads</span>
+                  <span>Full Teams</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
                     activeTabFilter === "FULL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
                   }`}>
@@ -481,72 +519,11 @@ function TeamsContent() {
                   <SelectItem value="ALL">All Campaigns ({events.length})</SelectItem>
                   {events.map((ev) => (
                     <SelectItem key={ev.id} value={ev.id}>
-                      {ev.code} ({ev.title.slice(0, 16)}...)
+                      {ev.code} ({ev.title.slice(0, 14)}...)
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Pagination Style & Batch Size */}
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="font-semibold text-foreground">Browsing Mode:</span>
-                <div className="flex items-center bg-muted/60 p-0.5 rounded border border-border">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPaginationMode("LOAD_MORE");
-                      setVisibleCount(pageSize);
-                    }}
-                    className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium cursor-pointer transition-colors ${
-                      paginationMode === "LOAD_MORE"
-                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Load More
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPaginationMode("PAGINATED");
-                      setCurrentPage(1);
-                    }}
-                    className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium cursor-pointer transition-colors ${
-                      paginationMode === "PAGINATED"
-                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Pages
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Batch Size:</span>
-                <div className="flex items-center gap-1">
-                  {[6, 12, 24].map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => {
-                        setPageSize(size);
-                        setVisibleCount(size);
-                        setCurrentPage(1);
-                      }}
-                      className={`px-2 py-0.5 rounded font-mono text-[10px] cursor-pointer transition-colors ${
-                        pageSize === size
-                          ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                          : "bg-muted text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {hasActiveFilters && (
@@ -561,73 +538,96 @@ function TeamsContent() {
               </Button>
             )}
           </Card>
-
-          {/* Directory Summary Stats Card */}
-          <Card className="p-3.5 bg-muted/30 border-border text-xs font-mono space-y-2">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground block tracking-wider">
-              Directory Stats
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <span className="text-muted-foreground block text-[10px]">Open Slots:</span>
-                <span className="font-bold text-[#10b981]">{totalOpenSlots} Slots</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground block text-[10px]">Researchers:</span>
-                <span className="font-bold text-foreground">{totalResearchers}</span>
-              </div>
-            </div>
-          </Card>
         </aside>
 
-        {/* RIGHT MAIN CONTENT AREA: SEARCH & SQUADS GRID */}
+        {/* RIGHT MAIN CONTENT AREA: TEAMS GRID */}
         <main className="flex-1 min-w-0 space-y-4">
-          {/* Search Input Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by squad name, leader, member, or campaign..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-8 text-xs h-9 font-sans bg-background"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label="Clear search"
-              >
-                <X className="size-4" />
-              </button>
-            )}
-          </div>
-
-          {/* Results Counter */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {paginationMode === "LOAD_MORE" ? (
+          {/* Results Counter & Listing Controls Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>
+                {paginationMode === "LOAD_MORE" ? (
+                  <>
+                    Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
+                    <strong className="text-foreground">{filteredTeams.length}</strong> {filteredTeams.length === 1 ? "team" : "teams"}
+                  </>
+                ) : (
+                  <>
+                    Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                    <strong className="text-foreground">{totalPages}</strong> ({filteredTeams.length} total {filteredTeams.length === 1 ? "team" : "teams"})
+                  </>
+                )}
+              </span>
+              {hasActiveFilters && (
                 <>
-                  Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
-                  <strong className="text-foreground">{filteredTeams.length}</strong> {filteredTeams.length === 1 ? "squad" : "squads"}
-                </>
-              ) : (
-                <>
-                  Page <strong className="text-foreground">{currentPage}</strong> of{" "}
-                  <strong className="text-foreground">{totalPages}</strong> ({filteredTeams.length} total {filteredTeams.length === 1 ? "squad" : "squads"})
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="text-primary hover:underline font-semibold cursor-pointer text-xs"
+                  >
+                    Clear all filters
+                  </button>
                 </>
               )}
-            </span>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="text-primary hover:underline font-semibold cursor-pointer"
-              >
-                Clear filters
-              </button>
-            )}
+            </div>
+
+            {/* Listing Controls: Browsing Mode + Batch Size */}
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              {/* Browsing Mode */}
+              <div className="flex items-center bg-muted/60 p-0.5 rounded border border-border h-7">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaginationMode("LOAD_MORE");
+                    setVisibleCount(pageSize);
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium cursor-pointer transition-colors ${
+                    paginationMode === "LOAD_MORE"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Load More
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaginationMode("PAGINATED");
+                    setCurrentPage(1);
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium cursor-pointer transition-colors ${
+                    paginationMode === "PAGINATED"
+                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Pages
+                </button>
+              </div>
+
+              {/* Batch Size Selector */}
+              <div className="flex items-center bg-muted/60 p-0.5 rounded border border-border h-7 gap-0.5">
+                {[6, 12, 24].map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => {
+                      setPageSize(size);
+                      setVisibleCount(size);
+                      setCurrentPage(1);
+                    }}
+                    className={`px-2 py-0.5 rounded font-mono text-[10px] cursor-pointer transition-colors ${
+                      pageSize === size
+                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Squad Cards Grid */}
@@ -635,29 +635,26 @@ function TeamsContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Array.from({ length: pageSize }).map((_, idx) => (
                 <Card key={idx} className="p-4 space-y-3 bg-card border-border animate-pulse">
-                  <div className="flex items-center justify-between">
-                    <div className="h-4 w-20 bg-muted rounded" />
-                    <div className="h-4 w-16 bg-muted rounded" />
-                  </div>
+                  <div className="h-4 w-20 bg-muted rounded" />
                   <div className="h-5 w-3/4 bg-muted rounded" />
-                  <div className="space-y-1">
-                    <div className="h-3 w-1/2 bg-muted rounded" />
-                    <div className="h-1.5 w-full bg-muted rounded" />
+                  <div className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-1.5">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="size-6 rounded bg-muted" />
+                      ))}
+                    </div>
+                    <div className="h-3 w-10 bg-muted rounded" />
                   </div>
                   <div className="h-8 w-full bg-muted/60 rounded" />
-                  <div className="pt-2 border-t border-border flex items-center gap-2">
-                    <div className="size-5 rounded-full bg-muted" />
-                    <div className="h-3 w-32 bg-muted rounded" />
-                  </div>
                   <div className="h-8 w-full bg-muted rounded mt-2" />
                 </Card>
               ))}
             </div>
           ) : filteredTeams.length === 0 ? (
             <Card className="p-12 text-center text-sm text-muted-foreground space-y-2 border-dashed">
-              <div className="font-sans font-bold text-foreground text-sm">No Matching Squads Found</div>
+              <div className="font-sans font-bold text-foreground text-sm">No Matching Citizen Teams Found</div>
               <p className="max-w-md mx-auto text-xs leading-relaxed text-muted-foreground">
-                No research squads match your current search and filter criteria. Try adjusting your filters or enter an invite code on the sidebar.
+                No citizen teams match your current search and filter criteria. Try adjusting your filters or enter an invite code on the sidebar.
               </p>
               {hasActiveFilters && (
                 <Button onClick={handleResetFilters} variant="outline" size="sm" className="mt-2 text-xs">
@@ -671,14 +668,10 @@ function TeamsContent() {
                 {displayedTeams.map((team) => {
                   const memberCount = team.members?.length || 0;
                   const isFull = memberCount >= 6;
-                  const openSlots = Math.max(0, 6 - memberCount);
-                  const capacityPercent = Math.min(100, Math.round((memberCount / 6) * 100));
 
                   const isUserMember = session?.user?.id
                     ? team.members?.some((m) => m.user?.id === session.user.id)
                     : false;
-
-                  const leaderMember = team.members?.find((m) => m.role === "LEADER" || m.role === "leader") || team.members?.[0];
 
                   return (
                     <Card
@@ -686,27 +679,11 @@ function TeamsContent() {
                       className="p-4 flex flex-col justify-between space-y-3 bg-card border-border hover:border-primary/40 hover:shadow-[0_2px_0_0_#8b5cf6]/20 transition-all"
                     >
                       <div className="space-y-2.5">
-                        {/* Top Bar: Campaign Code Badge & Capacity Pill */}
-                        <div className="flex items-center justify-between gap-2">
+                        {/* Top: Campaign Code */}
+                        <div>
                           <span className="text-xs font-mono font-bold text-primary truncate">
                             {team.event?.code || "CAMPAIGN"}
                           </span>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {isFull ? (
-                              <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded bg-[#8b5cf6] text-white shadow-xs">
-                                6/6 Full
-                              </span>
-                            ) : team.isRecruiting ? (
-                              <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded bg-[#10b981] text-white shadow-xs">
-                                {openSlots} Open {openSlots === 1 ? "Slot" : "Slots"}
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                                {memberCount}/6 Closed
-                              </span>
-                            )}
-                          </div>
                         </div>
 
                         {/* Squad Name */}
@@ -714,53 +691,35 @@ function TeamsContent() {
                           {team.name}
                         </h3>
 
-                        {/* Member Capacity Progress */}
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-                            <span>Capacity</span>
-                            <span className="font-bold text-foreground">{memberCount}/6 Members</span>
+                        {/* Member Slots: 6 Colored User Icons */}
+                        <div className="flex items-center justify-between py-1">
+                          <div className="flex items-center gap-1.5">
+                            {Array.from({ length: 6 }).map((_, i) => {
+                              const isFilled = i < memberCount;
+                              return (
+                                <div
+                                  key={i}
+                                  className={`size-6 rounded flex items-center justify-center transition-colors ${
+                                    isFilled
+                                      ? "bg-[#8b5cf6] text-white shadow-xs"
+                                      : "bg-muted/50 text-muted-foreground/30 border border-border/70 border-dashed"
+                                  }`}
+                                  title={isFilled ? `Member slot ${i + 1} (Filled)` : `Slot ${i + 1} (Available)`}
+                                >
+                                  <User className="size-3.5" />
+                                </div>
+                              );
+                            })}
                           </div>
-                          <Progress value={capacityPercent} className="h-1.5" />
+                          <span className="font-mono text-[11px] text-muted-foreground">
+                            <strong className="text-foreground">{memberCount}</strong>/6
+                          </span>
                         </div>
 
                         {/* Recruitment Notes */}
                         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[32px]">
                           {team.recruitmentNotes || "Active asteroid search squad analyzing telescope image sets."}
                         </p>
-
-                        {/* Squad Leader & Members Roster */}
-                        <div className="pt-2 border-t border-border/60 space-y-2">
-                          {leaderMember && (
-                            <div className="flex items-center gap-2">
-                              <div className="size-5 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[9px] font-bold text-foreground shrink-0">
-                                {getInitials(leaderMember.user.name)}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="text-xs font-semibold text-foreground truncate">
-                                  Leader: {leaderMember.user.name}
-                                  {leaderMember.user.country && (
-                                    <span className="text-muted-foreground font-normal ml-1 font-mono text-[10px]">
-                                      ({leaderMember.user.country})
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Member Name Chips */}
-                          <div className="flex flex-wrap gap-1">
-                            {team.members.map((m) => (
-                              <span
-                                key={m.id}
-                                className="inline-flex items-center text-[10px] px-1.5 py-0.2 rounded bg-muted text-muted-foreground font-sans"
-                                title={m.user.name}
-                              >
-                                {m.user.name.split(" ")[0]}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
                       </div>
 
                       {/* Card Bottom Action Button */}
@@ -964,7 +923,7 @@ export default function TeamsPage() {
     <Suspense
       fallback={
         <div className="p-12 text-center text-xs font-mono text-muted-foreground">
-          Loading research squads...
+          Loading citizen teams...
         </div>
       }
     >
