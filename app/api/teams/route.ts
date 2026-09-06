@@ -159,6 +159,10 @@ export async function GET(req: Request) {
       ];
     }
 
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     const teams = await prisma.team.findMany({
       where,
       include: {
@@ -183,6 +187,14 @@ export async function GET(req: Request) {
             },
           },
         },
+        ...(session?.user?.id
+          ? {
+              joinRequests: {
+                where: { userId: session.user.id },
+                select: { id: true, status: true },
+              },
+            }
+          : {}),
         _count: {
           select: {
             members: true,
@@ -195,7 +207,15 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, teams });
+    const formattedTeams = teams.map((team: any) => {
+      const myReq = team.joinRequests?.[0];
+      return {
+        ...team,
+        myRequestStatus: myReq?.status || null,
+      };
+    });
+
+    return NextResponse.json({ success: true, teams: formattedTeams });
   } catch (error: any) {
     console.error("GET /api/teams error:", error);
     return NextResponse.json(

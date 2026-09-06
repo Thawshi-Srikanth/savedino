@@ -4,6 +4,100 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { generateInviteCode } from "@/lib/campaign-engine";
 
+export const dynamic = "force-dynamic";
+
+// GET: Fetch squad workspace details (members, event, invite code, status)
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ teamId: string }> }
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
+    }
+
+    const { teamId } = await params;
+
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            code: true,
+            startDate: true,
+            endDate: true,
+            status: true,
+          },
+        },
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                institution: true,
+                country: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            joinRequests: true,
+            imageSets: true,
+          },
+        },
+      },
+    });
+
+    if (!team) {
+      return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+    }
+
+    const isMember = team.members.some((m) => m.userId === session.user.id);
+    const isAdmin = session.user.role === "admin";
+
+    if (!isMember && !isAdmin) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Access denied. You are not an active member of this squad.",
+        },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        team,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
+  } catch (error: any) {
+    console.error("GET /api/teams/[teamId] error:", error);
+    return NextResponse.json(
+      { success: false, error: error.message || "Failed to load squad details." },
+      { status: 500 }
+    );
+  }
+}
+
 // PATCH: Update team settings, status, name, leader, recruitment, and disqualification reason
 export async function PATCH(
   request: Request,

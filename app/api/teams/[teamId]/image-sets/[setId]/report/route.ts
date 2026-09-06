@@ -45,21 +45,48 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Set not found." }, { status: 404 });
     }
 
+    // Check membership
+    const isMember = await prisma.teamMember.findUnique({
+      where: {
+        teamId_userId: {
+          teamId,
+          userId: session.user.id,
+        },
+      },
+    });
+
+    const isLeader = team?.leaderId === session.user.id;
+    const isAdmin = session.user.role === "admin";
+
+    if (!isMember && !isAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Only team members can submit reports for this squad." },
+        { status: 403 }
+      );
+    }
+
+    const targetStatus = (isLeader || isAdmin) ? "SUBMITTED" : "PENDING_APPROVAL";
+
     // 1. If marked clean (no asteroids in this set)
     if (markClean) {
-      await prisma.imageSet.update({
+      const updatedSet = await prisma.imageSet.update({
         where: { id: setId },
         data: {
-          status: "SUBMITTED",
+          status: targetStatus,
           isClean: true,
+          mpcReportText: null,
           claimedById: session.user.id,
-          submittedAt: new Date(),
+          submittedAt: (isLeader || isAdmin) ? new Date() : null,
         },
       });
 
       return NextResponse.json({
         success: true,
-        message: "Picture set marked as Clean (No moving objects detected).",
+        pendingApproval: targetStatus === "PENDING_APPROVAL",
+        message: targetStatus === "PENDING_APPROVAL"
+          ? "Picture set marked clean. Awaiting team leader approval."
+          : "Picture set marked clean and submitted.",
+        imageSet: updatedSet,
       });
     }
 
@@ -77,15 +104,20 @@ export async function POST(
     const updatedSet = await prisma.imageSet.update({
       where: { id: setId },
       data: {
-        status: "SUBMITTED",
+        status: targetStatus,
+        isClean: false,
         mpcReportText: reportText,
         claimedById: session.user.id,
-        submittedAt: new Date(),
+        submittedAt: (isLeader || isAdmin) ? new Date() : null,
       },
     });
 
     return NextResponse.json({
       success: true,
+      pendingApproval: targetStatus === "PENDING_APPROVAL",
+      message: targetStatus === "PENDING_APPROVAL"
+        ? "Discovery report submitted. Awaiting team leader approval."
+        : "Discovery report submitted and approved for squad.",
       observatory: parsed.observatoryCode,
       telescope: parsed.telescope,
       totalObservations: parsed.totalObservations,

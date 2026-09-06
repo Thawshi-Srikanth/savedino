@@ -347,7 +347,7 @@ function TeamsContent() {
           type="submit"
           disabled={joinCodeLoading || !joinCodeInput.trim()}
           size="sm"
-          className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
+          className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] border-0 shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
           title="Join Team"
         >
           {joinCodeLoading ? (
@@ -780,6 +780,26 @@ function TeamsContent() {
                               <ArrowRight className="size-3.5" />
                             </Button>
                           </Link>
+                        ) : team.myRequestStatus === "REJECTED" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled
+                            className="w-full h-8 text-xs font-bold bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/30 cursor-not-allowed opacity-80"
+                            title="Your previous application was declined. You cannot re-apply to this squad."
+                          >
+                            Application Declined
+                          </Button>
+                        ) : team.myRequestStatus === "PENDING" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled
+                            className="w-full h-8 text-xs font-bold bg-[#f59e0b]/10 text-amber-600 dark:text-amber-400 border-amber-500/30 cursor-not-allowed opacity-90"
+                            title="Your join request is awaiting review by the squad leader."
+                          >
+                            Request Pending
+                          </Button>
                         ) : team.isRecruiting && !isFull ? (
                           <Button
                             onClick={() => {

@@ -74,13 +74,49 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Team is already at max capacity (6 members)." }, { status: 400 });
     }
 
+    // Check if user is already enrolled in ANY squad for this campaign
+    const existingMembership = await prisma.teamMember.findFirst({
+      where: {
+        userId: joinReq.userId,
+        team: {
+          eventId: team.eventId,
+        },
+      },
+      include: {
+        team: { select: { id: true, name: true } },
+      },
+    });
+
+    if (existingMembership) {
+      if (existingMembership.teamId === teamId) {
+        // Already a member of this team - update request to ACCEPTED
+        await prisma.teamJoinRequest.update({
+          where: { id: requestId },
+          data: { status: "ACCEPTED" },
+        });
+        return NextResponse.json({
+          success: true,
+          message: "This scientist is already a member of your squad.",
+        });
+      } else {
+        // Enrolled in a different team
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Cannot accept: This user has already joined squad "${existingMembership.team.name}" for this campaign.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Transaction to add member and mark request accepted
     await prisma.$transaction([
       prisma.teamMember.create({
         data: {
           teamId,
           userId: joinReq.userId,
-          role: "MEMBER",
+          role: "member",
         },
       }),
       prisma.teamJoinRequest.update({

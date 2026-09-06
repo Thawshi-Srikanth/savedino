@@ -572,13 +572,13 @@ export default function ProfilePage() {
         {/* TAB 2: CAMPAIGN & EVENT HISTORY */}
         {/* ------------------------------------------------------------- */}
         <TabsContent value="history" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-lg font-bold text-foreground">Campaign History</h2>
               <p className="text-xs text-muted-foreground">All asteroid search campaigns you have participated in.</p>
             </div>
             <Link href="/campaigns">
-              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 gap-1">
+              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 gap-1 self-start sm:self-auto">
                 <Telescope className="size-3.5" />
                 <span>Explore Campaigns</span>
               </Button>
@@ -596,31 +596,25 @@ export default function ProfilePage() {
               </div>
               <Link href="/campaigns">
                 <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9]">
-                  Browse Active Campaigns
+                  Browse Campaigns
                 </Button>
               </Link>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-3.5">
               {campaigns.map(({ event, team }) => {
                 const isCompleted = event.status === "COMPLETED";
                 const isActive = event.status === "ACTIVE" || event.status === "SUBMISSION_OPEN";
 
                 return (
                   <Card key={event.id} className="border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl hover:border-primary/40 transition-all">
-                    <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      {/* Left: Campaign Title & Info */}
-                      <div className="space-y-1.5 min-w-0">
+                    <CardContent className="p-4 sm:p-5 flex flex-col gap-3.5">
+                      {/* Top Row: Badges & Timeline */}
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline" className="text-[10px] font-mono font-bold">
                             {event.code}
                           </Badge>
-
-                          <Link href={`/campaigns/${event.id}`} className="hover:text-primary transition-colors">
-                            <h3 className="text-base font-bold text-foreground truncate hover:underline">
-                              {event.title}
-                            </h3>
-                          </Link>
 
                           {isActive ? (
                             <Badge className="bg-[#10b981] text-white border-0 text-[10px] font-bold">
@@ -637,41 +631,54 @@ export default function ProfilePage() {
                           )}
                         </div>
 
-                        {/* Squad info & Timeline */}
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground font-sans">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+                          <Calendar className="size-3.5 opacity-75" />
+                          <span>{new Date(event.startDate).toLocaleDateString()} &ndash; {new Date(event.endDate).toLocaleDateString()}</span>
+                        </span>
+                      </div>
+
+                      {/* Main Title & Squad Details */}
+                      <div className="space-y-2">
+                        <Link href={`/campaigns/${event.id}`} className="block group">
+                          <h3 className="text-base sm:text-lg font-bold text-foreground break-words group-hover:text-primary transition-colors">
+                            {event.title}
+                          </h3>
+                        </Link>
+
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground font-sans">
                           <span className="inline-flex items-center gap-1.5">
-                            <Users className="size-3.5 text-primary" />
+                            <Users className="size-3.5 text-primary shrink-0" />
                             <span>Squad: <strong className="text-foreground">{team.name}</strong></span>
-                            {team.role === "leader" && (
-                              <Badge className="bg-[#8b5cf6]/20 text-[#8b5cf6] border-[#8b5cf6]/30 text-[10px] font-bold py-0 px-1.5">
+                            {team.role === "leader" ? (
+                              <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold py-0 px-1.5 shadow-[0_1.5px_0_0_#6d28d9]">
                                 Leader
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-slate-600 text-white border-0 text-[10px] font-bold py-0 px-1.5">
+                                Member
                               </Badge>
                             )}
                           </span>
 
-                          <span className="inline-flex items-center gap-1.5 font-mono">
-                            <Calendar className="size-3.5" />
-                            <span>{new Date(event.startDate).toLocaleDateString()} &ndash; {new Date(event.endDate).toLocaleDateString()}</span>
-                          </span>
-
                           <span className="inline-flex items-center gap-1 text-[11px] font-mono">
-                            <span>Sets: <strong>{team.imageSetsCount}</strong></span>
+                            <span className="opacity-40">•</span>
+                            <span>Sets Analyzed: <strong className="text-foreground">{team.imageSetsCount}</strong></span>
                           </span>
                         </div>
                       </div>
 
-                      {/* Right: Actions */}
-                      <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                        <Link href={`/campaigns/${event.id}`}>
-                          <Button size="sm" variant="outline" className="h-8 px-3 text-xs font-bold rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center gap-1">
+                      {/* Bottom Action Buttons Row */}
+                      <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-border/60">
+                        <Link href={`/campaigns/${event.id}`} className="w-full sm:w-auto">
+                          <Button size="sm" variant="outline" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1">
                             <span>Campaign View</span>
                             <ArrowRight className="size-3" />
                           </Button>
                         </Link>
 
-                        <Link href={`/teams`}>
-                          <Button size="sm" variant="default" className="h-8 px-3 text-xs font-bold rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 flex items-center gap-1">
-                            <Users className="size-3" />
+                        <Link href={`/team/${team.id}`} className="w-full sm:w-auto">
+                          <Button size="sm" variant="default" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 flex items-center justify-center gap-1.5">
+                            <Users className="size-3.5" />
                             <span>Squad Workspace</span>
                           </Button>
                         </Link>
@@ -688,13 +695,13 @@ export default function ProfilePage() {
         {/* TAB 3: SQUAD MEMBERSHIPS */}
         {/* ------------------------------------------------------------- */}
         <TabsContent value="teams" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-lg font-bold text-foreground">Your Squad Memberships</h2>
               <p className="text-xs text-muted-foreground">Teams you have formed or joined across campaigns.</p>
             </div>
             <Link href="/teams">
-              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 gap-1">
+              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 gap-1 self-start sm:self-auto">
                 <Users className="size-3.5" />
                 <span>Squad Directory</span>
               </Button>
@@ -722,18 +729,18 @@ export default function ProfilePage() {
                 <Card key={team.id} className="border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl flex flex-col justify-between">
                   <CardHeader className="pb-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline" className="text-[10px] font-mono">
+                      <Badge variant="outline" className="text-[10px] font-mono font-bold">
                         {team.event.code}
                       </Badge>
-                      <Badge className={team.role === "leader" ? "bg-[#8b5cf6] text-white border-0 text-[10px]" : "bg-muted text-muted-foreground border-border text-[10px]"}>
+                      <Badge className={team.role === "leader" ? "bg-[#8b5cf6] text-white border-0 text-[10px] font-bold shadow-[0_1.5px_0_0_#6d28d9]" : "bg-muted text-muted-foreground border-border text-[10px]"}>
                         {team.role === "leader" ? "Squad Leader" : "Member"}
                       </Badge>
                     </div>
 
-                    <CardTitle className="text-base font-bold text-foreground">
+                    <CardTitle className="text-base font-bold text-foreground break-words">
                       {team.name}
                     </CardTitle>
-                    <CardDescription className="text-xs line-clamp-1">
+                    <CardDescription className="text-xs break-words">
                       Campaign: {team.event.title}
                     </CardDescription>
                   </CardHeader>
@@ -761,8 +768,8 @@ export default function ProfilePage() {
                       <span>{team.imageSetsCount} Image Sets</span>
                     </div>
 
-                    <Link href={`/teams?eventId=${team.event.id}`} className="block w-full">
-                      <Button variant="outline" size="sm" className="w-full text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1">
+                    <Link href={`/team/${team.id}`} className="block w-full">
+                      <Button variant="outline" size="sm" className="w-full text-xs font-bold h-8.5 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1.5">
                         <span>Open Workspace</span>
                         <ExternalLink className="size-3" />
                       </Button>

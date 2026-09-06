@@ -84,8 +84,7 @@ export default function JoinTeamPage({
         <Button
           onClick={handleJoin}
           disabled={loading}
-          variant="default"
-          className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2 cursor-pointer bg-slate-950 text-white hover:bg-slate-900 shadow-[0_3px_0_0_#020617] active:translate-y-0.5 transition-transform"
+          className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2 cursor-pointer bg-slate-950 text-white hover:bg-slate-900 border-0 shadow-[0_3px_0_0_#020617] active:translate-y-0.5 transition-transform"
         >
           {loading ? (
             <>
