@@ -17,6 +17,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Telescope,
   PlusCircle,
   UserPlus,
@@ -35,6 +41,7 @@ import {
   ExternalLink,
   Check,
   Pin,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -493,14 +500,30 @@ export default function CampaignsPage() {
     <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
       {/* 1. TOP HEADER (Sticky) */}
       <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-2">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Telescope className="size-5 text-primary" />
             <span>Campaigns</span>
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Search for asteroids with your team.
-          </p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="size-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors flex items-center justify-center cursor-pointer"
+                  aria-label="About Campaigns"
+                >
+                  <HelpCircle className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="text-xs max-w-xs bg-card text-card-foreground border-border shadow-lg p-3 space-y-1">
+                <div className="font-bold text-foreground">About Campaigns</div>
+                <p className="text-muted-foreground leading-relaxed">
+                  Scheduled observation events where teams analyze sky survey images from global observatories to detect asteroids and submit scientific discoveries.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Global Join with Code Button */}
