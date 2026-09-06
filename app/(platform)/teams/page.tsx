@@ -33,6 +33,7 @@ import {
 import {
   Search,
   User,
+  Users,
   UserPlus,
   RefreshCw,
   X,
@@ -309,19 +310,23 @@ function TeamsContent() {
   };
 
   return (
-    <div className="w-full font-sans max-w-6xl mx-auto">
-      {/* 1. TOP HEADER - STICKY UNDER NAVBAR */}
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border mb-6">
+    <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
+      {/* 1. TOP HEADER (Sticky) */}
+      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Citizen Teams
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Users className="size-5 text-primary" />
+            <span>Citizen Teams</span>
           </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Search for asteroids with your team.
+          </p>
         </div>
 
         <Link href="/campaigns">
           <Button
             variant="outline"
-            className="h-8 px-3 text-xs font-semibold gap-1.5 cursor-pointer bg-background shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 shrink-0"
+            className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl shrink-0"
           >
             <span>Explore Campaigns</span>
             <ArrowRight className="size-3.5" />
@@ -329,12 +334,12 @@ function TeamsContent() {
         </Link>
       </div>
 
-      {/* 2. TWO-COLUMN LAYOUT: STICKY SIDEBAR + MAIN TEAMS GRID */}
-      <div className="flex flex-col md:flex-row items-start gap-6 relative">
-        {/* LEFT STICKY SIDEBAR: JOIN TEAM & FILTERS */}
-        <aside className="w-full md:w-64 lg:w-72 shrink-0 md:sticky md:top-[8.5rem] md:self-start space-y-4 max-h-[calc(100vh-9.5rem)] overflow-y-auto pb-4 pr-0.5 pt-1 z-20">
+      {/* 2. MAIN LAYOUT: SIDEBAR FILTER + TEAMS CONTENT */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop) === */}
+        <aside className="lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
           {/* Join with Invite Code Card */}
-          <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] space-y-2.5">
+          <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] space-y-2.5">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-bold text-white tracking-wide">Join with Code</span>
               <TooltipProvider>
@@ -413,9 +418,20 @@ function TeamsContent() {
 
             {/* Status Filter Tabs */}
             <div className="space-y-2 pt-2 border-t border-border">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                Status Filter
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Status Filter
+                </span>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="text-[10px] text-primary hover:underline font-bold cursor-pointer"
+                  >
+                    Reset All
+                  </button>
+                )}
+              </div>
               <div className="flex flex-col gap-1">
                 <button
                   type="button"
@@ -525,23 +541,11 @@ function TeamsContent() {
                 </SelectContent>
               </Select>
             </div>
-
-            {hasActiveFilters && (
-              <Button
-                type="button"
-                onClick={handleResetFilters}
-                size="sm"
-                variant="outline"
-                className="w-full h-8 text-xs font-semibold cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
-              >
-                Reset All Filters
-              </Button>
-            )}
           </Card>
         </aside>
 
         {/* RIGHT MAIN CONTENT AREA: TEAMS GRID */}
-        <main className="flex-1 min-w-0 space-y-4">
+        <main className="lg:col-span-3 min-w-0 space-y-4 min-h-[calc(100vh-10rem)]">
           {/* Results Counter & Listing Controls Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -651,7 +655,7 @@ function TeamsContent() {
               ))}
             </div>
           ) : filteredTeams.length === 0 ? (
-            <Card className="p-12 text-center text-sm text-muted-foreground space-y-2 border-dashed">
+            <Card className="p-12 text-center text-sm text-muted-foreground space-y-2 border-dashed min-h-[280px] flex flex-col items-center justify-center">
               <div className="font-sans font-bold text-foreground text-sm">No Matching Citizen Teams Found</div>
               <p className="max-w-md mx-auto text-xs leading-relaxed text-muted-foreground">
                 No citizen teams match your current search and filter criteria. Try adjusting your filters or enter an invite code on the sidebar.
