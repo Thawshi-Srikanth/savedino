@@ -895,7 +895,7 @@ export default function TeamWorkspacePage({
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
-                  Awaiting Approval ({awaitingApprovalSets.length})
+                  In Review ({awaitingApprovalSets.length})
                 </button>
 
                 <button
@@ -907,7 +907,7 @@ export default function TeamWorkspacePage({
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
-                  Approved &amp; Submitted ({approvedSets.length})
+                  Approved ({approvedSets.length})
                 </button>
               </div>
 
@@ -978,7 +978,7 @@ export default function TeamWorkspacePage({
                             </Badge>
                           ) : normalized === "PENDING_APPROVAL" ? (
                             <Badge className="bg-[#f59e0b] text-slate-950 font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
-                              Awaiting Approval
+                              In Review
                             </Badge>
                           ) : s.isClean ? (
                             <Badge className="bg-slate-500 text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
@@ -986,7 +986,7 @@ export default function TeamWorkspacePage({
                             </Badge>
                           ) : (
                             <Badge className="bg-[#10b981] text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#059669]">
-                              Approved &amp; Logged
+                              Approved
                             </Badge>
                           )}
                         </div>
@@ -1095,7 +1095,7 @@ export default function TeamWorkspacePage({
                             </Button>
                           ) : (
                             <div className="w-full text-center py-1.5 px-2 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl text-[11px] font-semibold">
-                              Awaiting Leader Review
+                              In Review
                             </div>
                           )
                         ) : (
@@ -1797,7 +1797,7 @@ export default function TeamWorkspacePage({
                   </div>
                 </div>
                 <Badge className="bg-[#f59e0b] text-slate-950 font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
-                  Awaiting Leader Decision
+                  Pending Review
                 </Badge>
               </div>
 
