@@ -73,9 +73,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
     if (nightModeOverride !== undefined && nightModeOverride !== null) {
       setIsNight(nightModeOverride);
       isNightRef.current = nightModeOverride;
-      onNightModeChange?.(nightModeOverride);
     }
-  }, [nightModeOverride, onNightModeChange]);
+  }, [nightModeOverride]);
 
   // Load official Chromium sprite sheet
   useEffect(() => {
@@ -188,9 +187,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       setScore(0);
       setMeteorsDestroyed(0);
       onScoreUpdate?.(0, s.highScore, 0);
-      isNightRef.current = false;
-      setIsNight(false);
-      onNightModeChange?.(false);
+      const initialNight = nightModeOverrideRef.current ?? false;
+      isNightRef.current = initialNight;
+      setIsNight(initialNight);
       audioSynth.playButtonClick();
       audioSynth.startMusic();
     }
@@ -225,9 +224,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       setScore(0);
       setMeteorsDestroyed(0);
       onScoreUpdate?.(0, s.highScore, 0);
-      isNightRef.current = false;
-      setIsNight(false);
-      onNightModeChange?.(false);
+      const initialNight = nightModeOverrideRef.current ?? false;
+      isNightRef.current = initialNight;
+      setIsNight(initialNight);
       audioSynth.playButtonClick();
       audioSynth.startMusic();
       return;
@@ -718,12 +717,13 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         ctx.translate(shakeX, shakeY);
       }
 
-      const calculatedNight = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
-      const night = nightModeOverrideRef.current !== null ? nightModeOverrideRef.current : calculatedNight;
+      const baseNight = nightModeOverrideRef.current ?? false;
+      const cycleInverted = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
+      const night = cycleInverted ? !baseNight : baseNight;
       if (isNightRef.current !== night) {
         isNightRef.current = night;
         setIsNight(night);
-        if (onNightModeChange) {
+        if (s.gameState === "RUNNING" && onNightModeChange) {
           onNightModeChange(night);
         }
       }
@@ -913,6 +913,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
       // Start Screen if IDLE
       if (s.gameState === "IDLE") {
+        ctx.fillStyle = mainColor;
         ctx.textAlign = "center";
         ctx.font = '11px "Press Start 2P", monospace';
         const blink = Math.floor(s.frameCount / 30) % 2 === 0;
@@ -925,6 +926,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
       // Game Over Screen if GAMEOVER
       if (s.gameState === "GAMEOVER") {
+        ctx.fillStyle = mainColor;
         ctx.textAlign = "center";
         ctx.font = '14px "Press Start 2P", monospace';
         ctx.fillText("G A M E   O V E R", CANVAS_WIDTH / 2, 60);

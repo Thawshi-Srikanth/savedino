@@ -786,17 +786,17 @@ export default function CampaignsPage() {
                       </div>
                     </div>
 
-                    {/* Horizontal Dashed Timeline (Start Dates Only) */}
+                    {/* Dashed Timeline (2x2 on Mobile, 4-Cols on Desktop) */}
                     <div className="pt-3 pb-1 border-t border-border">
-                      <div className="grid grid-cols-4 items-center relative">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 items-center relative py-1">
                         {getEventStages(currentActiveEvent).map((stage, sIdx) => {
                           const isLive = stage.status === "ACTIVE";
                           const isDone = stage.status === "COMPLETED";
 
                           return (
-                            <div key={stage.name} className="flex flex-col items-center text-center space-y-1.5 z-10">
+                            <div key={stage.name} className="flex flex-col items-center text-center space-y-1.5 z-10 px-1">
                               <span
-                                className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[80px] sm:max-w-none ${
+                                className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[130px] sm:max-w-none ${
                                   isLive ? "text-[#8b5cf6]" : isDone ? "text-[#10b981]" : "text-muted-foreground"
                                 }`}
                               >
@@ -824,8 +824,12 @@ export default function CampaignsPage() {
                           );
                         })}
 
-                        {/* Dashed Connecting Line */}
-                        <div className="absolute top-[32px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+                        {/* Dashed Connecting Line (Desktop) */}
+                        <div className="hidden sm:block absolute top-[36px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+
+                        {/* Dashed Connecting Lines (Mobile Continuum: Row 1 to right edge, Row 2 from left edge) */}
+                        <div className="sm:hidden absolute top-[36px] left-[25%] right-0 border-t-2 border-dashed border-border pointer-events-none z-0" />
+                        <div className="sm:hidden absolute bottom-[35px] left-0 right-[25%] border-t-2 border-dashed border-border pointer-events-none z-0" />
                       </div>
                     </div>
 
@@ -993,17 +997,17 @@ export default function CampaignsPage() {
                         </p>
                       </div>
 
-                      {/* Horizontal Dashed Timeline (Start Dates Only) */}
+                      {/* Dashed Timeline (2x2 on Mobile, 4-Cols on Desktop) */}
                       <div className="pt-3 border-t border-border space-y-3">
-                        <div className="grid grid-cols-4 items-center relative py-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 items-center relative py-1">
                           {getEventStages(ev).map((stage, sIdx) => {
                             const isLive = stage.status === "ACTIVE";
                             const isDone = stage.status === "COMPLETED";
 
                             return (
-                              <div key={stage.name} className="flex flex-col items-center text-center space-y-1.5 z-10">
+                              <div key={stage.name} className="flex flex-col items-center text-center space-y-1.5 z-10 px-1">
                                 <span
-                                  className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[80px] sm:max-w-none ${
+                                  className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[130px] sm:max-w-none ${
                                     isLive ? "text-[#8b5cf6]" : isDone ? "text-[#10b981]" : "text-muted-foreground"
                                   }`}
                                 >
@@ -1031,8 +1035,12 @@ export default function CampaignsPage() {
                             );
                           })}
 
-                          {/* Dashed Connecting Line */}
-                          <div className="absolute top-[32px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+                          {/* Dashed Connecting Line (Desktop) */}
+                          <div className="hidden sm:block absolute top-[36px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+
+                          {/* Dashed Connecting Lines (Mobile Continuum: Row 1 to right edge, Row 2 from left edge) */}
+                          <div className="sm:hidden absolute top-[36px] left-[25%] right-0 border-t-2 border-dashed border-border pointer-events-none z-0" />
+                          <div className="sm:hidden absolute bottom-[35px] left-0 right-[25%] border-t-2 border-dashed border-border pointer-events-none z-0" />
                         </div>
 
                         {/* Actions */}

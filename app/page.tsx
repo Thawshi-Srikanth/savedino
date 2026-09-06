@@ -48,8 +48,6 @@ export default function Home() {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [devNightOverride, setDevNightOverride] = useState<boolean | null>(null);
-
   const { resolvedTheme, setTheme } = useTheme();
 
   const [score, setScore] = useState<number>(0);
@@ -116,13 +114,10 @@ export default function Home() {
   };
 
   const isNight = mounted ? resolvedTheme === "dark" : false;
-  const effectiveNight = devNightOverride !== null ? devNightOverride : isNight;
-  const nightActive = mounted && effectiveNight;
 
   const handleToggleTheme = () => {
     const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
-    setDevNightOverride(nextTheme === "dark");
   };
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -166,7 +161,7 @@ export default function Home() {
   return (
     <main
       className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none ${
-        nightActive ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
+        isNight ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
       }`}
     >
       {/* Header */}
@@ -174,7 +169,7 @@ export default function Home() {
         onOpenHelp={() => setIsHelpOpen(true)}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
-        isNight={nightActive}
+        isNight={isNight}
         onToggleTheme={handleToggleTheme}
       />
 
@@ -183,7 +178,7 @@ export default function Home() {
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
           onNightModeChange={(night) => setTheme(night ? "dark" : "light")}
-          nightModeOverride={devNightOverride}
+          nightModeOverride={mounted ? isNight : null}
         />
 
         {/* Campaign Status Section (Coming Soon in Demo Mode vs Explore in Live Mode) */}
