@@ -365,18 +365,18 @@ export default function ProfilePage() {
             <TabsList className="h-10 bg-transparent p-0 flex min-w-full sm:min-w-0 sm:w-auto gap-1 border-0 rounded-none">
               <TabsTrigger
                 value="edit"
-                className="h-10 px-4 text-xs font-semibold gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none"
+                className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
-                <User className="size-3.5" />
-                <span>Edit Profile</span>
+                <User className="size-3.5 shrink-0" />
+                <span className={activeTab === "edit" ? "inline" : "hidden sm:inline"}>Edit Profile</span>
               </TabsTrigger>
 
               <TabsTrigger
                 value="history"
-                className="h-10 px-4 text-xs font-semibold gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none"
+                className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
-                <Telescope className="size-3.5" />
-                <span>Campaigns</span>
+                <Telescope className="size-3.5 shrink-0" />
+                <span className={activeTab === "history" ? "inline" : "hidden sm:inline"}>Campaigns</span>
                 <Badge
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-semibold font-mono transition-colors ${
@@ -391,10 +391,10 @@ export default function ProfilePage() {
 
               <TabsTrigger
                 value="teams"
-                className="h-10 px-4 text-xs font-semibold gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none"
+                className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
-                <Users className="size-3.5" />
-                <span>Squads</span>
+                <Users className="size-3.5 shrink-0" />
+                <span className={activeTab === "teams" ? "inline" : "hidden sm:inline"}>Squads</span>
                 <Badge
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-semibold font-mono transition-colors ${
@@ -409,10 +409,10 @@ export default function ProfilePage() {
 
               <TabsTrigger
                 value="activity"
-                className="h-10 px-4 text-xs font-semibold gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none"
+                className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
-                <FolderSearch className="size-3.5" />
-                <span>Activity</span>
+                <FolderSearch className="size-3.5 shrink-0" />
+                <span className={activeTab === "activity" ? "inline" : "hidden sm:inline"}>Activity</span>
                 <Badge
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-semibold font-mono transition-colors ${
