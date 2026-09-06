@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Sun, Moon, LogOut, User, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
+import { PixelAvatar } from "@/components/pixel-avatar";
+
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -113,11 +115,18 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                {/* Logged-In User Badge */}
-                <div className="h-9 flex items-center gap-1.5 px-3.5 border border-border rounded-xl text-xs font-medium bg-card shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                  <User className="size-3.5 text-[#8b5cf6]" />
-                  <span className="font-bold">{session.user.name}</span>
-                </div>
+                {/* Logged-In User Profile Link with Seed Pixel Avatar */}
+                <Link href="/profile">
+                  <Button
+                    size="sm"
+                    variant={pathname === "/profile" ? "default" : "outline"}
+                    className="h-9 px-2.5 text-xs font-bold rounded-xl border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
+                    title="Profile & Studio"
+                  >
+                    <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={22} showBorder={false} />
+                    <span className="font-bold max-w-[120px] truncate">{session.user.name}</span>
+                  </Button>
+                </Link>
                 <Button
                   size="sm"
                   variant="outline"
@@ -158,16 +167,28 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </Button>
 
             {session?.user ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                className="h-9 px-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center gap-1.5"
-                title="Sign Out"
-              >
-                <LogOut className="size-3.5" />
-                <span className="max-w-[70px] truncate">{session.user.name?.split(" ")[0]}</span>
-              </Button>
+              <div className="flex items-center gap-1.5">
+                <Link href="/profile">
+                  <Button
+                    variant={pathname === "/profile" ? "default" : "outline"}
+                    size="sm"
+                    className="h-9 px-2 rounded-xl text-xs font-bold border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center gap-1.5"
+                    title="Profile"
+                  >
+                    <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={20} showBorder={false} />
+                    <span className="max-w-[70px] truncate">{session.user.name?.split(" ")[0]}</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+                  className="h-9 w-9 p-0 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  title="Sign Out"
+                >
+                  <LogOut className="size-3.5" />
+                </Button>
+              </div>
             ) : (
               <Link href="/login">
                 <Button
@@ -208,7 +229,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           {/* 1. Arcade / Game (First) */}
           <Link
             href="/"
-            className={`flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               pathname === "/"
                 ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-[0_3px_0_0_#a16207] active:translate-y-0.5"
                 : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
@@ -223,7 +244,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           {/* 2. Campaigns (Second) */}
           <Link
             href="/campaigns"
-            className={`flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               pathname === "/campaigns"
                 ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5"
                 : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
@@ -238,7 +259,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           {/* 3. Teams (Third) */}
           <Link
             href="/teams"
-            className={`flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               pathname === "/teams" || pathname.startsWith("/team/")
                 ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5"
                 : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
@@ -249,8 +270,26 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             <Users className="size-4.5 shrink-0" />
             {(pathname === "/teams" || pathname.startsWith("/team/")) && <span>Teams</span>}
           </Link>
+
+          {/* 4. Profile (Fourth - if signed in) */}
+          {session?.user && (
+            <Link
+              href="/profile"
+              className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                pathname === "/profile"
+                  ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5"
+                  : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
+              }`}
+              title="User Profile & Studio"
+              aria-label="Profile"
+            >
+              <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={18} showBorder={false} />
+              {pathname === "/profile" && <span>Profile</span>}
+            </Link>
+          )}
         </div>
       </nav>
     </div>
   );
 }
+
