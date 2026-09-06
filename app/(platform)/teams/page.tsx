@@ -30,6 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
 import {
   Search,
   User,
@@ -301,7 +302,10 @@ function TeamsContent() {
     }
   };
 
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
   const hasActiveFilters = searchQuery.trim() !== "" || selectedEventId !== "ALL" || activeTabFilter !== "ALL";
+  const activeFilterCount = (searchQuery.trim() ? 1 : 0) + (activeTabFilter !== "ALL" ? 1 : 0) + (selectedEventId !== "ALL" ? 1 : 0);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -309,8 +313,228 @@ function TeamsContent() {
     setActiveTabFilter("ALL");
   };
 
+  const renderJoinCodeCard = (
+    <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] space-y-2.5">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-xs font-bold text-white tracking-wide">Join with Code</span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="text-white/80 hover:text-white transition-colors cursor-pointer p-0.5 rounded hover:bg-white/10"
+                aria-label="Invite code help"
+              >
+                <HelpCircle className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="text-xs max-w-xs bg-slate-900 text-white border-slate-700 shadow-lg">
+              Have a code from a team leader? Enter it here to join directly.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      <form onSubmit={handleJoinByCode} className="flex items-center gap-1.5">
+        <Input
+          type="text"
+          placeholder="AST-XXXX"
+          value={joinCodeInput}
+          onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
+          className="flex-1 uppercase text-xs h-8 font-mono font-bold tracking-wider bg-white text-slate-950 placeholder:text-slate-400 border-none shadow-inner min-w-0"
+        />
+        <Button
+          type="submit"
+          disabled={joinCodeLoading || !joinCodeInput.trim()}
+          size="sm"
+          className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
+          title="Join Team"
+        >
+          {joinCodeLoading ? (
+            <RefreshCw className="size-3.5 animate-spin" />
+          ) : (
+            <>
+              <span>Join</span>
+              <ArrowRight className="size-3.5" />
+            </>
+          )}
+        </Button>
+      </form>
+    </Card>
+  );
+
+  const renderFilterControls = (
+    <Card className="p-4 space-y-4 bg-card border-border">
+      {/* Search Input */}
+      <div className="space-y-1.5">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+          Search Teams
+        </span>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Name, member, code..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 pr-7 text-xs h-8 font-sans bg-background"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Status Filter Tabs */}
+      <div className="space-y-2 pt-2 border-t border-border">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+            Status Filter
+          </span>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="text-[10px] text-primary hover:underline font-bold cursor-pointer"
+            >
+              Reset All
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTabFilter("ALL")}
+            className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+              activeTabFilter === "ALL"
+                ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <span>All Teams</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+              activeTabFilter === "ALL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+            }`}>
+              {countAll}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTabFilter("RECRUITING")}
+            className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+              activeTabFilter === "RECRUITING"
+                ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <span>Open to Join</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+              activeTabFilter === "RECRUITING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+            }`}>
+              {countRecruiting}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTabFilter("FORMING")}
+            className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+              activeTabFilter === "FORMING"
+                ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <span>Forming</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+              activeTabFilter === "FORMING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+            }`}>
+              {countForming}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTabFilter("FULL")}
+            className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+              activeTabFilter === "FULL"
+                ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <span>Full Teams</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+              activeTabFilter === "FULL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+            }`}>
+              {countFull}
+            </span>
+          </button>
+
+          {session && (
+            <button
+              type="button"
+              onClick={() => setActiveTabFilter("MY_SQUADS")}
+              className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
+                activeTabFilter === "MY_SQUADS"
+                  ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              <span>My Squads</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                activeTabFilter === "MY_SQUADS" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+              }`}>
+                {countMySquads}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Campaign Select Filter */}
+      <div className="space-y-1.5 pt-2 border-t border-border">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+          Campaign Filter
+        </span>
+        <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+          <SelectTrigger className="h-8 text-xs font-sans bg-background">
+            <SelectValue placeholder="All Campaigns" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Campaigns ({events.length})</SelectItem>
+            {events.map((ev) => (
+              <SelectItem key={ev.id} value={ev.id}>
+                {ev.code} ({ev.title.slice(0, 14)}...)
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </Card>
+  );
+
   return (
     <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
+      {/* Mobile Draggable Filter Trigger + Drawer */}
+      <MobileFilterDrawer
+        title="Filter Teams"
+        description="Search and filter citizen teams"
+        activeCount={activeFilterCount}
+        totalResults={filteredTeams.length}
+        isOpen={isMobileFilterOpen}
+        onOpenChange={setIsMobileFilterOpen}
+        onReset={handleResetFilters}
+      >
+        {renderFilterControls}
+      </MobileFilterDrawer>
+
       {/* 1. TOP HEADER (Sticky) */}
       <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
@@ -339,7 +563,7 @@ function TeamsContent() {
           </TooltipProvider>
         </div>
 
-        <Link href="/campaigns">
+        <Link href="/campaigns" className="hidden sm:inline-flex">
           <Button
             variant="outline"
             className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl shrink-0"
@@ -352,216 +576,18 @@ function TeamsContent() {
 
       {/* 2. MAIN LAYOUT: SIDEBAR FILTER + TEAMS CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop) === */}
-        <aside className="lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
-          {/* Join with Invite Code Card */}
-          <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] space-y-2.5">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-xs font-bold text-white tracking-wide">Join with Code</span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="text-white/80 hover:text-white transition-colors cursor-pointer p-0.5 rounded hover:bg-white/10"
-                      aria-label="Invite code help"
-                    >
-                      <HelpCircle className="size-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="text-xs max-w-xs bg-slate-900 text-white border-slate-700 shadow-lg">
-                    Have a code from a team leader? Enter it here to join directly.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            <form onSubmit={handleJoinByCode} className="flex items-center gap-1.5">
-              <Input
-                type="text"
-                placeholder="AST-XXXX"
-                value={joinCodeInput}
-                onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                className="flex-1 uppercase text-xs h-8 font-mono font-bold tracking-wider bg-white text-slate-950 placeholder:text-slate-400 border-none shadow-inner min-w-0"
-              />
-              <Button
-                type="submit"
-                disabled={joinCodeLoading || !joinCodeInput.trim()}
-                size="sm"
-                className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
-                title="Join Team"
-              >
-                {joinCodeLoading ? (
-                  <RefreshCw className="size-3.5 animate-spin" />
-                ) : (
-                  <>
-                    <span>Join</span>
-                    <ArrowRight className="size-3.5" />
-                  </>
-                )}
-              </Button>
-            </form>
-          </Card>
-
-          {/* Search & Filters Sidebar Card */}
-          <Card className="p-4 space-y-4 bg-card border-border">
-            {/* Search Input in Sidebar */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                Search Teams
-              </span>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Name, member, code..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 pr-7 text-xs h-8 font-sans bg-background"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                    aria-label="Clear search"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Status Filter Tabs */}
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                  Status Filter
-                </span>
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={handleResetFilters}
-                    className="text-[10px] text-primary hover:underline font-bold cursor-pointer"
-                  >
-                    Reset All
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTabFilter("ALL")}
-                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
-                    activeTabFilter === "ALL"
-                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <span>All Teams</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                    activeTabFilter === "ALL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-                  }`}>
-                    {countAll}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTabFilter("RECRUITING")}
-                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
-                    activeTabFilter === "RECRUITING"
-                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <span>Open to Join</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                    activeTabFilter === "RECRUITING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-                  }`}>
-                    {countRecruiting}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTabFilter("FORMING")}
-                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
-                    activeTabFilter === "FORMING"
-                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <span>Forming</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                    activeTabFilter === "FORMING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-                  }`}>
-                    {countForming}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTabFilter("FULL")}
-                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
-                    activeTabFilter === "FULL"
-                      ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <span>Full Teams</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                    activeTabFilter === "FULL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-                  }`}>
-                    {countFull}
-                  </span>
-                </button>
-
-                {session && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTabFilter("MY_SQUADS")}
-                    className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center justify-between ${
-                      activeTabFilter === "MY_SQUADS"
-                        ? "bg-[#8b5cf6] text-white font-bold shadow-xs"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <span>My Squads</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                      activeTabFilter === "MY_SQUADS" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-                    }`}>
-                      {countMySquads}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Campaign Select Filter */}
-            <div className="space-y-1.5 pt-2 border-t border-border">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                Campaign Filter
-              </span>
-              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-                <SelectTrigger className="h-8 text-xs font-sans bg-background">
-                  <SelectValue placeholder="All Campaigns" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Campaigns ({events.length})</SelectItem>
-                  {events.map((ev) => (
-                    <SelectItem key={ev.id} value={ev.id}>
-                      {ev.code} ({ev.title.slice(0, 14)}...)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </Card>
+        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop, Hidden on Mobile) === */}
+        <aside className="hidden lg:block lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
+          {renderJoinCodeCard}
+          {renderFilterControls}
         </aside>
 
         {/* RIGHT MAIN CONTENT AREA: TEAMS GRID */}
         <main className="lg:col-span-3 min-w-0 space-y-4 min-h-[calc(100vh-10rem)]">
+          {/* Mobile Join with Code Card (Shown only on mobile above listing) */}
+          <div className="lg:hidden">
+            {renderJoinCodeCard}
+          </div>
           {/* Results Counter & Listing Controls Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">

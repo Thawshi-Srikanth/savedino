@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
 import {
   Telescope,
   PlusCircle,
@@ -42,6 +43,7 @@ import {
   Check,
   Pin,
   HelpCircle,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -487,6 +489,8 @@ export default function CampaignsPage() {
     ? getRegistrationDeadlineInfo(currentActiveEvent.regEnd, currentActiveEvent.startDate)
     : null;
 
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
   // Status Filter counts
   const countAll = events.length;
   const countActive = events.filter((e) => e.status === "ACTIVE").length;
@@ -496,8 +500,160 @@ export default function CampaignsPage() {
   }).length;
   const countUpcoming = events.filter((e) => e.status === "UPCOMING").length;
 
+  const activeFilterCount = (searchQuery.trim() ? 1 : 0) + (selectedStatusFilter !== "ALL" ? 1 : 0);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedStatusFilter("ALL");
+  };
+
+  const renderCampaignFilterControls = (
+    <div className="space-y-4">
+      <Card className="p-3 bg-card border-border shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-3">
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Search campaigns..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pl-8 pr-7 text-xs bg-background"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Status Navigation Buttons */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between px-1 pb-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Filter Campaigns
+            </span>
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-[10px] text-primary hover:underline font-bold cursor-pointer"
+              >
+                Reset All
+              </button>
+            )}
+          </div>
+
+          {/* All Campaigns */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "ALL" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("ALL")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Layers className="size-3.5" />
+              <span>All Campaigns</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "ALL" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countAll}
+            </Badge>
+          </Button>
+
+          {/* Active Now */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "ACTIVE" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("ACTIVE")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
+              <span>Active Now</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "ACTIVE" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countActive}
+            </Badge>
+          </Button>
+
+          {/* Registration Open */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "REGISTRATION" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("REGISTRATION")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="size-3.5 text-[#38bdf8]" />
+              <span>Registration Open</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "REGISTRATION" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countRegistrationOpen}
+            </Badge>
+          </Button>
+
+          {/* Upcoming */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "UPCOMING" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("UPCOMING")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar className="size-3.5" />
+              <span>Upcoming</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "UPCOMING" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countUpcoming}
+            </Badge>
+          </Button>
+        </div>
+      </Card>
+
+      {/* Quick Team Info Box */}
+      <Card className="p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5">
+        <div className="font-semibold text-foreground flex items-center gap-1.5 text-[11px]">
+          <Sparkles className="size-3.5 text-[#8b5cf6]" />
+          <span>Team Rules</span>
+        </div>
+        <p className="text-[11px] leading-relaxed">
+          Teams have <strong>2 to 6 members</strong>. Team leaders can invite members using a private invite code.
+        </p>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
+      {/* Mobile Draggable Filter Trigger + Drawer */}
+      <MobileFilterDrawer
+        title="Filter Campaigns"
+        description="Search and filter observation campaigns"
+        activeCount={activeFilterCount}
+        totalResults={filteredEvents.length}
+        isOpen={isMobileFilterOpen}
+        onOpenChange={setIsMobileFilterOpen}
+        onReset={handleResetFilters}
+      >
+        {renderCampaignFilterControls}
+      </MobileFilterDrawer>
+
       {/* 1. TOP HEADER (Sticky) */}
       <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
@@ -526,11 +682,11 @@ export default function CampaignsPage() {
           </TooltipProvider>
         </div>
 
-        {/* Global Join with Code Button */}
+        {/* Global Join with Code Button (Hidden on Mobile) */}
         <Button
           onClick={() => handleOpenJoinModal()}
           variant="outline"
-          className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl shrink-0"
+          className="hidden sm:inline-flex h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl shrink-0"
         >
           <KeyRound className="size-3.5 text-primary" />
           <span>Join with Code</span>
@@ -539,115 +695,10 @@ export default function CampaignsPage() {
 
       {/* 2. MAIN LAYOUT: SIDEBAR FILTER + CAMPAIGN CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop) === */}
-        <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
-          <Card className="p-3 bg-card border-border shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-3">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search campaigns..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 text-xs bg-background"
-              />
-            </div>
-
-            {/* Status Navigation Buttons */}
-            <div className="space-y-1.5 pt-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1 pb-0.5">
-                Filter Campaigns
-              </div>
-
-              {/* All Campaigns */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "ALL" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("ALL")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Layers className="size-3.5" />
-                  <span>All Campaigns</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "ALL" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countAll}
-                </Badge>
-              </Button>
-
-              {/* Active Now */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "ACTIVE" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("ACTIVE")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
-                  <span>Active Now</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "ACTIVE" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countActive}
-                </Badge>
-              </Button>
-
-              {/* Registration Open */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "REGISTRATION" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("REGISTRATION")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Clock className="size-3.5 text-[#38bdf8]" />
-                  <span>Registration Open</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "REGISTRATION" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countRegistrationOpen}
-                </Badge>
-              </Button>
-
-              {/* Upcoming */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "UPCOMING" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("UPCOMING")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Calendar className="size-3.5" />
-                  <span>Upcoming</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "UPCOMING" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countUpcoming}
-                </Badge>
-              </Button>
-            </div>
-          </Card>
-
-          {/* Quick Team Info Box */}
-          <Card className="p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5">
-            <div className="font-semibold text-foreground flex items-center gap-1.5 text-[11px]">
-              <Sparkles className="size-3.5 text-[#8b5cf6]" />
-              <span>Team Rules</span>
-            </div>
-            <p className="text-[11px] leading-relaxed">
-              Teams have <strong>2 to 6 members</strong>. Team leaders can invite members using a private invite code.
-            </p>
-          </Card>
-        </div>
+        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop, Hidden on Mobile) === */}
+        <aside className="hidden lg:block lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
+          {renderCampaignFilterControls}
+        </aside>
 
         {/* === RIGHT COLUMN: SPOTLIGHT & CAMPAIGN FEED === */}
         <div className="lg:col-span-3 space-y-6">
