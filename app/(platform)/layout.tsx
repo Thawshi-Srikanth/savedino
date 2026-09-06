@@ -10,6 +10,7 @@ import { Sun, Moon, LogOut, User, Gamepad2, Telescope, Users, ShieldAlert } from
 import { Logo } from "@/components/Logo";
 
 import { PixelAvatar } from "@/components/pixel-avatar";
+import { ProfileOnboardingDialog } from "@/components/profile-onboarding-dialog";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -209,6 +210,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
         {children}
       </main>
+
+      {/* Profile Onboarding Modal for Incomplete Magic-Link Profiles */}
+      <ProfileOnboardingDialog />
 
       {/* Desktop Floating Arcade Game Button (Hidden on mobile since it is inside the bottom bar) */}
       <div className="hidden md:block fixed bottom-6 right-6 z-50">

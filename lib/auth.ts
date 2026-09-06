@@ -20,19 +20,22 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (user) => {
+        before: async (user, context) => {
           // Automatic First Account Admin Provisioning:
           // If no accounts exist in the database, automatically assign admin role to the first user.
           const userCount = await prisma.user.count();
-          if (userCount === 0) {
-            return {
-              data: {
-                ...user,
-                role: "admin",
-              },
-            };
-          }
-          return { data: user };
+          const role = userCount === 0 ? "admin" : (user.role || "user");
+          const metadata = (context as any)?.metadata || {};
+
+          return {
+            data: {
+              ...user,
+              role,
+              institution: user.institution || metadata.institution || null,
+              country: user.country || metadata.country || null,
+              image: user.image || `Astro-Dino-${Math.floor(100 + Math.random() * 900)}`,
+            },
+          };
         },
       },
     },

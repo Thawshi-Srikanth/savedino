@@ -262,7 +262,21 @@ export default function ProfilePage() {
   }
 
   const savedAvatarSeed = user?.image || user?.id || "Astro-Dino-101";
-  const hasUnsavedAvatar = selectedAvatar !== savedAvatarSeed;
+  const hasUnsavedChanges =
+    (formName || "").trim() !== (user?.name || "").trim() ||
+    (formInstitution || "").trim() !== (user?.institution || "").trim() ||
+    (formCountry || "").trim() !== (user?.country || "").trim() ||
+    selectedAvatar !== savedAvatarSeed;
+
+  const handleDiscardChanges = () => {
+    if (user) {
+      setFormName(user.name || "");
+      setFormInstitution(user.institution || "");
+      setFormCountry(user.country || "");
+      setSelectedAvatar(user.image || user.id || "Astro-Dino-101");
+      toast.info("Unsaved changes discarded.");
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -419,40 +433,6 @@ export default function ProfilePage() {
         {/* ------------------------------------------------------------- */}
         <TabsContent value="edit" className="space-y-6">
           <form onSubmit={handleSaveProfile} className="space-y-6">
-            {/* Top Action & Save Bar - Directly below the tabs */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl border border-border bg-card shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-              <div className="space-y-0.5">
-                <h2 className="text-sm font-bold text-foreground">Profile & Avatar Settings</h2>
-                <p className="text-xs text-muted-foreground">
-                  {hasUnsavedAvatar ? (
-                    <span className="text-amber-500 font-semibold">Unsaved avatar preview selected. Click Save to apply.</span>
-                  ) : (
-                    <span>Update your public details or roll a new space avatar.</span>
-                  )}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <Button
-                  type="submit"
-                  disabled={isSaving}
-                  className="h-9 px-5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="size-3.5 animate-spin" />
-                      <span>Saving Changes...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="size-3.5" />
-                      <span>Save Profile Changes</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* Left Column: Personal Information Form */}
               <Card className="md:col-span-7 border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl">
@@ -559,7 +539,7 @@ export default function ProfilePage() {
                         <span>Roll Next Avatar</span>
                       </Button>
 
-                      {hasUnsavedAvatar && (
+                      {selectedAvatar !== savedAvatarSeed && (
                         <Button
                           type="button"
                           variant="ghost"
@@ -577,7 +557,7 @@ export default function ProfilePage() {
 
                 <div className="px-6 pb-4">
                   <p className="text-[11px] text-muted-foreground">
-                    Avatars are previewed instantly. Click <strong>Save Profile Changes</strong> at the top to save your changes.
+                    Avatars and details are previewed instantly. Use the floating bar to save your changes.
                   </p>
                 </div>
               </Card>
@@ -880,6 +860,61 @@ export default function ProfilePage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* FIXED FLOATING SAVE / DISCARD ACTION BAR */}
+      {hasUnsavedChanges && (
+        <div className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-xl bg-card/95 dark:bg-[#1c1d21]/95 backdrop-blur-md border border-border p-3.5 sm:p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          {/* Top text block on mobile, left on desktop */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+            </span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <p className="text-xs font-bold text-foreground">Unsaved changes detected</p>
+              <span className="text-[11px] text-muted-foreground hidden sm:inline">•</span>
+              <p className="text-[11px] text-muted-foreground hidden sm:inline">
+                Click save to apply your updates
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons (grid 2 columns on mobile, inline on desktop) */}
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleDiscardChanges}
+              disabled={isSaving}
+              className="h-9 px-3 text-xs font-semibold rounded-xl cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1"
+            >
+              <RotateCcw className="size-3.5" />
+              <span>Discard</span>
+            </Button>
+
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveProfile}
+              disabled={isSaving}
+              className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="size-3.5" />
+                  <span>Save Changes</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
