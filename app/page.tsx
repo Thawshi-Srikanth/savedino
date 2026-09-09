@@ -223,33 +223,33 @@ export default function Home() {
             )}
           </div>
         ) : (
-          <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-2 px-3 sm:px-4">
+          <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-2 px-0">
             <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
-              No Campaign Joined
+              Join an Asteroid Hunt
             </h2>
 
             <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-              Join an active asteroid search campaign to analyze real survey telescope image sets with your squad.
+              Team up with a research squad to analyze real telescope images and hunt for undiscovered asteroids.
             </p>
 
-            <ul className="font-sans space-y-1 text-xs text-muted-foreground pl-1 leading-relaxed pt-1">
+            <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Form an asteroid search research squad</span>
+                <span>Browse open asteroid search campaigns</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Analyze telescope time-series images</span>
+                <span>Join an existing team or create your own squad</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Submit asteroid discovery reports</span>
+                <span>Inspect telescope surveys and report asteroid sightings</span>
               </li>
             </ul>
 
             <div className="pt-2 flex items-center gap-3">
               <Link href="/campaigns">
-                <Button size="sm" variant="default" className="text-xs font-bold shadow-arcade-primary">
+                <Button size="sm" variant="default" className="text-xs font-bold shadow-arcade-primary cursor-pointer">
                   <span>Explore Campaigns &gt;</span>
                 </Button>
               </Link>
