@@ -133,6 +133,7 @@ export default function AdminDashboardPage() {
   const [editCampTitle, setEditCampTitle] = useState<string>("");
   const [editCampCode, setEditCampCode] = useState<string>("");
   const [editCampDesc, setEditCampDesc] = useState<string>("");
+  const [editCampMaxTeamSize, setEditCampMaxTeamSize] = useState<number>(6);
   const [editCampStatus, setEditCampStatus] = useState<string>("ACTIVE");
   const [editCampRegStart, setEditCampRegStart] = useState<string>("");
   const [editCampRegEnd, setEditCampRegEnd] = useState<string>("");
@@ -238,10 +239,10 @@ export default function AdminDashboardPage() {
   }, [users, soloSearch]);
 
   // Derived Squad Stats
-  const openSquadsCount = useMemo(() => teams.filter((t) => t.members.length < 6).length, [teams]);
-  const fullSquadsCount = useMemo(() => teams.filter((t) => t.members.length >= 6).length, [teams]);
+  const openSquadsCount = useMemo(() => teams.filter((t) => t.members.length < (t.event?.maxTeamSize || 6)).length, [teams]);
+  const fullSquadsCount = useMemo(() => teams.filter((t) => t.members.length >= (t.event?.maxTeamSize || 6)).length, [teams]);
   const totalSquadMembers = useMemo(() => teams.reduce((acc, t) => acc + t.members.length, 0), [teams]);
-  const totalOpenSlots = useMemo(() => teams.reduce((acc, t) => acc + Math.max(0, 6 - t.members.length), 0), [teams]);
+  const totalOpenSlots = useMemo(() => teams.reduce((acc, t) => acc + Math.max(0, (t.event?.maxTeamSize || 6) - t.members.length), 0), [teams]);
 
   // Squads Filtered List
   const filteredTeams = useMemo(() => {
@@ -259,10 +260,11 @@ export default function AdminDashboardPage() {
             m.user?.email?.toLowerCase().includes(q)
         );
 
+      const maxTeamSize = t.event?.maxTeamSize || 6;
       const matchesCapacity =
         teamCapacityFilter === "ALL" ||
-        (teamCapacityFilter === "OPEN" && t.members.length < 6) ||
-        (teamCapacityFilter === "FULL" && t.members.length >= 6);
+        (teamCapacityFilter === "OPEN" && t.members.length < maxTeamSize) ||
+        (teamCapacityFilter === "FULL" && t.members.length >= maxTeamSize);
 
       const matchesCampaign =
         teamCampaignFilter === "ALL" ||
@@ -640,6 +642,7 @@ export default function AdminDashboardPage() {
     setEditCampTitle(ev.title);
     setEditCampCode(ev.code);
     setEditCampDesc(ev.description || "");
+    setEditCampMaxTeamSize(ev.maxTeamSize || 6);
     setEditCampStatus(ev.status);
     setEditCampRegStart(toLocalInput(ev.regStart));
     setEditCampRegEnd(toLocalInput(ev.regEnd));
@@ -661,6 +664,7 @@ export default function AdminDashboardPage() {
         title: editCampTitle,
         code: editCampCode.trim().toUpperCase(),
         description: editCampDesc || null,
+        maxTeamSize: Number(editCampMaxTeamSize),
         status: editCampStatus,
         startDate: new Date(editCampStart).toISOString(),
         endDate: new Date(editCampEnd).toISOString(),
@@ -957,6 +961,8 @@ export default function AdminDashboardPage() {
           setEditCampStatus={setEditCampStatus}
           editCampDesc={editCampDesc}
           setEditCampDesc={setEditCampDesc}
+          editCampMaxTeamSize={editCampMaxTeamSize}
+          setEditCampMaxTeamSize={setEditCampMaxTeamSize}
           editCampRegStart={editCampRegStart}
           setEditCampRegStart={setEditCampRegStart}
           editCampRegEnd={editCampRegEnd}

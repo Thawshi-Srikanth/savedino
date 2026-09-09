@@ -59,7 +59,7 @@ interface CampaignHistoryItem {
   team: {
     id: string;
     name: string;
-    inviteCode: string;
+    inviteCode?: string | null;
     status: string;
     role: string;
     memberCount: number;
@@ -71,7 +71,7 @@ interface CampaignHistoryItem {
 interface TeamHistoryItem {
   id: string;
   name: string;
-  inviteCode: string;
+  inviteCode?: string | null;
   status: string;
   role: string;
   memberCount: number;
@@ -746,22 +746,24 @@ export default function ProfilePage() {
                   </CardHeader>
 
                   <CardContent className="pt-0 space-y-3">
-                    <div className="flex items-center justify-between text-xs py-2 border-t border-border font-mono">
-                      <span className="text-muted-foreground">Invite Code:</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(team.inviteCode)}
-                        className="inline-flex items-center gap-1 font-bold text-foreground hover:text-primary transition-colors cursor-pointer"
-                        title="Copy Invite Code"
-                      >
-                        <span>{team.inviteCode}</span>
-                        {copiedCode === team.inviteCode ? (
-                          <Check className="size-3 text-[#10b981]" />
-                        ) : (
-                          <Copy className="size-3 text-muted-foreground" />
-                        )}
-                      </button>
-                    </div>
+                    {team.inviteCode && (
+                      <div className="flex items-center justify-between text-xs py-2 border-t border-border font-mono">
+                        <span className="text-muted-foreground">Invite Code:</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(team.inviteCode!)}
+                          className="inline-flex items-center gap-1 font-bold text-foreground hover:text-primary transition-colors cursor-pointer"
+                          title="Copy Invite Code"
+                        >
+                          <span>{team.inviteCode}</span>
+                          {copiedCode === team.inviteCode ? (
+                            <Check className="size-3 text-[#10b981]" />
+                          ) : (
+                            <Copy className="size-3 text-muted-foreground" />
+                          )}
+                        </button>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>{team.memberCount} Members</span>

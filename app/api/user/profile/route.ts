@@ -119,16 +119,20 @@ export async function GET(req: Request) {
       );
     }
 
+    const isStaffOrAdmin = user.role === "admin" || user.role === "staff";
+
     // Extract unique campaigns
     const uniqueCampaignsMap = new Map<string, any>();
     user.teamMembers.forEach((tm) => {
       if (tm.team?.event) {
+        const isLeader = tm.role === "leader";
+        const canSeeCode = isLeader || isStaffOrAdmin;
         uniqueCampaignsMap.set(tm.team.event.id, {
           event: tm.team.event,
           team: {
             id: tm.team.id,
             name: tm.team.name,
-            inviteCode: tm.team.inviteCode,
+            inviteCode: canSeeCode ? tm.team.inviteCode : null,
             status: tm.team.status,
             role: tm.role,
             memberCount: tm.team._count.members,
@@ -156,17 +160,21 @@ export async function GET(req: Request) {
         createdAt: user.createdAt,
       },
       campaigns,
-      teams: user.teamMembers.map((tm) => ({
-        id: tm.team.id,
-        name: tm.team.name,
-        inviteCode: tm.team.inviteCode,
-        status: tm.team.status,
-        role: tm.role,
-        event: tm.team.event,
-        memberCount: tm.team._count.members,
-        imageSetsCount: tm.team._count.imageSets,
-        joinedAt: tm.createdAt,
-      })),
+      teams: user.teamMembers.map((tm) => {
+        const isLeader = tm.role === "leader";
+        const canSeeCode = isLeader || isStaffOrAdmin;
+        return {
+          id: tm.team.id,
+          name: tm.team.name,
+          inviteCode: canSeeCode ? tm.team.inviteCode : null,
+          status: tm.team.status,
+          role: tm.role,
+          event: tm.team.event,
+          memberCount: tm.team._count.members,
+          imageSetsCount: tm.team._count.imageSets,
+          joinedAt: tm.createdAt,
+        };
+      }),
       claimedSets: user.claimedSets,
       joinRequests: user.joinRequests,
       stats: {

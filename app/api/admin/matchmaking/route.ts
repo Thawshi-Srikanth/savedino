@@ -136,9 +136,10 @@ export async function POST(req: Request) {
       );
     }
 
-    if (team.members.length >= 6) {
+    const maxLimit = team.event?.maxTeamSize || 6;
+    if (team.members.length >= maxLimit) {
       return NextResponse.json(
-        { success: false, error: "Team is already full (max 6 members)." },
+        { success: false, error: `Squad is already full (max ${maxLimit} members for this campaign).` },
         { status: 400 }
       );
     }

@@ -426,11 +426,16 @@ export function CampaignsTab({
                       </DropdownMenu>
                     </TableCell>
 
-                    {/* Squad Count */}
+                    {/* Squad Count & Max Squad Size */}
                     <TableCell className="py-2.5 px-3 w-[12%] whitespace-nowrap overflow-hidden">
-                      <span className="font-mono text-xs font-bold text-foreground">
-                        {ev._count?.teams || 0}
-                      </span>
+                      <div className="space-y-0.5">
+                        <div className="font-mono text-xs font-bold text-foreground">
+                          {ev._count?.teams || 0} squads
+                        </div>
+                        <div className="font-mono text-[10px] text-muted-foreground">
+                          Max: {ev.maxTeamSize || 6}/squad
+                        </div>
+                      </div>
                     </TableCell>
 
                     {/* Timeline Schedules */}

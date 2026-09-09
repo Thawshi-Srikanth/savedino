@@ -149,6 +149,7 @@ export async function POST(
     const team = await prisma.team.findUnique({
       where: { id: teamId },
       include: {
+        event: true,
         members: true,
       },
     });
@@ -168,8 +169,9 @@ export async function POST(
       return NextResponse.json({ success: false, error: "This team is currently not accepting join requests." }, { status: 400 });
     }
 
-    if (team.members.length >= 6) {
-      return NextResponse.json({ success: false, error: "This team is already at max capacity (6 members)." }, { status: 400 });
+    const maxLimit = team.event?.maxTeamSize || 6;
+    if (team.members.length >= maxLimit) {
+      return NextResponse.json({ success: false, error: `This squad is already at max capacity (${maxLimit} members).` }, { status: 400 });
     }
 
     // Check if user is already in this team

@@ -29,6 +29,7 @@ export async function PUT(
     const team = await prisma.team.findUnique({
       where: { id: teamId },
       include: {
+        event: true,
         members: true,
       },
     });
@@ -70,8 +71,9 @@ export async function PUT(
       );
     }
 
-    if (team.members.length >= 6) {
-      return NextResponse.json({ success: false, error: "Team is already at max capacity (6 members)." }, { status: 400 });
+    const maxLimit = team.event?.maxTeamSize || 6;
+    if (team.members.length >= maxLimit) {
+      return NextResponse.json({ success: false, error: `Squad is already at max capacity (${maxLimit} members).` }, { status: 400 });
     }
 
     // Check if user is already enrolled in ANY squad for this campaign
@@ -133,7 +135,7 @@ export async function PUT(
       where: { id: teamId },
       data: {
         status: newStatus,
-        isRecruiting: updatedMemberCount < 6,
+        isRecruiting: updatedMemberCount < maxLimit,
       },
     });
 

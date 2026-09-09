@@ -59,6 +59,7 @@ interface EventDetail {
   submissionStart: string;
   submissionEnd: string;
   status: string;
+  maxTeamSize?: number;
   teams: Array<{
     id: string;
     name: string;
@@ -1032,7 +1033,7 @@ export default function CampaignDetailPage({
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Teams have 2 to 6 members.</span>
+                <span>Teams have 2 to {event.maxTeamSize || 6} members.</span>
               </div>
             </div>
 

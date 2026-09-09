@@ -25,10 +25,12 @@ Every core role has a dedicated single test persona:
 1. **Campaign 1 (ACTIVE): `Pan-STARRS Sky Survey Phase 1` (Code: `AST-2026-A`)**
    - Registration and Team Formation: Started 14 days ago, open for 14 more days.
    - Campaign Period: Started 7 days ago, closes in 14 days.
+   - Max Squad Size: 6 members per squad.
    - Status: Active search and report submissions in progress.
 2. **Campaign 2 (UPCOMING): `Catalina Deep Sky Phase 2` (Code: `AST-2026-B`)**
    - Registration and Team Formation: Open now (closes in 20 days).
    - Campaign Period: Starts in 20 days (after Campaign 1 ends).
+   - Max Squad Size: 5 members per squad.
    - Status: Upcoming phase.
 
 ### Teams
@@ -97,6 +99,10 @@ Every core role has a dedicated single test persona:
    - Switch back to **Amina Khalil** (`applicant@savedino.org`).
    - Refresh the page or visit `/teams`.
    - **Expected Result**: Amina is now an active member of *Nova Orbitals* with access to the team workspace and image sets.
+
+4. **Verify Invite Code Privacy for Regular Members**:
+   - As **Marcus Vance** (`member@savedino.org`) or **Amina Khalil** (`applicant@savedino.org`), open the *Nova Orbitals* workspace.
+   - **Expected Result**: The squad invite code is hidden from the workspace header, the roster tab, the profile page, and the API response. Only squad leader **Sarah Chen** and platform organizers can view and rotate the invite code.
 
 ---
 

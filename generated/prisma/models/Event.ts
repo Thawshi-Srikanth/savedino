@@ -20,8 +20,18 @@ export type EventModel = runtime.Types.Result.DefaultSelection<Prisma.$EventPayl
 
 export type AggregateEvent = {
   _count: EventCountAggregateOutputType | null
+  _avg: EventAvgAggregateOutputType | null
+  _sum: EventSumAggregateOutputType | null
   _min: EventMinAggregateOutputType | null
   _max: EventMaxAggregateOutputType | null
+}
+
+export type EventAvgAggregateOutputType = {
+  maxTeamSize: number | null
+}
+
+export type EventSumAggregateOutputType = {
+  maxTeamSize: number | null
 }
 
 export type EventMinAggregateOutputType = {
@@ -37,6 +47,7 @@ export type EventMinAggregateOutputType = {
   endDate: Date | null
   submissionStart: Date | null
   submissionEnd: Date | null
+  maxTeamSize: number | null
   status: $Enums.EventStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -55,6 +66,7 @@ export type EventMaxAggregateOutputType = {
   endDate: Date | null
   submissionStart: Date | null
   submissionEnd: Date | null
+  maxTeamSize: number | null
   status: $Enums.EventStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -73,12 +85,21 @@ export type EventCountAggregateOutputType = {
   endDate: number
   submissionStart: number
   submissionEnd: number
+  maxTeamSize: number
   status: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type EventAvgAggregateInputType = {
+  maxTeamSize?: true
+}
+
+export type EventSumAggregateInputType = {
+  maxTeamSize?: true
+}
 
 export type EventMinAggregateInputType = {
   id?: true
@@ -93,6 +114,7 @@ export type EventMinAggregateInputType = {
   endDate?: true
   submissionStart?: true
   submissionEnd?: true
+  maxTeamSize?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -111,6 +133,7 @@ export type EventMaxAggregateInputType = {
   endDate?: true
   submissionStart?: true
   submissionEnd?: true
+  maxTeamSize?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -129,6 +152,7 @@ export type EventCountAggregateInputType = {
   endDate?: true
   submissionStart?: true
   submissionEnd?: true
+  maxTeamSize?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -173,6 +197,18 @@ export type EventAggregateArgs<ExtArgs extends runtime.Types.Extensions.Internal
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: EventAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: EventSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: EventMinAggregateInputType
@@ -203,6 +239,8 @@ export type EventGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   _count?: EventCountAggregateInputType | true
+  _avg?: EventAvgAggregateInputType
+  _sum?: EventSumAggregateInputType
   _min?: EventMinAggregateInputType
   _max?: EventMaxAggregateInputType
 }
@@ -220,10 +258,13 @@ export type EventGroupByOutputType = {
   endDate: Date
   submissionStart: Date
   submissionEnd: Date
+  maxTeamSize: number
   status: $Enums.EventStatus
   createdAt: Date
   updatedAt: Date
   _count: EventCountAggregateOutputType | null
+  _avg: EventAvgAggregateOutputType | null
+  _sum: EventSumAggregateOutputType | null
   _min: EventMinAggregateOutputType | null
   _max: EventMaxAggregateOutputType | null
 }
@@ -259,6 +300,7 @@ export type EventWhereInput = {
   endDate?: Prisma.DateTimeFilter<"Event"> | Date | string
   submissionStart?: Prisma.DateTimeFilter<"Event"> | Date | string
   submissionEnd?: Prisma.DateTimeFilter<"Event"> | Date | string
+  maxTeamSize?: Prisma.IntFilter<"Event"> | number
   status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
@@ -279,6 +321,7 @@ export type EventOrderByWithRelationInput = {
   endDate?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  maxTeamSize?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -302,6 +345,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   endDate?: Prisma.DateTimeFilter<"Event"> | Date | string
   submissionStart?: Prisma.DateTimeFilter<"Event"> | Date | string
   submissionEnd?: Prisma.DateTimeFilter<"Event"> | Date | string
+  maxTeamSize?: Prisma.IntFilter<"Event"> | number
   status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
@@ -322,12 +366,15 @@ export type EventOrderByWithAggregationInput = {
   endDate?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  maxTeamSize?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.EventCountOrderByAggregateInput
+  _avg?: Prisma.EventAvgOrderByAggregateInput
   _max?: Prisma.EventMaxOrderByAggregateInput
   _min?: Prisma.EventMinOrderByAggregateInput
+  _sum?: Prisma.EventSumOrderByAggregateInput
 }
 
 export type EventScalarWhereWithAggregatesInput = {
@@ -346,6 +393,7 @@ export type EventScalarWhereWithAggregatesInput = {
   endDate?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   submissionStart?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   submissionEnd?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
+  maxTeamSize?: Prisma.IntWithAggregatesFilter<"Event"> | number
   status?: Prisma.EnumEventStatusWithAggregatesFilter<"Event"> | $Enums.EventStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
@@ -364,6 +412,7 @@ export type EventCreateInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -384,6 +433,7 @@ export type EventUncheckedCreateInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -404,6 +454,7 @@ export type EventUpdateInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -424,6 +475,7 @@ export type EventUncheckedUpdateInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -444,6 +496,7 @@ export type EventCreateManyInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -462,6 +515,7 @@ export type EventUpdateManyMutationInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -480,6 +534,7 @@ export type EventUncheckedUpdateManyInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -498,9 +553,14 @@ export type EventCountOrderByAggregateInput = {
   endDate?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  maxTeamSize?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type EventAvgOrderByAggregateInput = {
+  maxTeamSize?: Prisma.SortOrder
 }
 
 export type EventMaxOrderByAggregateInput = {
@@ -516,6 +576,7 @@ export type EventMaxOrderByAggregateInput = {
   endDate?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  maxTeamSize?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -534,14 +595,27 @@ export type EventMinOrderByAggregateInput = {
   endDate?: Prisma.SortOrder
   submissionStart?: Prisma.SortOrder
   submissionEnd?: Prisma.SortOrder
+  maxTeamSize?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
+export type EventSumOrderByAggregateInput = {
+  maxTeamSize?: Prisma.SortOrder
+}
+
 export type EventScalarRelationFilter = {
   is?: Prisma.EventWhereInput
   isNot?: Prisma.EventWhereInput
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type EnumEventStatusFieldUpdateOperationsInput = {
@@ -589,6 +663,7 @@ export type EventCreateWithoutTeamsInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -608,6 +683,7 @@ export type EventUncheckedCreateWithoutTeamsInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -643,6 +719,7 @@ export type EventUpdateWithoutTeamsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -662,6 +739,7 @@ export type EventUncheckedUpdateWithoutTeamsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -681,6 +759,7 @@ export type EventCreateWithoutImageSetsInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -700,6 +779,7 @@ export type EventUncheckedCreateWithoutImageSetsInput = {
   endDate: Date | string
   submissionStart: Date | string
   submissionEnd: Date | string
+  maxTeamSize?: number
   status?: $Enums.EventStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -735,6 +815,7 @@ export type EventUpdateWithoutImageSetsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -754,6 +835,7 @@ export type EventUncheckedUpdateWithoutImageSetsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissionEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  maxTeamSize?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -813,6 +895,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   endDate?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  maxTeamSize?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -834,6 +917,7 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   endDate?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  maxTeamSize?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -852,6 +936,7 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   endDate?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  maxTeamSize?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -870,12 +955,13 @@ export type EventSelectScalar = {
   endDate?: boolean
   submissionStart?: boolean
   submissionEnd?: boolean
+  maxTeamSize?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "code" | "description" | "regStart" | "regEnd" | "teamFormationStart" | "teamFormationEnd" | "startDate" | "endDate" | "submissionStart" | "submissionEnd" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "code" | "description" | "regStart" | "regEnd" | "teamFormationStart" | "teamFormationEnd" | "startDate" | "endDate" | "submissionStart" | "submissionEnd" | "maxTeamSize" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teams?: boolean | Prisma.Event$teamsArgs<ExtArgs>
   imageSets?: boolean | Prisma.Event$imageSetsArgs<ExtArgs>
@@ -903,6 +989,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     endDate: Date
     submissionStart: Date
     submissionEnd: Date
+    maxTeamSize: number
     status: $Enums.EventStatus
     createdAt: Date
     updatedAt: Date
@@ -1343,6 +1430,7 @@ export interface EventFieldRefs {
   readonly endDate: Prisma.FieldRef<"Event", 'DateTime'>
   readonly submissionStart: Prisma.FieldRef<"Event", 'DateTime'>
   readonly submissionEnd: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly maxTeamSize: Prisma.FieldRef<"Event", 'Int'>
   readonly status: Prisma.FieldRef<"Event", 'EventStatus'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>

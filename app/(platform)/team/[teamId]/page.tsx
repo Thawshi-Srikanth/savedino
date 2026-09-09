@@ -111,7 +111,7 @@ interface JoinRequestItem {
 interface TeamData {
   id: string;
   name: string;
-  inviteCode: string;
+  inviteCode?: string | null;
   status: string;
   leaderId: string;
   isRecruiting: boolean;
@@ -128,6 +128,7 @@ interface TeamData {
     startDate: string;
     endDate: string;
     status: string;
+    maxTeamSize?: number;
   };
   members: TeamMember[];
 }
@@ -698,7 +699,7 @@ export default function TeamWorkspacePage({
                 </Badge>
               ) : (
                 <Badge className="bg-slate-700 text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
-                  {memberCount}/6 Members
+                  {memberCount}/{team?.event?.maxTeamSize || 6} Members
                 </Badge>
               )}
 
@@ -722,42 +723,44 @@ export default function TeamWorkspacePage({
             </h1>
           </div>
 
-          {/* Quick Invite Code */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div
-              onClick={team?.status !== "DISQUALIFIED" ? handleCopyInvite : undefined}
-              className="flex items-center gap-2 bg-background hover:bg-muted/50 transition-colors border border-border px-3 py-1.5 rounded-xl cursor-pointer select-none shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
-              title={team?.status === "DISQUALIFIED" ? "Invite code deactivated" : "Click to copy invite code"}
-            >
-              <div>
-                <span className="block text-[9px] font-mono text-muted-foreground uppercase">Invite Code</span>
-                <span className="text-xs font-mono font-bold text-foreground tracking-wider">
-                  {team?.inviteCode || "AST-XXXX"}
-                </span>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                type="button"
-                disabled={team?.status === "DISQUALIFIED"}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopyInvite();
-                }}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40"
-                title="Copy Invite Code"
+          {/* Quick Invite Code (Leader/Admin only) */}
+          {isLeaderOrAdmin && team?.inviteCode && (
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div
+                onClick={team?.status !== "DISQUALIFIED" ? handleCopyInvite : undefined}
+                className="flex items-center gap-2 bg-background hover:bg-muted/50 transition-colors border border-border px-3 py-1.5 rounded-xl cursor-pointer select-none shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                title={team?.status === "DISQUALIFIED" ? "Invite code deactivated" : "Click to copy invite code"}
               >
-                {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-              </Button>
+                <div>
+                  <span className="block text-[9px] font-mono text-muted-foreground uppercase">Invite Code</span>
+                  <span className="text-xs font-mono font-bold text-foreground tracking-wider">
+                    {team.inviteCode}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  type="button"
+                  disabled={team?.status === "DISQUALIFIED"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopyInvite();
+                  }}
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40"
+                  title="Copy Invite Code"
+                >
+                  {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Clean Metrics Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border/60">
           <div className="p-3 rounded-xl bg-background border border-border">
             <span className="text-[10px] font-mono text-muted-foreground uppercase block">Squad Roster</span>
-            <span className="text-sm font-bold text-foreground">{memberCount} / 6 Members</span>
+            <span className="text-sm font-bold text-foreground">{memberCount} / {team?.event?.maxTeamSize || 6} Members</span>
           </div>
           <div className="p-3 rounded-xl bg-background border border-border">
             <span className="text-[10px] font-mono text-muted-foreground uppercase block">Image Sets</span>
@@ -826,7 +829,7 @@ export default function TeamWorkspacePage({
                       : "text-muted-foreground bg-muted"
                   }`}
                 >
-                  {memberCount}/6
+                  {memberCount}/{team?.event?.maxTeamSize || 6}
                 </Badge>
               </TabsTrigger>
 
@@ -1297,14 +1300,21 @@ export default function TeamWorkspacePage({
               </div>
 
               {/* Roster Capacity Indicator */}
-              <div className="flex items-center gap-2.5">
-                <span className="text-xs font-mono font-bold text-foreground">
-                  {memberCount} of 6 Slots Filled
-                </span>
-                <Badge className={memberCount >= 6 ? "bg-slate-700 text-white text-[10px] font-bold border-0" : "bg-[#8b5cf6] text-white text-[10px] font-bold border-0 shadow-[0_1.5px_0_0_#6d28d9]"}>
-                  {memberCount >= 6 ? "Full Roster" : `${6 - memberCount} Slots Open`}
-                </Badge>
-              </div>
+              {(() => {
+                const maxCapacity = team?.event?.maxTeamSize || 6;
+                const isFull = memberCount >= maxCapacity;
+                const openSlots = Math.max(0, maxCapacity - memberCount);
+                return (
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-mono font-bold text-foreground">
+                      {memberCount} of {maxCapacity} Slots Filled
+                    </span>
+                    <Badge className={isFull ? "bg-slate-700 text-white text-[10px] font-bold border-0" : "bg-[#8b5cf6] text-white text-[10px] font-bold border-0 shadow-[0_1.5px_0_0_#6d28d9]"}>
+                      {isFull ? "Full Roster" : `${openSlots} Slot${openSlots === 1 ? "" : "s"} Open`}
+                    </Badge>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Registration Window Information Alert */}
@@ -1396,42 +1406,79 @@ export default function TeamWorkspacePage({
               })}
 
               {/* Empty Slots Fillers */}
-              {Array.from({ length: Math.max(0, 6 - memberCount) }).map((_, idx) => (
-                <div
-                  key={`empty-${idx}`}
-                  className="p-4 border border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-muted-foreground min-h-[110px] space-y-1.5 text-center bg-background/50"
-                >
-                  <Users className="size-5 opacity-40" />
-                  <span className="text-xs font-bold text-foreground">Open Slot #{memberCount + idx + 1}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {team?.isRecruiting ? "Accepting student applications" : "Awaiting invites"}
-                  </span>
-                </div>
-              ))}
+              {(() => {
+                const maxCapacity = team?.event?.maxTeamSize || 6;
+                const openSlots = Math.max(0, maxCapacity - memberCount);
+                if (openSlots <= 0) return null;
+
+                if (openSlots <= 6) {
+                  return Array.from({ length: openSlots }).map((_, idx) => (
+                    <div
+                      key={`empty-${idx}`}
+                      className="p-4 border border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-muted-foreground min-h-[110px] space-y-1.5 text-center bg-background/50"
+                    >
+                      <Users className="size-5 opacity-40" />
+                      <span className="text-xs font-bold text-foreground">Open Slot #{memberCount + idx + 1}</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {team?.isRecruiting ? "Accepting student applications" : "Awaiting invites"}
+                      </span>
+                    </div>
+                  ));
+                }
+
+                // If more than 6 slots are open (e.g. 18 open slots in a 20-person squad)
+                return (
+                  <>
+                    {Array.from({ length: 3 }).map((_, idx) => (
+                      <div
+                        key={`empty-${idx}`}
+                        className="p-4 border border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-muted-foreground min-h-[110px] space-y-1.5 text-center bg-background/50"
+                      >
+                        <Users className="size-5 opacity-40" />
+                        <span className="text-xs font-bold text-foreground">Open Slot #{memberCount + idx + 1}</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {team?.isRecruiting ? "Accepting student applications" : "Awaiting invites"}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="p-4 border border-dashed border-primary/40 bg-primary/5 rounded-2xl flex flex-col items-center justify-center text-center min-h-[110px] space-y-1.5 col-span-1 sm:col-span-2 lg:col-span-1">
+                      <div className="size-8 rounded-full bg-[#8b5cf6]/15 text-primary flex items-center justify-center font-bold text-xs font-mono">
+                        +{openSlots - 3}
+                      </div>
+                      <span className="text-xs font-bold text-foreground">+{openSlots - 3} More Open Slots</span>
+                      <span className="text-[11px] text-muted-foreground font-mono">
+                        x{openSlots} total open slots ({memberCount}/{maxCapacity} filled)
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
-            {/* Shareable Invite Box in Roster Tab */}
-            <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-foreground">Invite Scientists to Your Squad</span>
-                <p className="text-xs text-muted-foreground">Share this 6-character code with students so they can join directly.</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="px-3 py-1.5 bg-background border border-border rounded-xl font-mono font-bold text-xs tracking-wider text-foreground">
-                  {team?.inviteCode}
+            {/* Shareable Invite Box in Roster Tab (Leader/Admin Only) */}
+            {isLeaderOrAdmin && team?.inviteCode && (
+              <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-foreground">Invite Scientists to Your Squad</span>
+                  <p className="text-xs text-muted-foreground">Share this 6-character code with students so they can join directly.</p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCopyInvite}
-                  className="h-8 text-xs font-bold gap-1 rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
-                >
-                  {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                  <span>{copied ? "Copied" : "Copy"}</span>
-                </Button>
+
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1.5 bg-background border border-border rounded-xl font-mono font-bold text-xs tracking-wider text-foreground">
+                    {team.inviteCode}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyInvite}
+                    className="h-8 text-xs font-bold gap-1 rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                  >
+                    {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                    <span>{copied ? "Copied" : "Copy"}</span>
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
           </Card>
         </TabsContent>
 
@@ -1552,7 +1599,8 @@ export default function TeamWorkspacePage({
                   {paginatedRequests.map((req) => {
                     const hasJoinedOtherSquad =
                       req.alreadyJoinedSquad && !req.alreadyJoinedSquad.isThisTeam;
-                    const isFull = memberCount >= 6;
+                    const maxCapacity = team?.event?.maxTeamSize || 6;
+                    const isFull = memberCount >= maxCapacity;
                     const isSquadDisabled = team?.status === "DISQUALIFIED";
                     const isPending = req.status === "PENDING";
                     const isProcessing = processingRequestId === req.id;
@@ -1644,7 +1692,7 @@ export default function TeamWorkspacePage({
                                 hasJoinedOtherSquad
                                   ? `Already in squad "${req.alreadyJoinedSquad?.teamName}"`
                                   : isFull
-                                  ? "Squad roster is full (6/6)"
+                                  ? `Squad roster is full (${memberCount}/${maxCapacity})`
                                   : isSquadDisabled
                                   ? "Squad is disabled"
                                   : "Accept applicant into squad"
@@ -1655,7 +1703,7 @@ export default function TeamWorkspacePage({
                                 {hasJoinedOtherSquad
                                   ? "Joined Another Squad"
                                   : isFull
-                                  ? "Roster Full (6/6)"
+                                  ? `Roster Full (${memberCount}/${maxCapacity})`
                                   : "Accept into Squad"}
                               </span>
                             </Button>

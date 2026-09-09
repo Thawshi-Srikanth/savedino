@@ -21,6 +21,8 @@ interface EditCampaignModalProps {
   setEditCampStatus: (val: string) => void;
   editCampDesc: string;
   setEditCampDesc: (val: string) => void;
+  editCampMaxTeamSize: number;
+  setEditCampMaxTeamSize: (val: number) => void;
   editCampRegStart: string;
   setEditCampRegStart: (val: string) => void;
   editCampRegEnd: string;
@@ -54,6 +56,8 @@ export function EditCampaignModal({
   setEditCampStatus,
   editCampDesc,
   setEditCampDesc,
+  editCampMaxTeamSize,
+  setEditCampMaxTeamSize,
   editCampRegStart,
   setEditCampRegStart,
   editCampRegEnd,
@@ -130,8 +134,8 @@ export function EditCampaignModal({
                 />
               </div>
 
-              {/* Code & Status */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Code, Status & Max Team Size */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground">Campaign Code</label>
                   <Input
@@ -156,6 +160,19 @@ export function EditCampaignModal({
                       <SelectItem value="COMPLETED">Completed / Concluded</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Max Squad Size</label>
+                  <Input
+                    type="number"
+                    min={2}
+                    max={30}
+                    required
+                    value={editCampMaxTeamSize}
+                    onChange={(e) => setEditCampMaxTeamSize(Math.max(2, Math.min(30, parseInt(e.target.value) || 6)))}
+                    className="h-9 text-xs font-mono bg-background"
+                  />
                 </div>
               </div>
 

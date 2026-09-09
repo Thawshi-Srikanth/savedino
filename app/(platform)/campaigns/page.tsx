@@ -62,6 +62,7 @@ interface EventItem {
   submissionStart: string;
   submissionEnd: string;
   status: string;
+  maxTeamSize?: number;
   _count?: {
     teams: number;
   };
@@ -1154,7 +1155,7 @@ export default function CampaignsPage() {
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Teams allow 2 to 6 members.</span>
+                <span>Teams allow 2 to {selectedEventForTeam?.maxTeamSize || 6} members.</span>
               </div>
             </div>
 

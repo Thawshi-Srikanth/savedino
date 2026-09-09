@@ -179,6 +179,7 @@ export async function GET(req: Request) {
             title: true,
             code: true,
             status: true,
+            maxTeamSize: true,
           },
         },
         members: {
@@ -214,10 +215,15 @@ export async function GET(req: Request) {
       },
     });
 
+    const isStaffOrAdmin = session?.user?.role === "admin" || session?.user?.role === "staff";
+
     const formattedTeams = teams.map((team: any) => {
+      const isLeader = Boolean(session?.user?.id && team.leaderId === session.user.id);
+      const canSeeInvite = isLeader || isStaffOrAdmin;
       const myReq = team.joinRequests?.[0];
       return {
         ...team,
+        inviteCode: canSeeInvite ? team.inviteCode : null,
         myRequestStatus: myReq?.status || null,
       };
     });

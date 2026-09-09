@@ -96,10 +96,12 @@ export async function POST(req: Request) {
       endDate,
       submissionStart,
       submissionEnd,
+      maxTeamSize,
     } = body;
 
     const sDate = startDate ? new Date(startDate) : new Date();
     const eDate = endDate ? new Date(endDate) : new Date(Date.now() + 30 * 86400000);
+    const teamSize = maxTeamSize ? Math.max(2, Math.min(30, Number(maxTeamSize))) : 6;
 
     const newEvent = await prisma.event.create({
       data: {
@@ -114,6 +116,7 @@ export async function POST(req: Request) {
         endDate: eDate,
         submissionStart: submissionStart ? new Date(submissionStart) : sDate,
         submissionEnd: submissionEnd ? new Date(submissionEnd) : eDate,
+        maxTeamSize: teamSize,
         status: "ACTIVE",
       },
     });

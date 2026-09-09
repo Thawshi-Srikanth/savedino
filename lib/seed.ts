@@ -115,6 +115,7 @@ export async function seedDatabase() {
       endDate: c1EndDate,
       submissionStart: c1SubStart,
       submissionEnd: c1SubEnd,
+      maxTeamSize: 6,
       status: "ACTIVE",
     },
   });
@@ -132,6 +133,7 @@ export async function seedDatabase() {
       endDate: c2EndDate,
       submissionStart: c2SubStart,
       submissionEnd: c2SubEnd,
+      maxTeamSize: 5,
       status: "UPCOMING",
     },
   });

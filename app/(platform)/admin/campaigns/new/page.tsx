@@ -23,6 +23,7 @@ export default function CreateCampaignPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newCode, setNewCode] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [newMaxTeamSize, setNewMaxTeamSize] = useState<number>(6);
   const [newRegStart, setNewRegStart] = useState("");
   const [newRegEnd, setNewRegEnd] = useState("");
   const [newTeamStart, setNewTeamStart] = useState("");
@@ -48,6 +49,7 @@ export default function CreateCampaignPage() {
           title: newTitle,
           code: newCode.toUpperCase(),
           description: newDesc,
+          maxTeamSize: newMaxTeamSize,
           regStart: newRegStart,
           regEnd: newRegEnd,
           teamFormationStart: newTeamStart,
@@ -135,8 +137,8 @@ export default function CreateCampaignPage() {
                 Define the primary campaign identity, official campaign code, and participant guidelines.
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-1">
                   <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-foreground">
                     Campaign Title *
                   </label>
@@ -158,6 +160,21 @@ export default function CreateCampaignPage() {
                     placeholder="AST-2026-A"
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+                    className="h-10 text-xs font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-foreground">
+                    Max Members Per Squad *
+                  </label>
+                  <Input
+                    type="number"
+                    min={2}
+                    max={30}
+                    required
+                    value={newMaxTeamSize}
+                    onChange={(e) => setNewMaxTeamSize(Math.max(2, Math.min(30, parseInt(e.target.value) || 6)))}
                     className="h-10 text-xs font-mono"
                   />
                 </div>
@@ -293,7 +310,7 @@ export default function CreateCampaignPage() {
                 <h4 className="font-bold text-lg text-foreground">{newTitle || "Untitled Campaign"}</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">{newDesc || "No description provided."}</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-border font-mono text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-border font-mono text-xs">
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px] uppercase font-bold">Student Registration</span>
                     <span className="font-bold text-foreground">
@@ -305,6 +322,13 @@ export default function CreateCampaignPage() {
                     <span className="text-muted-foreground block text-[10px] uppercase font-bold">Observation Campaign</span>
                     <span className="font-bold text-foreground">
                       {newStart ? new Date(newStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"} → {newEnd ? new Date(newEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-card rounded-lg border border-border space-y-1">
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">Max Squad Size</span>
+                    <span className="font-bold text-foreground">
+                      {newMaxTeamSize} Members / Squad
                     </span>
                   </div>
                 </div>

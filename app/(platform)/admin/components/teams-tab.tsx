@@ -200,7 +200,7 @@ export function TeamsTab({
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
-            <span>Open Slots (&lt; 6)</span>
+            <span>Open Slots</span>
             <span className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "OPEN" ? "text-white dark:text-slate-950" : "text-muted-foreground"}`}>
               {openSquadsCount}
             </span>
@@ -219,7 +219,7 @@ export function TeamsTab({
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
-            <span>Full Squads (6/6)</span>
+            <span>Full Squads</span>
             <span className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "FULL" ? "text-white" : "text-muted-foreground"}`}>
               {fullSquadsCount}
             </span>
@@ -421,7 +421,8 @@ export function TeamsTab({
               <TableBody>
                 {paginatedTeams.map((t) => {
                   const leaderMember = t.members.find((m) => m.role === "LEADER" || m.role === "leader" || m.userId === t.leaderId) || t.members[0];
-                  const isFull = t.members.length >= 6;
+                  const maxTeamSize = t.event?.maxTeamSize || 6;
+                  const isFull = t.members.length >= maxTeamSize;
                   const isDisqualified = t.status === "DISQUALIFIED";
 
                   return (
@@ -542,15 +543,15 @@ export function TeamsTab({
                           <div className="flex items-center gap-1.5">
                             {isFull ? (
                               <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#8b5cf6] text-white shadow-xs">
-                                6/6 Full
+                                {t.members.length}/{maxTeamSize} Full
                               </span>
                             ) : (
                               <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#10b981] text-white shadow-xs">
-                                {t.members.length}/6
+                                {t.members.length}/{maxTeamSize}
                               </span>
                             )}
                             <span className="text-[11px] text-muted-foreground font-mono">
-                              ({6 - t.members.length} open)
+                              ({Math.max(0, maxTeamSize - t.members.length)} open)
                             </span>
                           </div>
 

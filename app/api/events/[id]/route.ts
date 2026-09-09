@@ -123,6 +123,9 @@ export async function PATCH(
     if (body.endDate) dataToUpdate.endDate = new Date(body.endDate);
     if (body.submissionStart) dataToUpdate.submissionStart = new Date(body.submissionStart);
     if (body.submissionEnd) dataToUpdate.submissionEnd = new Date(body.submissionEnd);
+    if (body.maxTeamSize !== undefined) {
+      dataToUpdate.maxTeamSize = Math.max(2, Math.min(30, Number(body.maxTeamSize)));
+    }
 
     const updatedEvent = await prisma.event.update({
       where: { id: existingEvent.id },

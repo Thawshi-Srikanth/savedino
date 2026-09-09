@@ -63,6 +63,7 @@ interface TeamEvent {
   title: string;
   code: string;
   status: string;
+  maxTeamSize?: number;
 }
 
 interface Team {
@@ -716,7 +717,9 @@ function TeamsContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {displayedTeams.map((team) => {
                   const memberCount = team.members?.length || 0;
-                  const isFull = memberCount >= 6;
+                  const maxCap = team.event?.maxTeamSize || 6;
+                  const openSlots = Math.max(0, maxCap - memberCount);
+                  const isFull = memberCount >= maxCap;
 
                   const isUserMember = session?.user?.id
                     ? team.members?.some((m) => m.user?.id === session.user.id)
@@ -740,30 +743,66 @@ function TeamsContent() {
                           {team.name}
                         </h3>
 
-                        {/* Member Slots: 6 Colored User Icons */}
-                        <div className="flex items-center justify-between py-1">
-                          <div className="flex items-center gap-1.5">
-                            {Array.from({ length: 6 }).map((_, i) => {
-                              const isFilled = i < memberCount;
-                              return (
-                                <div
-                                  key={i}
-                                  className={`size-6 rounded flex items-center justify-center transition-colors ${
-                                    isFilled
-                                      ? "bg-[#8b5cf6] text-white shadow-xs"
-                                      : "bg-muted/50 text-muted-foreground/30 border border-border/70 border-dashed"
-                                  }`}
-                                  title={isFilled ? `Member slot ${i + 1} (Filled)` : `Slot ${i + 1} (Available)`}
-                                >
+                        {/* Member Slots / Multiplier Capacity Display */}
+                        {maxCap <= 6 ? (
+                          <div className="flex items-center justify-between py-1">
+                            <div className="flex items-center gap-1.5">
+                              {Array.from({ length: maxCap }).map((_, i) => {
+                                const isFilled = i < memberCount;
+                                return (
+                                  <div
+                                    key={i}
+                                    className={`size-6 rounded flex items-center justify-center transition-colors ${
+                                      isFilled
+                                        ? "bg-[#8b5cf6] text-white shadow-xs"
+                                        : "bg-muted/50 text-muted-foreground/30 border border-border/70 border-dashed"
+                                    }`}
+                                    title={isFilled ? `Member slot ${i + 1} (Filled)` : `Slot ${i + 1} (Available)`}
+                                  >
+                                    <User className="size-3.5" />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <span className="font-mono text-[11px] text-muted-foreground">
+                              <strong className="text-foreground">{memberCount}</strong>/{maxCap}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between py-1">
+                            <div className="flex items-center gap-3">
+                              {/* Filled Member Box + Multiplier */}
+                              <div className="flex items-center gap-1.5" title={`${memberCount} members joined`}>
+                                <div className="size-6 rounded flex items-center justify-center bg-[#8b5cf6] text-white shadow-xs">
                                   <User className="size-3.5" />
                                 </div>
-                              );
-                            })}
+                                <span className="font-mono text-xs font-bold text-foreground">
+                                  x{memberCount}
+                                </span>
+                              </div>
+
+                              {/* Available Empty Slot Box + Multiplier */}
+                              {openSlots > 0 ? (
+                                <div className="flex items-center gap-1.5" title={`${openSlots} slots remaining`}>
+                                  <div className="size-6 rounded flex items-center justify-center bg-muted/50 text-muted-foreground/40 border border-border/70 border-dashed">
+                                    <User className="size-3.5" />
+                                  </div>
+                                  <span className="font-mono text-xs text-muted-foreground">
+                                    x{openSlots} open
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-white">
+                                  Full
+                                </span>
+                              )}
+                            </div>
+
+                            <span className="font-mono text-[11px] text-muted-foreground">
+                              <strong className="text-foreground">{memberCount}</strong>/{maxCap}
+                            </span>
                           </div>
-                          <span className="font-mono text-[11px] text-muted-foreground">
-                            <strong className="text-foreground">{memberCount}</strong>/6
-                          </span>
-                        </div>
+                        )}
 
                         {/* Recruitment Notes */}
                         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[32px]">

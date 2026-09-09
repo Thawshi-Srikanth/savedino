@@ -109,6 +109,7 @@ model Event {
   endDate            DateTime
   submissionStart    DateTime
   submissionEnd      DateTime
+  maxTeamSize        Int         @default(6)
   status             EventStatus @default(UPCOMING)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt

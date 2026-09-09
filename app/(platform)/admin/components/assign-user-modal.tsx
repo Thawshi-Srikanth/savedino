@@ -47,12 +47,15 @@ export function AssignUserModal({
             >
               <option value="">-- Choose a Squad --</option>
               {teams
-                .filter((t) => t.members.length < 6)
-                .map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} ({t.event?.code || "AST"}) &bull; {t.members.length}/6 Members
-                  </option>
-                ))}
+                .filter((t) => t.members.length < (t.event?.maxTeamSize || 6))
+                .map((t) => {
+                  const maxCap = t.event?.maxTeamSize || 6;
+                  return (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.event?.code || "AST"}) &bull; {t.members.length}/{maxCap} Members
+                    </option>
+                  );
+                })}
             </select>
           </div>
 

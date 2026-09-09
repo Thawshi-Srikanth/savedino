@@ -33,6 +33,7 @@ export async function GET(
             startDate: true,
             endDate: true,
             status: true,
+            maxTeamSize: true,
           },
         },
         members: {
@@ -66,6 +67,7 @@ export async function GET(
     }
 
     const isMember = team.members.some((m) => m.userId === session.user.id);
+    const isLeader = team.leaderId === session.user.id;
     const isStaffOrAdmin = session.user.role === "admin" || session.user.role === "staff";
 
     if (!isMember && !isStaffOrAdmin) {
@@ -78,10 +80,16 @@ export async function GET(
       );
     }
 
+    const canSeeInviteCode = isLeader || isStaffOrAdmin;
+    const sanitizedTeam = {
+      ...team,
+      inviteCode: canSeeInviteCode ? team.inviteCode : null,
+    };
+
     return NextResponse.json(
       {
         success: true,
-        team,
+        team: sanitizedTeam,
       },
       {
         headers: {

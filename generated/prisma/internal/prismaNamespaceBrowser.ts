@@ -154,6 +154,7 @@ export const EventScalarFieldEnum = {
   endDate: 'endDate',
   submissionStart: 'submissionStart',
   submissionEnd: 'submissionEnd',
+  maxTeamSize: 'maxTeamSize',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

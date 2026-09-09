@@ -12,6 +12,7 @@ export interface EventData {
   submissionStart?: string;
   submissionEnd?: string;
   status: string;
+  maxTeamSize?: number;
   _count?: {
     teams: number;
     imageSets?: number;
@@ -31,6 +32,7 @@ export interface TeamData {
   event: {
     title: string;
     code: string;
+    maxTeamSize?: number;
   };
   members: Array<{
     id: string;
