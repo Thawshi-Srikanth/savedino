@@ -128,8 +128,8 @@
   --input: #38393e;
   --ring: #8b5cf6;
 
-  /* Tactile 3D Shadows in Dark Mode: Balanced Purplish Dark tone harmonious with background */
-  --shadow-arcade-border: #231e32; /* Warm Dark Purple-Slate Shadow */
+  /* Tactile 3D Shadows in Dark Mode: Clean Dark Grey tone matching Greyish Black Dark Theme */
+  --shadow-arcade-border: #27282d; /* Cohesive Charcoal Grey Shadow */
   --shadow-arcade-primary: #5b21b6; /* Rich Deep Violet Shadow */
   --shadow-arcade-emerald: #065f46;
   --shadow-arcade-amber: #854d0e;
@@ -281,4 +281,3 @@ body,
 .shadow-arcade-destructive {
   box-shadow: 0 2px 0 0 var(--shadow-arcade-destructive) !important;
 }
-
