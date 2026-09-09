@@ -177,7 +177,6 @@ export default function Home() {
       <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
         <DinoGameCanvas
           onScoreUpdate={handleScoreUpdate}
-          onNightModeChange={(night) => setTheme(night ? "dark" : "light")}
           nightModeOverride={mounted ? isNight : null}
         />
 

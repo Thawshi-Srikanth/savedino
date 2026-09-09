@@ -722,15 +722,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         ctx.translate(shakeX, shakeY);
       }
 
-      const baseNight = nightModeOverrideRef.current ?? false;
-      const cycleInverted = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
-      const night = cycleInverted ? !baseNight : baseNight;
+      // Consistently respect the active theme without periodic score-based flickering
+      const night = nightModeOverrideRef.current ?? isNightRef.current ?? false;
       if (isNightRef.current !== night) {
         isNightRef.current = night;
         setIsNight(night);
-        if (s.gameState === "RUNNING" && onNightModeChange) {
-          onNightModeChange(night);
-        }
       }
 
       // Transparent Canvas Clear (Lets the smooth 700ms page background transition show through directly)
@@ -833,41 +829,144 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(bx + r - pSize, by - Math.floor(r * 0.35), pSize, pSize * 2);
         ctx.fillRect(bx + r - pSize, by + Math.floor(r * 0.2), pSize, pSize * 2);
-
         ctx.restore();
       });
 
-      // Draw Varied Asteroids
+      // ----------------------------------------------------
+      // DRAW 8-BIT PIXEL ART BALL ASTEROIDS (TUMBLING & DETAILED)
+      // Stepped circular pixel matrix with fiery aura, magma veins, and rotating craters
+      // ----------------------------------------------------
       s.meteors.forEach((m) => {
+        const cx = Math.floor(m.x + m.radius);
+        const cy = Math.floor(m.y + m.radius);
+        const rad = Math.floor(m.radius);
+        const step = Math.max(2, Math.floor(rad / 6)); // Discrete pixel block size
+
+        // 1. Draw Trailing Flame Tail (Aligned with flight path, behind the asteroid)
         ctx.save();
-        ctx.translate(m.x + m.radius, m.y + m.radius);
+        const angle = Math.atan2(m.vy, m.vx);
+        const tailLen = m.type === "giant" ? 18 : m.type === "small" ? 10 : 14;
+        const tailColor =
+          m.type === "giant" ? "#ef4444" : m.type === "small" ? "#f59e0b" : "#f97316";
+
+        ctx.fillStyle = tailColor;
+        for (let t = 1; t <= 3; t++) {
+          const tDist = rad + t * (step * 1.5);
+          const tx = cx - Math.cos(angle) * tDist + Math.sin(s.frameCount * 0.4 + t) * step;
+          const ty = cy - Math.sin(angle) * tDist + Math.cos(s.frameCount * 0.4 + t) * step;
+          const tSize = Math.max(step, step * (4 - t));
+          ctx.fillRect(Math.floor(tx - tSize / 2), Math.floor(ty - tSize / 2), tSize, tSize);
+        }
+
+        // Inner Yellow Flame Core in Tail
+        ctx.fillStyle = "#fde047";
+        const txCore = cx - Math.cos(angle) * (rad + step);
+        const tyCore = cy - Math.sin(angle) * (rad + step);
+        ctx.fillRect(Math.floor(txCore - step), Math.floor(tyCore - step), step * 2, step * 2);
+        ctx.restore();
+
+        // 2. Draw Tumbling Asteroid Body (Centered at (0, 0) for authentic spin)
+        ctx.save();
+        ctx.translate(cx, cy);
         ctx.rotate(m.rotation);
 
-        // Halo
-        ctx.fillStyle = m.type === "giant" ? "#dc2626" : m.type === "small" ? "#f59e0b" : "#f97316";
-        ctx.shadowColor = "#ef4444";
-        ctx.shadowBlur = m.type === "giant" ? 14 : 8;
-        ctx.fillRect(-m.radius, -m.radius, m.size, m.size);
+        // Stepped Pixel Circle Drawer relative to local (0, 0)
+        const drawPixelCircle = (radius: number, color: string, offsetX = 0, offsetY = 0) => {
+          ctx.fillStyle = color;
+          for (let dy = -radius; dy <= radius; dy += step) {
+            const width =
+              Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
+            if (width > 0) {
+              ctx.fillRect(offsetX - width, offsetY + dy, width * 2, step);
+            }
+          }
+        };
 
-        // Rocky core
-        ctx.fillStyle = "#57534e";
-        ctx.shadowBlur = 0;
-        ctx.fillRect(-m.radius + 2, -m.radius + 2, m.size - 4, m.size - 4);
+        // A. Fiery Atmospheric Plasma Corona / Outer Burn
+        const fireColor =
+          m.type === "giant" ? "#dc2626" : m.type === "small" ? "#f59e0b" : "#f97316";
+        drawPixelCircle(rad + step, fireColor);
 
-        // Crater dots
-        ctx.fillStyle = "#292524";
-        ctx.fillRect(
-          -m.radius + 4,
-          -m.radius + 4,
-          m.type === "giant" ? 5 : 3,
-          m.type === "giant" ? 5 : 3
+        // B. Bright Molten Corona Edge
+        drawPixelCircle(rad, m.type === "giant" ? "#f97316" : "#fde047");
+
+        // C. Dark Shadowed Rocky Crust (Dark base stone sphere)
+        drawPixelCircle(rad - step, "#292524");
+
+        // D. Mid Rock Body (Offset slightly top-left for 3D depth)
+        drawPixelCircle(
+          Math.max(step, rad - step * 2),
+          "#57534e",
+          -Math.floor(step * 0.5),
+          -Math.floor(step * 0.5)
         );
+
+        // E. Lit Stone Highlight (Top-left crescent)
+        drawPixelCircle(Math.max(step, Math.floor(rad * 0.55)), "#78716c", -step, -step);
+
+        // F. Glowing Magma Veins & Heat Cracks (Pulses through rock)
+        ctx.fillStyle = "#f97316";
+        ctx.fillRect(-step * 2, 0, step * 3, step);
+        ctx.fillRect(0, -step * 2, step, step * 3);
+        ctx.fillRect(step, step, step * 2, step);
+
+        ctx.fillStyle = "#fde047";
+        ctx.fillRect(-step, 0, step, step);
+        ctx.fillRect(0, -step, step, step);
+
+        // G. Rotating Detailed Pixel Craters with Lit Lips and Dark Pits
         if (m.type === "giant") {
-          ctx.fillRect(-m.radius + m.size - 10, -m.radius + 8, 4, 4);
-          ctx.fillRect(-m.radius + 8, -m.radius + m.size - 10, 4, 4);
+          // Large main crater with lit rim
+          ctx.fillStyle = "#a8a29e"; // Lit rim
+          ctx.fillRect(-step * 3 - step, -step * 2 - step, step * 4, step);
+          ctx.fillStyle = "#1c1917"; // Crater wall
+          ctx.fillRect(-step * 3, -step * 2, step * 3, step * 2);
+          ctx.fillRect(-step * 4, -step, step * 5, step);
+          ctx.fillStyle = "#0c0a09"; // Deep abyss
+          ctx.fillRect(-step * 2, -step, step * 2, step);
+
+          // Second crater
+          ctx.fillStyle = "#78716c";
+          ctx.fillRect(step * 2, -step * 2, step * 2, step);
+          ctx.fillStyle = "#1c1917";
+          ctx.fillRect(step * 2, -step, step * 2, step * 2);
+          ctx.fillStyle = "#0c0a09";
+          ctx.fillRect(step * 2 + Math.floor(step * 0.5), 0, step, step);
+
+          // Third crater
+          ctx.fillStyle = "#1c1917";
+          ctx.fillRect(-step * 2, step * 2, step * 2, step * 2);
+          ctx.fillStyle = "#0c0a09";
+          ctx.fillRect(-step * 1.5, step * 2.5, step, step);
+        } else if (m.type === "medium") {
+          // Medium crater 1
+          ctx.fillStyle = "#78716c";
+          ctx.fillRect(-step * 2, -step * 2, step * 2, step);
+          ctx.fillStyle = "#1c1917";
+          ctx.fillRect(-step * 2, -step, step * 2, step * 2);
+          ctx.fillStyle = "#0c0a09";
+          ctx.fillRect(-step * 1.5, 0, step, step);
+
+          // Medium crater 2
+          ctx.fillStyle = "#1c1917";
+          ctx.fillRect(step, step, step * 2, step * 2);
+          ctx.fillStyle = "#0c0a09";
+          ctx.fillRect(step + Math.floor(step * 0.5), step + Math.floor(step * 0.5), step, step);
         } else {
-          ctx.fillRect(-m.radius + m.size - 7, -m.radius + 6, 2, 2);
+          // Small crater
+          ctx.fillStyle = "#78716c";
+          ctx.fillRect(-step, -step, step * 2, step);
+          ctx.fillStyle = "#1c1917";
+          ctx.fillRect(-step, 0, step * 2, step);
+          ctx.fillStyle = "#0c0a09";
+          ctx.fillRect(0, 0, step, step);
         }
+
+        // H. Specular Glint Pixels on top-left rock face
+        ctx.fillStyle = "#e7e5e4";
+        const glintDist = Math.floor(rad * 0.5);
+        ctx.fillRect(-glintDist, -glintDist, step * 2, step);
+        ctx.fillRect(-glintDist - step, -glintDist + step, step, step);
 
         ctx.restore();
       });
