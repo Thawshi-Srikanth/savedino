@@ -48,9 +48,9 @@ export async function GET(
 
     const isMember = team.members.some((m) => m.userId === session.user.id);
     const isLeader = team.leaderId === session.user.id;
-    const isAdmin = session.user.role === "admin";
+    const isStaffOrAdmin = session.user.role === "admin" || session.user.role === "staff";
 
-    if (!isMember && !isAdmin) {
+    if (!isMember && !isStaffOrAdmin) {
       return NextResponse.json({ success: false, error: "Only team members or admins can view join requests." }, { status: 403 });
     }
 
@@ -132,6 +132,13 @@ export async function POST(
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
+    }
+
+    if (session.user.role === "admin" || session.user.role === "staff") {
+      return NextResponse.json(
+        { success: false, error: "Administrators and staff manage campaigns and cannot submit team join requests." },
+        { status: 403 }
+      );
     }
 
     const { teamId } = await params;

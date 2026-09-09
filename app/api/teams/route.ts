@@ -22,6 +22,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (session.user.role === "admin" || session.user.role === "staff") {
+      return NextResponse.json(
+        { success: false, error: "Administrators and staff manage campaigns and cannot form participant teams." },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { eventId, name } = body;
 

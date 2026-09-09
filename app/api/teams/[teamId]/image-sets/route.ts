@@ -30,7 +30,9 @@ export async function GET(
       },
     });
 
-    if (!isMember && session.user.role !== "admin") {
+    const isStaffOrAdmin = session.user.role === "admin" || session.user.role === "staff";
+
+    if (!isMember && !isStaffOrAdmin) {
       return NextResponse.json(
         { success: false, error: "Access denied. You are not an active member of this squad." },
         { status: 403 }

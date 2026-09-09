@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use, useMemo } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
+import { getTeamContextPermissions, isOrganizer, isAdmin } from "@/lib/rbac";
 import { parseMpcReport } from "@/lib/mpc-parser";
 import { isRegistrationClosed } from "@/lib/campaign-utils";
 import { Card } from "@/components/ui/card";
@@ -44,6 +45,7 @@ import {
   Clock,
   CheckCircle2,
   ShieldAlert,
+  ShieldCheck,
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -481,9 +483,19 @@ export default function TeamWorkspacePage({
     reader.readAsText(file);
   };
 
-  const isLeader = team?.leaderId === session?.user?.id;
-  const isAdmin = session?.user?.role === "admin";
-  const isLeaderOrAdmin = isLeader || isAdmin;
+  const {
+    isMember,
+    isLeader,
+    isOrganizer: isStaffOrAdmin,
+    isObserverMode,
+    canManageTeam,
+  } = useMemo(
+    () => getTeamContextPermissions(session?.user, team),
+    [session?.user, team]
+  );
+  const isAdminUser = isAdmin(session?.user);
+  const isAdminRole = isAdminUser;
+  const isLeaderOrAdmin = isLeader || isAdminUser;
   const memberCount = team?.members?.length || 0;
 
   // Check if registration period is closed
@@ -616,6 +628,31 @@ export default function TeamWorkspacePage({
           </Link>
         )}
       </div>
+
+      {/* Organizer Read-Only Mode Banner */}
+      {isObserverMode && (
+        <div className="p-3.5 rounded-2xl border border-violet-500/30 bg-violet-500/10 text-violet-800 dark:text-violet-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs font-sans">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-xl bg-[#8b5cf6] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div className="text-xs">
+              <span className="font-bold text-foreground">Organizer Read-Only Mode:</span>{" "}
+              <span className="text-muted-foreground">
+                You are inspecting this squad workspace with administrator privileges. All participant actions are in read-only mode.
+              </span>
+            </div>
+          </div>
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs font-bold shrink-0 rounded-xl border-violet-500/30 hover:bg-violet-500/20"
+          >
+            <Link href="/admin?tab=teams">Open Admin Console</Link>
+          </Button>
+        </div>
+      )}
 
       {/* Disqualification / Disabled Banner */}
       {team?.status === "DISQUALIFIED" && (
@@ -1036,7 +1073,28 @@ export default function TeamWorkspacePage({
 
                       {/* Action Buttons */}
                       <div className="pt-2.5 border-t border-border/60">
-                        {normalized === "UNASSIGNED" ? (
+                        {isObserverMode ? (
+                          <Button
+                            onClick={() => {
+                              if (s.mpcReportText || s.status === "SUBMITTED" || s.status === "IN_PROGRESS") {
+                                setActiveSetForReport(s);
+                                setMpcText(s.mpcReportText || "");
+                              }
+                            }}
+                            size="sm"
+                            variant="outline"
+                            disabled={normalized === "UNASSIGNED"}
+                            className="w-full h-8 text-xs font-bold rounded-xl"
+                          >
+                            <span>
+                              {normalized === "UNASSIGNED"
+                                ? "Unassigned Batch"
+                                : normalized === "SUBMITTED"
+                                ? "Inspect Final Report"
+                                : "Inspect Batch Progress"}
+                            </span>
+                          </Button>
+                        ) : normalized === "UNASSIGNED" ? (
                           <Button
                             onClick={() => handleClaimSet(s.id)}
                             size="sm"
@@ -1207,11 +1265,11 @@ export default function TeamWorkspacePage({
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={isRegClosed && !isAdmin}
+                          disabled={isRegClosed && !isAdminUser}
                           onClick={() => setMemberToRemove(m)}
                           className="h-7 px-2 text-[11px] font-bold text-muted-foreground hover:text-destructive hover:border-destructive/40 rounded-xl gap-1 shrink-0 disabled:opacity-40"
                           title={
-                            isRegClosed && !isAdmin
+                            isRegClosed && !isAdminUser
                               ? "Member removal is locked because the campaign registration period has ended"
                               : "Remove citizen from squad"
                           }

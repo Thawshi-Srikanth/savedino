@@ -56,12 +56,13 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   ];
 
   // @ts-ignore
-  if (session?.user?.role === "admin") {
+  const userRole = session?.user?.role;
+  if (userRole === "admin" || userRole === "staff") {
     navItems.push({
       title: "Admin Console",
       url: "/admin",
       icon: ShieldAlert,
-      active: pathname === "/admin",
+      active: pathname === "/admin" || pathname.startsWith("/admin/"),
     });
   }
 

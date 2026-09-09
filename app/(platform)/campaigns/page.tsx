@@ -391,6 +391,10 @@ export default function CampaignsPage() {
       router.push("/login");
       return;
     }
+    if (session.user.role === "admin" || session.user.role === "staff") {
+      toast.info("Administrators and staff manage campaigns and cannot join participant teams.");
+      return;
+    }
     setSelectedEventForJoin(event || null);
     setJoinCode("");
     setJoinError(null);
@@ -400,6 +404,10 @@ export default function CampaignsPage() {
   const handleOpenCreateModal = (event: EventItem) => {
     if (!session) {
       router.push("/login");
+      return;
+    }
+    if (session.user.role === "admin" || session.user.role === "staff") {
+      toast.info("Administrators and staff manage campaigns and cannot form participant teams.");
       return;
     }
     setSelectedEventForTeam(event);

@@ -1,145 +1,69 @@
 import { prisma } from "./prisma";
 
 export async function seedDatabase() {
-  console.log("🌱 Starting SaveDino Database Seeding...");
+  console.log("🌱 Starting Clean SaveDino Database Seeding...");
 
-  // 1. Create Users with 4-Tier Roles (admin, staff, leader, user)
+  // 0. Clean wipe existing records in correct foreign key order
+  await prisma.imageSet.deleteMany();
+  await prisma.teamJoinRequest.deleteMany();
+  await prisma.teamMember.deleteMany();
+  await prisma.team.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.verification.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log("🧹 Previous data wiped cleanly.");
+
+  // 1. Single Person For Each Role
   const usersData = [
     {
       email: "admin@savedino.org",
       name: "Dr. Eleanor Arroway",
       role: "admin",
-      institution: "SETI & IASC Research",
+      institution: "SETI Research",
       country: "United States",
       emailVerified: true,
     },
     {
-      email: "sarah.chen@mit.edu",
+      email: "staff@savedino.org",
+      name: "Priya Patel",
+      role: "staff",
+      institution: "IASC Operations",
+      country: "India",
+      emailVerified: true,
+    },
+    {
+      email: "leader@savedino.org",
       name: "Sarah Chen",
-      role: "leader",
+      role: "user",
       institution: "MIT Astrophysics",
       country: "United States",
       emailVerified: true,
     },
     {
-      email: "kenji.sato@u-tokyo.ac.jp",
-      name: "Kenji Sato",
-      role: "leader",
-      institution: "University of Tokyo",
-      country: "Japan",
-      emailVerified: true,
-    },
-    {
-      email: "elena.rostova@cam.ac.uk",
-      name: "Dr. Elena Rostova",
-      role: "leader",
-      institution: "Cambridge Astronomy",
-      country: "United Kingdom",
-      emailVerified: true,
-    },
-    {
-      email: "marcus.vance@caltech.edu",
+      email: "member@savedino.org",
       name: "Marcus Vance",
-      role: "leader",
-      institution: "Caltech",
+      role: "user",
+      institution: "Caltech Astronomy",
       country: "United States",
       emailVerified: true,
     },
     {
-      email: "priya.patel@iisc.ac.in",
-      name: "Priya Patel",
-      role: "staff",
-      institution: "Indian Institute of Science",
-      country: "India",
-      emailVerified: true,
-    },
-    {
-      email: "hina.takahashi@kyoto-u.ac.jp",
-      name: "Hina Takahashi",
-      role: "staff",
-      institution: "Kyoto University",
-      country: "Japan",
-      emailVerified: true,
-    },
-    {
-      email: "lucas.silva@usp.br",
-      name: "Lucas Silva",
-      role: "user",
-      institution: "University of São Paulo",
-      country: "Brazil",
-      emailVerified: true,
-    },
-    {
-      email: "amina.khalil@aucegypt.edu",
+      email: "applicant@savedino.org",
       name: "Amina Khalil",
       role: "user",
-      institution: "American University in Cairo",
+      institution: "Cairo Space Science",
       country: "Egypt",
       emailVerified: true,
     },
     {
-      email: "leo.dupont@sorbonne.fr",
-      name: "Léo Dupont",
-      role: "user",
-      institution: "Sorbonne University",
-      country: "France",
-      emailVerified: true,
-    },
-    // Unassigned Solo Researchers / Students (Available for Matchmaking & Teams)
-    {
-      email: "alex.novak@cmu.edu",
+      email: "solo@savedino.org",
       name: "Alex Novak",
       role: "user",
-      institution: "Carnegie Mellon University",
+      institution: "Carnegie Mellon",
       country: "United States",
-      emailVerified: true,
-    },
-    {
-      email: "mateo.fernandez@uba.ar",
-      name: "Mateo Fernandez",
-      role: "user",
-      institution: "University of Buenos Aires",
-      country: "Argentina",
-      emailVerified: true,
-    },
-    {
-      email: "zara.mensah@ug.edu.gh",
-      name: "Zara Mensah",
-      role: "user",
-      institution: "University of Ghana",
-      country: "Ghana",
-      emailVerified: true,
-    },
-    {
-      email: "oliver.smith@ox.ac.uk",
-      name: "Oliver Smith",
-      role: "user",
-      institution: "University of Oxford",
-      country: "United Kingdom",
-      emailVerified: true,
-    },
-    {
-      email: "fatima.almansoori@uaeu.ac.ae",
-      name: "Fatima Al-Mansoori",
-      role: "user",
-      institution: "UAE University",
-      country: "United Arab Emirates",
-      emailVerified: true,
-    },
-    {
-      email: "lars.lindqvist@kth.se",
-      name: "Lars Lindqvist",
-      role: "user",
-      institution: "KTH Royal Institute of Technology",
-      country: "Sweden",
-      emailVerified: true,
-    },
-    {
-      email: "chloe.martin@unimelb.edu.au",
-      name: "Chloe Martin",
-      role: "user",
-      institution: "University of Melbourne",
-      country: "Australia",
       emailVerified: true,
     },
   ];
@@ -147,214 +71,148 @@ export async function seedDatabase() {
   const createdUsers: Record<string, any> = {};
 
   for (const u of usersData) {
-    const user = await prisma.user.upsert({
-      where: { email: u.email },
-      update: {
-        name: u.name,
-        role: u.role,
-        institution: u.institution,
-        country: u.country,
-        emailVerified: u.emailVerified,
-      },
-      create: u,
+    const user = await prisma.user.create({
+      data: u,
     });
     createdUsers[u.email] = user;
   }
-  console.log(`✅ Upserted ${Object.keys(createdUsers).length} users.`);
+  console.log(`✅ Created ${Object.keys(createdUsers).length} role personas.`);
 
-  // 2. Create Events (Campaigns)
+  // 2. Create Two Campaigns with Proper Timeline (No em dashes)
   const now = new Date();
-  const pastDate = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000);
-  const futureDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const nextMonth = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const dayMs = 24 * 60 * 60 * 1000;
 
-  const eventsData = [
-    {
-      code: "IASC-2026-A",
-      title: "Global Asteroid Search Campaign — Phase 1",
-      description:
-        "Primary Pan-STARRS sky survey analysis campaign detecting Near Earth Objects (NEOs) and Main Belt asteroids.",
-      regStart: pastDate,
-      regEnd: futureDate,
-      teamFormationStart: pastDate,
-      teamFormationEnd: futureDate,
-      startDate: pastDate,
-      endDate: futureDate,
-      submissionStart: pastDate,
-      submissionEnd: futureDate,
-      status: "ACTIVE" as const,
+  // Campaign 1: Active Phase (In progress right now)
+  const c1RegStart = new Date(now.getTime() - 14 * dayMs);
+  const c1RegEnd = new Date(now.getTime() + 14 * dayMs);
+  const c1TeamStart = new Date(now.getTime() - 14 * dayMs);
+  const c1TeamEnd = new Date(now.getTime() + 14 * dayMs);
+  const c1StartDate = new Date(now.getTime() - 7 * dayMs);
+  const c1EndDate = new Date(now.getTime() + 14 * dayMs);
+  const c1SubStart = new Date(now.getTime() - 7 * dayMs);
+  const c1SubEnd = new Date(now.getTime() + 14 * dayMs);
+
+  // Campaign 2: Upcoming Phase (Starts after Campaign 1 ends, but Registration is open now)
+  const c2RegStart = new Date(now.getTime() - 5 * dayMs);
+  const c2RegEnd = new Date(now.getTime() + 20 * dayMs);
+  const c2TeamStart = new Date(now.getTime() - 5 * dayMs);
+  const c2TeamEnd = new Date(now.getTime() + 20 * dayMs);
+  const c2StartDate = new Date(now.getTime() + 20 * dayMs);
+  const c2EndDate = new Date(now.getTime() + 50 * dayMs);
+  const c2SubStart = new Date(now.getTime() + 20 * dayMs);
+  const c2SubEnd = new Date(now.getTime() + 50 * dayMs);
+
+  const event1 = await prisma.event.create({
+    data: {
+      code: "AST-2026-A",
+      title: "Pan-STARRS Sky Survey Phase 1",
+      description: "Active asteroid search campaign detecting Near Earth Objects and Main Belt asteroids.",
+      regStart: c1RegStart,
+      regEnd: c1RegEnd,
+      teamFormationStart: c1TeamStart,
+      teamFormationEnd: c1TeamEnd,
+      startDate: c1StartDate,
+      endDate: c1EndDate,
+      submissionStart: c1SubStart,
+      submissionEnd: c1SubEnd,
+      status: "ACTIVE",
     },
-    {
-      code: "IASC-2026-B",
-      title: "Catalina Sky Survey Rapid Response",
-      description:
-        "Targeted analysis for fast-moving faint orbital targets across Catalina Sky Survey image batches.",
-      regStart: pastDate,
-      regEnd: futureDate,
-      teamFormationStart: pastDate,
-      teamFormationEnd: futureDate,
-      startDate: pastDate,
-      endDate: futureDate,
-      submissionStart: pastDate,
-      submissionEnd: futureDate,
-      status: "SUBMISSION_OPEN" as const,
+  });
+
+  const event2 = await prisma.event.create({
+    data: {
+      code: "AST-2026-B",
+      title: "Catalina Deep Sky Phase 2",
+      description: "Next phase fast moving near earth object tracking campaign.",
+      regStart: c2RegStart,
+      regEnd: c2RegEnd,
+      teamFormationStart: c2TeamStart,
+      teamFormationEnd: c2TeamEnd,
+      startDate: c2StartDate,
+      endDate: c2EndDate,
+      submissionStart: c2SubStart,
+      submissionEnd: c2SubEnd,
+      status: "UPCOMING",
     },
-    {
-      code: "IASC-2026-C",
-      title: "Pan-STARRS Deep Sky Exploration",
-      description:
-        "Upcoming deep-sky orbital identification campaign starting next month.",
-      regStart: now,
-      regEnd: futureDate,
-      teamFormationStart: now,
-      teamFormationEnd: futureDate,
-      startDate: futureDate,
-      endDate: nextMonth,
-      submissionStart: futureDate,
-      submissionEnd: nextMonth,
-      status: "UPCOMING" as const,
-    },
-  ];
+  });
 
-  const createdEvents: Record<string, any> = {};
+  console.log("✅ Created 2 campaigns with sequential timelines.");
 
-  for (const e of eventsData) {
-    const event = await prisma.event.upsert({
-      where: { code: e.code },
-      update: {
-        title: e.title,
-        description: e.description,
-        status: e.status,
-      },
-      create: e,
-    });
-    createdEvents[e.code] = event;
-  }
-  console.log(`✅ Upserted ${Object.keys(createdEvents).length} events.`);
+  // 3. Create Two Teams
+  // Team 1: Active in Campaign 1
+  const leaderUser = createdUsers["leader@savedino.org"];
+  const memberUser = createdUsers["member@savedino.org"];
+  const staffUser = createdUsers["staff@savedino.org"];
+  const applicantUser = createdUsers["applicant@savedino.org"];
 
-  // 3. Create Teams
-  const teamsData = [
-    {
+  const team1 = await prisma.team.create({
+    data: {
       name: "Nova Orbitals",
-      eventCode: "IASC-2026-A",
-      inviteCode: "NOVA92",
-      leaderEmail: "sarah.chen@mit.edu",
-      status: "ACTIVE" as const,
+      eventId: event1.id,
+      inviteCode: "NOVA99",
+      leaderId: leaderUser.id,
+      status: "ACTIVE",
       isRecruiting: true,
-      recruitmentNotes:
-        "Active daily analyzing Pan-STARRS batches with Astrometrica. Looking for 1-2 dedicated observers.",
-      memberEmails: ["sarah.chen@mit.edu", "marcus.vance@caltech.edu", "priya.patel@iisc.ac.in"],
+      recruitmentNotes: "Active team reviewing Pan-STARRS batches. Open for dedicated observers.",
     },
-    {
+  });
+
+  // Add Leader to Team 1
+  await prisma.teamMember.create({
+    data: {
+      teamId: team1.id,
+      userId: leaderUser.id,
+      role: "leader",
+    },
+  });
+
+  // Add Member to Team 1
+  await prisma.teamMember.create({
+    data: {
+      teamId: team1.id,
+      userId: memberUser.id,
+      role: "member",
+    },
+  });
+
+  // Team 2: Forming in Campaign 2
+  const team2 = await prisma.team.create({
+    data: {
       name: "Cosmic Wardens",
-      eventCode: "IASC-2026-A",
+      eventId: event2.id,
       inviteCode: "WARD77",
-      leaderEmail: "kenji.sato@u-tokyo.ac.jp",
-      status: "FORMING" as const,
+      leaderId: leaderUser.id,
+      status: "FORMING",
       isRecruiting: true,
-      recruitmentNotes:
-        "Forming team focused on high-precision astrometric verification. Beginners welcome!",
-      memberEmails: ["kenji.sato@u-tokyo.ac.jp"],
+      recruitmentNotes: "Forming team for the upcoming Catalina search. Open for solo student matching.",
     },
-    {
-      name: "Stellar Hunters",
-      eventCode: "IASC-2026-A",
-      inviteCode: "STEL41",
-      leaderEmail: "elena.rostova@cam.ac.uk",
-      status: "ACTIVE" as const,
-      isRecruiting: false,
-      recruitmentNotes: "Experienced team conducting multi-night asteroid verification.",
-      memberEmails: [
-        "elena.rostova@cam.ac.uk",
-        "lucas.silva@usp.br",
-        "amina.khalil@aucegypt.edu",
-        "leo.dupont@sorbonne.fr",
-        "admin@savedino.org",
-      ],
+  });
+
+  // Add Leader to Team 2
+  await prisma.teamMember.create({
+    data: {
+      teamId: team2.id,
+      userId: leaderUser.id,
+      role: "leader",
     },
-    {
-      name: "Meteor Watchers",
-      eventCode: "IASC-2026-B",
-      inviteCode: "METE15",
-      leaderEmail: "marcus.vance@caltech.edu",
-      status: "ACTIVE" as const,
-      isRecruiting: true,
-      recruitmentNotes: "Catalina fast-track team. We review daily batch uploads within 12 hours.",
-      memberEmails: ["marcus.vance@caltech.edu", "lucas.silva@usp.br"],
+  });
+
+  console.log("✅ Created 2 teams with student leaders and members (Staff has zero team memberships).");
+
+  // 4. Create Pending Join Request from Applicant to Team 1
+  await prisma.teamJoinRequest.create({
+    data: {
+      teamId: team1.id,
+      userId: applicantUser.id,
+      message: "Hi Sarah! I have experience with Astrometrica and would like to help blink image sets.",
+      status: "PENDING",
     },
-  ];
+  });
+  console.log("✅ Created pending join request for applicant.");
 
-  const createdTeams: Record<string, any> = {};
-
-  for (const t of teamsData) {
-    const event = createdEvents[t.eventCode];
-    const leader = createdUsers[t.leaderEmail];
-    if (!event || !leader) continue;
-
-    let team = await prisma.team.findUnique({
-      where: { inviteCode: t.inviteCode },
-    });
-
-    if (!team) {
-      team = await prisma.team.create({
-        data: {
-          name: t.name,
-          eventId: event.id,
-          inviteCode: t.inviteCode,
-          leaderId: leader.id,
-          status: t.status,
-          isRecruiting: t.isRecruiting,
-          recruitmentNotes: t.recruitmentNotes,
-        },
-      });
-    } else {
-      team = await prisma.team.update({
-        where: { id: team.id },
-        data: {
-          name: t.name,
-          eventId: event.id,
-          leaderId: leader.id,
-          status: t.status,
-          isRecruiting: t.isRecruiting,
-          recruitmentNotes: t.recruitmentNotes,
-        },
-      });
-    }
-
-    // Add members
-    for (const email of t.memberEmails) {
-      const user = createdUsers[email];
-      if (!user) continue;
-
-      const role = email === t.leaderEmail ? "LEADER" : "MEMBER";
-      await prisma.teamMember.upsert({
-        where: {
-          teamId_userId: {
-            teamId: team.id,
-            userId: user.id,
-          },
-        },
-        update: { role },
-        create: {
-          teamId: team.id,
-          userId: user.id,
-          role,
-        },
-      });
-    }
-
-    createdTeams[t.name] = team;
-  }
-  console.log(`✅ Upserted ${Object.keys(createdTeams).length} teams with members.`);
-
-  // 4. Create Image Sets
-  const novaTeam = createdTeams["Nova Orbitals"];
-  const wardenTeam = createdTeams["Cosmic Wardens"];
-  const eventA = createdEvents["IASC-2026-A"];
-
-  if (novaTeam && eventA) {
-    const sampleMpcReport = `COD F65
-CON S. Chen, MIT Astrophysics <sarah.chen@mit.edu>
+  // 5. Create Sample Image Sets for Testing
+  const sampleMpcReport = `COD F65
+CON S. Chen, MIT Astrophysics <leader@savedino.org>
 OBS S. Chen, M. Vance
 MEA S. Chen
 TEL 1.8-m Ritchey-Chretien + CCD
@@ -364,12 +222,13 @@ NET GAIA-DR2
     SD26A01    C2026 09 01.24835 21 45 15.42 +14 18 28.5          20.5 R      F65
 ----- end -----`;
 
-    const setsData = [
+  await prisma.imageSet.createMany({
+    data: [
       {
         name: "PS1-26A-01",
-        eventId: eventA.id,
-        teamId: novaTeam.id,
-        claimedById: createdUsers["sarah.chen@mit.edu"]?.id,
+        eventId: event1.id,
+        teamId: team1.id,
+        claimedById: leaderUser.id,
         status: "SUBMITTED",
         mpcReportText: sampleMpcReport,
         isClean: false,
@@ -377,101 +236,36 @@ NET GAIA-DR2
       },
       {
         name: "PS1-26A-02",
-        eventId: eventA.id,
-        teamId: novaTeam.id,
-        claimedById: createdUsers["marcus.vance@caltech.edu"]?.id,
+        eventId: event1.id,
+        teamId: team1.id,
+        claimedById: memberUser.id,
         status: "IN_PROGRESS",
         isClean: false,
       },
       {
         name: "PS1-26A-03",
-        eventId: eventA.id,
-        teamId: novaTeam.id,
+        eventId: event1.id,
+        teamId: team1.id,
         status: "UNASSIGNED",
         isClean: false,
       },
-      {
-        name: "PS1-26A-04",
-        eventId: eventA.id,
-        teamId: novaTeam.id,
-        claimedById: createdUsers["priya.patel@iisc.ac.in"]?.id,
-        status: "SUBMITTED",
-        isClean: true,
-        submittedAt: now,
-      },
-      {
-        name: "PS1-26A-05",
-        eventId: eventA.id,
-        teamId: novaTeam.id,
-        status: "UNASSIGNED",
-        isClean: false,
-      },
-    ];
-
-    for (const s of setsData) {
-      const existing = await prisma.imageSet.findFirst({
-        where: { name: s.name, teamId: novaTeam.id },
-      });
-      if (!existing) {
-        await prisma.imageSet.create({ data: s });
-      }
-    }
-  }
-
-  if (wardenTeam && eventA) {
-    const wardenSets = [
       {
         name: "CSS-26B-01",
-        eventId: eventA.id,
-        teamId: wardenTeam.id,
-        claimedById: createdUsers["kenji.sato@u-tokyo.ac.jp"]?.id,
-        status: "IN_PROGRESS",
-        isClean: false,
-      },
-      {
-        name: "CSS-26B-02",
-        eventId: eventA.id,
-        teamId: wardenTeam.id,
+        eventId: event2.id,
+        teamId: team2.id,
         status: "UNASSIGNED",
         isClean: false,
       },
-    ];
+    ],
+  });
 
-    for (const s of wardenSets) {
-      const existing = await prisma.imageSet.findFirst({
-        where: { name: s.name, teamId: wardenTeam.id },
-      });
-      if (!existing) {
-        await prisma.imageSet.create({ data: s });
-      }
-    }
-  }
+  console.log("✅ Created test image sets across teams.");
+  console.log("🚀 SaveDino database seeded cleanly and successfully!");
 
-  // 5. Create Sample Join Requests
-  if (novaTeam && createdUsers["amina.khalil@aucegypt.edu"]) {
-    const existingReq = await prisma.teamJoinRequest.findFirst({
-      where: {
-        teamId: novaTeam.id,
-        userId: createdUsers["amina.khalil@aucegypt.edu"].id,
-      },
-    });
-    if (!existingReq) {
-      await prisma.teamJoinRequest.create({
-        data: {
-          teamId: novaTeam.id,
-          userId: createdUsers["amina.khalil@aucegypt.edu"].id,
-          message: "Hi Sarah! I have experience with Astrometrica and would love to help blink image sets.",
-          status: "PENDING",
-        },
-      });
-    }
-  }
-
-  console.log("🚀 Database seeding completed successfully!");
   return {
     success: true,
-    usersCount: Object.keys(createdUsers).length,
-    eventsCount: Object.keys(createdEvents).length,
-    teamsCount: Object.keys(createdTeams).length,
+    users: Object.keys(createdUsers).length,
+    events: 2,
+    teams: 2,
   };
 }

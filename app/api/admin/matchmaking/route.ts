@@ -11,9 +11,9 @@ export async function GET() {
       headers: await headers(),
     });
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || (session.user.role !== "admin" && session.user.role !== "staff")) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized. Admin privileges required." },
+        { success: false, error: "Unauthorized. Admin or Staff privileges required." },
         { status: 403 }
       );
     }
@@ -40,8 +40,11 @@ export async function GET() {
       },
     });
 
-    // 3. Get all users
+    // 3. Get all eligible participant users (excluding platform admins)
     const allUsers = await prisma.user.findMany({
+      where: {
+        role: { not: "admin" },
+      },
       select: {
         id: true,
         name: true,
@@ -79,9 +82,9 @@ export async function POST(req: Request) {
       headers: await headers(),
     });
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || (session.user.role !== "admin" && session.user.role !== "staff")) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized. Admin privileges required." },
+        { success: false, error: "Unauthorized. Admin or Staff privileges required." },
         { status: 403 }
       );
     }
@@ -92,6 +95,24 @@ export async function POST(req: Request) {
     if (!userId || !teamId) {
       return NextResponse.json(
         { success: false, error: "Missing required fields: userId, teamId" },
+        { status: 400 }
+      );
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { success: false, error: "User not found." },
+        { status: 404 }
+      );
+    }
+
+    if (targetUser.role === "admin") {
+      return NextResponse.json(
+        { success: false, error: "Administrators cannot be assigned to participant teams." },
         { status: 400 }
       );
     }

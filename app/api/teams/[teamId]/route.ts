@@ -66,9 +66,9 @@ export async function GET(
     }
 
     const isMember = team.members.some((m) => m.userId === session.user.id);
-    const isAdmin = session.user.role === "admin";
+    const isStaffOrAdmin = session.user.role === "admin" || session.user.role === "staff";
 
-    if (!isMember && !isAdmin) {
+    if (!isMember && !isStaffOrAdmin) {
       return NextResponse.json(
         {
           success: false,

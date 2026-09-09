@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo, Suspense } from "reac
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { isOrganizer, canParticipateInTeams } from "@/lib/rbac";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,6 +95,7 @@ function TeamsContent() {
   const urlEventId = searchParams.get("eventId") || searchParams.get("event");
   const urlJoinCode = searchParams.get("join");
   const { data: session } = useSession();
+  const isStaffOrAdmin = isOrganizer(session?.user);
 
   // Data State
   const [teams, setTeams] = useState<Team[]>([]);
@@ -770,13 +772,13 @@ function TeamsContent() {
 
                       {/* Card Bottom Action Button */}
                       <div className="pt-2 border-t border-border/60">
-                        {isUserMember ? (
+                        {isUserMember || isStaffOrAdmin ? (
                           <Link href={`/team/${team.id}`} className="block w-full">
                             <Button
                               size="sm"
                               className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
                             >
-                              <span>Open Workspace</span>
+                              <span>{isStaffOrAdmin && !isUserMember ? "Inspect Workspace" : "Open Workspace"}</span>
                               <ArrowRight className="size-3.5" />
                             </Button>
                           </Link>
