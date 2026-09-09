@@ -88,7 +88,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <Button
                     size="sm"
                     variant={item.active ? "default" : "outline"}
-                    className="h-9 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl"
+                    className="h-9 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-arcade-sm active:translate-y-0.5 rounded-xl"
                   >
                     <item.icon className="size-3.5" />
                     <span>{item.title}</span>
@@ -105,7 +105,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               variant="outline"
               size="icon"
               onClick={handleToggleTheme}
-              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -122,7 +122,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <Button
                     size="sm"
                     variant={pathname === "/profile" ? "default" : "outline"}
-                    className="h-9 px-2.5 text-xs font-bold rounded-xl border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
+                    className="h-9 px-2.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
                     title="Profile & Studio"
                   >
                     <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={22} showBorder={false} />
@@ -133,7 +133,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   size="sm"
                   variant="outline"
                   onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                  className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer rounded-xl border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer rounded-xl border-border shadow-arcade-sm active:translate-y-0.5"
                   title="Sign Out"
                 >
                   <LogOut className="size-3.5" />
@@ -142,10 +142,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             ) : (
               <div className="flex items-center gap-2 text-xs">
                 <Link href="/login">
-                  <Button size="sm" variant="outline" className="h-9 px-3.5 text-xs font-bold rounded-xl border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5">Sign In</Button>
+                  <Button size="sm" variant="outline" className="h-9 px-3.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5">Sign In</Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" variant="default" className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5">Register</Button>
+                  <Button size="sm" variant="default" className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5">Register</Button>
                 </Link>
               </div>
             )}
@@ -157,7 +157,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               variant="outline"
               size="icon"
               onClick={handleToggleTheme}
-              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
               aria-label="Toggle theme"
             >
@@ -174,7 +174,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <Button
                     variant={pathname === "/profile" ? "default" : "outline"}
                     size="sm"
-                    className="h-9 px-2 rounded-xl text-xs font-bold border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center gap-1.5"
+                    className="h-9 px-2 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-1.5"
                     title="Profile"
                   >
                     <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={20} showBorder={false} />
@@ -185,7 +185,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   variant="outline"
                   size="icon"
                   onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                  className="h-9 w-9 p-0 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-9 w-9 p-0 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive border-border shadow-arcade-sm active:translate-y-0.5"
                   title="Sign Out"
                 >
                   <LogOut className="size-3.5" />
@@ -196,7 +196,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-9 px-3 rounded-xl text-xs font-bold border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-9 px-3 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5"
                 >
                   Sign In
                 </Button>
@@ -220,7 +220,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         <Link href="/">
           <Button
             size="icon"
-            className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-[0_3.5px_0_0_#b45309] active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
+            className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-arcade-amber-lg active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
             title="Play SaveDino Arcade Game"
           >
             <Gamepad2 className="size-6 text-[#0f172a]" />
@@ -236,8 +236,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             href="/"
             className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               pathname === "/"
-                ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-[0_3px_0_0_#a16207] active:translate-y-0.5"
-                : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
+                ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-arcade-amber-lg active:translate-y-0.5"
+                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
             }`}
             title="Play Retro Arcade Game"
             aria-label="Arcade Game"
@@ -251,8 +251,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             href="/campaigns"
             className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               pathname === "/campaigns"
-                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5"
-                : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
+                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
             }`}
             title="Observation Campaigns"
             aria-label="Campaigns"
@@ -266,8 +266,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             href="/teams"
             className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               pathname === "/teams" || pathname.startsWith("/team/")
-                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5"
-                : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
+                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
             }`}
             title="Citizen Teams"
             aria-label="Citizen Teams"
@@ -282,8 +282,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               href="/profile"
               className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 pathname === "/profile"
-                  ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5"
-                  : "size-10 bg-muted/70 text-foreground border border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] hover:bg-muted active:translate-y-0.5 shrink-0"
+                  ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                  : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
               }`}
               title="User Profile & Studio"
               aria-label="Profile"

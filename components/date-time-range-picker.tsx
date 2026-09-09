@@ -241,7 +241,7 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-between text-left text-xs font-mono font-normal h-10 border-border bg-card cursor-pointer shadow-[0_2px_0_0_rgba(0,0,0,0.06)] dark:shadow-[0_2px_0_0_rgba(255,255,255,0.06)] hover:bg-card/90",
+            "w-full justify-between text-left text-xs font-mono font-normal h-10 border-border bg-card cursor-pointer shadow-arcade hover:bg-card/90",
             className,
           )}
         >

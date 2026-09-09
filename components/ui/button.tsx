@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[#8b5cf6] text-white border border-[#6d28d9] shadow-[0_3px_0_0_#6d28d9] hover:bg-[#7c3aed] active:translate-y-[2px] active:shadow-none font-bold",
+          "bg-[#8b5cf6] text-white border border-[#6d28d9] shadow-arcade-primary-lg hover:bg-[#7c3aed] active:translate-y-[2px] active:shadow-none font-bold",
         destructive:
-          "bg-destructive text-destructive-foreground border border-destructive/80 hover:bg-destructive/90 font-bold",
+          "bg-destructive text-destructive-foreground border border-destructive/80 shadow-arcade-destructive hover:bg-destructive/90 font-bold",
         outline:
-          "border border-border bg-white text-[#0f172a] dark:bg-[#1c1d21] dark:text-[#f3f4f6] shadow-[0_3px_0_0_rgba(0,0,0,0.15)] hover:border-[#8b5cf6] active:translate-y-[2px] active:shadow-none font-bold",
+          "border border-border bg-white text-[#0f172a] dark:bg-[#1c1d21] dark:text-[#f3f4f6] shadow-arcade hover:border-[#8b5cf6] active:translate-y-[2px] active:shadow-none font-bold",
         secondary:
           "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -24,7 +24,7 @@ const buttonVariants = cva(
         pill:
           "rounded-full border border-border bg-white text-[#0f172a] dark:bg-[#1c1d21] dark:text-[#f3f4f6] hover:bg-[#8b5cf6] hover:text-white hover:border-[#8b5cf6] text-[11px] font-medium px-3.5 py-1 transition-all",
         emerald:
-          "bg-[#10b981] text-white border border-[#047857] shadow-[0_3px_0_0_#047857] hover:bg-[#059669] active:translate-y-[2px] active:shadow-none font-bold",
+          "bg-[#10b981] text-white border border-[#047857] shadow-arcade-emerald-lg hover:bg-[#059669] active:translate-y-[2px] active:shadow-none font-bold",
       },
       size: {
         default: "h-9 px-4 py-2",

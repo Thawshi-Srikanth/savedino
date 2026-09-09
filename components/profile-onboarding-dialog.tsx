@@ -200,7 +200,7 @@ export function ProfileOnboardingDialog() {
             <Button
               type="submit"
               disabled={isSaving}
-              className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
+              className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
             >
               {isSaving ? (
                 <>

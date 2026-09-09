@@ -118,7 +118,7 @@ export function CampaignsTab({
   return (
     <div className="flex flex-col md:flex-row gap-4 items-start w-full">
       {/* Left Campaign Status Filter Sidebar */}
-      <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-[0_3px_0_0_#e2e8f0] dark:shadow-[0_3px_0_0_#27282d] space-y-2.5">
+      <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-arcade-lg space-y-2.5">
         <div className="px-2 py-1 flex items-center justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
             Campaign Status
@@ -134,7 +134,7 @@ export function CampaignsTab({
             onClick={() => setCampaignStatusFilter("ALL")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "ALL"
-                ? "bg-primary text-primary-foreground shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 font-bold"
+                ? "bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 font-bold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -151,7 +151,7 @@ export function CampaignsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "ACTIVE"
-                ? "bg-[#10b981] text-white font-bold shadow-[0_2px_0_0_#059669] active:translate-y-0.5"
+                ? "bg-[#10b981] text-white font-bold shadow-arcade-emerald active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -168,7 +168,7 @@ export function CampaignsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "UPCOMING"
-                ? "bg-[#0284c7] dark:bg-[#38bdf8] text-white dark:text-slate-950 font-bold shadow-[0_2px_0_0_#0369a1] active:translate-y-0.5"
+                ? "bg-[#0284c7] dark:bg-[#38bdf8] text-white dark:text-slate-950 font-bold shadow-arcade active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -187,7 +187,7 @@ export function CampaignsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "SUBMISSION_OPEN"
-                ? "bg-[#f59e0b] text-[#0f172a] font-bold shadow-[0_2px_0_0_#d97706] active:translate-y-0.5"
+                ? "bg-[#f59e0b] text-[#0f172a] font-bold shadow-arcade-amber active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -204,7 +204,7 @@ export function CampaignsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "COMPLETED"
-                ? "bg-slate-700 text-white font-bold shadow-[0_2px_0_0_#475569] active:translate-y-0.5"
+                ? "bg-slate-700 text-white font-bold shadow-arcade active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -218,7 +218,7 @@ export function CampaignsTab({
           <Link href="/admin/campaigns/new" className="block w-full">
             <Button
               size="sm"
-              className="w-full text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
+              className="w-full text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5"
             >
               <PlusCircle className="size-3.5" />
               <span>New Campaign</span>
@@ -274,7 +274,7 @@ export function CampaignsTab({
                   size="icon"
                   variant="outline"
                   onClick={fetchAdminData}
-                  className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-arcade active:translate-y-0.5"
                 >
                   <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
                 </Button>
@@ -313,7 +313,7 @@ export function CampaignsTab({
               <Button
                 size="sm"
                 variant="default"
-                className="h-8 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shrink-0 shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
+                className="h-8 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shrink-0 shadow-arcade-primary active:translate-y-0.5"
               >
                 <PlusCircle className="size-3.5" />
                 <span>New Campaign</span>
@@ -343,7 +343,7 @@ export function CampaignsTab({
                     setCampaignSearch("");
                     setCampaignStatusFilter("ALL");
                   }}
-                  className="h-7 text-xs mt-2 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-7 text-xs mt-2 cursor-pointer shadow-arcade active:translate-y-0.5"
                 >
                   Reset All Filters
                 </Button>
@@ -545,7 +545,7 @@ export function CampaignsTab({
               variant="outline"
               onClick={() => setCampaignCurrentPage(1)}
               disabled={campaignCurrentPage === 1}
-              className="h-6.5 px-1.5 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-1.5 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="First Page"
             >
               <ChevronsLeft className="size-3.5" />
@@ -555,7 +555,7 @@ export function CampaignsTab({
               variant="outline"
               onClick={() => setCampaignCurrentPage((p) => Math.max(1, p - 1))}
               disabled={campaignCurrentPage === 1}
-              className="h-6.5 px-2 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-2 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Previous Page"
             >
               <ChevronLeft className="size-3.5" />
@@ -580,7 +580,7 @@ export function CampaignsTab({
                     onClick={() => setCampaignCurrentPage(pageIndex)}
                     className={`h-6.5 min-w-[26px] px-1.5 rounded text-xs font-mono font-semibold cursor-pointer transition-all border ${
                       isActive
-                        ? "bg-primary text-primary-foreground border-primary shadow-[0_1px_0_0_#7c3aed]"
+                        ? "bg-primary text-primary-foreground border-primary shadow-arcade-xs"
                         : "bg-background text-muted-foreground border-border hover:text-foreground hover:bg-muted"
                     }`}
                   >
@@ -595,7 +595,7 @@ export function CampaignsTab({
               variant="outline"
               onClick={() => setCampaignCurrentPage((p) => Math.min(totalCampaignPages, p + 1))}
               disabled={campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0}
-              className="h-6.5 px-2 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-2 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Next Page"
             >
               <ChevronRight className="size-3.5" />
@@ -605,7 +605,7 @@ export function CampaignsTab({
               variant="outline"
               onClick={() => setCampaignCurrentPage(totalCampaignPages)}
               disabled={campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0}
-              className="h-6.5 px-1.5 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-1.5 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Last Page"
             >
               <ChevronsRight className="size-3.5" />

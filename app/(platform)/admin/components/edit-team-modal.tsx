@@ -103,7 +103,7 @@ export function EditTeamModal({
                   variant="outline"
                   size="sm"
                   onClick={handleRotateInviteCode}
-                  className="h-9 px-3 shrink-0 text-xs font-semibold gap-1.5 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-9 px-3 shrink-0 text-xs font-semibold gap-1.5 cursor-pointer shadow-arcade active:translate-y-0.5"
                   title="Rotate to a new unique invite code"
                 >
                   <RefreshCw className="size-3.5" />
@@ -213,7 +213,7 @@ export function EditTeamModal({
               size="sm"
               onClick={() => setEditingTeam(null)}
               disabled={editLoading}
-              className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+              className="shadow-arcade active:translate-y-0.5 cursor-pointer"
             >
               Cancel
             </Button>
@@ -221,7 +221,7 @@ export function EditTeamModal({
               type="submit"
               size="sm"
               disabled={editLoading}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 cursor-pointer"
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
             >
               {editLoading ? "Saving Changes..." : "Save Squad"}
             </Button>

@@ -144,7 +144,7 @@ export function TeamsTab({
   return (
     <div className="flex flex-col md:flex-row gap-4 items-start w-full font-sans">
       {/* Left Squad Filter Sidebar */}
-      <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-[0_3px_0_0_#e2e8f0] dark:shadow-[0_3px_0_0_#27282d] space-y-2.5">
+      <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-arcade-lg space-y-2.5">
         <div className="px-2 py-1 flex items-center justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
             Squad Rosters
@@ -160,7 +160,7 @@ export function TeamsTab({
             onClick={() => setTeamCapacityFilter("ALL")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "ALL"
-                ? "bg-primary text-primary-foreground shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 font-bold"
+                ? "bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 font-bold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -177,7 +177,7 @@ export function TeamsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "ACTIVE"
-                ? "bg-[#10b981] text-white font-bold shadow-[0_2px_0_0_#059669] active:translate-y-0.5"
+                ? "bg-[#10b981] text-white font-bold shadow-arcade-emerald active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -196,7 +196,7 @@ export function TeamsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "OPEN"
-                ? "bg-[#0284c7] dark:bg-[#38bdf8] text-white dark:text-slate-950 font-bold shadow-[0_2px_0_0_#0369a1] active:translate-y-0.5"
+                ? "bg-[#0284c7] dark:bg-[#38bdf8] text-white dark:text-slate-950 font-bold shadow-arcade active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -215,7 +215,7 @@ export function TeamsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "FULL"
-                ? "bg-[#8b5cf6] text-white font-bold shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
+                ? "bg-[#8b5cf6] text-white font-bold shadow-arcade-primary active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -234,7 +234,7 @@ export function TeamsTab({
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "DISQUALIFIED"
-                ? "bg-destructive text-destructive-foreground font-bold shadow-[0_2px_0_0_#b91c1c] active:translate-y-0.5"
+                ? "bg-destructive text-destructive-foreground font-bold shadow-arcade-destructive active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -345,7 +345,7 @@ export function TeamsTab({
                   size="icon"
                   variant="outline"
                   onClick={fetchAdminData}
-                  className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-arcade active:translate-y-0.5"
                 >
                   <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
                 </Button>
@@ -399,7 +399,7 @@ export function TeamsTab({
                     setTeamCapacityFilter("ALL");
                     setTeamCampaignFilter("ALL");
                   }}
-                  className="h-7 text-xs mt-2 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-7 text-xs mt-2 cursor-pointer shadow-arcade active:translate-y-0.5"
                 >
                   Reset All Filters
                 </Button>
@@ -751,7 +751,7 @@ export function TeamsTab({
                 size="icon"
                 onClick={() => setTeamCurrentPage(1)}
                 disabled={teamCurrentPage === 1}
-                className="h-7 w-7 p-0 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer disabled:opacity-40"
+                className="h-7 w-7 p-0 shadow-arcade active:translate-y-0.5 cursor-pointer disabled:opacity-40"
                 title="First Page"
               >
                 <ChevronsLeft className="size-3.5" />
@@ -761,7 +761,7 @@ export function TeamsTab({
                 size="icon"
                 onClick={() => setTeamCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={teamCurrentPage === 1}
-                className="h-7 w-7 p-0 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer disabled:opacity-40"
+                className="h-7 w-7 p-0 shadow-arcade active:translate-y-0.5 cursor-pointer disabled:opacity-40"
                 title="Previous Page"
               >
                 <ChevronLeft className="size-3.5" />
@@ -787,8 +787,8 @@ export function TeamsTab({
                       onClick={() => setTeamCurrentPage(pageNum)}
                       className={`h-7 min-w-[28px] px-2 text-xs font-mono cursor-pointer transition-all ${
                         isActive
-                          ? "bg-primary text-primary-foreground font-bold shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
-                          : "shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 text-muted-foreground hover:text-foreground"
+                          ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary active:translate-y-0.5"
+                          : "shadow-arcade active:translate-y-0.5 text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {pageNum}
@@ -802,7 +802,7 @@ export function TeamsTab({
                 size="icon"
                 onClick={() => setTeamCurrentPage((p) => Math.min(totalTeamPages, p + 1))}
                 disabled={teamCurrentPage === totalTeamPages}
-                className="h-7 w-7 p-0 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer disabled:opacity-40"
+                className="h-7 w-7 p-0 shadow-arcade active:translate-y-0.5 cursor-pointer disabled:opacity-40"
                 title="Next Page"
               >
                 <ChevronRight className="size-3.5" />
@@ -812,7 +812,7 @@ export function TeamsTab({
                 size="icon"
                 onClick={() => setTeamCurrentPage(totalTeamPages)}
                 disabled={teamCurrentPage === totalTeamPages}
-                className="h-7 w-7 p-0 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer disabled:opacity-40"
+                className="h-7 w-7 p-0 shadow-arcade active:translate-y-0.5 cursor-pointer disabled:opacity-40"
                 title="Last Page"
               >
                 <ChevronsRight className="size-3.5" />

@@ -81,14 +81,14 @@ export function ReportTeamModal({
               size="sm"
               onClick={() => setReportingTeam(null)}
               disabled={reportLoading}
-              className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+              className="shadow-arcade active:translate-y-0.5 cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={reportLoading || !reportReason.trim()}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold shadow-[0_2px_0_0_#b91c1c] active:translate-y-0.5 cursor-pointer"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold shadow-arcade-destructive active:translate-y-0.5 cursor-pointer"
             >
               {reportLoading ? "Processing..." : reportAction === "DISQUALIFY" ? "Disqualify Squad" : "Log Report"}
             </Button>

@@ -145,7 +145,7 @@ export function MobileFilterDrawer({
                 variant="outline"
                 size="sm"
                 onClick={onReset}
-                className="h-8.5 text-xs font-bold gap-1.5 cursor-pointer border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 shrink-0"
+                className="h-8.5 text-xs font-bold gap-1.5 cursor-pointer border-border shadow-arcade-sm active:translate-y-0.5 shrink-0"
               >
                 <RotateCcw className="size-3.5" />
                 <span>Reset</span>
@@ -153,7 +153,7 @@ export function MobileFilterDrawer({
             )}
             <Button
               type="button"
-              className="flex-1 h-8.5 text-xs font-bold cursor-pointer gap-1.5 bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5"
+              className="flex-1 h-8.5 text-xs font-bold cursor-pointer gap-1.5 bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
               onClick={() => onOpenChange(false)}
             >
               <Check className="size-3.5" />
@@ -179,7 +179,7 @@ export function MobileFilterDrawer({
             onClick={() => onOpenChange(true)}
             onTouchStart={handleTabTouchStart}
             onTouchEnd={handleTabTouchEnd}
-            className="relative size-11 rounded-l-2xl bg-primary text-primary-foreground border-y border-l border-primary/40 shadow-[0_3px_0_0_#6d28d9] dark:shadow-[0_3px_0_0_#5b21b6] active:translate-y-0.5 flex items-center justify-center cursor-pointer transition-transform hover:bg-primary/95"
+            className="relative size-11 rounded-l-2xl bg-primary text-primary-foreground border-y border-l border-primary/40 shadow-arcade-primary-lg active:translate-y-0.5 flex items-center justify-center cursor-pointer transition-transform hover:bg-primary/95"
             aria-label="Open filter drawer"
           >
             <SlidersHorizontal className="size-5" />

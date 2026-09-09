@@ -45,7 +45,7 @@ export function DeleteTeamDialog({
             size="sm"
             onClick={() => setDeletingTeam(null)}
             disabled={deleteLoading}
-            className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+            className="shadow-arcade active:translate-y-0.5 cursor-pointer"
           >
             Cancel
           </Button>
@@ -55,7 +55,7 @@ export function DeleteTeamDialog({
             size="sm"
             onClick={onConfirmDelete}
             disabled={deleteLoading}
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold shadow-[0_2px_0_0_#b91c1c] active:translate-y-0.5 cursor-pointer"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold shadow-arcade-destructive active:translate-y-0.5 cursor-pointer"
           >
             {deleteLoading ? "Deleting Squad..." : "Yes, Delete Squad"}
           </Button>

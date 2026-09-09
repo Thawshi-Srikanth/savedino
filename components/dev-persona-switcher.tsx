@@ -166,7 +166,7 @@ export function DevPersonaSwitcher() {
         onClick={() => handleSwitch(persona.email, persona.name)}
         className={`w-full text-left p-2 rounded-xl transition-all flex items-center justify-between cursor-pointer group ${
           isActive
-            ? "bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/30 shadow-[0_2px_0_0_#8b5cf6]"
+            ? "bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/30 shadow-arcade-primary"
             : "hover:bg-muted/70 border border-transparent hover:border-border active:translate-y-0.5"
         }`}
       >
@@ -239,7 +239,7 @@ export function DevPersonaSwitcher() {
             <button
               onClick={handleLogout}
               disabled={loading || !currentSession}
-              className="flex-1 h-8 px-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+              className="flex-1 h-8 px-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border shadow-arcade-xs active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Log Out</span>
@@ -248,7 +248,7 @@ export function DevPersonaSwitcher() {
               onClick={handleResetDb}
               disabled={loading}
               title="Wipe and re-seed clean test data"
-              className="h-8 px-3 rounded-xl text-xs font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+              className="h-8 px-3 rounded-xl text-xs font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 shadow-arcade-xs active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               <span>Reset DB</span>

@@ -313,7 +313,7 @@ export function EditCampaignModal({
               size="sm"
               onClick={() => setEditingCampaign(null)}
               disabled={editCampLoading}
-              className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+              className="shadow-arcade active:translate-y-0.5 cursor-pointer"
             >
               Cancel
             </Button>
@@ -322,7 +322,7 @@ export function EditCampaignModal({
               variant="default"
               size="sm"
               disabled={editCampLoading}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 cursor-pointer"
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
             >
               {editCampLoading ? "Saving Changes..." : "Save Campaign"}
             </Button>

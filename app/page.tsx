@@ -214,7 +214,7 @@ export default function Home() {
                   type="button"
                   size="sm"
                   onClick={() => setIsNotifyModalOpen(true)}
-                  className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] cursor-pointer"
+                  className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
                 >
                   <Bell className="size-3.5" />
                   <span>Notify Me</span>
@@ -249,7 +249,7 @@ export default function Home() {
 
             <div className="pt-2 flex items-center gap-3">
               <Link href="/campaigns">
-                <Button size="sm" variant="default" className="text-xs font-bold shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]">
+                <Button size="sm" variant="default" className="text-xs font-bold shadow-arcade-primary">
                   <span>Explore Campaigns &gt;</span>
                 </Button>
               </Link>
@@ -312,7 +312,7 @@ export default function Home() {
                 type="submit"
                 size="sm"
                 disabled={isSubscribing || !email.trim()}
-                className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] cursor-pointer"
+                className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
               >
                 {isSubscribing ? (
                   <span>Subscribing...</span>

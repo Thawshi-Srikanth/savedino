@@ -595,7 +595,7 @@ export default function TeamWorkspacePage({
             <Button
               asChild
               variant="default"
-              className="w-full sm:w-auto h-9 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+              className="w-full sm:w-auto h-9 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary"
             >
               <Link href="/teams">
                 <Users className="size-3.5 mr-1.5" />
@@ -605,7 +605,7 @@ export default function TeamWorkspacePage({
             <Button
               asChild
               variant="outline"
-              className="w-full sm:w-auto h-9 text-xs font-bold rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d]"
+              className="w-full sm:w-auto h-9 text-xs font-bold rounded-xl shadow-arcade"
             >
               <Link href="/profile">
                 <span>View My Profile</span>
@@ -685,34 +685,34 @@ export default function TeamWorkspacePage({
       )}
 
       {/* Squad Header Summary Card */}
-      <Card className="p-5 sm:p-6 bg-card border-border space-y-4 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl">
+      <Card className="p-5 sm:p-6 bg-card border-border space-y-4 shadow-arcade rounded-2xl">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-[#8b5cf6] text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#6d28d9]">
+              <Badge className="bg-[#8b5cf6] text-white font-mono font-bold text-[10px] border-0 shadow-arcade-primary">
                 {team?.event?.code || "CAMPAIGN"}
               </Badge>
 
               {team?.status === "DISQUALIFIED" ? (
-                <Badge className="bg-[#ef4444] text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#dc2626]">
+                <Badge className="bg-[#ef4444] text-white font-bold text-[10px] border-0 shadow-arcade-destructive">
                   Disabled
                 </Badge>
               ) : (
-                <Badge className="bg-slate-700 text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
+                <Badge className="bg-slate-700 text-white font-bold text-[10px] border-0 shadow-arcade">
                   {memberCount}/{team?.event?.maxTeamSize || 6} Members
                 </Badge>
               )}
 
               {team?.status === "DISQUALIFIED" ? (
-                <Badge className="bg-[#ef4444] text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#dc2626]">
+                <Badge className="bg-[#ef4444] text-white font-bold text-[10px] border-0 shadow-arcade-destructive">
                   Recruitment Locked
                 </Badge>
               ) : team?.isRecruiting ? (
-                <Badge className="bg-[#10b981] text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#059669]">
+                <Badge className="bg-[#10b981] text-white font-bold text-[10px] border-0 shadow-arcade-emerald">
                   Recruiting Open
                 </Badge>
               ) : (
-                <Badge className="bg-slate-600 text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
+                <Badge className="bg-slate-600 text-white font-bold text-[10px] border-0 shadow-arcade">
                   Recruiting Closed
                 </Badge>
               )}
@@ -728,7 +728,7 @@ export default function TeamWorkspacePage({
             <div className="flex flex-wrap items-center gap-2.5">
               <div
                 onClick={team?.status !== "DISQUALIFIED" ? handleCopyInvite : undefined}
-                className="flex items-center gap-2 bg-background hover:bg-muted/50 transition-colors border border-border px-3 py-1.5 rounded-xl cursor-pointer select-none shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                className="flex items-center gap-2 bg-background hover:bg-muted/50 transition-colors border border-border px-3 py-1.5 rounded-xl cursor-pointer select-none shadow-arcade active:translate-y-0.5"
                 title={team?.status === "DISQUALIFIED" ? "Invite code deactivated" : "Click to copy invite code"}
               >
                 <div>
@@ -797,19 +797,19 @@ export default function TeamWorkspacePage({
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-mono font-semibold transition-colors ${
                     activeWorkspaceTab === "imagesets"
-                      ? "bg-[#8b5cf6] text-white shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-[#8b5cf6] text-white shadow-arcade-primary"
                       : "text-muted-foreground bg-muted"
                   }`}
                 >
                   {imageSets.length}
                 </Badge>
                 {pendingClaimRequests.length > 0 && isLeaderOrAdmin && (
-                  <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-[0_1.5px_0_0_#d97706]">
+                  <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-arcade-amber">
                     {pendingClaimRequests.length} Claim{pendingClaimRequests.length > 1 ? "s" : ""}
                   </Badge>
                 )}
                 {awaitingApprovalSets.length > 0 && isLeaderOrAdmin && (
-                  <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-[0_1.5px_0_0_#d97706]">
+                  <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-arcade-amber">
                     {awaitingApprovalSets.length} to Review
                   </Badge>
                 )}
@@ -825,7 +825,7 @@ export default function TeamWorkspacePage({
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-mono font-semibold transition-colors ${
                     activeWorkspaceTab === "members"
-                      ? "bg-[#8b5cf6] text-white shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-[#8b5cf6] text-white shadow-arcade-primary"
                       : "text-muted-foreground bg-muted"
                   }`}
                 >
@@ -842,7 +842,7 @@ export default function TeamWorkspacePage({
                   <Inbox className="size-3.5 shrink-0" />
                   <span>Join Requests</span>
                   {pendingRequests.length > 0 ? (
-                    <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-[0_1.5px_0_0_#d97706]">
+                    <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-arcade-amber">
                       {pendingRequests.length} New
                     </Badge>
                   ) : (
@@ -850,7 +850,7 @@ export default function TeamWorkspacePage({
                       variant="secondary"
                       className="text-[10px] px-1.5 py-0 font-mono font-semibold text-muted-foreground bg-muted"
                     >
-                      {joinRequests.length}
+                      0
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -863,7 +863,7 @@ export default function TeamWorkspacePage({
                   className="h-10 px-3 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-xl rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
                 >
                   <Settings className="size-3.5 shrink-0" />
-                  <span>Settings</span>
+                  <span>Squad Settings</span>
                 </TabsTrigger>
               )}
             </TabsList>
@@ -874,7 +874,7 @@ export default function TeamWorkspacePage({
         {/* TAB 1: IMAGE SETS (ASTEROID SEARCH)                                       */}
         {/* ========================================================================= */}
         <TabsContent value="imagesets" className="space-y-5">
-          <Card className="p-5 sm:p-6 bg-card border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl space-y-5">
+          <Card className="p-5 sm:p-6 bg-card border-border shadow-arcade rounded-2xl space-y-5">
             {/* Header Controls */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
               <div className="space-y-1">
@@ -892,7 +892,7 @@ export default function TeamWorkspacePage({
                   variant="default"
                   size="sm"
                   onClick={() => setShowIngestModal(true)}
-                  className="h-8.5 px-3.5 text-xs font-bold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5"
+                  className="h-8.5 px-3.5 text-xs font-bold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5"
                 >
                   <Plus className="size-3.5" />
                   <span>Import Image Sets</span>
@@ -908,7 +908,7 @@ export default function TeamWorkspacePage({
                   onClick={() => setImageSetTab("ALL")}
                   className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                     imageSetTab === "ALL"
-                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -920,7 +920,7 @@ export default function TeamWorkspacePage({
                   onClick={() => setImageSetTab("UNASSIGNED")}
                   className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                     imageSetTab === "UNASSIGNED"
-                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -932,7 +932,7 @@ export default function TeamWorkspacePage({
                   onClick={() => setImageSetTab("CLAIM_REQUESTED")}
                   className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                     imageSetTab === "CLAIM_REQUESTED"
-                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -944,7 +944,7 @@ export default function TeamWorkspacePage({
                   onClick={() => setImageSetTab("IN_PROGRESS")}
                   className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                     imageSetTab === "IN_PROGRESS"
-                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -956,7 +956,7 @@ export default function TeamWorkspacePage({
                   onClick={() => setImageSetTab("PENDING_APPROVAL")}
                   className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                     imageSetTab === "PENDING_APPROVAL"
-                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -968,7 +968,7 @@ export default function TeamWorkspacePage({
                   onClick={() => setImageSetTab("SUBMITTED")}
                   className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                     imageSetTab === "SUBMITTED"
-                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -1034,27 +1034,27 @@ export default function TeamWorkspacePage({
                           </span>
 
                           {normalized === "UNASSIGNED" ? (
-                            <Badge className="bg-slate-600 text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
+                            <Badge className="bg-slate-600 text-white font-mono font-bold text-[10px] border-0 shadow-arcade">
                               To Analyze
                             </Badge>
                           ) : normalized === "CLAIM_REQUESTED" ? (
-                            <Badge className="bg-[#f59e0b] text-slate-950 font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
+                            <Badge className="bg-[#f59e0b] text-slate-950 font-mono font-bold text-[10px] border-0 shadow-arcade-amber">
                               Claim Requested
                             </Badge>
                           ) : normalized === "IN_PROGRESS" ? (
-                            <Badge className="bg-[#0284c7] text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#0369a1]">
+                            <Badge className="bg-[#0284c7] text-white font-mono font-bold text-[10px] border-0 shadow-arcade">
                               In Analysis
                             </Badge>
                           ) : normalized === "PENDING_APPROVAL" ? (
-                            <Badge className="bg-[#f59e0b] text-slate-950 font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
+                            <Badge className="bg-[#f59e0b] text-slate-950 font-mono font-bold text-[10px] border-0 shadow-arcade-amber">
                               In Review
                             </Badge>
                           ) : s.isClean ? (
-                            <Badge className="bg-slate-500 text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
+                            <Badge className="bg-slate-500 text-white font-mono font-bold text-[10px] border-0 shadow-arcade">
                               Clean (Approved)
                             </Badge>
                           ) : (
-                            <Badge className="bg-[#10b981] text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#059669]">
+                            <Badge className="bg-[#10b981] text-white font-mono font-bold text-[10px] border-0 shadow-arcade-emerald">
                               Approved
                             </Badge>
                           )}
@@ -1145,7 +1145,7 @@ export default function TeamWorkspacePage({
                                 onClick={() => handleClaimAction(s.id)}
                                 size="sm"
                                 variant="default"
-                                className="flex-1 h-8 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_1.5px_0_0_#6d28d9] dark:shadow-[0_1.5px_0_0_#5b21b6] active:translate-y-0.5"
+                                className="flex-1 h-8 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5"
                               >
                                 <span>Claim for Self</span>
                               </Button>
@@ -1168,7 +1168,7 @@ export default function TeamWorkspacePage({
                               onClick={() => handleClaimAction(s.id, "REQUEST_CLAIM")}
                               size="sm"
                               variant="outline"
-                              className="w-full h-8 text-xs font-bold gap-1 bg-card hover:bg-accent rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                              className="w-full h-8 text-xs font-bold gap-1 bg-card hover:bg-accent rounded-xl shadow-arcade active:translate-y-0.5"
                             >
                               <span>Request to Claim</span>
                             </Button>
@@ -1180,7 +1180,7 @@ export default function TeamWorkspacePage({
                                 onClick={() => handleClaimAction(s.id, "APPROVE_CLAIM")}
                                 size="sm"
                                 variant="default"
-                                className="flex-1 h-8 text-xs font-bold gap-1 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl shadow-[0_1.5px_0_0_#047857] active:translate-y-0.5"
+                                className="flex-1 h-8 text-xs font-bold gap-1 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl shadow-arcade-emerald active:translate-y-0.5"
                               >
                                 <Check className="size-3.5" />
                                 <span>Approve Claim</span>
@@ -1228,7 +1228,7 @@ export default function TeamWorkspacePage({
                                 }}
                                 size="sm"
                                 variant="default"
-                                className="flex-1 h-8 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_1.5px_0_0_#6d28d9] dark:shadow-[0_1.5px_0_0_#5b21b6] active:translate-y-0.5"
+                                className="flex-1 h-8 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5"
                               >
                                 <span>Submit Report</span>
                               </Button>
@@ -1261,7 +1261,7 @@ export default function TeamWorkspacePage({
                               onClick={() => setReviewingSet(s)}
                               size="sm"
                               variant="default"
-                              className="w-full h-8 text-xs font-bold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_1.5px_0_0_#6d28d9] dark:shadow-[0_1.5px_0_0_#5b21b6] active:translate-y-0.5"
+                              className="w-full h-8 text-xs font-bold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5"
                             >
                               <Crown className="size-3.5 text-amber-300" />
                               <span>Review Submission</span>
@@ -1290,7 +1290,7 @@ export default function TeamWorkspacePage({
         {/* TAB 2: SQUAD ROSTER & MEMBERS */}
         {/* ------------------------------------------------------------- */}
         <TabsContent value="members" className="space-y-5">
-          <Card className="p-5 sm:p-6 bg-card border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl space-y-6">
+          <Card className="p-5 sm:p-6 bg-card border-border shadow-arcade rounded-2xl space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
               <div>
                 <h2 className="text-lg font-bold text-foreground">Squad Roster &amp; Members</h2>
@@ -1309,7 +1309,7 @@ export default function TeamWorkspacePage({
                     <span className="text-xs font-mono font-bold text-foreground">
                       {memberCount} of {maxCapacity} Slots Filled
                     </span>
-                    <Badge className={isFull ? "bg-slate-700 text-white text-[10px] font-bold border-0" : "bg-[#8b5cf6] text-white text-[10px] font-bold border-0 shadow-[0_1.5px_0_0_#6d28d9]"}>
+                    <Badge className={isFull ? "bg-slate-700 text-white text-[10px] font-bold border-0" : "bg-[#8b5cf6] text-white text-[10px] font-bold border-0 shadow-arcade-primary"}>
                       {isFull ? "Full Roster" : `${openSlots} Slot${openSlots === 1 ? "" : "s"} Open`}
                     </Badge>
                   </div>
@@ -1358,7 +1358,7 @@ export default function TeamWorkspacePage({
                       </div>
 
                       {isThisMemberLeader ? (
-                        <Badge className="bg-[#8b5cf6] text-white font-bold text-[10px] border-0 py-0.5 px-2 gap-1 shrink-0 shadow-[0_1.5px_0_0_#6d28d9]">
+                        <Badge className="bg-[#8b5cf6] text-white font-bold text-[10px] border-0 py-0.5 px-2 gap-1 shrink-0 shadow-arcade-primary">
                           <Crown className="size-3 text-amber-300" />
                           <span>Leader</span>
                         </Badge>
@@ -1369,31 +1369,23 @@ export default function TeamWorkspacePage({
                       )}
                     </div>
 
-                    <div className="pt-2.5 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground font-sans">
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="flex items-center gap-1">
-                          <Globe className="size-3 text-muted-foreground" />
-                          <span>{m.user.country || "Global"}</span>
-                        </span>
-                        {m.user.institution && (
-                          <span className="truncate max-w-[110px]" title={m.user.institution}>
-                            &bull; {m.user.institution}
-                          </span>
-                        )}
-                      </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50 text-[11px] font-sans">
+                      <span className="text-muted-foreground font-mono">
+                        Joined {new Date(m.joinedAt).toLocaleDateString()}
+                      </span>
 
-                      {/* Remove Member Button (Leader/Admin Only, Non-Leader Member Only) */}
-                      {isLeaderOrAdmin && !isThisMemberLeader && (
+                      {/* Remove Member Button: Leader or Admin only (can't remove self) */}
+                      {isLeaderOrAdmin && m.user.id !== team.leaderId && !isObserverMode && (
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={isRegClosed && !isAdminUser}
+                          disabled={isRegClosed && !isOrganizerAdmin}
                           onClick={() => setMemberToRemove(m)}
                           className="h-7 px-2 text-[11px] font-bold text-muted-foreground hover:text-destructive hover:border-destructive/40 rounded-xl gap-1 shrink-0 disabled:opacity-40"
                           title={
-                            isRegClosed && !isAdminUser
-                              ? "Member removal is locked because the campaign registration period has ended"
-                              : "Remove citizen from squad"
+                            isRegClosed && !isOrganizerAdmin
+                              ? "Roster modifications locked after registration ends"
+                              : "Remove member from squad"
                           }
                         >
                           <UserMinus className="size-3" />
@@ -1471,7 +1463,7 @@ export default function TeamWorkspacePage({
                     size="sm"
                     variant="outline"
                     onClick={handleCopyInvite}
-                    className="h-8 text-xs font-bold gap-1 rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                    className="h-8 text-xs font-bold gap-1 rounded-xl shadow-arcade active:translate-y-0.5"
                   >
                     {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
                     <span>{copied ? "Copied" : "Copy"}</span>
@@ -1487,14 +1479,14 @@ export default function TeamWorkspacePage({
         {/* ------------------------------------------------------------- */}
         {isLeaderOrAdmin && (
           <TabsContent value="requests" className="space-y-5">
-            <Card className="p-5 sm:p-6 bg-card border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl space-y-5">
+            <Card className="p-5 sm:p-6 bg-card border-border shadow-arcade rounded-2xl space-y-5">
               {/* Header & Controls */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
                 <div>
                   <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <span>Student Join Applications</span>
                     {pendingRequests.length > 0 && (
-                      <Badge className="bg-[#10b981] text-white text-[10px] font-bold border-0 shadow-[0_1.5px_0_0_#059669]">
+                      <Badge className="bg-[#10b981] text-white text-[10px] font-bold border-0 shadow-arcade-emerald">
                         {pendingRequests.length} Pending
                       </Badge>
                     )}
@@ -1514,7 +1506,7 @@ export default function TeamWorkspacePage({
                     }}
                     className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                       requestStatusFilter === "ALL"
-                        ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                        ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                         : "bg-background text-muted-foreground hover:text-foreground border border-border"
                     }`}
                   >
@@ -1529,7 +1521,7 @@ export default function TeamWorkspacePage({
                     }}
                     className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                       requestStatusFilter === "PENDING"
-                        ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                        ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                         : "bg-background text-muted-foreground hover:text-foreground border border-border"
                     }`}
                   >
@@ -1544,7 +1536,7 @@ export default function TeamWorkspacePage({
                     }}
                     className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                       requestStatusFilter === "ACCEPTED"
-                        ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                        ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                         : "bg-background text-muted-foreground hover:text-foreground border border-border"
                     }`}
                   >
@@ -1559,7 +1551,7 @@ export default function TeamWorkspacePage({
                     }}
                     className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
                       requestStatusFilter === "REJECTED"
-                        ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                        ? "bg-primary text-primary-foreground font-bold shadow-arcade-primary"
                         : "bg-background text-muted-foreground hover:text-foreground border border-border"
                     }`}
                   >
@@ -1620,15 +1612,15 @@ export default function TeamWorkspacePage({
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="font-bold text-sm text-foreground">{req.user.name}</span>
                                 {req.status === "ACCEPTED" ? (
-                                  <Badge className="bg-[#10b981] text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#059669]">
+                                  <Badge className="bg-[#10b981] text-white font-bold text-[10px] border-0 shadow-arcade-emerald">
                                     Accepted
                                   </Badge>
                                 ) : req.status === "REJECTED" ? (
-                                  <Badge className="bg-[#ef4444] text-white font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#dc2626]">
+                                  <Badge className="bg-[#ef4444] text-white font-bold text-[10px] border-0 shadow-arcade-destructive">
                                     Declined
                                   </Badge>
                                 ) : (
-                                  <Badge className="bg-[#f59e0b] text-slate-950 font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
+                                  <Badge className="bg-[#f59e0b] text-slate-950 font-bold text-[10px] border-0 shadow-arcade-amber">
                                     Pending Review
                                   </Badge>
                                 )}
@@ -1687,7 +1679,7 @@ export default function TeamWorkspacePage({
                               variant="emerald"
                               disabled={hasJoinedOtherSquad || isFull || isSquadDisabled || isProcessing}
                               onClick={() => handleRespondToRequest(req.id, "ACCEPT")}
-                              className="h-8.5 px-4 text-xs font-bold rounded-xl gap-1.5 active:translate-y-0.5 border-0 shadow-[0_2px_0_0_#059669]"
+                              className="h-8.5 px-4 text-xs font-bold rounded-xl gap-1.5 active:translate-y-0.5 border-0 shadow-arcade-emerald"
                               title={
                                 hasJoinedOtherSquad
                                   ? `Already in squad "${req.alreadyJoinedSquad?.teamName}"`
@@ -1713,7 +1705,7 @@ export default function TeamWorkspacePage({
                               variant="outline"
                               disabled={isProcessing}
                               onClick={() => handleRespondToRequest(req.id, "REJECT")}
-                              className="h-8.5 px-3.5 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40 rounded-xl gap-1.5 shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                              className="h-8.5 px-3.5 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40 rounded-xl gap-1.5 shadow-arcade active:translate-y-0.5"
                               title="Decline request"
                             >
                               <UserX className="size-3.5" />
@@ -1769,7 +1761,7 @@ export default function TeamWorkspacePage({
         {/* ------------------------------------------------------------- */}
         {isLeaderOrAdmin && (
           <TabsContent value="settings" className="space-y-5">
-            <Card className="p-5 sm:p-6 bg-card border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl space-y-6">
+            <Card className="p-5 sm:p-6 bg-card border-border shadow-arcade rounded-2xl space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-foreground">Squad Recruitment &amp; Access Controls</h2>
                 <p className="text-xs text-muted-foreground">
@@ -1820,7 +1812,7 @@ export default function TeamWorkspacePage({
                   <Button
                     type="submit"
                     disabled={recruitLoading || team?.status === "DISQUALIFIED"}
-                    className="h-9 px-5 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5"
+                    className="h-9 px-5 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5"
                   >
                     {recruitLoading ? "Saving..." : "Save Recruitment Settings"}
                   </Button>
@@ -1847,7 +1839,7 @@ export default function TeamWorkspacePage({
                     variant="outline"
                     disabled={rotatingCode || team?.status === "DISQUALIFIED"}
                     onClick={handleRotateInviteCode}
-                    className="h-8.5 text-xs font-bold gap-1.5 rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                    className="h-8.5 text-xs font-bold gap-1.5 rounded-xl shadow-arcade active:translate-y-0.5"
                   >
                     <RotateCw className={`size-3.5 ${rotatingCode ? "animate-spin" : ""}`} />
                     <span>Rotate Invite Code</span>
@@ -1883,7 +1875,7 @@ export default function TeamWorkspacePage({
               <Button type="button" variant="outline" size="sm" onClick={() => setShowIngestModal(false)} className="rounded-xl">
                 Cancel
               </Button>
-              <Button type="submit" variant="default" size="sm" disabled={ingestLoading || !bulkText.trim()} className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5">
+              <Button type="submit" variant="default" size="sm" disabled={ingestLoading || !bulkText.trim()} className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-arcade-primary active:translate-y-0.5">
                 {ingestLoading ? "Importing..." : "Import Sets"}
               </Button>
             </DialogFooter>
@@ -1917,7 +1909,7 @@ export default function TeamWorkspacePage({
               size="sm"
               onClick={() => handleSubmitMpcReport(true)}
               disabled={reportLoading}
-              className="text-xs font-bold rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+              className="text-xs font-bold rounded-xl shadow-arcade active:translate-y-0.5"
             >
               Mark Clean
             </Button>
@@ -1979,7 +1971,7 @@ export default function TeamWorkspacePage({
                 size="sm"
                 onClick={() => handleSubmitMpcReport(false)}
                 disabled={reportLoading || !mpcText.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-arcade-primary active:translate-y-0.5"
               >
                 {reportLoading ? "Saving..." : isLeaderOrAdmin ? "Confirm & Submit" : "Submit for Leader Approval"}
               </Button>
@@ -2014,7 +2006,7 @@ export default function TeamWorkspacePage({
                     <div className="text-[11px] text-muted-foreground">{reviewingSet.claimedByUser?.email}</div>
                   </div>
                 </div>
-                <Badge className="bg-[#f59e0b] text-slate-950 font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
+                <Badge className="bg-[#f59e0b] text-slate-950 font-bold text-[10px] border-0 shadow-arcade-amber">
                   Pending Review
                 </Badge>
               </div>
@@ -2085,7 +2077,7 @@ export default function TeamWorkspacePage({
                   size="sm"
                   disabled={reviewActionLoading}
                   onClick={() => handleLeaderApproveReport(reviewingSet.id, "APPROVE")}
-                  className="rounded-xl text-xs font-bold gap-1.5 border-0 shadow-[0_2px_0_0_#059669] active:translate-y-0.5"
+                  className="rounded-xl text-xs font-bold gap-1.5 border-0 shadow-arcade-emerald active:translate-y-0.5"
                 >
                   <CheckCircle2 className="size-3.5" />
                   <span>{reviewActionLoading ? "Approving..." : "Approve Submission"}</span>
@@ -2174,7 +2166,7 @@ export default function TeamWorkspacePage({
                 setIsAssigning(false);
                 setAssignModalOpen(false);
               }}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5"
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-arcade-primary active:translate-y-0.5"
             >
               {isAssigning ? "Assigning..." : "Assign Set"}
             </Button>
@@ -2217,7 +2209,7 @@ export default function TeamWorkspacePage({
               size="sm"
               disabled={removingMember}
               onClick={handleRemoveMember}
-              className="rounded-xl text-xs font-bold gap-1.5 bg-[#ef4444] text-white hover:bg-[#dc2626] border-0 shadow-[0_2px_0_0_#b91c1c] active:translate-y-0.5"
+              className="rounded-xl text-xs font-bold gap-1.5 bg-[#ef4444] text-white hover:bg-[#dc2626] border-0 shadow-arcade-destructive active:translate-y-0.5"
             >
               {removingMember ? (
                 <>

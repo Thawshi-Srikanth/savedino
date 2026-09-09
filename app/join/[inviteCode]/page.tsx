@@ -59,7 +59,7 @@ export default function JoinTeamPage({
         <span>Back to Teams Directory</span>
       </Link>
 
-      <Card className="w-full max-w-md bg-[#8b5cf6] text-white border border-[#7c3aed] shadow-[0_6px_0_0_#6d28d9] dark:shadow-[0_6px_0_0_#5b21b6] rounded-2xl p-6 sm:p-8 space-y-6">
+      <Card className="w-full max-w-md bg-[#8b5cf6] text-white border border-[#7c3aed] shadow-arcade-primary-lg rounded-2xl p-6 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
           <div className="size-11 rounded-full bg-white/15 text-white flex items-center justify-center mx-auto mb-1">
             <Sparkles className="size-5 text-amber-300" />
@@ -84,7 +84,7 @@ export default function JoinTeamPage({
         <Button
           onClick={handleJoin}
           disabled={loading}
-          className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2 cursor-pointer bg-slate-950 text-white hover:bg-slate-900 border-0 shadow-[0_3px_0_0_#020617] active:translate-y-0.5 transition-transform"
+          className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2 cursor-pointer bg-slate-950 text-white hover:bg-slate-900 border-0 shadow-arcade-lg active:translate-y-0.5 transition-transform"
         >
           {loading ? (
             <>

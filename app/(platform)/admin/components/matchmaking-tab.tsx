@@ -100,7 +100,7 @@ export function MatchmakingTab({
                 size="icon"
                 variant="outline"
                 onClick={fetchAdminData}
-                className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-arcade active:translate-y-0.5"
               >
                 <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
               </Button>
@@ -186,7 +186,7 @@ export function MatchmakingTab({
                       size="sm"
                       variant="outline"
                       onClick={() => onAssignClick(u)}
-                      className="h-6.5 text-[11px] font-semibold gap-1.5 cursor-pointer bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 border-[#10b981]/30 shadow-[0_1px_0_0_#10b981]/20 active:translate-y-0.5"
+                      className="h-6.5 text-[11px] font-semibold gap-1.5 cursor-pointer bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 border-[#10b981]/30 shadow-arcade-emerald active:translate-y-0.5"
                     >
                       <UserPlus className="size-3" />
                       <span>Assign to Squad</span>

@@ -66,7 +66,7 @@ export function AssignUserModal({
               size="sm"
               onClick={() => setAssigningUser(null)}
               disabled={assignLoading}
-              className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+              className="shadow-arcade active:translate-y-0.5 cursor-pointer"
             >
               Cancel
             </Button>
@@ -75,7 +75,7 @@ export function AssignUserModal({
               variant="default"
               size="sm"
               disabled={!selectedTeamId || assignLoading}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 cursor-pointer"
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
             >
               {assignLoading ? "Assigning..." : "Confirm Assignment"}
             </Button>

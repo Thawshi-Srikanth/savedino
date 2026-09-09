@@ -59,7 +59,7 @@ export function DeleteCampaignDialog({
             size="sm"
             onClick={() => setDeletingCampaign(null)}
             disabled={deleteCampLoading}
-            className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+            className="shadow-arcade active:translate-y-0.5 cursor-pointer"
           >
             Cancel
           </Button>
@@ -69,7 +69,7 @@ export function DeleteCampaignDialog({
             size="sm"
             onClick={onConfirmDelete}
             disabled={deleteCampLoading}
-            className="font-bold shadow-[0_2px_0_0_#991b1b] active:translate-y-0.5 cursor-pointer"
+            className="font-bold shadow-arcade-destructive active:translate-y-0.5 cursor-pointer"
           >
             {deleteCampLoading ? "Deleting..." : "Delete Campaign"}
           </Button>

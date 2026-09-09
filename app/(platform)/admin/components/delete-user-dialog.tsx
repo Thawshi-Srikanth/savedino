@@ -39,7 +39,7 @@ export function DeleteUserDialog({
             size="sm"
             onClick={() => setDeletingUser(null)}
             disabled={deleteLoading}
-            className="shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 cursor-pointer"
+            className="shadow-arcade active:translate-y-0.5 cursor-pointer"
           >
             Cancel
           </Button>
@@ -49,7 +49,7 @@ export function DeleteUserDialog({
             size="sm"
             onClick={onConfirmDelete}
             disabled={deleteLoading}
-            className="font-bold shadow-[0_2px_0_0_#991b1b] active:translate-y-0.5 cursor-pointer"
+            className="font-bold shadow-arcade-destructive active:translate-y-0.5 cursor-pointer"
           >
             {deleteLoading ? "Deleting..." : "Delete User"}
           </Button>

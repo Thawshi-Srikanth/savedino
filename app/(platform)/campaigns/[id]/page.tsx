@@ -353,7 +353,7 @@ export default function CampaignDetailPage({
       <div className="w-full py-20 text-center space-y-4 font-sans">
         <div className="text-base font-semibold text-foreground">Campaign Not Found</div>
         <Link href="/campaigns">
-          <Button variant="outline" size="sm" className="gap-2 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
+          <Button variant="outline" size="sm" className="gap-2 cursor-pointer shadow-arcade-sm">
             <ArrowLeft className="size-4" />
             <span>Back to Campaigns</span>
           </Button>
@@ -426,16 +426,16 @@ export default function CampaignDetailPage({
         {/* Theme Status Pill with 3D Shadow */}
         <div className="flex items-center gap-2">
           {event.status === "ACTIVE" ? (
-            <Badge className="bg-[#10b981] hover:bg-[#059669] text-white border-0 font-sans font-bold text-xs px-2.5 py-1 gap-1.5 shadow-[0_2px_0_0_#047857] rounded-lg">
-              <span className="size-1.5 rounded-full bg-white animate-pulse" />
-              <span>Active</span>
+            <Badge className="bg-[#10b981] hover:bg-[#059669] text-white border-0 font-sans font-bold text-xs px-2.5 py-1 gap-1.5 shadow-arcade-emerald rounded-lg">
+              <span className="size-1.5 rounded-full bg-white" />
+              <span>{event.status}</span>
             </Badge>
           ) : event.status === "UPCOMING" ? (
-            <Badge className="bg-sky-500 hover:bg-sky-600 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-[0_2px_0_0_#0284c7] rounded-lg">
+            <Badge className="bg-sky-500 hover:bg-sky-600 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-arcade-sm rounded-lg">
               Upcoming
             </Badge>
           ) : (
-            <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-[0_2px_0_0_#334155] rounded-lg">
+            <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-arcade-sm rounded-lg">
               {event.status}
             </Badge>
           )}
@@ -515,10 +515,10 @@ export default function CampaignDetailPage({
                           variant={isLive ? "default" : "outline"}
                           className={`font-sans font-bold text-xs px-2.5 py-0.5 rounded-lg ${
                             isLive
-                              ? "bg-[#8b5cf6] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                              ? "bg-[#8b5cf6] text-white border-0 shadow-arcade-primary"
                               : isDone
-                              ? "bg-[#10b981] text-white border-0 shadow-[0_2px_0_0_#059669]"
-                              : "bg-muted text-muted-foreground border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                              ? "bg-[#10b981] text-white border-0 shadow-arcade-emerald"
+                              : "bg-muted text-muted-foreground border-border shadow-arcade-sm"
                           }`}
                         >
                           Step {idx + 1}
@@ -585,10 +585,10 @@ export default function CampaignDetailPage({
                         <div
                           className={`absolute -left-9 size-7 rounded-lg border flex items-center justify-center transition-all ${
                             isDone
-                              ? "bg-[#10b981] border-[#059669] text-white shadow-[0_2px_0_0_#059669] dark:shadow-[0_2px_0_0_#047857]"
+                              ? "bg-[#10b981] border-[#059669] text-white shadow-arcade-emerald"
                               : isLive
-                              ? "bg-[#8b5cf6] border-[#7c3aed] text-white shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
-                              : "bg-card border-border text-muted-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                              ? "bg-[#8b5cf6] border-[#7c3aed] text-white shadow-arcade-primary"
+                              : "bg-card border-border text-muted-foreground shadow-arcade-sm"
                           }`}
                         >
                           {isDone || isLive ? (
@@ -637,10 +637,10 @@ export default function CampaignDetailPage({
                         <div
                           className={`absolute -left-9 size-7 rounded-lg border flex items-center justify-center transition-all ${
                             isDone
-                              ? "bg-[#10b981] border-[#059669] text-white shadow-[0_2px_0_0_#059669] dark:shadow-[0_2px_0_0_#047857]"
+                              ? "bg-[#10b981] border-[#059669] text-white shadow-arcade-emerald"
                               : isLive
-                              ? "bg-card border-[#8b5cf6] text-[#8b5cf6] shadow-[0_2px_0_0_#8b5cf6]/30"
-                              : "bg-card border-border text-muted-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                              ? "bg-card border-[#8b5cf6] text-[#8b5cf6] shadow-arcade-sm"
+                              : "bg-card border-border text-muted-foreground shadow-arcade-sm"
                           }`}
                         >
                           {isDone ? (
@@ -758,7 +758,7 @@ export default function CampaignDetailPage({
                 </div>
 
                 {/* 2. Solid Theme Action Card with dynamic buttons based on active stage */}
-                <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
+                <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-arcade-primary-lg border-0 transition-all">
                   {/* Header / Active Stage Status */}
                   <div className="flex items-center justify-between pb-1 border-b border-white/20">
                     <span className="text-[11px] uppercase tracking-wider font-bold text-white/90">
@@ -783,7 +783,7 @@ export default function CampaignDetailPage({
                         <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                           <Button
                             variant="default"
-                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
                           >
                             <Telescope className="size-4" />
                             <span>Start Image Search</span>
@@ -829,7 +829,7 @@ export default function CampaignDetailPage({
                         ) : (
                           <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                             <Button
-                              className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
+                              className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all"
                             >
                               <Users className="size-4" />
                               <span>View Joined Teams ({squadCount})</span>
@@ -845,7 +845,7 @@ export default function CampaignDetailPage({
                         <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                           <Button
                             variant="default"
-                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-[0_3px_0_0_#059669] active:translate-y-0.5 border-0 rounded-xl"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-arcade-emerald-lg active:translate-y-0.5 border-0 rounded-xl"
                           >
                             <CheckCircle2 className="size-4" />
                             <span>Submit Reports</span>
@@ -854,7 +854,7 @@ export default function CampaignDetailPage({
 
                         <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                           <Button
-                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all"
                           >
                             <Users className="size-4" />
                             <span>View Teams ({squadCount})</span>
@@ -868,7 +868,7 @@ export default function CampaignDetailPage({
                       <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                         <Button
                           variant="default"
-                          className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                          className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
                         >
                           <Sparkles className="size-4" />
                           <span>View Results & Teams ({squadCount})</span>
@@ -902,7 +902,7 @@ export default function CampaignDetailPage({
                                   setCreateModalOpen(true);
                                 }}
                                 variant="default"
-                                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
+                                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
                               >
                                 <PlusCircle className="size-4" />
                                 <span>Form a Team</span>
@@ -929,7 +929,7 @@ export default function CampaignDetailPage({
 
                           <Link href={`/teams?eventId=${event.id}`} className="block w-full">
                             <Button
-                              className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_3px_0_0_#b45309] active:translate-y-0.5 border-0 rounded-xl transition-all"
+                              className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber active:translate-y-0.5 border-0 rounded-xl transition-all"
                             >
                               <Users className="size-4" />
                               <span>View Joined Teams ({squadCount})</span>
@@ -1044,7 +1044,7 @@ export default function CampaignDetailPage({
                 size="sm"
                 onClick={() => setCreateModalOpen(false)}
                 disabled={createLoading}
-                className="text-xs shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                className="text-xs shadow-arcade-sm"
               >
                 Cancel
               </Button>
@@ -1053,7 +1053,7 @@ export default function CampaignDetailPage({
                 variant="default"
                 size="sm"
                 disabled={createLoading || !teamName.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary"
               >
                 {createLoading ? "Creating..." : "Create Team"}
               </Button>
@@ -1104,7 +1104,7 @@ export default function CampaignDetailPage({
                 size="sm"
                 onClick={() => setJoinModalOpen(false)}
                 disabled={joinLoading}
-                className="text-xs shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                className="text-xs shadow-arcade-sm"
               >
                 Cancel
               </Button>
@@ -1113,7 +1113,7 @@ export default function CampaignDetailPage({
                 variant="default"
                 size="sm"
                 disabled={joinLoading || !joinCode.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary"
               >
                 {joinLoading ? "Joining..." : "Join Team"}
               </Button>

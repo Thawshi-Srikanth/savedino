@@ -284,7 +284,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* 1. CLEAN PROFILE HEADER CARD */}
-      <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-arcade flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left: Avatar & Identity Details */}
         <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
           <PixelAvatar seed={savedAvatarSeed} size={56} className="shadow-md shrink-0 ring-2 ring-primary/20" />
@@ -296,7 +296,7 @@ export default function ProfilePage() {
               </h1>
 
               {user?.role === "admin" ? (
-                <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold px-1.5 py-0 shadow-[0_1.5px_0_0_#6d28d9]">
+                <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold px-1.5 py-0 shadow-arcade-primary">
                   <ShieldCheck className="size-3 mr-0.5" />
                   Admin
                 </Badge>
@@ -438,7 +438,7 @@ export default function ProfilePage() {
           <form onSubmit={handleSaveProfile} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* Left Column: Personal Information Form */}
-              <Card className="md:col-span-7 border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl">
+              <Card className="md:col-span-7 border-border shadow-arcade rounded-2xl">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <User className="size-4 text-primary" />
@@ -507,7 +507,7 @@ export default function ProfilePage() {
               </Card>
 
               {/* Right Column: Space Character Avatar Preview & Selector */}
-              <Card className="md:col-span-5 border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl flex flex-col justify-between">
+              <Card className="md:col-span-5 border-border shadow-arcade rounded-2xl flex flex-col justify-between">
                 <div>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -536,7 +536,7 @@ export default function ProfilePage() {
                         type="button"
                         variant="outline"
                         onClick={handleRollAvatar}
-                        className="flex-1 h-9 text-xs font-bold rounded-xl cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1.5"
+                        className="flex-1 h-9 text-xs font-bold rounded-xl cursor-pointer shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1.5"
                       >
                         <Dices className="size-3.5 text-primary" />
                         <span>Roll Next Avatar</span>
@@ -578,7 +578,7 @@ export default function ProfilePage() {
               <p className="text-xs text-muted-foreground">All asteroid search campaigns you have participated in.</p>
             </div>
             <Link href="/campaigns">
-              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 gap-1 self-start sm:self-auto">
+              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-arcade active:translate-y-0.5 gap-1 self-start sm:self-auto">
                 <Telescope className="size-3.5" />
                 <span>Explore Campaigns</span>
               </Button>
@@ -595,7 +595,7 @@ export default function ProfilePage() {
                 </p>
               </div>
               <Link href="/campaigns">
-                <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9]">
+                <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary">
                   Browse Campaigns
                 </Button>
               </Link>
@@ -607,7 +607,7 @@ export default function ProfilePage() {
                 const isActive = event.status === "ACTIVE" || event.status === "SUBMISSION_OPEN";
 
                 return (
-                  <Card key={event.id} className="border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl hover:border-primary/40 transition-all">
+                  <Card key={event.id} className="border-border shadow-arcade rounded-2xl hover:border-primary/40 transition-all">
                     <CardContent className="p-4 sm:p-5 flex flex-col gap-3.5">
                       {/* Top Row: Badges & Timeline */}
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -650,7 +650,7 @@ export default function ProfilePage() {
                             <Users className="size-3.5 text-primary shrink-0" />
                             <span>Squad: <strong className="text-foreground">{team.name}</strong></span>
                             {team.role === "leader" ? (
-                              <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold py-0 px-1.5 shadow-[0_1.5px_0_0_#6d28d9]">
+                              <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold py-0 px-1.5 shadow-arcade-primary">
                                 Leader
                               </Badge>
                             ) : (
@@ -670,14 +670,14 @@ export default function ProfilePage() {
                       {/* Bottom Action Buttons Row */}
                       <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-border/60">
                         <Link href={`/campaigns/${event.id}`} className="w-full sm:w-auto">
-                          <Button size="sm" variant="outline" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1">
+                          <Button size="sm" variant="outline" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1">
                             <span>Campaign View</span>
                             <ArrowRight className="size-3" />
                           </Button>
                         </Link>
 
                         <Link href={`/team/${team.id}`} className="w-full sm:w-auto">
-                          <Button size="sm" variant="default" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 flex items-center justify-center gap-1.5">
+                          <Button size="sm" variant="default" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 flex items-center justify-center gap-1.5">
                             <Users className="size-3.5" />
                             <span>Squad Workspace</span>
                           </Button>
@@ -701,7 +701,7 @@ export default function ProfilePage() {
               <p className="text-xs text-muted-foreground">Teams you have formed or joined across campaigns.</p>
             </div>
             <Link href="/teams">
-              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 gap-1 self-start sm:self-auto">
+              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-arcade active:translate-y-0.5 gap-1 self-start sm:self-auto">
                 <Users className="size-3.5" />
                 <span>Squad Directory</span>
               </Button>
@@ -718,7 +718,7 @@ export default function ProfilePage() {
                 </p>
               </div>
               <Link href="/teams">
-                <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9]">
+                <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary">
                   Find or Create Squad
                 </Button>
               </Link>
@@ -726,13 +726,13 @@ export default function ProfilePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {teams.map((team) => (
-                <Card key={team.id} className="border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl flex flex-col justify-between">
+                <Card key={team.id} className="border-border shadow-arcade rounded-2xl flex flex-col justify-between">
                   <CardHeader className="pb-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="outline" className="text-[10px] font-mono font-bold">
                         {team.event.code}
                       </Badge>
-                      <Badge className={team.role === "leader" ? "bg-[#8b5cf6] text-white border-0 text-[10px] font-bold shadow-[0_1.5px_0_0_#6d28d9]" : "bg-muted text-muted-foreground border-border text-[10px]"}>
+                      <Badge className={team.role === "leader" ? "bg-[#8b5cf6] text-white border-0 text-[10px] font-bold shadow-arcade-primary" : "bg-muted text-muted-foreground border-border text-[10px]"}>
                         {team.role === "leader" ? "Squad Leader" : "Member"}
                       </Badge>
                     </div>
@@ -771,7 +771,7 @@ export default function ProfilePage() {
                     </div>
 
                     <Link href={`/team/${team.id}`} className="block w-full">
-                      <Button variant="outline" size="sm" className="w-full text-xs font-bold h-8.5 rounded-xl shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1.5">
+                      <Button variant="outline" size="sm" className="w-full text-xs font-bold h-8.5 rounded-xl shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1.5">
                         <span>Open Workspace</span>
                         <ExternalLink className="size-3" />
                       </Button>
@@ -899,7 +899,7 @@ export default function ProfilePage() {
               size="sm"
               onClick={handleDiscardChanges}
               disabled={isSaving}
-              className="h-9 px-3 text-xs font-semibold rounded-xl cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex items-center justify-center gap-1"
+              className="h-9 px-3 text-xs font-semibold rounded-xl cursor-pointer shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1"
             >
               <RotateCcw className="size-3.5" />
               <span>Discard</span>
@@ -910,7 +910,7 @@ export default function ProfilePage() {
               size="sm"
               onClick={handleSaveProfile}
               disabled={isSaving}
-              className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5 cursor-pointer flex items-center justify-center gap-1.5"
+              className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 cursor-pointer flex items-center justify-center gap-1.5"
             >
               {isSaving ? (
                 <>

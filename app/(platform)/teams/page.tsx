@@ -318,7 +318,7 @@ function TeamsContent() {
   };
 
   const renderJoinCodeCard = (
-    <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] space-y-2.5">
+    <Card className="p-3.5 bg-[#8b5cf6] text-white border-[#7c3aed] shadow-arcade-primary-lg space-y-2.5">
       <div className="flex items-center justify-between gap-1">
         <span className="text-xs font-bold text-white tracking-wide">Join with Code</span>
         <TooltipProvider>
@@ -351,7 +351,7 @@ function TeamsContent() {
           type="submit"
           disabled={joinCodeLoading || !joinCodeInput.trim()}
           size="sm"
-          className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] border-0 shadow-[0_2px_0_0_#ca8a04] active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
+          className="h-8 px-2.5 text-xs font-bold cursor-pointer bg-[#facc15] text-slate-950 hover:bg-[#eab308] border-0 shadow-arcade-amber active:translate-y-0.5 transition-transform shrink-0 flex items-center gap-1"
           title="Join Team"
         >
           {joinCodeLoading ? (
@@ -570,7 +570,7 @@ function TeamsContent() {
         <Link href="/campaigns" className="hidden sm:inline-flex">
           <Button
             variant="outline"
-            className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 rounded-xl shrink-0"
+            className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl shrink-0"
           >
             <span>Explore Campaigns</span>
             <ArrowRight className="size-3.5" />
@@ -728,7 +728,7 @@ function TeamsContent() {
                   return (
                     <Card
                       key={team.id}
-                      className="p-4 flex flex-col justify-between space-y-3 bg-card border-border hover:border-primary/40 hover:shadow-[0_2px_0_0_#8b5cf6]/20 transition-all"
+                      className="p-4 flex flex-col justify-between space-y-3 bg-card border-border hover:border-primary/40 transition-all"
                     >
                       <div className="space-y-2.5">
                         {/* Top: Campaign Code */}
@@ -816,7 +816,7 @@ function TeamsContent() {
                           <Link href={`/team/${team.id}`} className="block w-full">
                             <Button
                               size="sm"
-                              className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
+                              className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5"
                             >
                               <span>{isStaffOrAdmin && !isUserMember ? "Inspect Workspace" : "Open Workspace"}</span>
                               <ArrowRight className="size-3.5" />
@@ -854,7 +854,7 @@ function TeamsContent() {
                             }}
                             size="sm"
                             variant="outline"
-                            className="w-full h-8 text-xs font-bold gap-1.5 text-foreground hover:bg-accent cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                            className="w-full h-8 text-xs font-bold gap-1.5 text-foreground hover:bg-accent cursor-pointer shadow-arcade active:translate-y-0.5"
                           >
                             <UserPlus className="size-3.5 text-[#10b981]" />
                             <span>Request to Join</span>
@@ -885,7 +885,7 @@ function TeamsContent() {
                           <Button
                             onClick={handleLoadMore}
                             variant="outline"
-                            className="h-8 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-background hover:bg-accent text-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5 flex-1 sm:flex-initial"
+                            className="h-8 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-background hover:bg-accent text-foreground shadow-arcade active:translate-y-0.5 flex-1 sm:flex-initial"
                           >
                             <span>Load More Squads (+{Math.min(pageSize, remainingCount)})</span>
                           </Button>
@@ -924,7 +924,7 @@ function TeamsContent() {
                           disabled={currentPage <= 1}
                           variant="outline"
                           size="sm"
-                          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed shadow-arcade active:translate-y-0.5"
                         >
                           <ChevronLeft className="size-3.5" />
                           <span>Prev</span>
@@ -967,7 +967,7 @@ function TeamsContent() {
                           disabled={currentPage >= totalPages}
                           variant="outline"
                           size="sm"
-                          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed shadow-arcade active:translate-y-0.5"
                         >
                           <span>Next</span>
                           <ChevronRight className="size-3.5" />
@@ -1015,7 +1015,7 @@ function TeamsContent() {
               size="sm"
               onClick={handleSendJoinRequest}
               disabled={requestLoading}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 cursor-pointer"
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
             >
               {requestLoading ? "Sending..." : "Submit Request"}
             </Button>

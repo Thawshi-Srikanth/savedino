@@ -109,7 +109,7 @@ export function UsersTab({
   return (
     <div className="flex flex-col md:flex-row gap-4 items-start w-full">
       {/* Left Role Filter Sidebar */}
-      <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-[0_3px_0_0_#e2e8f0] dark:shadow-[0_3px_0_0_#27282d] space-y-2.5">
+      <aside className="w-full md:w-56 shrink-0 bg-card border border-border rounded-xl p-3 shadow-arcade-lg space-y-2.5">
         <div className="px-2 py-1 flex items-center justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
             Researcher Roles
@@ -125,7 +125,7 @@ export function UsersTab({
             onClick={() => setRoleFilter("ALL")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               roleFilter === "ALL"
-                ? "bg-primary text-primary-foreground shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5 font-bold"
+                ? "bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 font-bold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -138,7 +138,7 @@ export function UsersTab({
             onClick={() => setRoleFilter(roleFilter === "admin" ? "ALL" : "admin")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               roleFilter === "admin"
-                ? "bg-[#8b5cf6] text-white font-bold shadow-[0_2px_0_0_#7c3aed] active:translate-y-0.5"
+                ? "bg-[#8b5cf6] text-white font-bold shadow-arcade-primary active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -151,7 +151,7 @@ export function UsersTab({
             onClick={() => setRoleFilter(roleFilter === "staff" ? "ALL" : "staff")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               roleFilter === "staff"
-                ? "bg-[#10b981] text-white font-bold shadow-[0_2px_0_0_#059669] active:translate-y-0.5"
+                ? "bg-[#10b981] text-white font-bold shadow-arcade-emerald active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -164,7 +164,7 @@ export function UsersTab({
             onClick={() => setRoleFilter(roleFilter === "user" ? "ALL" : "user")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               roleFilter === "user"
-                ? "bg-slate-700 text-white font-bold shadow-[0_2px_0_0_#475569] active:translate-y-0.5"
+                ? "bg-slate-700 text-white font-bold shadow-arcade active:translate-y-0.5"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
@@ -244,7 +244,7 @@ export function UsersTab({
                   size="icon"
                   variant="outline"
                   onClick={fetchAdminData}
-                  className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground shadow-arcade active:translate-y-0.5"
                 >
                   <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
                 </Button>
@@ -298,7 +298,7 @@ export function UsersTab({
                     setRoleFilter("ALL");
                     setTeamStatusFilter("ALL");
                   }}
-                  className="h-7 text-xs mt-2 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] active:translate-y-0.5"
+                  className="h-7 text-xs mt-2 cursor-pointer shadow-arcade active:translate-y-0.5"
                 >
                   Reset All Filters
                 </Button>
@@ -510,7 +510,7 @@ export function UsersTab({
               variant="outline"
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
-              className="h-6.5 px-1.5 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-1.5 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="First Page"
             >
               <ChevronsLeft className="size-3.5" />
@@ -520,7 +520,7 @@ export function UsersTab({
               variant="outline"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="h-6.5 px-2 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-2 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Previous Page"
             >
               <ChevronLeft className="size-3.5" />
@@ -545,7 +545,7 @@ export function UsersTab({
                     onClick={() => setCurrentPage(pageIndex)}
                     className={`h-6.5 min-w-[26px] px-1.5 rounded text-xs font-mono font-semibold cursor-pointer transition-all border ${
                       isActive
-                        ? "bg-primary text-primary-foreground border-primary shadow-[0_1px_0_0_#7c3aed]"
+                        ? "bg-primary text-primary-foreground border-primary shadow-arcade-xs"
                         : "bg-background text-muted-foreground border-border hover:text-foreground hover:bg-muted"
                     }`}
                   >
@@ -560,7 +560,7 @@ export function UsersTab({
               variant="outline"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || filteredUsers.length === 0}
-              className="h-6.5 px-2 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-2 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Next Page"
             >
               <ChevronRight className="size-3.5" />
@@ -570,7 +570,7 @@ export function UsersTab({
               variant="outline"
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages || filteredUsers.length === 0}
-              className="h-6.5 px-1.5 text-xs shadow-[0_1px_0_0_#e2e8f0] dark:shadow-[0_1px_0_0_#27282d] active:translate-y-0.5"
+              className="h-6.5 px-1.5 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Last Page"
             >
               <ChevronsRight className="size-3.5" />
