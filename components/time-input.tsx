@@ -124,12 +124,7 @@ export const TimeInput: React.FC<TimeInputProps> = ({
   };
 
   return (
-    <div
-      className={cn(
-        "flex items-center space-x-1 rounded-md border p-1",
-        className,
-      )}
-    >
+    <div className={cn("flex items-center space-x-1 rounded-md border p-1", className)}>
       <div className="flex flex-col">
         <Button
           type="button"

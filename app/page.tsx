@@ -189,7 +189,8 @@ export default function Home() {
             </h2>
 
             <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-              Get ready for the SaveDino Asteroid Search Challenge! Team up with your squad to spot real asteroids, submit discovery reports, and compete on the global leaderboard.
+              Get ready for the SaveDino Asteroid Search Challenge! Team up with your squad to spot
+              real asteroids, submit discovery reports, and compete on the global leaderboard.
             </p>
 
             <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
@@ -229,7 +230,8 @@ export default function Home() {
             </h2>
 
             <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-              Team up with a research squad to analyze real telescope images and hunt for undiscovered asteroids.
+              Team up with a research squad to analyze real telescope images and hunt for
+              undiscovered asteroids.
             </p>
 
             <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
@@ -249,7 +251,11 @@ export default function Home() {
 
             <div className="pt-2 flex items-center gap-3">
               <Link href="/campaigns">
-                <Button size="sm" variant="default" className="text-xs font-bold shadow-arcade-primary cursor-pointer">
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="text-xs font-bold shadow-arcade-primary cursor-pointer"
+                >
                   <span>Explore Campaigns &gt;</span>
                 </Button>
               </Link>
@@ -267,11 +273,10 @@ export default function Home() {
                 <Bell className="size-4" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold font-sans">
-                  Get Notified
-                </DialogTitle>
+                <DialogTitle className="text-base font-bold font-sans">Get Notified</DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground font-sans">
-                  Be the first to know when registrations open for the upcoming Asteroid Search Challenge.
+                  Be the first to know when registrations open for the upcoming Asteroid Search
+                  Challenge.
                 </DialogDescription>
               </div>
             </div>

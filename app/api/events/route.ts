@@ -25,7 +25,8 @@ export async function GET() {
           {
             title: "IASC Pan-STARRS Campaign 2026-A",
             code: "IASC-2026-A",
-            description: "Official International Astronomical Search Collaboration month-long campaign using Pan-STARRS 1.8m telescope FITS data.",
+            description:
+              "Official International Astronomical Search Collaboration month-long campaign using Pan-STARRS 1.8m telescope FITS data.",
             regStart: new Date(now.getTime() - 7 * day),
             regEnd: new Date(now.getTime() + 7 * day),
             teamFormationStart: new Date(now.getTime() - 3 * day),
@@ -39,7 +40,8 @@ export async function GET() {
           {
             title: "Catalina Sky Survey Winter Search 2026",
             code: "CSS-2026-WIN",
-            description: "High-priority Near-Earth Asteroid discovery campaign utilizing Mt. Lemmon telescope image sets.",
+            description:
+              "High-priority Near-Earth Asteroid discovery campaign utilizing Mt. Lemmon telescope image sets.",
             regStart: new Date(now.getTime() + 30 * day),
             regEnd: new Date(now.getTime() + 45 * day),
             teamFormationStart: new Date(now.getTime() + 40 * day),

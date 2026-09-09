@@ -66,7 +66,8 @@ export function isSubmissionClosed(
     if (!isNaN(deadline.getTime()) && now.getTime() > deadline.getTime()) {
       return {
         closed: true,
-        reason: "The submission window for this campaign has ended. Discovery reports can no longer be submitted.",
+        reason:
+          "The submission window for this campaign has ended. Discovery reports can no longer be submitted.",
       };
     }
   }

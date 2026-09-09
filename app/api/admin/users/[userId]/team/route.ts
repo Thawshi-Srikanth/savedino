@@ -5,10 +5,7 @@ import { headers } from "next/headers";
 import { calculateTeamStatus } from "@/lib/campaign-engine";
 
 // DELETE /api/admin/users/[userId]/team - Remove a user from their active team
-export async function DELETE(
-  req: Request,
-  context: { params: Promise<{ userId: string }> }
-) {
+export async function DELETE(req: Request, context: { params: Promise<{ userId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

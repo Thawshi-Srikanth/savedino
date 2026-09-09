@@ -6,10 +6,7 @@ import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 
 // GET pending join requests for a team (Leader, Squad Members & Admins)
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ teamId: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -51,7 +48,10 @@ export async function GET(
     const isStaffOrAdmin = session.user.role === "admin" || session.user.role === "staff";
 
     if (!isMember && !isStaffOrAdmin) {
-      return NextResponse.json({ success: false, error: "Only team members or admins can view join requests." }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: "Only team members or admins can view join requests." },
+        { status: 403 }
+      );
     }
 
     // Get all userIds of the applicants
@@ -76,7 +76,10 @@ export async function GET(
       },
     });
 
-    const membershipMap = new Map<string, { teamId: string; teamName: string; isThisTeam: boolean }>();
+    const membershipMap = new Map<
+      string,
+      { teamId: string; teamName: string; isThisTeam: boolean }
+    >();
     for (const mem of campaignMemberships) {
       membershipMap.set(mem.userId, {
         teamId: mem.team.id,
@@ -121,10 +124,7 @@ export async function GET(
 }
 
 // POST: Student sends a join request to a recruiting team
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ teamId: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -136,7 +136,10 @@ export async function POST(
 
     if (session.user.role === "admin" || session.user.role === "staff") {
       return NextResponse.json(
-        { success: false, error: "Administrators and staff manage campaigns and cannot submit team join requests." },
+        {
+          success: false,
+          error: "Administrators and staff manage campaigns and cannot submit team join requests.",
+        },
         { status: 403 }
       );
     }
@@ -160,24 +163,37 @@ export async function POST(
 
     if (team.status === "DISQUALIFIED") {
       return NextResponse.json(
-        { success: false, error: "This squad has been disabled by platform administration and is not accepting join requests." },
+        {
+          success: false,
+          error:
+            "This squad has been disabled by platform administration and is not accepting join requests.",
+        },
         { status: 403 }
       );
     }
 
     if (!team.isRecruiting) {
-      return NextResponse.json({ success: false, error: "This team is currently not accepting join requests." }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "This team is currently not accepting join requests." },
+        { status: 400 }
+      );
     }
 
     const maxLimit = team.event?.maxTeamSize || 6;
     if (team.members.length >= maxLimit) {
-      return NextResponse.json({ success: false, error: `This squad is already at max capacity (${maxLimit} members).` }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: `This squad is already at max capacity (${maxLimit} members).` },
+        { status: 400 }
+      );
     }
 
     // Check if user is already in this team
     const alreadyMember = team.members.some((m) => m.userId === session.user.id);
     if (alreadyMember) {
-      return NextResponse.json({ success: false, error: "You are already a member of this team." }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "You are already a member of this team." },
+        { status: 400 }
+      );
     }
 
     // Check existing join request
@@ -193,7 +209,8 @@ export async function POST(
         return NextResponse.json(
           {
             success: false,
-            error: "Your previous application to this squad was declined. You cannot re-apply to the same squad.",
+            error:
+              "Your previous application to this squad was declined. You cannot re-apply to the same squad.",
           },
           { status: 403 }
         );

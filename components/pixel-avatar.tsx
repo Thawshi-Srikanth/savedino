@@ -48,14 +48,7 @@ export const PixelAvatar: React.FC<PixelAvatarProps> = ({
             if (cell === 0) return null;
             const fill = cell === 2 ? profile.accentHex : profile.fgHex;
             return (
-              <rect
-                key={`${rIdx}-${cIdx}`}
-                x={cIdx}
-                y={rIdx}
-                width={1}
-                height={1}
-                fill={fill}
-              />
+              <rect key={`${rIdx}-${cIdx}`} x={cIdx} y={rIdx} width={1} height={1} fill={fill} />
             );
           })
         )}
@@ -73,11 +66,7 @@ interface PixelBannerProps {
 /**
  * PixelBanner - Character-driven Arcade Hero Banner
  */
-export const PixelBanner: React.FC<PixelBannerProps> = ({
-  seed,
-  className = "",
-  children,
-}) => {
+export const PixelBanner: React.FC<PixelBannerProps> = ({ seed, className = "", children }) => {
   const profile = useMemo(() => generateSeedProfile(seed), [seed]);
 
   return (

@@ -4,10 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
 // GET /api/events/[id] - Get detailed campaign by ID or Code
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -47,26 +44,17 @@ export async function GET(
     });
 
     if (!event) {
-      return NextResponse.json(
-        { success: false, error: "Campaign not found." },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Campaign not found." }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, event });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
 // PATCH /api/events/[id] - Update campaign event (Admin only)
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -117,7 +105,8 @@ export async function PATCH(
 
     if (body.regStart) dataToUpdate.regStart = new Date(body.regStart);
     if (body.regEnd) dataToUpdate.regEnd = new Date(body.regEnd);
-    if (body.teamFormationStart) dataToUpdate.teamFormationStart = new Date(body.teamFormationStart);
+    if (body.teamFormationStart)
+      dataToUpdate.teamFormationStart = new Date(body.teamFormationStart);
     if (body.teamFormationEnd) dataToUpdate.teamFormationEnd = new Date(body.teamFormationEnd);
     if (body.startDate) dataToUpdate.startDate = new Date(body.startDate);
     if (body.endDate) dataToUpdate.endDate = new Date(body.endDate);
@@ -143,10 +132,7 @@ export async function PATCH(
 }
 
 // DELETE /api/events/[id] - Delete campaign event (Admin only)
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -166,10 +152,7 @@ export async function DELETE(
     });
 
     if (!existingEvent) {
-      return NextResponse.json(
-        { success: false, error: "Campaign not found." },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Campaign not found." }, { status: 404 });
     }
 
     // Explicitly delete any related imageSets before deleting the event

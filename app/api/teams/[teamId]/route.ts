@@ -7,10 +7,7 @@ import { generateInviteCode } from "@/lib/campaign-engine";
 export const dynamic = "force-dynamic";
 
 // GET: Fetch squad workspace details (members, event, invite code, status)
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ teamId: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -107,10 +104,7 @@ export async function GET(
 }
 
 // PATCH: Update team settings, status, name, leader, recruitment, and disqualification reason
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ teamId: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -122,7 +116,16 @@ export async function PATCH(
 
     const { teamId } = await params;
     const body = await request.json();
-    const { name, inviteCode, status, isRecruiting, recruitmentNotes, disqualificationReason, leaderId, rotateInviteCode } = body;
+    const {
+      name,
+      inviteCode,
+      status,
+      isRecruiting,
+      recruitmentNotes,
+      disqualificationReason,
+      leaderId,
+      rotateInviteCode,
+    } = body;
 
     const team = await prisma.team.findUnique({
       where: { id: teamId },
@@ -148,7 +151,8 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: "This squad has been disabled by platform administration and cannot be modified by team members or leaders.",
+          error:
+            "This squad has been disabled by platform administration and cannot be modified by team members or leaders.",
         },
         { status: 403 }
       );
@@ -158,7 +162,13 @@ export async function PATCH(
 
     // Status updates
     let targetStatus = team.status;
-    if (status && (status === "FORMING" || status === "ACTIVE" || status === "SUBMITTED" || status === "DISQUALIFIED")) {
+    if (
+      status &&
+      (status === "FORMING" ||
+        status === "ACTIVE" ||
+        status === "SUBMITTED" ||
+        status === "DISQUALIFIED")
+    ) {
       if (isAdmin || (isLeader && status !== "DISQUALIFIED")) {
         updateData.status = status;
         targetStatus = status;

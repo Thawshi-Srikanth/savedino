@@ -25,12 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
 import {
   Search,
@@ -107,7 +102,9 @@ function TeamsContent() {
   // Filters State
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedEventId, setSelectedEventId] = useState<string>(urlEventId || "ALL");
-  const [activeTabFilter, setActiveTabFilter] = useState<"ALL" | "RECRUITING" | "FORMING" | "FULL" | "MY_SQUADS">("ALL");
+  const [activeTabFilter, setActiveTabFilter] = useState<
+    "ALL" | "RECRUITING" | "FORMING" | "FULL" | "MY_SQUADS"
+  >("ALL");
 
   // Pagination & Load More State
   const [paginationMode, setPaginationMode] = useState<"LOAD_MORE" | "PAGINATED">("LOAD_MORE");
@@ -238,9 +235,18 @@ function TeamsContent() {
 
   // Derived Counts
   const countAll = validTeams.length;
-  const countRecruiting = useMemo(() => validTeams.filter((t) => t.isRecruiting && (t.members?.length || 0) < 6).length, [validTeams]);
-  const countForming = useMemo(() => validTeams.filter((t) => (t.members?.length || 0) < 2 || t.status === "FORMING").length, [validTeams]);
-  const countFull = useMemo(() => validTeams.filter((t) => (t.members?.length || 0) >= 6).length, [validTeams]);
+  const countRecruiting = useMemo(
+    () => validTeams.filter((t) => t.isRecruiting && (t.members?.length || 0) < 6).length,
+    [validTeams]
+  );
+  const countForming = useMemo(
+    () => validTeams.filter((t) => (t.members?.length || 0) < 2 || t.status === "FORMING").length,
+    [validTeams]
+  );
+  const countFull = useMemo(
+    () => validTeams.filter((t) => (t.members?.length || 0) >= 6).length,
+    [validTeams]
+  );
   const countMySquads = useMemo(() => {
     if (!session?.user?.id) return 0;
     return validTeams.filter((t) => t.members?.some((m) => m.user?.id === session.user.id)).length;
@@ -308,8 +314,12 @@ function TeamsContent() {
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  const hasActiveFilters = searchQuery.trim() !== "" || selectedEventId !== "ALL" || activeTabFilter !== "ALL";
-  const activeFilterCount = (searchQuery.trim() ? 1 : 0) + (activeTabFilter !== "ALL" ? 1 : 0) + (selectedEventId !== "ALL" ? 1 : 0);
+  const hasActiveFilters =
+    searchQuery.trim() !== "" || selectedEventId !== "ALL" || activeTabFilter !== "ALL";
+  const activeFilterCount =
+    (searchQuery.trim() ? 1 : 0) +
+    (activeTabFilter !== "ALL" ? 1 : 0) +
+    (selectedEventId !== "ALL" ? 1 : 0);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -332,7 +342,10 @@ function TeamsContent() {
                 <HelpCircle className="size-3.5" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right" className="text-xs max-w-xs bg-slate-900 text-white border-slate-700 shadow-lg">
+            <TooltipContent
+              side="right"
+              className="text-xs max-w-xs bg-slate-900 text-white border-slate-700 shadow-lg"
+            >
               Have a code from a team leader? Enter it here to join directly.
             </TooltipContent>
           </Tooltip>
@@ -423,9 +436,11 @@ function TeamsContent() {
             }`}
           >
             <span>All Teams</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-              activeTabFilter === "ALL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-            }`}>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                activeTabFilter === "ALL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+              }`}
+            >
               {countAll}
             </span>
           </button>
@@ -440,9 +455,13 @@ function TeamsContent() {
             }`}
           >
             <span>Open to Join</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-              activeTabFilter === "RECRUITING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-            }`}>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                activeTabFilter === "RECRUITING"
+                  ? "bg-white/20 text-white"
+                  : "bg-muted text-foreground"
+              }`}
+            >
               {countRecruiting}
             </span>
           </button>
@@ -457,9 +476,13 @@ function TeamsContent() {
             }`}
           >
             <span>Forming</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-              activeTabFilter === "FORMING" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-            }`}>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                activeTabFilter === "FORMING"
+                  ? "bg-white/20 text-white"
+                  : "bg-muted text-foreground"
+              }`}
+            >
               {countForming}
             </span>
           </button>
@@ -474,9 +497,11 @@ function TeamsContent() {
             }`}
           >
             <span>Full Teams</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-              activeTabFilter === "FULL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-            }`}>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                activeTabFilter === "FULL" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+              }`}
+            >
               {countFull}
             </span>
           </button>
@@ -492,9 +517,13 @@ function TeamsContent() {
               }`}
             >
               <span>My Squads</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                activeTabFilter === "MY_SQUADS" ? "bg-white/20 text-white" : "bg-muted text-foreground"
-              }`}>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                  activeTabFilter === "MY_SQUADS"
+                    ? "bg-white/20 text-white"
+                    : "bg-muted text-foreground"
+                }`}
+              >
                 {countMySquads}
               </span>
             </button>
@@ -557,10 +586,15 @@ function TeamsContent() {
                   <HelpCircle className="size-4" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="text-xs max-w-xs bg-card text-card-foreground border-border shadow-lg p-3 space-y-1">
+              <TooltipContent
+                side="bottom"
+                align="start"
+                className="text-xs max-w-xs bg-card text-card-foreground border-border shadow-lg p-3 space-y-1"
+              >
                 <div className="font-bold text-foreground">About Citizen Teams</div>
                 <p className="text-muted-foreground leading-relaxed">
-                  Collaborative groups of researchers, students, and enthusiasts. Join or form a team to analyze sky survey images and discover asteroids together.
+                  Collaborative groups of researchers, students, and enthusiasts. Join or form a
+                  team to analyze sky survey images and discover asteroids together.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -589,9 +623,7 @@ function TeamsContent() {
         {/* RIGHT MAIN CONTENT AREA: TEAMS GRID */}
         <main className="lg:col-span-3 min-w-0 space-y-4 min-h-[calc(100vh-10rem)]">
           {/* Mobile Join with Code Card (Shown only on mobile above listing) */}
-          <div className="lg:hidden">
-            {renderJoinCodeCard}
-          </div>
+          <div className="lg:hidden">{renderJoinCodeCard}</div>
           {/* Results Counter & Listing Controls Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -599,12 +631,14 @@ function TeamsContent() {
                 {paginationMode === "LOAD_MORE" ? (
                   <>
                     Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
-                    <strong className="text-foreground">{filteredTeams.length}</strong> {filteredTeams.length === 1 ? "team" : "teams"}
+                    <strong className="text-foreground">{filteredTeams.length}</strong>{" "}
+                    {filteredTeams.length === 1 ? "team" : "teams"}
                   </>
                 ) : (
                   <>
                     Page <strong className="text-foreground">{currentPage}</strong> of{" "}
-                    <strong className="text-foreground">{totalPages}</strong> ({filteredTeams.length} total {filteredTeams.length === 1 ? "team" : "teams"})
+                    <strong className="text-foreground">{totalPages}</strong> (
+                    {filteredTeams.length} total {filteredTeams.length === 1 ? "team" : "teams"})
                   </>
                 )}
               </span>
@@ -702,12 +736,20 @@ function TeamsContent() {
             </div>
           ) : filteredTeams.length === 0 ? (
             <Card className="p-12 text-center text-sm text-muted-foreground space-y-2 border-dashed min-h-[280px] flex flex-col items-center justify-center">
-              <div className="font-sans font-bold text-foreground text-sm">No Matching Citizen Teams Found</div>
+              <div className="font-sans font-bold text-foreground text-sm">
+                No Matching Citizen Teams Found
+              </div>
               <p className="max-w-md mx-auto text-xs leading-relaxed text-muted-foreground">
-                No citizen teams match your current search and filter criteria. Try adjusting your filters or enter an invite code on the sidebar.
+                No citizen teams match your current search and filter criteria. Try adjusting your
+                filters or enter an invite code on the sidebar.
               </p>
               {hasActiveFilters && (
-                <Button onClick={handleResetFilters} variant="outline" size="sm" className="mt-2 text-xs">
+                <Button
+                  onClick={handleResetFilters}
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 text-xs"
+                >
                   Reset Filters
                 </Button>
               )}
@@ -757,7 +799,11 @@ function TeamsContent() {
                                         ? "bg-[#8b5cf6] text-white shadow-xs"
                                         : "bg-muted/50 text-muted-foreground/30 border border-border/70 border-dashed"
                                     }`}
-                                    title={isFilled ? `Member slot ${i + 1} (Filled)` : `Slot ${i + 1} (Available)`}
+                                    title={
+                                      isFilled
+                                        ? `Member slot ${i + 1} (Filled)`
+                                        : `Slot ${i + 1} (Available)`
+                                    }
                                   >
                                     <User className="size-3.5" />
                                   </div>
@@ -772,7 +818,10 @@ function TeamsContent() {
                           <div className="flex items-center justify-between py-1">
                             <div className="flex items-center gap-3">
                               {/* Filled Member Box + Multiplier */}
-                              <div className="flex items-center gap-1.5" title={`${memberCount} members joined`}>
+                              <div
+                                className="flex items-center gap-1.5"
+                                title={`${memberCount} members joined`}
+                              >
                                 <div className="size-6 rounded flex items-center justify-center bg-[#8b5cf6] text-white shadow-xs">
                                   <User className="size-3.5" />
                                 </div>
@@ -783,7 +832,10 @@ function TeamsContent() {
 
                               {/* Available Empty Slot Box + Multiplier */}
                               {openSlots > 0 ? (
-                                <div className="flex items-center gap-1.5" title={`${openSlots} slots remaining`}>
+                                <div
+                                  className="flex items-center gap-1.5"
+                                  title={`${openSlots} slots remaining`}
+                                >
                                   <div className="size-6 rounded flex items-center justify-center bg-muted/50 text-muted-foreground/40 border border-border/70 border-dashed">
                                     <User className="size-3.5" />
                                   </div>
@@ -806,7 +858,8 @@ function TeamsContent() {
 
                         {/* Recruitment Notes */}
                         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[32px]">
-                          {team.recruitmentNotes || "Active asteroid search squad analyzing telescope image sets."}
+                          {team.recruitmentNotes ||
+                            "Active asteroid search squad analyzing telescope image sets."}
                         </p>
                       </div>
 
@@ -818,7 +871,11 @@ function TeamsContent() {
                               size="sm"
                               className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5"
                             >
-                              <span>{isStaffOrAdmin && !isUserMember ? "Inspect Workspace" : "Open Workspace"}</span>
+                              <span>
+                                {isStaffOrAdmin && !isUserMember
+                                  ? "Inspect Workspace"
+                                  : "Open Workspace"}
+                              </span>
                               <ArrowRight className="size-3.5" />
                             </Button>
                           </Link>
@@ -860,7 +917,12 @@ function TeamsContent() {
                             <span>Request to Join</span>
                           </Button>
                         ) : (
-                          <Button variant="outline" size="sm" disabled className="w-full h-8 text-xs opacity-50 cursor-not-allowed">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled
+                            className="w-full h-8 text-xs opacity-50 cursor-not-allowed"
+                          >
                             Recruitment Closed
                           </Button>
                         )}
@@ -876,8 +938,9 @@ function TeamsContent() {
                   {paginationMode === "LOAD_MORE" ? (
                     <>
                       <div className="text-xs text-muted-foreground font-mono">
-                        Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
-                        <strong className="text-foreground">{filteredTeams.length}</strong> squads
+                        Showing <strong className="text-foreground">{displayedTeams.length}</strong>{" "}
+                        of <strong className="text-foreground">{filteredTeams.length}</strong>{" "}
+                        squads
                       </div>
 
                       {hasMore ? (
@@ -915,7 +978,8 @@ function TeamsContent() {
                     <>
                       <div className="text-xs text-muted-foreground font-mono">
                         Page <strong className="text-foreground">{currentPage}</strong> of{" "}
-                        <strong className="text-foreground">{totalPages}</strong> ({filteredTeams.length} squads)
+                        <strong className="text-foreground">{totalPages}</strong> (
+                        {filteredTeams.length} squads)
                       </div>
 
                       <div className="flex items-center gap-1.5">
@@ -954,7 +1018,10 @@ function TeamsContent() {
                           }
                           if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
                             return (
-                              <span key={pageNum} className="text-xs text-muted-foreground px-0.5 font-mono">
+                              <span
+                                key={pageNum}
+                                className="text-xs text-muted-foreground px-0.5 font-mono"
+                              >
                                 ...
                               </span>
                             );
@@ -990,7 +1057,8 @@ function TeamsContent() {
               Join Request: {requestTeam?.name}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Send a request to join campaign squad <strong className="text-foreground font-mono">{requestTeam?.event?.code}</strong>.
+              Send a request to join campaign squad{" "}
+              <strong className="text-foreground font-mono">{requestTeam?.event?.code}</strong>.
             </DialogDescription>
           </DialogHeader>
 
@@ -1008,7 +1076,12 @@ function TeamsContent() {
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" size="sm" onClick={() => setRequestTeam(null)} disabled={requestLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRequestTeam(null)}
+              disabled={requestLoading}
+            >
               Cancel
             </Button>
             <Button

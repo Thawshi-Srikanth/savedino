@@ -21,11 +21,14 @@ function LoginForm() {
 
   // If already authenticated, redirect to destination
   useEffect(() => {
-    authClient.getSession().then((res) => {
-      if (res?.data?.session) {
-        router.push(redirectTo);
-      }
-    }).catch(() => {});
+    authClient
+      .getSession()
+      .then((res) => {
+        if (res?.data?.session) {
+          router.push(redirectTo);
+        }
+      })
+      .catch(() => {});
   }, [redirectTo, router]);
 
   // Handle URL errors (e.g. expired tokens)
@@ -53,7 +56,8 @@ function LoginForm() {
       });
 
       if (res.error) {
-        const msg = res.error.message || "Failed to send link. Please check your email and try again.";
+        const msg =
+          res.error.message || "Failed to send link. Please check your email and try again.";
         toast.error(msg);
       } else {
         toast.success("Sign-in link sent! Check your inbox.");
@@ -68,7 +72,6 @@ function LoginForm() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none bg-background text-foreground">
@@ -93,7 +96,7 @@ function LoginForm() {
         </Link>
       </div>
 
-        {/* Main Centered Auth Section */}
+      {/* Main Centered Auth Section */}
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center">
@@ -103,9 +106,7 @@ function LoginForm() {
         {/* Auth Card */}
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="text-center space-y-1.5">
-            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-              Sign in
-            </h1>
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">Sign in</h1>
             <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
               Enter your email address to receive a sign-in link.
             </p>
@@ -158,7 +159,10 @@ function LoginForm() {
         {/* Bottom Navigation */}
         <div className="text-center text-xs font-sans text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
+          <Link
+            href="/register"
+            className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
+          >
             <span>Create account</span>
             <span>&rarr;</span>
           </Link>

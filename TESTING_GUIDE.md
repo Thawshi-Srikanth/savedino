@@ -8,20 +8,21 @@ This guide provides clear step-by-step instructions for testing all user roles, 
 
 Every core role has a dedicated single test persona:
 
-| Role / Position | Name | Email | Permissions & Scope |
-|---|---|---|---|
-| **Platform Admin** | Dr. Eleanor Arroway | `admin@savedino.org` | Full access to `/admin`, manage all users, manage teams, assign matchmaking, edit campaigns |
-| **Staff Member** | Priya Patel | `staff@savedino.org` | Access to `/admin`, platform operations and read-only squad inspection |
-| **Team Leader** | Sarah Chen | `leader@savedino.org` | Leader of *Nova Orbitals*, approve/reject join requests, review astrometry submissions |
-| **Team Member** | Marcus Vance | `member@savedino.org` | Member of *Nova Orbitals*, claim image sets, submit discovery reports |
-| **Applicant** | Amina Khalil | `applicant@savedino.org` | Has pending join request for *Nova Orbitals* |
-| **Solo Student** | Alex Novak | `solo@savedino.org` | Unassigned student in the matchmaking pool |
+| Role / Position    | Name                | Email                    | Permissions & Scope                                                                         |
+| ------------------ | ------------------- | ------------------------ | ------------------------------------------------------------------------------------------- |
+| **Platform Admin** | Dr. Eleanor Arroway | `admin@savedino.org`     | Full access to `/admin`, manage all users, manage teams, assign matchmaking, edit campaigns |
+| **Staff Member**   | Priya Patel         | `staff@savedino.org`     | Access to `/admin`, platform operations and read-only squad inspection                      |
+| **Team Leader**    | Sarah Chen          | `leader@savedino.org`    | Leader of _Nova Orbitals_, approve/reject join requests, review astrometry submissions      |
+| **Team Member**    | Marcus Vance        | `member@savedino.org`    | Member of _Nova Orbitals_, claim image sets, submit discovery reports                       |
+| **Applicant**      | Amina Khalil        | `applicant@savedino.org` | Has pending join request for _Nova Orbitals_                                                |
+| **Solo Student**   | Alex Novak          | `solo@savedino.org`      | Unassigned student in the matchmaking pool                                                  |
 
 ---
 
 ## 2. Seed Campaigns & Teams Structure
 
 ### Campaigns
+
 1. **Campaign 1 (ACTIVE): `Pan-STARRS Sky Survey Phase 1` (Code: `AST-2026-A`)**
    - Registration and Team Formation: Started 14 days ago, open for 14 more days.
    - Campaign Period: Started 7 days ago, closes in 14 days.
@@ -34,6 +35,7 @@ Every core role has a dedicated single test persona:
    - Status: Upcoming phase.
 
 ### Teams
+
 1. **Team 1: `Nova Orbitals` (Invite Code: `NOVA99`)**
    - Campaign: Campaign 1 (`AST-2026-A`)
    - Leader: Sarah Chen (`leader@savedino.org`)
@@ -85,12 +87,12 @@ Every core role has a dedicated single test persona:
 
 1. **Verify Applicant State**:
    - Switch to **Amina Khalil** (`applicant@savedino.org`).
-   - Visit `/campaigns` and view *Nova Orbitals*.
+   - Visit `/campaigns` and view _Nova Orbitals_.
    - **Expected Result**: Her card displays a **Pending Request** badge.
 
 2. **Leader Approves Request**:
    - Switch to **Sarah Chen** (`leader@savedino.org`).
-   - Visit `/teams` and click into *Nova Orbitals*.
+   - Visit `/teams` and click into _Nova Orbitals_.
    - Open the **Join Requests** tab.
    - Click the **Approve** button on Amina Khalil's request.
    - **Expected Result**: Request moves from pending to approved.
@@ -98,10 +100,10 @@ Every core role has a dedicated single test persona:
 3. **Verify New Member Access**:
    - Switch back to **Amina Khalil** (`applicant@savedino.org`).
    - Refresh the page or visit `/teams`.
-   - **Expected Result**: Amina is now an active member of *Nova Orbitals* with access to the team workspace and image sets.
+   - **Expected Result**: Amina is now an active member of _Nova Orbitals_ with access to the team workspace and image sets.
 
 4. **Verify Invite Code Privacy for Regular Members**:
-   - As **Marcus Vance** (`member@savedino.org`) or **Amina Khalil** (`applicant@savedino.org`), open the *Nova Orbitals* workspace.
+   - As **Marcus Vance** (`member@savedino.org`) or **Amina Khalil** (`applicant@savedino.org`), open the _Nova Orbitals_ workspace.
    - **Expected Result**: The squad invite code is hidden from the workspace header, the roster tab, the profile page, and the API response. Only squad leader **Sarah Chen** and platform organizers can view and rotate the invite code.
 
 ---
@@ -112,14 +114,14 @@ Every core role has a dedicated single test persona:
 
 1. **Member Submits Claim Request**:
    - Switch to **Marcus Vance** (`member@savedino.org`).
-   - Go to the *Nova Orbitals* workspace.
+   - Go to the _Nova Orbitals_ workspace.
    - Switch to the **To Analyze** filter or view `PS1-26A-03`.
    - Click **Request to Claim**.
    - **Expected Result**: The status changes to **Claim Requested**. Marcus sees a notification pill saying **Awaiting Squad Leader Approval** and a **Cancel** button if he changes his mind.
 
 2. **Team Leader Approves or Declines Claim Request**:
    - Switch to **Sarah Chen** (`leader@savedino.org`).
-   - Go to *Nova Orbitals* workspace.
+   - Go to _Nova Orbitals_ workspace.
    - Notice the **Image Sets** tab displays a notification badge (e.g. `1 Claim`).
    - Click on the **Claim Requests** filter pill.
    - On set `PS1-26A-03`, Sarah sees **Approve Claim** (emerald button) and **Decline** (outline button).
@@ -161,13 +163,13 @@ Every core role has a dedicated single test persona:
    - Switch to **Dr. Eleanor Arroway** (`admin@savedino.org`).
    - Go to `/admin?tab=matchmaking`.
    - Locate Alex Novak in the unassigned pool.
-   - Select *Cosmic Wardens* from the team dropdown and click **Assign to Squad**.
+   - Select _Cosmic Wardens_ from the team dropdown and click **Assign to Squad**.
    - **Expected Result**: Success notification appears and Alex is removed from the unassigned list.
 
 3. **Verify Match Result**:
    - Switch back to **Alex Novak** (`solo@savedino.org`).
    - Go to `/teams`.
-   - **Expected Result**: Alex is now a member of *Cosmic Wardens*.
+   - **Expected Result**: Alex is now a member of _Cosmic Wardens_.
 
 ---
 
@@ -177,14 +179,14 @@ Every core role has a dedicated single test persona:
 
 1. **Admin Inspects Competitor Squad**:
    - Switch to **Dr. Eleanor Arroway** (`admin@savedino.org`).
-   - Go to `/teams` and click into *Nova Orbitals* (or visit `/team/[teamId]`).
+   - Go to `/teams` and click into _Nova Orbitals_ (or visit `/team/[teamId]`).
    - **Expected Result**: The workspace opens successfully. A violet **Organizer Read-Only Mode** banner appears at the top.
    - You can inspect the squad roster, active image batches, astrometry candidates, and submitted discovery reports in read-only mode.
    - Claiming image sets is disabled for organizers so student batches are preserved.
 
 2. **Staff Inspects Squad**:
    - Switch to **Priya Patel** (`staff@savedino.org`).
-   - Click into *Nova Orbitals*.
+   - Click into _Nova Orbitals_.
    - **Expected Result**: Staff can review the team's progress and image submissions in read-only mode.
 
 ---

@@ -132,9 +132,7 @@ export function MobileFilterDrawer({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 font-sans min-h-0">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 font-sans min-h-0">{children}</div>
 
         {/* Action Footer */}
         <div className="p-3 border-t border-border bg-card/95 backdrop-blur-xs shrink-0">

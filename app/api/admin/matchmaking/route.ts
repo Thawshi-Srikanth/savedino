@@ -104,10 +104,7 @@ export async function POST(req: Request) {
     });
 
     if (!targetUser) {
-      return NextResponse.json(
-        { success: false, error: "User not found." },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "User not found." }, { status: 404 });
     }
 
     if (targetUser.role === "admin") {
@@ -139,7 +136,10 @@ export async function POST(req: Request) {
     const maxLimit = team.event?.maxTeamSize || 6;
     if (team.members.length >= maxLimit) {
       return NextResponse.json(
-        { success: false, error: `Squad is already full (max ${maxLimit} members for this campaign).` },
+        {
+          success: false,
+          error: `Squad is already full (max ${maxLimit} members for this campaign).`,
+        },
         { status: 400 }
       );
     }
@@ -147,10 +147,7 @@ export async function POST(req: Request) {
     // Check concurrency
     const concurrency = await checkUserEventConcurrency(userId, team.eventId);
     if (!concurrency.canEnroll) {
-      return NextResponse.json(
-        { success: false, error: concurrency.reason },
-        { status: 409 }
-      );
+      return NextResponse.json({ success: false, error: concurrency.reason }, { status: 409 });
     }
 
     const newCount = team.members.length + 1;

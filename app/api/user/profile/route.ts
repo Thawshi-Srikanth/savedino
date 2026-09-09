@@ -113,10 +113,7 @@ export async function GET(req: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: "User not found." },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "User not found." }, { status: 404 });
     }
 
     const isStaffOrAdmin = user.role === "admin" || user.role === "staff";
@@ -222,9 +219,9 @@ export async function PATCH(req: Request) {
       where: { id: session.user.id },
       data: {
         name: name.trim(),
-        institution: institution !== undefined ? (institution?.trim() || null) : undefined,
-        country: country !== undefined ? (country?.trim() || null) : undefined,
-        image: image !== undefined ? (image?.trim() || null) : undefined,
+        institution: institution !== undefined ? institution?.trim() || null : undefined,
+        country: country !== undefined ? country?.trim() || null : undefined,
+        image: image !== undefined ? image?.trim() || null : undefined,
       },
       select: {
         id: true,

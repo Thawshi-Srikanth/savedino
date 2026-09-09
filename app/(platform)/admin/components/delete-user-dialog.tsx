@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { UserData } from "./types";
@@ -28,7 +35,10 @@ export function DeleteUserDialog({
             <span>Delete Account</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Are you sure you want to delete <strong className="text-foreground">{deletingUser?.name}</strong> ({deletingUser?.email})? This action cannot be undone and will remove all their squad memberships and submissions.
+            Are you sure you want to delete{" "}
+            <strong className="text-foreground">{deletingUser?.name}</strong> ({deletingUser?.email}
+            )? This action cannot be undone and will remove all their squad memberships and
+            submissions.
           </DialogDescription>
         </DialogHeader>
 

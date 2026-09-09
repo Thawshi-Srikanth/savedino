@@ -23,11 +23,14 @@ function RegisterForm() {
 
   // If already authenticated, redirect to destination
   useEffect(() => {
-    authClient.getSession().then((res) => {
-      if (res?.data?.session) {
-        router.push(redirectTo);
-      }
-    }).catch(() => {});
+    authClient
+      .getSession()
+      .then((res) => {
+        if (res?.data?.session) {
+          router.push(redirectTo);
+        }
+      })
+      .catch(() => {});
   }, [redirectTo, router]);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -204,7 +207,10 @@ function RegisterForm() {
         {/* Bottom Navigation */}
         <div className="text-center text-xs font-sans text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
+          <Link
+            href="/login"
+            className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
+          >
             <span>Sign in</span>
             <span>&rarr;</span>
           </Link>

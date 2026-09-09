@@ -11,7 +11,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DateTimeRangePicker } from "@/components/date-time-range-picker";
 import { DateTimeInput } from "@/components/date-time-input";
-import { ArrowLeft, ArrowRight, Calendar, FileText, Telescope, CheckCircle, ShieldAlert, Rocket } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  FileText,
+  Telescope,
+  CheckCircle,
+  ShieldAlert,
+  Rocket,
+} from "lucide-react";
 
 export default function CreateCampaignPage() {
   const router = useRouter();
@@ -79,7 +88,11 @@ export default function CreateCampaignPage() {
       {/* Top Header & Breadcrumb */}
       <div className="flex items-center justify-between">
         <Link href="/admin">
-          <Button variant="outline" size="sm" className="text-xs font-semibold cursor-pointer flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs font-semibold cursor-pointer flex items-center gap-2"
+          >
             <ArrowLeft className="size-4" />
             <span>Back to Admin Console</span>
           </Button>
@@ -97,7 +110,8 @@ export default function CreateCampaignPage() {
           <span>Create Campaign Event</span>
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Configure search campaign parameters, student registration windows, and Minor Planet Center (MPC) candidate submission schedules.
+          Configure search campaign parameters, student registration windows, and Minor Planet
+          Center (MPC) candidate submission schedules.
         </p>
       </div>
 
@@ -112,19 +126,31 @@ export default function CreateCampaignPage() {
         <Tabs value={wizardTab} onValueChange={setWizardTab} className="w-full space-y-6">
           {/* Shadcn UI Tabs List Header */}
           <TabsList className="w-full grid grid-cols-4 font-mono text-xs h-11 p-1 bg-muted/60">
-            <TabsTrigger value="overview" className="flex items-center gap-2 cursor-pointer font-bold">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 cursor-pointer font-bold"
+            >
               <FileText className="size-4 text-[#8b5cf6]" />
               <span className="hidden sm:inline">1. Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="registration" className="flex items-center gap-2 cursor-pointer font-bold">
+            <TabsTrigger
+              value="registration"
+              className="flex items-center gap-2 cursor-pointer font-bold"
+            >
               <Calendar className="size-4 text-[#8b5cf6]" />
               <span className="hidden sm:inline">2. Registration</span>
             </TabsTrigger>
-            <TabsTrigger value="schedule" className="flex items-center gap-2 cursor-pointer font-bold">
+            <TabsTrigger
+              value="schedule"
+              className="flex items-center gap-2 cursor-pointer font-bold"
+            >
               <Telescope className="size-4 text-[#8b5cf6]" />
               <span className="hidden sm:inline">3. Schedule</span>
             </TabsTrigger>
-            <TabsTrigger value="review" className="flex items-center gap-2 cursor-pointer font-bold">
+            <TabsTrigger
+              value="review"
+              className="flex items-center gap-2 cursor-pointer font-bold"
+            >
               <CheckCircle className="size-4 text-emerald-500" />
               <span className="hidden sm:inline">4. Review</span>
             </TabsTrigger>
@@ -134,7 +160,8 @@ export default function CreateCampaignPage() {
             {/* TAB 1: OVERVIEW */}
             <TabsContent value="overview" className="space-y-5 text-xs mt-0">
               <div className="p-3.5 rounded-lg border border-border bg-muted/30 text-muted-foreground text-xs font-mono">
-                Define the primary campaign identity, official campaign code, and participant guidelines.
+                Define the primary campaign identity, official campaign code, and participant
+                guidelines.
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -174,7 +201,9 @@ export default function CreateCampaignPage() {
                     max={30}
                     required
                     value={newMaxTeamSize}
-                    onChange={(e) => setNewMaxTeamSize(Math.max(2, Math.min(30, parseInt(e.target.value) || 6)))}
+                    onChange={(e) =>
+                      setNewMaxTeamSize(Math.max(2, Math.min(30, parseInt(e.target.value) || 6)))
+                    }
                     className="h-10 text-xs font-mono"
                   />
                 </div>
@@ -197,7 +226,8 @@ export default function CreateCampaignPage() {
             {/* TAB 2: REGISTRATION & TEAM FORMATION WINDOWS */}
             <TabsContent value="registration" className="space-y-6 text-xs mt-0">
               <div className="p-3.5 rounded-lg border border-border bg-muted/30 text-muted-foreground text-xs font-mono">
-                Configure student registration and team formation schedules using separate start and end DateTimeInput fields.
+                Configure student registration and team formation schedules using separate start and
+                end DateTimeInput fields.
               </div>
 
               <div className="space-y-6">
@@ -207,18 +237,16 @@ export default function CreateCampaignPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Registration Start *</label>
-                      <DateTimeInput
-                        value={newRegStart}
-                        onChange={setNewRegStart}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Registration Start *
+                      </label>
+                      <DateTimeInput value={newRegStart} onChange={setNewRegStart} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Registration End *</label>
-                      <DateTimeInput
-                        value={newRegEnd}
-                        onChange={setNewRegEnd}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Registration End *
+                      </label>
+                      <DateTimeInput value={newRegEnd} onChange={setNewRegEnd} />
                     </div>
                   </div>
                 </div>
@@ -229,18 +257,16 @@ export default function CreateCampaignPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Team Formation Start *</label>
-                      <DateTimeInput
-                        value={newTeamStart}
-                        onChange={setNewTeamStart}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Team Formation Start *
+                      </label>
+                      <DateTimeInput value={newTeamStart} onChange={setNewTeamStart} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Team Formation End *</label>
-                      <DateTimeInput
-                        value={newTeamEnd}
-                        onChange={setNewTeamEnd}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Team Formation End *
+                      </label>
+                      <DateTimeInput value={newTeamEnd} onChange={setNewTeamEnd} />
                     </div>
                   </div>
                 </div>
@@ -250,7 +276,8 @@ export default function CreateCampaignPage() {
             {/* TAB 3: EXECUTION & MPC SUBMISSION SCHEDULE */}
             <TabsContent value="schedule" className="space-y-6 text-xs mt-0">
               <div className="p-3.5 rounded-lg border border-border bg-muted/30 text-muted-foreground text-xs font-mono">
-                Set campaign observation dates and Minor Planet Center (MPC) candidate submission windows.
+                Set campaign observation dates and Minor Planet Center (MPC) candidate submission
+                windows.
               </div>
 
               <div className="space-y-6">
@@ -260,18 +287,16 @@ export default function CreateCampaignPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Campaign Start Date *</label>
-                      <DateTimeInput
-                        value={newStart}
-                        onChange={setNewStart}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Campaign Start Date *
+                      </label>
+                      <DateTimeInput value={newStart} onChange={setNewStart} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Campaign End Date *</label>
-                      <DateTimeInput
-                        value={newEnd}
-                        onChange={setNewEnd}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Campaign End Date *
+                      </label>
+                      <DateTimeInput value={newEnd} onChange={setNewEnd} />
                     </div>
                   </div>
                 </div>
@@ -282,18 +307,16 @@ export default function CreateCampaignPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Submission Window Start *</label>
-                      <DateTimeInput
-                        value={newSubStart}
-                        onChange={setNewSubStart}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Submission Window Start *
+                      </label>
+                      <DateTimeInput value={newSubStart} onChange={setNewSubStart} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1">Submission Window End *</label>
-                      <DateTimeInput
-                        value={newSubEnd}
-                        onChange={setNewSubEnd}
-                      />
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
+                        Submission Window End *
+                      </label>
+                      <DateTimeInput value={newSubEnd} onChange={setNewSubEnd} />
                     </div>
                   </div>
                 </div>
@@ -304,29 +327,69 @@ export default function CreateCampaignPage() {
             <TabsContent value="review" className="space-y-5 text-xs mt-0">
               <div className="p-5 rounded-xl border border-[#8b5cf6]/30 bg-[#8b5cf6]/5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-primary font-bold font-mono">{newCode || "CODE-MISSING"}</span>
+                  <span className="text-xs text-primary font-bold font-mono">
+                    {newCode || "CODE-MISSING"}
+                  </span>
                   <Badge variant="default">READY TO PUBLISH</Badge>
                 </div>
-                <h4 className="font-bold text-lg text-foreground">{newTitle || "Untitled Campaign"}</h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">{newDesc || "No description provided."}</p>
+                <h4 className="font-bold text-lg text-foreground">
+                  {newTitle || "Untitled Campaign"}
+                </h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {newDesc || "No description provided."}
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-border font-mono text-xs">
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">Student Registration</span>
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                      Student Registration
+                    </span>
                     <span className="font-bold text-foreground">
-                      {newRegStart ? new Date(newRegStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"} → {newRegEnd ? new Date(newRegEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}
+                      {newRegStart
+                        ? new Date(newRegStart).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "-"}{" "}
+                      →{" "}
+                      {newRegEnd
+                        ? new Date(newRegEnd).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "-"}
                     </span>
                   </div>
 
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">Observation Campaign</span>
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                      Observation Campaign
+                    </span>
                     <span className="font-bold text-foreground">
-                      {newStart ? new Date(newStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"} → {newEnd ? new Date(newEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}
+                      {newStart
+                        ? new Date(newStart).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "-"}{" "}
+                      →{" "}
+                      {newEnd
+                        ? new Date(newEnd).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "-"}
                     </span>
                   </div>
 
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">Max Squad Size</span>
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                      Max Squad Size
+                    </span>
                     <span className="font-bold text-foreground">
                       {newMaxTeamSize} Members / Squad
                     </span>
@@ -353,7 +416,11 @@ export default function CreateCampaignPage() {
                 </Button>
               ) : (
                 <Link href="/admin">
-                  <Button type="button" variant="ghost" className="text-xs text-muted-foreground cursor-pointer">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
                     Cancel
                   </Button>
                 </Link>
@@ -383,7 +450,12 @@ export default function CreateCampaignPage() {
                   <ArrowRight className="size-4" />
                 </Button>
               ) : (
-                <Button type="submit" variant="default" disabled={submitting} className="text-xs uppercase font-bold cursor-pointer">
+                <Button
+                  type="submit"
+                  variant="default"
+                  disabled={submitting}
+                  className="text-xs uppercase font-bold cursor-pointer"
+                >
                   {submitting ? "Publishing Event..." : "Publish Campaign Event"}
                 </Button>
               )}

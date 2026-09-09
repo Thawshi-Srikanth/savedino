@@ -55,8 +55,7 @@ export async function subscribeToNewsletter(email: string) {
     return { success: true, simulated: true };
   }
 
-  const segmentId =
-    process.env.RESEND_SEGMENT_ID || "ed40a4c8-4b89-4a0b-94b5-1246d21b597c";
+  const segmentId = process.env.RESEND_SEGMENT_ID || "ed40a4c8-4b89-4a0b-94b5-1246d21b597c";
 
   try {
     // Resend SDK: Create contact and attach to segment

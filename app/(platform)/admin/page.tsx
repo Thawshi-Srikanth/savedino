@@ -43,7 +43,9 @@ export default function AdminDashboardPage() {
   const pathname = usePathname();
 
   // Navigation Tabs synchronized with URL query (?tab=users, etc.)
-  const [activeTab, setActiveTab] = useState<AdminTab>(() => parseTabQuery(searchParams.get("tab")));
+  const [activeTab, setActiveTab] = useState<AdminTab>(() =>
+    parseTabQuery(searchParams.get("tab"))
+  );
 
   // Synchronize state when URL query changes (e.g. Back/Forward button)
   useEffect(() => {
@@ -153,7 +155,10 @@ export default function AdminDashboardPage() {
     try {
       const [evRes, tmRes, usRes] = await Promise.all([
         fetch("/api/events", { cache: "no-store", headers: { "Cache-Control": "no-cache" } }),
-        fetch("/api/teams?includeDisqualified=true", { cache: "no-store", headers: { "Cache-Control": "no-cache" } }),
+        fetch("/api/teams?includeDisqualified=true", {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        }),
         fetch("/api/admin/users", { cache: "no-store", headers: { "Cache-Control": "no-cache" } }),
       ]);
 
@@ -213,14 +218,32 @@ export default function AdminDashboardPage() {
   // Derived Role Distribution Stats
   const adminCount = useMemo(() => users.filter((u) => u.role === "admin").length, [users]);
   const staffCount = useMemo(() => users.filter((u) => u.role === "staff").length, [users]);
-  const citizenCount = useMemo(() => users.filter((u) => u.role === "user" || !u.role).length, [users]);
-  const unassignedCount = useMemo(() => users.filter((u) => u.teamMembers.length === 0).length, [users]);
+  const citizenCount = useMemo(
+    () => users.filter((u) => u.role === "user" || !u.role).length,
+    [users]
+  );
+  const unassignedCount = useMemo(
+    () => users.filter((u) => u.teamMembers.length === 0).length,
+    [users]
+  );
 
   // Derived Campaign Stats
-  const activeCampCount = useMemo(() => events.filter((e) => e.status === "ACTIVE").length, [events]);
-  const upcomingCampCount = useMemo(() => events.filter((e) => e.status === "UPCOMING").length, [events]);
-  const subOpenCampCount = useMemo(() => events.filter((e) => e.status === "SUBMISSION_OPEN").length, [events]);
-  const completedCampCount = useMemo(() => events.filter((e) => e.status === "COMPLETED").length, [events]);
+  const activeCampCount = useMemo(
+    () => events.filter((e) => e.status === "ACTIVE").length,
+    [events]
+  );
+  const upcomingCampCount = useMemo(
+    () => events.filter((e) => e.status === "UPCOMING").length,
+    [events]
+  );
+  const subOpenCampCount = useMemo(
+    () => events.filter((e) => e.status === "SUBMISSION_OPEN").length,
+    [events]
+  );
+  const completedCampCount = useMemo(
+    () => events.filter((e) => e.status === "COMPLETED").length,
+    [events]
+  );
 
   // Solo Matchmaking Filtered List
   const unassignedSoloUsers = useMemo(() => {
@@ -239,10 +262,26 @@ export default function AdminDashboardPage() {
   }, [users, soloSearch]);
 
   // Derived Squad Stats
-  const openSquadsCount = useMemo(() => teams.filter((t) => t.members.length < (t.event?.maxTeamSize || 6)).length, [teams]);
-  const fullSquadsCount = useMemo(() => teams.filter((t) => t.members.length >= (t.event?.maxTeamSize || 6)).length, [teams]);
-  const totalSquadMembers = useMemo(() => teams.reduce((acc, t) => acc + t.members.length, 0), [teams]);
-  const totalOpenSlots = useMemo(() => teams.reduce((acc, t) => acc + Math.max(0, (t.event?.maxTeamSize || 6) - t.members.length), 0), [teams]);
+  const openSquadsCount = useMemo(
+    () => teams.filter((t) => t.members.length < (t.event?.maxTeamSize || 6)).length,
+    [teams]
+  );
+  const fullSquadsCount = useMemo(
+    () => teams.filter((t) => t.members.length >= (t.event?.maxTeamSize || 6)).length,
+    [teams]
+  );
+  const totalSquadMembers = useMemo(
+    () => teams.reduce((acc, t) => acc + t.members.length, 0),
+    [teams]
+  );
+  const totalOpenSlots = useMemo(
+    () =>
+      teams.reduce(
+        (acc, t) => acc + Math.max(0, (t.event?.maxTeamSize || 6) - t.members.length),
+        0
+      ),
+    [teams]
+  );
 
   // Squads Filtered List
   const filteredTeams = useMemo(() => {
@@ -255,9 +294,7 @@ export default function AdminDashboardPage() {
         (t.event?.code && t.event.code.toLowerCase().includes(q)) ||
         (t.event?.title && t.event.title.toLowerCase().includes(q)) ||
         t.members.some(
-          (m) =>
-            m.user?.name?.toLowerCase().includes(q) ||
-            m.user?.email?.toLowerCase().includes(q)
+          (m) => m.user?.name?.toLowerCase().includes(q) || m.user?.email?.toLowerCase().includes(q)
         );
 
       const maxTeamSize = t.event?.maxTeamSize || 6;
@@ -291,9 +328,25 @@ export default function AdminDashboardPage() {
       if (teamCurrentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, "...", totalTeamPages);
       } else if (teamCurrentPage >= totalTeamPages - 3) {
-        pages.push(1, "...", totalTeamPages - 4, totalTeamPages - 3, totalTeamPages - 2, totalTeamPages - 1, totalTeamPages);
+        pages.push(
+          1,
+          "...",
+          totalTeamPages - 4,
+          totalTeamPages - 3,
+          totalTeamPages - 2,
+          totalTeamPages - 1,
+          totalTeamPages
+        );
       } else {
-        pages.push(1, "...", teamCurrentPage - 1, teamCurrentPage, teamCurrentPage + 1, "...", totalTeamPages);
+        pages.push(
+          1,
+          "...",
+          teamCurrentPage - 1,
+          teamCurrentPage,
+          teamCurrentPage + 1,
+          "...",
+          totalTeamPages
+        );
       }
     }
     return pages;
@@ -308,8 +361,7 @@ export default function AdminDashboardPage() {
         ev.code.toLowerCase().includes(campaignSearch.toLowerCase()) ||
         (ev.description && ev.description.toLowerCase().includes(campaignSearch.toLowerCase()));
 
-      const matchesStatus =
-        campaignStatusFilter === "ALL" || ev.status === campaignStatusFilter;
+      const matchesStatus = campaignStatusFilter === "ALL" || ev.status === campaignStatusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -331,7 +383,15 @@ export default function AdminDashboardPage() {
       if (currentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, "...", totalPages);
       } else if (currentPage >= totalPages - 3) {
-        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          "...",
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
         pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
       }
@@ -347,9 +407,25 @@ export default function AdminDashboardPage() {
       if (campaignCurrentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, "...", totalCampaignPages);
       } else if (campaignCurrentPage >= totalCampaignPages - 3) {
-        pages.push(1, "...", totalCampaignPages - 4, totalCampaignPages - 3, totalCampaignPages - 2, totalCampaignPages - 1, totalCampaignPages);
+        pages.push(
+          1,
+          "...",
+          totalCampaignPages - 4,
+          totalCampaignPages - 3,
+          totalCampaignPages - 2,
+          totalCampaignPages - 1,
+          totalCampaignPages
+        );
       } else {
-        pages.push(1, "...", campaignCurrentPage - 1, campaignCurrentPage, campaignCurrentPage + 1, "...", totalCampaignPages);
+        pages.push(
+          1,
+          "...",
+          campaignCurrentPage - 1,
+          campaignCurrentPage,
+          campaignCurrentPage + 1,
+          "...",
+          totalCampaignPages
+        );
       }
     }
     return pages;
@@ -367,9 +443,7 @@ export default function AdminDashboardPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to update role");
       }
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
-      );
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
       toast.success(`Role updated to ${newRole.toUpperCase()}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to update role.");
@@ -483,9 +557,7 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || "Failed to update squad status");
       }
       const data = await res.json();
-      setTeams((prev) =>
-        prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t))
-      );
+      setTeams((prev) => prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t)));
       toast.success(`Squad status updated to ${newStatus}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to update squad status.");
@@ -505,9 +577,7 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || "Failed to rotate invite code");
       }
       const data = await res.json();
-      setTeams((prev) =>
-        prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t))
-      );
+      setTeams((prev) => prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t)));
       toast.success(`Generated new invite code: ${data.team.inviteCode}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to rotate invite code.");
@@ -541,7 +611,8 @@ export default function AdminDashboardPage() {
           status: editTeamStatus,
           isRecruiting: editTeamIsRecruiting,
           recruitmentNotes: editTeamRecruitmentNotes,
-          disqualificationReason: editTeamStatus === "DISQUALIFIED" ? editTeamDisqualificationReason : null,
+          disqualificationReason:
+            editTeamStatus === "DISQUALIFIED" ? editTeamDisqualificationReason : null,
           leaderId: editTeamLeaderId,
         }),
       });
@@ -550,9 +621,7 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || "Failed to save squad");
       }
       const data = await res.json();
-      setTeams((prev) =>
-        prev.map((t) => (t.id === editingTeam.id ? { ...t, ...data.team } : t))
-      );
+      setTeams((prev) => prev.map((t) => (t.id === editingTeam.id ? { ...t, ...data.team } : t)));
       toast.success("Squad details updated successfully.");
       setEditingTeam(null);
     } catch (err: any) {
@@ -563,7 +632,11 @@ export default function AdminDashboardPage() {
   };
 
   // Squad Moderation / Report Handlers
-  const handleConfirmReportTeam = async (teamId: string, action: "DISQUALIFY" | "WARN", reason: string) => {
+  const handleConfirmReportTeam = async (
+    teamId: string,
+    action: "DISQUALIFY" | "WARN",
+    reason: string
+  ) => {
     setReportTeamLoading(true);
     try {
       const res = await fetch(`/api/teams/${teamId}`, {
@@ -572,7 +645,10 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({
           status: action === "DISQUALIFY" ? "DISQUALIFIED" : undefined,
           disqualificationReason: action === "DISQUALIFY" ? reason : undefined,
-          recruitmentNotes: action === "WARN" ? `[ADMIN WARNING ${new Date().toLocaleDateString()}]: ${reason}` : undefined,
+          recruitmentNotes:
+            action === "WARN"
+              ? `[ADMIN WARNING ${new Date().toLocaleDateString()}]: ${reason}`
+              : undefined,
           isRecruiting: action === "DISQUALIFY" ? false : undefined,
         }),
       });
@@ -581,10 +657,10 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || "Failed to process squad report");
       }
       const data = await res.json();
-      setTeams((prev) =>
-        prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t))
+      setTeams((prev) => prev.map((t) => (t.id === teamId ? { ...t, ...data.team } : t)));
+      toast.success(
+        action === "DISQUALIFY" ? "Squad has been disqualified and disabled." : "Report logged."
       );
-      toast.success(action === "DISQUALIFY" ? "Squad has been disqualified and disabled." : "Report logged.");
       setReportingTeam(null);
     } catch (err: any) {
       toast.error(err.message || "Failed to report squad.");
@@ -627,9 +703,7 @@ export default function AdminDashboardPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to update campaign status");
       }
-      setEvents((prev) =>
-        prev.map((e) => (e.id === eventId ? { ...e, status: newStatus } : e))
-      );
+      setEvents((prev) => prev.map((e) => (e.id === eventId ? { ...e, status: newStatus } : e)));
       toast.success(`Campaign status updated to ${newStatus}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to update status.");

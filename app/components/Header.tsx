@@ -33,7 +33,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Action button shown only when not in Demo Mode */}
           {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
             <Link href="/campaigns" className="hidden sm:inline-flex">
-              <Button size="sm" variant="default" className="text-[10px] sm:text-xs font-bold flex items-center gap-1.5 px-2.5 sm:px-3.5 shadow-arcade-primary">
+              <Button
+                size="sm"
+                variant="default"
+                className="text-[10px] sm:text-xs font-bold flex items-center gap-1.5 px-2.5 sm:px-3.5 shadow-arcade-primary"
+              >
                 <Telescope className="size-3.5" />
                 <span>Explore Campaigns</span>
               </Button>

@@ -3,10 +3,7 @@ import type { NextRequest } from "next/server";
 
 // Demo Launch Mode: Controlled via NEXT_PUBLIC_DEMO_MODE or DEMO_MODE env variable
 const isDemoModeEnabled = () => {
-  return (
-    process.env.NEXT_PUBLIC_DEMO_MODE === "true" ||
-    process.env.DEMO_MODE === "true"
-  );
+  return process.env.NEXT_PUBLIC_DEMO_MODE === "true" || process.env.DEMO_MODE === "true";
 };
 
 export function proxy(request: NextRequest) {

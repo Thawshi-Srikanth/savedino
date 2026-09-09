@@ -24,7 +24,10 @@ export async function POST(req: Request) {
 
     if (session.user.role === "admin" || session.user.role === "staff") {
       return NextResponse.json(
-        { success: false, error: "Administrators and staff manage campaigns and cannot join participant teams." },
+        {
+          success: false,
+          error: "Administrators and staff manage campaigns and cannot join participant teams.",
+        },
         { status: 403 }
       );
     }
@@ -62,7 +65,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "This squad has been disabled by platform administration and is not accepting new members.",
+          error:
+            "This squad has been disabled by platform administration and is not accepting new members.",
         },
         { status: 403 }
       );
@@ -73,7 +77,10 @@ export async function POST(req: Request) {
       const regCheck = isRegistrationClosed(team.event);
       if (regCheck.closed) {
         return NextResponse.json(
-          { success: false, error: regCheck.reason || "Team registration has closed for this campaign." },
+          {
+            success: false,
+            error: regCheck.reason || "Team registration has closed for this campaign.",
+          },
           { status: 400 }
         );
       }
@@ -83,7 +90,10 @@ export async function POST(req: Request) {
     const maxLimit = team.event?.maxTeamSize || 6;
     if (team.members.length >= maxLimit) {
       return NextResponse.json(
-        { success: false, error: `This squad has already reached the maximum limit of ${maxLimit} members for this campaign.` },
+        {
+          success: false,
+          error: `This squad has already reached the maximum limit of ${maxLimit} members for this campaign.`,
+        },
         { status: 400 }
       );
     }
@@ -100,10 +110,7 @@ export async function POST(req: Request) {
     // 4. Check Event Concurrency
     const concurrency = await checkUserEventConcurrency(session.user.id, team.eventId);
     if (!concurrency.canEnroll) {
-      return NextResponse.json(
-        { success: false, error: concurrency.reason },
-        { status: 409 }
-      );
+      return NextResponse.json({ success: false, error: concurrency.reason }, { status: 409 });
     }
 
     // 5. Add user to team and update status

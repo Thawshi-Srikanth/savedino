@@ -19,4 +19,3 @@ const basePrisma = createPrismaClient();
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = basePrisma;
 
 export const prisma = basePrisma;
-

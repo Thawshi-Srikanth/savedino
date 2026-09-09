@@ -16,10 +16,7 @@ export async function POST(req: Request) {
     const { email, callbackURL = "/" } = body;
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     // Find the user in database

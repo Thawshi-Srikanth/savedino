@@ -7,9 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Search,
   RefreshCw,
@@ -149,7 +169,10 @@ export function TeamsTab({
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
             Squad Rosters
           </span>
-          <Badge variant="secondary" className="text-[10px] font-mono font-bold px-1.5 py-0 bg-muted text-foreground">
+          <Badge
+            variant="secondary"
+            className="text-[10px] font-mono font-bold px-1.5 py-0 bg-muted text-foreground"
+          >
             {teams.length}
           </Badge>
         </div>
@@ -171,9 +194,7 @@ export function TeamsTab({
           <button
             type="button"
             onClick={() =>
-              setTeamCapacityFilter(
-                teamCapacityFilter === "ACTIVE" ? "ALL" : "ACTIVE"
-              )
+              setTeamCapacityFilter(teamCapacityFilter === "ACTIVE" ? "ALL" : "ACTIVE")
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "ACTIVE"
@@ -182,18 +203,16 @@ export function TeamsTab({
             }`}
           >
             <span>Active Squads</span>
-            <span className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "ACTIVE" ? "text-white" : "text-muted-foreground"}`}>
+            <span
+              className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "ACTIVE" ? "text-white" : "text-muted-foreground"}`}
+            >
               {activeSquadsCount}
             </span>
           </button>
 
           <button
             type="button"
-            onClick={() =>
-              setTeamCapacityFilter(
-                teamCapacityFilter === "OPEN" ? "ALL" : "OPEN"
-              )
-            }
+            onClick={() => setTeamCapacityFilter(teamCapacityFilter === "OPEN" ? "ALL" : "OPEN")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "OPEN"
                 ? "bg-[#0284c7] dark:bg-[#38bdf8] text-white dark:text-slate-950 font-bold shadow-arcade active:translate-y-0.5"
@@ -201,18 +220,16 @@ export function TeamsTab({
             }`}
           >
             <span>Open Slots</span>
-            <span className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "OPEN" ? "text-white dark:text-slate-950" : "text-muted-foreground"}`}>
+            <span
+              className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "OPEN" ? "text-white dark:text-slate-950" : "text-muted-foreground"}`}
+            >
               {openSquadsCount}
             </span>
           </button>
 
           <button
             type="button"
-            onClick={() =>
-              setTeamCapacityFilter(
-                teamCapacityFilter === "FULL" ? "ALL" : "FULL"
-              )
-            }
+            onClick={() => setTeamCapacityFilter(teamCapacityFilter === "FULL" ? "ALL" : "FULL")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "FULL"
                 ? "bg-[#8b5cf6] text-white font-bold shadow-arcade-primary active:translate-y-0.5"
@@ -220,7 +237,9 @@ export function TeamsTab({
             }`}
           >
             <span>Full Squads</span>
-            <span className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "FULL" ? "text-white" : "text-muted-foreground"}`}>
+            <span
+              className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "FULL" ? "text-white" : "text-muted-foreground"}`}
+            >
               {fullSquadsCount}
             </span>
           </button>
@@ -228,9 +247,7 @@ export function TeamsTab({
           <button
             type="button"
             onClick={() =>
-              setTeamCapacityFilter(
-                teamCapacityFilter === "DISQUALIFIED" ? "ALL" : "DISQUALIFIED"
-              )
+              setTeamCapacityFilter(teamCapacityFilter === "DISQUALIFIED" ? "ALL" : "DISQUALIFIED")
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               teamCapacityFilter === "DISQUALIFIED"
@@ -239,7 +256,9 @@ export function TeamsTab({
             }`}
           >
             <span>Disabled / Reported</span>
-            <span className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "DISQUALIFIED" ? "text-destructive-foreground" : "text-destructive"}`}>
+            <span
+              className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "DISQUALIFIED" ? "text-destructive-foreground" : "text-destructive"}`}
+            >
               {disabledSquadsCount}
             </span>
           </button>
@@ -368,13 +387,18 @@ export function TeamsTab({
                   <HelpCircle className="size-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+              <TooltipContent
+                side="bottom"
+                align="end"
+                className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg"
+              >
                 <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
                   <HelpCircle className="size-3.5 text-[#8b5cf6]" />
                   <span>Squad &amp; Roster Management</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Monitor campaign squad rosters, squad leader assignments, edit details, disable/disqualify, and report squads.
+                  Monitor campaign squad rosters, squad leader assignments, edit details,
+                  disable/disqualify, and report squads.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -388,7 +412,8 @@ export function TeamsTab({
               <Telescope className="size-8 mx-auto text-muted-foreground/30 mb-1" />
               <div className="font-semibold text-sm text-foreground">No matching squads found</div>
               <p className="text-muted-foreground max-w-sm mx-auto">
-                No campaign squads match your active search and filter criteria. Try clearing filters.
+                No campaign squads match your active search and filter criteria. Try clearing
+                filters.
               </p>
               {(teamSearch || teamCapacityFilter !== "ALL" || teamCampaignFilter !== "ALL") && (
                 <Button
@@ -409,18 +434,33 @@ export function TeamsTab({
             <Table className="w-full table-fixed border-b border-border">
               <TableHeader className="sticky top-0 z-20 bg-card">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[18%] border-b border-border shadow-xs">Squad &amp; Code</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[11%] border-b border-border shadow-xs">Status</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[13%] border-b border-border shadow-xs">Campaign</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[16%] border-b border-border shadow-xs">Squad Leader</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[15%] border-b border-border shadow-xs">Roster</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[21%] border-b border-border shadow-xs">Disclaimer &amp; Notes</TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[18%] border-b border-border shadow-xs">
+                    Squad &amp; Code
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[11%] border-b border-border shadow-xs">
+                    Status
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[13%] border-b border-border shadow-xs">
+                    Campaign
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[16%] border-b border-border shadow-xs">
+                    Squad Leader
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[15%] border-b border-border shadow-xs">
+                    Roster
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[21%] border-b border-border shadow-xs">
+                    Disclaimer &amp; Notes
+                  </TableHead>
                   <TableHead className="sticky top-0 z-20 bg-card text-right text-xs font-bold py-2.5 px-3 w-[6%] border-b border-border shadow-xs"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedTeams.map((t) => {
-                  const leaderMember = t.members.find((m) => m.role === "LEADER" || m.role === "leader" || m.userId === t.leaderId) || t.members[0];
+                  const leaderMember =
+                    t.members.find(
+                      (m) => m.role === "LEADER" || m.role === "leader" || m.userId === t.leaderId
+                    ) || t.members[0];
                   const maxTeamSize = t.event?.maxTeamSize || 6;
                   const isFull = t.members.length >= maxTeamSize;
                   const isDisqualified = t.status === "DISQUALIFIED";
@@ -433,7 +473,10 @@ export function TeamsTab({
                           <div className="font-semibold text-xs text-foreground truncate flex items-center gap-1.5">
                             <span className="truncate">{t.name}</span>
                             {isDisqualified && (
-                              <span className="size-1.5 rounded-full bg-destructive shrink-0" title="Squad Disabled" />
+                              <span
+                                className="size-1.5 rounded-full bg-destructive shrink-0"
+                                title="Squad Disabled"
+                              />
                             )}
                           </div>
                           <div className="flex items-center gap-1.5 font-mono text-[11px]">
@@ -533,7 +576,9 @@ export function TeamsTab({
                             </div>
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground italic">No leader assigned</span>
+                          <span className="text-xs text-muted-foreground italic">
+                            No leader assigned
+                          </span>
                         )}
                       </TableCell>
 
@@ -597,11 +642,16 @@ export function TeamsTab({
                                   </span>
                                 )}
                                 <span className="text-[11px] text-muted-foreground group-hover:text-foreground line-clamp-2 leading-tight break-words min-w-0 flex-1">
-                                  {t.disqualificationReason || t.recruitmentNotes?.replace(/^\[ADMIN [^\]]*\]:\s*/, "")}
+                                  {t.disqualificationReason ||
+                                    t.recruitmentNotes?.replace(/^\[ADMIN [^\]]*\]:\s*/, "")}
                                 </span>
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent side="top" align="start" className="max-w-sm p-3 space-y-2 bg-popover text-popover-foreground border border-border shadow-xl rounded-lg">
+                            <TooltipContent
+                              side="top"
+                              align="start"
+                              className="max-w-sm p-3 space-y-2 bg-popover text-popover-foreground border border-border shadow-xl rounded-lg"
+                            >
                               {t.disqualificationReason && (
                                 <div className="space-y-1">
                                   <div className="font-bold text-xs flex items-center gap-1.5 text-destructive">
@@ -718,7 +768,8 @@ export function TeamsTab({
                 <strong className="text-foreground font-mono">
                   {Math.min(filteredTeams.length, teamCurrentPage * teamPageSize)}
                 </strong>{" "}
-                of <strong className="text-foreground font-mono">{filteredTeams.length}</strong> squads
+                of <strong className="text-foreground font-mono">{filteredTeams.length}</strong>{" "}
+                squads
               </span>
 
               {/* Rows Per Page Selector */}
@@ -735,10 +786,18 @@ export function TeamsTab({
                     <SelectValue placeholder="10" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="5" className="text-xs font-mono">5</SelectItem>
-                    <SelectItem value="10" className="text-xs font-mono">10</SelectItem>
-                    <SelectItem value="20" className="text-xs font-mono">20</SelectItem>
-                    <SelectItem value="50" className="text-xs font-mono">50</SelectItem>
+                    <SelectItem value="5" className="text-xs font-mono">
+                      5
+                    </SelectItem>
+                    <SelectItem value="10" className="text-xs font-mono">
+                      10
+                    </SelectItem>
+                    <SelectItem value="20" className="text-xs font-mono">
+                      20
+                    </SelectItem>
+                    <SelectItem value="50" className="text-xs font-mono">
+                      50
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -772,7 +831,10 @@ export function TeamsTab({
                 {getTeamPageNumbers().map((page, idx) => {
                   if (page === "...") {
                     return (
-                      <span key={`ellipsis-${idx}`} className="px-1.5 py-0.5 text-xs text-muted-foreground font-mono">
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="px-1.5 py-0.5 text-xs text-muted-foreground font-mono"
+                      >
                         ...
                       </span>
                     );

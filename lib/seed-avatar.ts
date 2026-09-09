@@ -1,6 +1,6 @@
 /**
  * Space Pixel Avatar & Curated Color System for SaveDino
- * 
+ *
  * Provides 24+ handcrafted space & arcade 8x8 pixel art sprites
  * and 16+ harmonious complementary color palettes.
  */
@@ -540,7 +540,7 @@ export interface SeedAvatarData {
  * by rotating through predefined space pixel arts and defined complementary color schemes.
  */
 export function generateSeedProfile(inputSeed?: string | null): SeedAvatarData {
-  const seed = (inputSeed && inputSeed.trim().length > 0) ? inputSeed.trim() : "Astro-Dino-42";
+  const seed = inputSeed && inputSeed.trim().length > 0 ? inputSeed.trim() : "Astro-Dino-42";
   const hash = hashString(seed);
 
   // Rotate between predefined space pixel arts
@@ -548,7 +548,7 @@ export function generateSeedProfile(inputSeed?: string | null): SeedAvatarData {
   const selectedArt = SPACE_PIXEL_ARTS[artIdx];
 
   // Rotate between predefined complementary color schemes
-  const colorIdx = (Math.floor(hash / SPACE_PIXEL_ARTS.length)) % COLOR_SCHEMES.length;
+  const colorIdx = Math.floor(hash / SPACE_PIXEL_ARTS.length) % COLOR_SCHEMES.length;
   const selectedScheme = COLOR_SCHEMES[colorIdx];
 
   return {
@@ -566,19 +566,59 @@ export function generateSeedProfile(inputSeed?: string | null): SeedAvatarData {
 
 // Preset Random Seed Generator for rolling new avatars
 const SEED_PREFIXES = [
-  "Astro", "Cosmic", "Solar", "Quantum", "Nebula",
-  "Cyber", "Retro", "Lunar", "Orbital", "Stellar",
-  "Nova", "Chrono", "Laser", "Arcade", "Pixel",
-  "Galaxy", "Comet", "Hyper", "Vortex", "Matrix",
-  "Plasma", "Photon", "Pulsar", "Radiant", "Apex"
+  "Astro",
+  "Cosmic",
+  "Solar",
+  "Quantum",
+  "Nebula",
+  "Cyber",
+  "Retro",
+  "Lunar",
+  "Orbital",
+  "Stellar",
+  "Nova",
+  "Chrono",
+  "Laser",
+  "Arcade",
+  "Pixel",
+  "Galaxy",
+  "Comet",
+  "Hyper",
+  "Vortex",
+  "Matrix",
+  "Plasma",
+  "Photon",
+  "Pulsar",
+  "Radiant",
+  "Apex",
 ];
 
 const SEED_NOUNS = [
-  "Dino", "Raptor", "Hunter", "Explorer", "Pilot",
-  "Radar", "Seeker", "Rover", "Astronaut", "Voyager",
-  "Comet", "Scout", "Watcher", "Beacon", "Pioneer",
-  "Shuttle", "Lander", "Crystal", "Star", "Cruiser",
-  "Saucer", "Cannon", "Orbit", "Signal", "Ranger"
+  "Dino",
+  "Raptor",
+  "Hunter",
+  "Explorer",
+  "Pilot",
+  "Radar",
+  "Seeker",
+  "Rover",
+  "Astronaut",
+  "Voyager",
+  "Comet",
+  "Scout",
+  "Watcher",
+  "Beacon",
+  "Pioneer",
+  "Shuttle",
+  "Lander",
+  "Crystal",
+  "Star",
+  "Cruiser",
+  "Saucer",
+  "Cannon",
+  "Orbit",
+  "Signal",
+  "Ranger",
 ];
 
 export function getRandomSeed(): string {

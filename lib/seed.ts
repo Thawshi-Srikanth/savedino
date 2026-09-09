@@ -106,7 +106,8 @@ export async function seedDatabase() {
     data: {
       code: "AST-2026-A",
       title: "Pan-STARRS Sky Survey Phase 1",
-      description: "Active asteroid search campaign detecting Near Earth Objects and Main Belt asteroids.",
+      description:
+        "Active asteroid search campaign detecting Near Earth Objects and Main Belt asteroids.",
       regStart: c1RegStart,
       regEnd: c1RegEnd,
       teamFormationStart: c1TeamStart,
@@ -186,7 +187,8 @@ export async function seedDatabase() {
       leaderId: leaderUser.id,
       status: "FORMING",
       isRecruiting: true,
-      recruitmentNotes: "Forming team for the upcoming Catalina search. Open for solo student matching.",
+      recruitmentNotes:
+        "Forming team for the upcoming Catalina search. Open for solo student matching.",
     },
   });
 
@@ -199,14 +201,17 @@ export async function seedDatabase() {
     },
   });
 
-  console.log("✅ Created 2 teams with student leaders and members (Staff has zero team memberships).");
+  console.log(
+    "✅ Created 2 teams with student leaders and members (Staff has zero team memberships)."
+  );
 
   // 4. Create Pending Join Request from Applicant to Team 1
   await prisma.teamJoinRequest.create({
     data: {
       teamId: team1.id,
       userId: applicantUser.id,
-      message: "Hi Sarah! I have experience with Astrometrica and would like to help blink image sets.",
+      message:
+        "Hi Sarah! I have experience with Astrometrica and would like to help blink image sets.",
       status: "PENDING",
     },
   });

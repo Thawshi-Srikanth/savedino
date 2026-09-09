@@ -10,11 +10,7 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
 }
 
-export const Logo: React.FC<LogoProps> = ({
-  className = "",
-  href = "/",
-  size = "md",
-}) => {
+export const Logo: React.FC<LogoProps> = ({ className = "", href = "/", size = "md" }) => {
   const sizeClasses = {
     sm: "h-6 sm:h-7",
     md: "h-7 sm:h-8",
@@ -74,7 +70,10 @@ export const Logo: React.FC<LogoProps> = ({
 
   if (href) {
     return (
-      <Link href={href} className="inline-flex items-center group cursor-pointer focus:outline-hidden">
+      <Link
+        href={href}
+        className="inline-flex items-center group cursor-pointer focus:outline-hidden"
+      >
         {content}
       </Link>
     );

@@ -6,9 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Users,
   Search,
@@ -114,7 +134,10 @@ export function UsersTab({
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
             Researcher Roles
           </span>
-          <Badge variant="secondary" className="text-[10px] font-mono font-bold px-1.5 py-0 bg-muted text-foreground">
+          <Badge
+            variant="secondary"
+            className="text-[10px] font-mono font-bold px-1.5 py-0 bg-muted text-foreground"
+          >
             {users.length}
           </Badge>
         </div>
@@ -143,7 +166,11 @@ export function UsersTab({
             }`}
           >
             <span>Admins</span>
-            <span className={`font-mono text-[11px] font-bold ${roleFilter === "admin" ? "text-white" : "text-muted-foreground"}`}>{adminCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${roleFilter === "admin" ? "text-white" : "text-muted-foreground"}`}
+            >
+              {adminCount}
+            </span>
           </button>
 
           <button
@@ -156,7 +183,11 @@ export function UsersTab({
             }`}
           >
             <span>Staff / Ops</span>
-            <span className={`font-mono text-[11px] font-bold ${roleFilter === "staff" ? "text-white" : "text-muted-foreground"}`}>{staffCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${roleFilter === "staff" ? "text-white" : "text-muted-foreground"}`}
+            >
+              {staffCount}
+            </span>
           </button>
 
           <button
@@ -169,7 +200,11 @@ export function UsersTab({
             }`}
           >
             <span>Citizens</span>
-            <span className={`font-mono text-[11px] font-bold ${roleFilter === "user" ? "text-white" : "text-muted-foreground"}`}>{citizenCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${roleFilter === "user" ? "text-white" : "text-muted-foreground"}`}
+            >
+              {citizenCount}
+            </span>
           </button>
         </nav>
 
@@ -177,7 +212,9 @@ export function UsersTab({
         <div className="pt-2.5 border-t border-border space-y-1.5 text-[11px] text-muted-foreground px-1">
           <div className="flex justify-between">
             <span>In Squad:</span>
-            <span className="font-bold text-foreground font-mono">{users.length - unassignedCount}</span>
+            <span className="font-bold text-foreground font-mono">
+              {users.length - unassignedCount}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>Unassigned:</span>
@@ -267,13 +304,18 @@ export function UsersTab({
                   <HelpCircle className="size-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+              <TooltipContent
+                side="bottom"
+                align="end"
+                className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg"
+              >
                 <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
                   <HelpCircle className="size-3.5 text-[#8b5cf6]" />
                   <span>User &amp; Role Management</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Manage 4-tier platform roles (Admin, Staff, Leader, Citizen), researcher permissions, and team allocations.
+                  Manage 4-tier platform roles (Admin, Staff, Leader, Citizen), researcher
+                  permissions, and team allocations.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -285,7 +327,9 @@ export function UsersTab({
           {filteredUsers.length === 0 ? (
             <div className="py-16 text-center text-xs text-muted-foreground space-y-2">
               <Users className="size-8 mx-auto text-muted-foreground/30 mb-1" />
-              <div className="font-semibold text-sm text-foreground">No matching researchers found</div>
+              <div className="font-semibold text-sm text-foreground">
+                No matching researchers found
+              </div>
               <p className="text-muted-foreground max-w-sm mx-auto">
                 No users match your active search and filter criteria. Try clearing filters.
               </p>
@@ -308,10 +352,18 @@ export function UsersTab({
             <Table className="w-full table-fixed border-b border-border">
               <TableHeader className="sticky top-0 z-20 bg-card">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[32%] border-b border-border shadow-xs">Researcher</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[16%] border-b border-border shadow-xs">Role</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[22%] border-b border-border shadow-xs">Squad Status</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[24%] border-b border-border shadow-xs">Affiliation / Region</TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[32%] border-b border-border shadow-xs">
+                    Researcher
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[16%] border-b border-border shadow-xs">
+                    Role
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[22%] border-b border-border shadow-xs">
+                    Squad Status
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[24%] border-b border-border shadow-xs">
+                    Affiliation / Region
+                  </TableHead>
                   <TableHead className="sticky top-0 z-20 bg-card text-right text-xs font-bold py-2.5 px-3 w-[6%] border-b border-border shadow-xs"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -531,7 +583,10 @@ export function UsersTab({
               {getPageNumbers().map((pNum, idx) => {
                 if (pNum === "...") {
                   return (
-                    <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground text-xs font-mono">
+                    <span
+                      key={`ellipsis-${idx}`}
+                      className="px-1 text-muted-foreground text-xs font-mono"
+                    >
                       ...
                     </span>
                   );

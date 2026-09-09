@@ -54,13 +54,18 @@ export function canParticipateInTeams(user?: SessionUser | null): boolean {
  */
 export function getTeamContextPermissions(
   user: SessionUser | null | undefined,
-  team: { leaderId?: string; members?: Array<{ userId?: string; user?: { id: string }; role?: string }> } | null | undefined
+  team:
+    | {
+        leaderId?: string;
+        members?: Array<{ userId?: string; user?: { id: string }; role?: string }>;
+      }
+    | null
+    | undefined
 ) {
   const userId = user?.id;
   const organizer = isOrganizer(user);
   const isMember = Boolean(
-    userId &&
-      team?.members?.some((m) => (m.userId ? m.userId === userId : m.user?.id === userId))
+    userId && team?.members?.some((m) => (m.userId ? m.userId === userId : m.user?.id === userId))
   );
   const isLeader = Boolean(userId && team?.leaderId === userId);
 

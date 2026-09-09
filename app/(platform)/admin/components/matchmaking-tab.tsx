@@ -5,7 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import {
   Users,
   Search,
@@ -123,13 +130,18 @@ export function MatchmakingTab({
                 <HelpCircle className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+            <TooltipContent
+              side="bottom"
+              align="end"
+              className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg"
+            >
               <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
                 <HelpCircle className="size-3.5 text-[#10b981]" />
                 <span>Solo Researcher Matchmaking</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Match unassigned citizen scientists and solo students into active research squads with available slots.
+                Match unassigned citizen scientists and solo students into active research squads
+                with available slots.
               </p>
             </TooltipContent>
           </Tooltip>
@@ -140,7 +152,9 @@ export function MatchmakingTab({
         {users.filter((u) => u.teamMembers.length === 0).length === 0 ? (
           <div className="py-16 text-center text-xs text-muted-foreground space-y-1">
             <Users className="size-8 mx-auto text-muted-foreground/30 mb-1" />
-            <div className="font-semibold text-sm text-foreground">All researchers are assigned!</div>
+            <div className="font-semibold text-sm text-foreground">
+              All researchers are assigned!
+            </div>
             <p>There are no unassigned solo students at this moment.</p>
           </div>
         ) : unassignedSoloUsers.length === 0 ? (
@@ -153,10 +167,18 @@ export function MatchmakingTab({
           <Table className="w-full table-fixed border-b border-border">
             <TableHeader className="sticky top-0 z-20 bg-card">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[35%] border-b border-border shadow-xs">Researcher</TableHead>
-                <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[18%] border-b border-border shadow-xs">Role</TableHead>
-                <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[27%] border-b border-border shadow-xs">Affiliation / Region</TableHead>
-                <TableHead className="sticky top-0 z-20 bg-card text-right text-xs font-bold py-2.5 px-3 w-[20%] border-b border-border shadow-xs">Match Action</TableHead>
+                <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[35%] border-b border-border shadow-xs">
+                  Researcher
+                </TableHead>
+                <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[18%] border-b border-border shadow-xs">
+                  Role
+                </TableHead>
+                <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[27%] border-b border-border shadow-xs">
+                  Affiliation / Region
+                </TableHead>
+                <TableHead className="sticky top-0 z-20 bg-card text-right text-xs font-bold py-2.5 px-3 w-[20%] border-b border-border shadow-xs">
+                  Match Action
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -168,17 +190,25 @@ export function MatchmakingTab({
                         {getInitials(u.name)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-xs text-foreground truncate">{u.name}</div>
-                        <div className="text-[11px] text-muted-foreground font-mono truncate">{u.email}</div>
+                        <div className="font-semibold text-xs text-foreground truncate">
+                          {u.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground font-mono truncate">
+                          {u.email}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-3 w-[18%] whitespace-nowrap overflow-hidden">{renderRoleBadge(u.role)}</TableCell>
+                  <TableCell className="py-2 px-3 w-[18%] whitespace-nowrap overflow-hidden">
+                    {renderRoleBadge(u.role)}
+                  </TableCell>
                   <TableCell className="py-2 px-3 w-[27%] min-w-0 overflow-hidden text-xs text-muted-foreground">
                     <span className="truncate block max-w-full">
                       <span className="text-foreground/90">{u.institution || "Independent"}</span>
                       <span className="text-muted-foreground mx-1">&middot;</span>
-                      <span className="font-mono text-[11px] text-muted-foreground">{u.country || "Global"}</span>
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {u.country || "Global"}
+                      </span>
                     </span>
                   </TableCell>
                   <TableCell className="py-2 px-3 w-[20%] text-right whitespace-nowrap overflow-hidden">

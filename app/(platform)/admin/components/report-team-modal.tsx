@@ -1,10 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TeamData } from "./types";
 
 interface ReportTeamModalProps {
@@ -57,7 +70,9 @@ export function ReportTeamModal({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-foreground">Reason / Violation Notes</label>
+            <label className="text-xs font-semibold text-foreground">
+              Reason / Violation Notes
+            </label>
             <Textarea
               required
               rows={3}
@@ -70,7 +85,8 @@ export function ReportTeamModal({
 
           {reportAction === "DISQUALIFY" && (
             <div className="p-2.5 rounded bg-destructive/10 border border-destructive/20 text-destructive text-xs">
-              Disqualifying this squad will immediately change its status to <strong>DISQUALIFIED</strong> and lock submissions.
+              Disqualifying this squad will immediately change its status to{" "}
+              <strong>DISQUALIFIED</strong> and lock submissions.
             </div>
           )}
 
@@ -90,7 +106,11 @@ export function ReportTeamModal({
               disabled={reportLoading || !reportReason.trim()}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold shadow-arcade-destructive active:translate-y-0.5 cursor-pointer"
             >
-              {reportLoading ? "Processing..." : reportAction === "DISQUALIFY" ? "Disqualify Squad" : "Log Report"}
+              {reportLoading
+                ? "Processing..."
+                : reportAction === "DISQUALIFY"
+                  ? "Disqualify Squad"
+                  : "Log Report"}
             </Button>
           </DialogFooter>
         </form>

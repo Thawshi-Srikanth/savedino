@@ -24,7 +24,10 @@ export async function POST(req: Request) {
 
     if (session.user.role === "admin" || session.user.role === "staff") {
       return NextResponse.json(
-        { success: false, error: "Administrators and staff manage campaigns and cannot form participant teams." },
+        {
+          success: false,
+          error: "Administrators and staff manage campaigns and cannot form participant teams.",
+        },
         { status: 403 }
       );
     }
@@ -45,10 +48,7 @@ export async function POST(req: Request) {
     });
 
     if (!targetEvent) {
-      return NextResponse.json(
-        { success: false, error: "Campaign not found." },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Campaign not found." }, { status: 404 });
     }
 
     const regCheck = isRegistrationClosed(targetEvent);
@@ -62,10 +62,7 @@ export async function POST(req: Request) {
     // 2. Enforce Event Concurrency Rule
     const concurrency = await checkUserEventConcurrency(session.user.id, eventId);
     if (!concurrency.canEnroll) {
-      return NextResponse.json(
-        { success: false, error: concurrency.reason },
-        { status: 409 }
-      );
+      return NextResponse.json({ success: false, error: concurrency.reason }, { status: 409 });
     }
 
     // 3. Generate unique invite code

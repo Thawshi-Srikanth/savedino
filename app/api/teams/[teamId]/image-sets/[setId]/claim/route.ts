@@ -54,7 +54,11 @@ export async function POST(
     // Organizers observing cannot claim sets for themselves
     if (isStaffOrAdmin && !isMember && !action) {
       return NextResponse.json(
-        { success: false, error: "Organizers view squads in read-only mode and cannot claim participant image sets." },
+        {
+          success: false,
+          error:
+            "Organizers view squads in read-only mode and cannot claim participant image sets.",
+        },
         { status: 403 }
       );
     }
@@ -84,7 +88,10 @@ export async function POST(
     if (action === "ASSIGN") {
       if (!isLeader && !isStaffOrAdmin) {
         return NextResponse.json(
-          { success: false, error: "Only squad leaders can assign image sets directly to members." },
+          {
+            success: false,
+            error: "Only squad leaders can assign image sets directly to members.",
+          },
           { status: 403 }
         );
       }
@@ -213,9 +220,16 @@ export async function POST(
 
     // --- CASE E: Member Requests to Claim or Leader Claims for Self ---
     // If the set is already claimed by someone else
-    if (currentSet.claimedById && currentSet.claimedById !== session.user.id && currentSet.status !== "UNASSIGNED") {
+    if (
+      currentSet.claimedById &&
+      currentSet.claimedById !== session.user.id &&
+      currentSet.status !== "UNASSIGNED"
+    ) {
       return NextResponse.json(
-        { success: false, error: "This image set is already being analyzed or requested by another member." },
+        {
+          success: false,
+          error: "This image set is already being analyzed or requested by another member.",
+        },
         { status: 409 }
       );
     }

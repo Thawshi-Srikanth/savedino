@@ -56,11 +56,14 @@ function VerifyContent() {
   // If already authenticated and not verifying token, forward to destination
   useEffect(() => {
     if (token) return;
-    authClient.getSession().then((res) => {
-      if (res?.data?.session) {
-        router.push(redirectTo);
-      }
-    }).catch(() => {});
+    authClient
+      .getSession()
+      .then((res) => {
+        if (res?.data?.session) {
+          router.push(redirectTo);
+        }
+      })
+      .catch(() => {});
   }, [token, redirectTo, router]);
 
   // Handle URL errors
@@ -146,13 +149,17 @@ function VerifyContent() {
     }
   };
 
-
   const getEmailProviderInfo = (emailAddress: string) => {
     const domain = emailAddress.split("@")[1]?.toLowerCase() || "";
     if (domain.includes("gmail") || domain.includes("google")) {
       return { name: "Gmail", url: "https://mail.google.com" };
     }
-    if (domain.includes("outlook") || domain.includes("hotmail") || domain.includes("live") || domain.includes("microsoft")) {
+    if (
+      domain.includes("outlook") ||
+      domain.includes("hotmail") ||
+      domain.includes("live") ||
+      domain.includes("microsoft")
+    ) {
       return { name: "Outlook", url: "https://outlook.live.com" };
     }
     if (domain.includes("yahoo")) {
@@ -281,7 +288,10 @@ function VerifyContent() {
         {/* Bottom Navigation */}
         <div className="text-center text-xs font-sans text-muted-foreground">
           Need an account?{" "}
-          <Link href="/register" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
+          <Link
+            href="/register"
+            className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
+          >
             <span>Create account</span>
             <span>&rarr;</span>
           </Link>

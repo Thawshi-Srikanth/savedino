@@ -7,10 +7,7 @@ import { CandidateReport } from "@/types/mpc";
 import { isOrganizer } from "@/lib/rbac";
 
 // GET /api/teams/[teamId]/image-sets - List image sets for the team
-export async function GET(
-  req: Request,
-  context: { params: Promise<{ teamId: string }> }
-) {
+export async function GET(req: Request, context: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -91,10 +88,7 @@ export async function GET(
 }
 
 // POST /api/teams/[teamId]/image-sets - Add image set(s) (Only Team Leader or Admin)
-export async function POST(
-  req: Request,
-  context: { params: Promise<{ teamId: string }> }
-) {
+export async function POST(req: Request, context: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -120,7 +114,10 @@ export async function POST(
 
     if (!isLeader && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: "Only the squad leader or administrator can upload or import image sets." },
+        {
+          success: false,
+          error: "Only the squad leader or administrator can upload or import image sets.",
+        },
         { status: 403 }
       );
     }

@@ -40,7 +40,10 @@ export async function PUT(
 
     // Verify leader authorization
     if (team.leaderId !== session.user.id && session.user.role !== "admin") {
-      return NextResponse.json({ success: false, error: "Only team leader or admin can process join requests." }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: "Only team leader or admin can process join requests." },
+        { status: 403 }
+      );
     }
 
     const joinReq = await prisma.teamJoinRequest.findUnique({
@@ -66,14 +69,21 @@ export async function PUT(
     // Action === "ACCEPT"
     if (team.status === "DISQUALIFIED") {
       return NextResponse.json(
-        { success: false, error: "This squad has been disabled by platform administration and cannot accept new members." },
+        {
+          success: false,
+          error:
+            "This squad has been disabled by platform administration and cannot accept new members.",
+        },
         { status: 403 }
       );
     }
 
     const maxLimit = team.event?.maxTeamSize || 6;
     if (team.members.length >= maxLimit) {
-      return NextResponse.json({ success: false, error: `Squad is already at max capacity (${maxLimit} members).` }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: `Squad is already at max capacity (${maxLimit} members).` },
+        { status: 400 }
+      );
     }
 
     // Check if user is already enrolled in ANY squad for this campaign

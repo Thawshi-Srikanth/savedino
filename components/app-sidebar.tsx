@@ -24,8 +24,18 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
 
   const navItems = [
-    { title: "Campaigns Hub", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Team Workspace", url: "/campaigns", icon: Users, active: pathname.startsWith("/team/") },
+    {
+      title: "Campaigns Hub",
+      url: "/campaigns",
+      icon: Telescope,
+      active: pathname === "/campaigns",
+    },
+    {
+      title: "Team Workspace",
+      url: "/campaigns",
+      icon: Users,
+      active: pathname.startsWith("/team/"),
+    },
   ];
 
   // @ts-ignore
@@ -41,7 +51,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-16 flex items-center justify-between border-b px-4">
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-sm tracking-tight text-primary">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 font-bold text-sm tracking-tight text-primary"
+        >
           <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Sparkles className="size-4" />
           </div>

@@ -6,7 +6,8 @@ import { sendMagicLinkEmail } from "./email";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  baseURL:
+    process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -24,7 +25,7 @@ export const auth = betterAuth({
           // Automatic First Account Admin Provisioning:
           // If no accounts exist in the database, automatically assign admin role to the first user.
           const userCount = await prisma.user.count();
-          const role = userCount === 0 ? "admin" : (user.role || "user");
+          const role = userCount === 0 ? "admin" : user.role || "user";
           const metadata = (context as any)?.metadata || {};
 
           return {
@@ -61,4 +62,3 @@ export const auth = betterAuth({
     },
   },
 });
-

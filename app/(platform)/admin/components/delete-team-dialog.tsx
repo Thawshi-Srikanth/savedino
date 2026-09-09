@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { TeamData } from "./types";
@@ -31,10 +38,14 @@ export function DeleteTeamDialog({
             <div>
               Are you sure you want to permanently delete{" "}
               <strong className="text-foreground">{deletingTeam?.name}</strong> (Code:{" "}
-              <span className="font-mono text-foreground font-bold">{deletingTeam?.inviteCode}</span>)?
+              <span className="font-mono text-foreground font-bold">
+                {deletingTeam?.inviteCode}
+              </span>
+              )?
             </div>
             <div className="p-2.5 rounded bg-destructive/10 border border-destructive/20 text-destructive text-xs">
-              All member affiliations and squad enrollments for {deletingTeam?.members.length} researchers will be released back to the unassigned candidate pool.
+              All member affiliations and squad enrollments for {deletingTeam?.members.length}{" "}
+              researchers will be released back to the unassigned candidate pool.
             </div>
           </DialogDescription>
         </DialogHeader>

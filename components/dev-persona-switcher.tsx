@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  ShieldCheck, 
-  Shield, 
-  Crown, 
-  UserCheck, 
-  Clock, 
-  User, 
-  LogOut, 
-  ChevronUp, 
-  ChevronDown, 
+import {
+  ShieldCheck,
+  Shield,
+  Crown,
+  UserCheck,
+  Clock,
+  User,
+  LogOut,
+  ChevronUp,
+  ChevronDown,
   RefreshCw,
   Sparkles,
   Zap,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -181,9 +181,7 @@ export function DevPersonaSwitcher() {
           </div>
           <div className="min-w-0 truncate">
             <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-xs text-foreground truncate">
-                {persona.name}
-              </span>
+              <span className="font-semibold text-xs text-foreground truncate">{persona.name}</span>
             </div>
             <div className="text-[10px] font-mono text-muted-foreground truncate">
               {persona.email}
@@ -203,11 +201,13 @@ export function DevPersonaSwitcher() {
   };
 
   return (
-    <aside aria-label="Dev Persona Switcher" className="fixed bottom-4 left-4 z-50 font-sans select-none">
+    <aside
+      aria-label="Dev Persona Switcher"
+      className="fixed bottom-4 left-4 z-50 font-sans select-none"
+    >
       {/* Expanded Switcher Card */}
       {isOpen && (
         <div className="mb-2.5 w-88 bg-white dark:bg-[#1c1d21] border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
-          
           {/* Header Bar */}
           <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-[#16171a] border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -269,7 +269,11 @@ export function DevPersonaSwitcher() {
 
           {currentPersona ? (
             <div className="flex items-center gap-2 max-w-[210px] truncate">
-              <PixelAvatar seed={currentPersona.name || currentPersona.email} size={20} showBorder={false} />
+              <PixelAvatar
+                seed={currentPersona.name || currentPersona.email}
+                size={20}
+                showBorder={false}
+              />
               <span className="font-bold text-xs text-foreground truncate">
                 {currentPersona.name}
               </span>
@@ -282,7 +286,9 @@ export function DevPersonaSwitcher() {
               </span>
             </div>
           ) : (
-            <span className="text-xs font-medium text-muted-foreground">Guest Mode (Logged Out)</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Guest Mode (Logged Out)
+            </span>
           )}
         </div>
 

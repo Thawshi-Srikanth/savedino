@@ -1,10 +1,23 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Edit2, Calendar, Users, Telescope, FileCode } from "lucide-react";
 import { EventData } from "./types";
 
@@ -78,10 +91,7 @@ export function EditCampaignModal({
   onSave,
 }: EditCampaignModalProps) {
   return (
-    <Dialog
-      open={!!editingCampaign}
-      onOpenChange={(open) => !open && setEditingCampaign(null)}
-    >
+    <Dialog open={!!editingCampaign} onOpenChange={(open) => !open && setEditingCampaign(null)}>
       <DialogContent className="sm:max-w-2xl bg-card border-border font-sans max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
@@ -170,7 +180,11 @@ export function EditCampaignModal({
                     max={30}
                     required
                     value={editCampMaxTeamSize}
-                    onChange={(e) => setEditCampMaxTeamSize(Math.max(2, Math.min(30, parseInt(e.target.value) || 6)))}
+                    onChange={(e) =>
+                      setEditCampMaxTeamSize(
+                        Math.max(2, Math.min(30, parseInt(e.target.value) || 6))
+                      )
+                    }
                     className="h-9 text-xs font-mono bg-background"
                   />
                 </div>
@@ -293,7 +307,9 @@ export function EditCampaignModal({
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] text-muted-foreground">Submissions Deadline</label>
+                    <label className="text-[11px] text-muted-foreground">
+                      Submissions Deadline
+                    </label>
                     <Input
                       type="datetime-local"
                       value={editCampSubEnd}

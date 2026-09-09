@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { EventData } from "./types";
@@ -20,10 +27,7 @@ export function DeleteCampaignDialog({
   onConfirmDelete,
 }: DeleteCampaignDialogProps) {
   return (
-    <Dialog
-      open={!!deletingCampaign}
-      onOpenChange={(open) => !open && setDeletingCampaign(null)}
-    >
+    <Dialog open={!!deletingCampaign} onOpenChange={(open) => !open && setDeletingCampaign(null)}>
       <DialogContent className="sm:max-w-md bg-card border-border font-sans">
         <DialogHeader>
           <DialogTitle className="text-base font-bold text-destructive flex items-center gap-2">
@@ -34,9 +38,7 @@ export function DeleteCampaignDialog({
             <span>
               Are you sure you want to permanently delete{" "}
               <strong className="text-foreground">{deletingCampaign?.title}</strong> (
-              <span className="font-mono font-bold text-foreground">
-                {deletingCampaign?.code}
-              </span>
+              <span className="font-mono font-bold text-foreground">{deletingCampaign?.code}</span>
               )?
             </span>
           </DialogDescription>
@@ -48,7 +50,8 @@ export function DeleteCampaignDialog({
             <span>Permanent Deletion Warning</span>
           </div>
           <p className="text-[11px] leading-relaxed">
-            This will permanently delete this campaign event along with all associated teams, squad memberships, and image set observation logs.
+            This will permanently delete this campaign event along with all associated teams, squad
+            memberships, and image set observation logs.
           </p>
         </div>
 

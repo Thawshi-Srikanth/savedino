@@ -162,13 +162,15 @@ export default function ProfilePage() {
         setTeams(data.teams || []);
         setClaimedSets(data.claimedSets || []);
         setJoinRequests(data.joinRequests || []);
-        setStats(data.stats || {
-          campaignsCount: 0,
-          teamsCount: 0,
-          squadsLeadCount: 0,
-          claimedSetsCount: 0,
-          submittedSetsCount: 0,
-        });
+        setStats(
+          data.stats || {
+            campaignsCount: 0,
+            teamsCount: 0,
+            squadsLeadCount: 0,
+            claimedSetsCount: 0,
+            submittedSetsCount: 0,
+          }
+        );
 
         // Initialize local form fields
         setFormName(data.user.name || "");
@@ -287,7 +289,11 @@ export default function ProfilePage() {
       <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-arcade flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left: Avatar & Identity Details */}
         <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-          <PixelAvatar seed={savedAvatarSeed} size={56} className="shadow-md shrink-0 ring-2 ring-primary/20" />
+          <PixelAvatar
+            seed={savedAvatarSeed}
+            size={56}
+            className="shadow-md shrink-0 ring-2 ring-primary/20"
+          />
 
           <div className="space-y-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -301,7 +307,10 @@ export default function ProfilePage() {
                   Admin
                 </Badge>
               ) : (
-                <Badge variant="secondary" className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0"
+                >
                   Citizen Scientist
                 </Badge>
               )}
@@ -332,7 +341,11 @@ export default function ProfilePage() {
 
               <span className="inline-flex items-center gap-1 text-[11px] opacity-75 font-mono">
                 <span className="opacity-40">•</span>
-                Joined {new Date(user?.createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                Joined{" "}
+                {new Date(user?.createdAt || Date.now()).toLocaleDateString("en-US", {
+                  month: "short",
+                  year: "numeric",
+                })}
               </span>
             </div>
           </div>
@@ -342,7 +355,9 @@ export default function ProfilePage() {
         <div className="flex items-center gap-2 sm:gap-2.5 self-start sm:self-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-border/60">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
             <span className="font-mono font-bold text-foreground">{stats.campaignsCount}</span>
-            <span className="text-[10px] text-muted-foreground uppercase font-medium">Campaigns</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-medium">
+              Campaigns
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
@@ -352,17 +367,15 @@ export default function ProfilePage() {
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
             <span className="font-mono font-bold text-[#38bdf8]">{stats.claimedSetsCount}</span>
-            <span className="text-[10px] text-muted-foreground uppercase font-medium">Analyzed</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-medium">
+              Analyzed
+            </span>
           </div>
         </div>
       </div>
 
       {/* 2. TABBED CONTENT: EDIT PROFILE, CAMPAIGNS, SQUADS, ACTIVITY */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full space-y-6"
-      >
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
         <div className="border-b border-border">
           <div className="overflow-x-auto scrollbar-none flex items-center">
             <TabsList className="h-10 bg-transparent p-0 flex min-w-full sm:min-w-0 sm:w-auto gap-1 border-0 rounded-none">
@@ -371,7 +384,9 @@ export default function ProfilePage() {
                 className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
                 <User className="size-3.5 shrink-0" />
-                <span className={activeTab === "edit" ? "inline" : "hidden sm:inline"}>Edit Profile</span>
+                <span className={activeTab === "edit" ? "inline" : "hidden sm:inline"}>
+                  Edit Profile
+                </span>
               </TabsTrigger>
 
               <TabsTrigger
@@ -379,7 +394,9 @@ export default function ProfilePage() {
                 className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
                 <Telescope className="size-3.5 shrink-0" />
-                <span className={activeTab === "history" ? "inline" : "hidden sm:inline"}>Campaigns</span>
+                <span className={activeTab === "history" ? "inline" : "hidden sm:inline"}>
+                  Campaigns
+                </span>
                 <Badge
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-semibold font-mono transition-colors ${
@@ -397,7 +414,9 @@ export default function ProfilePage() {
                 className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
                 <Users className="size-3.5 shrink-0" />
-                <span className={activeTab === "teams" ? "inline" : "hidden sm:inline"}>Squads</span>
+                <span className={activeTab === "teams" ? "inline" : "hidden sm:inline"}>
+                  Squads
+                </span>
                 <Badge
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-semibold font-mono transition-colors ${
@@ -415,7 +434,9 @@ export default function ProfilePage() {
                 className="h-10 px-2.5 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-lg rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
               >
                 <FolderSearch className="size-3.5 shrink-0" />
-                <span className={activeTab === "activity" ? "inline" : "hidden sm:inline"}>Activity</span>
+                <span className={activeTab === "activity" ? "inline" : "hidden sm:inline"}>
+                  Activity
+                </span>
                 <Badge
                   variant="secondary"
                   className={`text-[10px] px-1.5 py-0 font-semibold font-mono transition-colors ${
@@ -473,7 +494,9 @@ export default function ProfilePage() {
                       disabled
                       className="h-9 text-xs rounded-xl bg-muted text-muted-foreground cursor-not-allowed"
                     />
-                    <p className="text-[11px] text-muted-foreground">Managed by your authentication account.</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Managed by your authentication account.
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -521,12 +544,28 @@ export default function ProfilePage() {
                   <CardContent className="space-y-4">
                     {/* Character Preview Canvas Box */}
                     <div className="flex flex-col items-center justify-center p-5 rounded-xl border border-border bg-muted/40 gap-3">
-                      <PixelAvatar seed={selectedAvatar} size={96} className="shadow-xl ring-2 ring-primary/30" />
+                      <PixelAvatar
+                        seed={selectedAvatar}
+                        size={96}
+                        className="shadow-xl ring-2 ring-primary/30"
+                      />
 
                       <div className="flex items-center gap-1.5" title="Palette Colors">
-                        <span className="size-3 rounded-full border border-border shadow-sm" style={{ backgroundColor: liveAvatarProfile.bgHex }} title="Background Tone" />
-                        <span className="size-3 rounded-full border border-border shadow-sm" style={{ backgroundColor: liveAvatarProfile.fgHex }} title="Primary Character Color" />
-                        <span className="size-3 rounded-full border border-border shadow-sm" style={{ backgroundColor: liveAvatarProfile.accentHex }} title="Accent Tone" />
+                        <span
+                          className="size-3 rounded-full border border-border shadow-sm"
+                          style={{ backgroundColor: liveAvatarProfile.bgHex }}
+                          title="Background Tone"
+                        />
+                        <span
+                          className="size-3 rounded-full border border-border shadow-sm"
+                          style={{ backgroundColor: liveAvatarProfile.fgHex }}
+                          title="Primary Character Color"
+                        />
+                        <span
+                          className="size-3 rounded-full border border-border shadow-sm"
+                          style={{ backgroundColor: liveAvatarProfile.accentHex }}
+                          title="Accent Tone"
+                        />
                       </div>
                     </div>
 
@@ -560,7 +599,8 @@ export default function ProfilePage() {
 
                 <div className="px-6 pb-4">
                   <p className="text-[11px] text-muted-foreground">
-                    Avatars and details are previewed instantly. Use the floating bar to save your changes.
+                    Avatars and details are previewed instantly. Use the floating bar to save your
+                    changes.
                   </p>
                 </div>
               </Card>
@@ -575,10 +615,16 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-lg font-bold text-foreground">Campaign History</h2>
-              <p className="text-xs text-muted-foreground">All asteroid search campaigns you have participated in.</p>
+              <p className="text-xs text-muted-foreground">
+                All asteroid search campaigns you have participated in.
+              </p>
             </div>
             <Link href="/campaigns">
-              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-arcade active:translate-y-0.5 gap-1 self-start sm:self-auto">
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs font-bold h-8 rounded-xl shadow-arcade active:translate-y-0.5 gap-1 self-start sm:self-auto"
+              >
                 <Telescope className="size-3.5" />
                 <span>Explore Campaigns</span>
               </Button>
@@ -591,11 +637,15 @@ export default function ProfilePage() {
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-foreground">No Campaign History Yet</h3>
                 <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                  You haven&apos;t joined any asteroid search campaigns yet. Browse available campaigns and form a squad to get started!
+                  You haven&apos;t joined any asteroid search campaigns yet. Browse available
+                  campaigns and form a squad to get started!
                 </p>
               </div>
               <Link href="/campaigns">
-                <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary">
+                <Button
+                  size="sm"
+                  className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary"
+                >
                   Browse Campaigns
                 </Button>
               </Link>
@@ -607,7 +657,10 @@ export default function ProfilePage() {
                 const isActive = event.status === "ACTIVE" || event.status === "SUBMISSION_OPEN";
 
                 return (
-                  <Card key={event.id} className="border-border shadow-arcade rounded-2xl hover:border-primary/40 transition-all">
+                  <Card
+                    key={event.id}
+                    className="border-border shadow-arcade rounded-2xl hover:border-primary/40 transition-all"
+                  >
                     <CardContent className="p-4 sm:p-5 flex flex-col gap-3.5">
                       {/* Top Row: Badges & Timeline */}
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -633,7 +686,10 @@ export default function ProfilePage() {
 
                         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
                           <Calendar className="size-3.5 opacity-75" />
-                          <span>{new Date(event.startDate).toLocaleDateString()} &ndash; {new Date(event.endDate).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(event.startDate).toLocaleDateString()} &ndash;{" "}
+                            {new Date(event.endDate).toLocaleDateString()}
+                          </span>
                         </span>
                       </div>
 
@@ -648,7 +704,9 @@ export default function ProfilePage() {
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground font-sans">
                           <span className="inline-flex items-center gap-1.5">
                             <Users className="size-3.5 text-primary shrink-0" />
-                            <span>Squad: <strong className="text-foreground">{team.name}</strong></span>
+                            <span>
+                              Squad: <strong className="text-foreground">{team.name}</strong>
+                            </span>
                             {team.role === "leader" ? (
                               <Badge className="bg-[#8b5cf6] text-white border-0 text-[10px] font-bold py-0 px-1.5 shadow-arcade-primary">
                                 Leader
@@ -662,7 +720,10 @@ export default function ProfilePage() {
 
                           <span className="inline-flex items-center gap-1 text-[11px] font-mono">
                             <span className="opacity-40">•</span>
-                            <span>Sets Analyzed: <strong className="text-foreground">{team.imageSetsCount}</strong></span>
+                            <span>
+                              Sets Analyzed:{" "}
+                              <strong className="text-foreground">{team.imageSetsCount}</strong>
+                            </span>
                           </span>
                         </div>
                       </div>
@@ -670,14 +731,22 @@ export default function ProfilePage() {
                       {/* Bottom Action Buttons Row */}
                       <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-border/60">
                         <Link href={`/campaigns/${event.id}`} className="w-full sm:w-auto">
-                          <Button size="sm" variant="outline" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1"
+                          >
                             <span>Campaign View</span>
                             <ArrowRight className="size-3" />
                           </Button>
                         </Link>
 
                         <Link href={`/team/${team.id}`} className="w-full sm:w-auto">
-                          <Button size="sm" variant="default" className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 flex items-center justify-center gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="w-full sm:w-auto h-8.5 px-3 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 flex items-center justify-center gap-1.5"
+                          >
                             <Users className="size-3.5" />
                             <span>Squad Workspace</span>
                           </Button>
@@ -698,10 +767,16 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-lg font-bold text-foreground">Your Squad Memberships</h2>
-              <p className="text-xs text-muted-foreground">Teams you have formed or joined across campaigns.</p>
+              <p className="text-xs text-muted-foreground">
+                Teams you have formed or joined across campaigns.
+              </p>
             </div>
             <Link href="/teams">
-              <Button size="sm" variant="outline" className="text-xs font-bold h-8 rounded-xl shadow-arcade active:translate-y-0.5 gap-1 self-start sm:self-auto">
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs font-bold h-8 rounded-xl shadow-arcade active:translate-y-0.5 gap-1 self-start sm:self-auto"
+              >
                 <Users className="size-3.5" />
                 <span>Squad Directory</span>
               </Button>
@@ -714,11 +789,15 @@ export default function ProfilePage() {
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-foreground">No Squads Found</h3>
                 <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                  You are not currently a member of any squads. Join an existing team or create one for an upcoming campaign!
+                  You are not currently a member of any squads. Join an existing team or create one
+                  for an upcoming campaign!
                 </p>
               </div>
               <Link href="/teams">
-                <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary">
+                <Button
+                  size="sm"
+                  className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary"
+                >
                   Find or Create Squad
                 </Button>
               </Link>
@@ -726,13 +805,22 @@ export default function ProfilePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {teams.map((team) => (
-                <Card key={team.id} className="border-border shadow-arcade rounded-2xl flex flex-col justify-between">
+                <Card
+                  key={team.id}
+                  className="border-border shadow-arcade rounded-2xl flex flex-col justify-between"
+                >
                   <CardHeader className="pb-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="outline" className="text-[10px] font-mono font-bold">
                         {team.event.code}
                       </Badge>
-                      <Badge className={team.role === "leader" ? "bg-[#8b5cf6] text-white border-0 text-[10px] font-bold shadow-arcade-primary" : "bg-muted text-muted-foreground border-border text-[10px]"}>
+                      <Badge
+                        className={
+                          team.role === "leader"
+                            ? "bg-[#8b5cf6] text-white border-0 text-[10px] font-bold shadow-arcade-primary"
+                            : "bg-muted text-muted-foreground border-border text-[10px]"
+                        }
+                      >
                         {team.role === "leader" ? "Squad Leader" : "Member"}
                       </Badge>
                     </div>
@@ -771,7 +859,11 @@ export default function ProfilePage() {
                     </div>
 
                     <Link href={`/team/${team.id}`} className="block w-full">
-                      <Button variant="outline" size="sm" className="w-full text-xs font-bold h-8.5 rounded-xl shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs font-bold h-8.5 rounded-xl shadow-arcade active:translate-y-0.5 flex items-center justify-center gap-1.5"
+                      >
                         <span>Open Workspace</span>
                         <ExternalLink className="size-3" />
                       </Button>
@@ -796,14 +888,17 @@ export default function ProfilePage() {
 
             {claimedSets.length === 0 ? (
               <Card className="border-border rounded-2xl p-6 text-center text-xs text-muted-foreground">
-                No telescope image sets claimed yet. Claim image sets during active campaign phases to search for asteroids.
+                No telescope image sets claimed yet. Claim image sets during active campaign phases
+                to search for asteroids.
               </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {claimedSets.map((set) => (
                   <Card key={set.id} className="border-border rounded-xl p-3.5 space-y-2 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-foreground">{set.name}</span>
+                      <span className="font-mono text-xs font-bold text-foreground">
+                        {set.name}
+                      </span>
                       <Badge
                         className={`text-[10px] font-mono ${
                           set.status === "SUBMITTED"
@@ -851,7 +946,11 @@ export default function ProfilePage() {
                     <div className="space-y-0.5">
                       <span className="font-bold text-foreground">{req.team.name}</span>
                       <span className="text-muted-foreground ml-2">({req.team.event.title})</span>
-                      {req.message && <p className="text-muted-foreground italic text-[11px]">&quot;{req.message}&quot;</p>}
+                      {req.message && (
+                        <p className="text-muted-foreground italic text-[11px]">
+                          &quot;{req.message}&quot;
+                        </p>
+                      )}
                     </div>
 
                     <Badge
@@ -859,8 +958,8 @@ export default function ProfilePage() {
                         req.status === "ACCEPTED"
                           ? "bg-[#10b981] text-white border-0"
                           : req.status === "REJECTED"
-                          ? "bg-destructive text-destructive-foreground border-0"
-                          : "bg-muted text-muted-foreground border-border"
+                            ? "bg-destructive text-destructive-foreground border-0"
+                            : "bg-muted text-muted-foreground border-border"
                       }`}
                     >
                       {req.status}

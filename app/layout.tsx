@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DevPersonaSwitcher } from "@/components/dev-persona-switcher";
 
-
 const pressStart2P = Press_Start_2P({
   weight: "400",
   variable: "--font-pixel",
@@ -54,7 +53,12 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${pressStart2P.variable} ${spaceMono.variable} ${inter.variable} ${outfit.variable} min-h-screen flex flex-col bg-background text-foreground font-sans antialiased overscroll-none`}
       >
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           <AudioRouteGuard />
           <Toaster position="top-right" />
           {children}

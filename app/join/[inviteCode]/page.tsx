@@ -9,11 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-export default function JoinTeamPage({
-  params,
-}: {
-  params: Promise<{ inviteCode: string }>;
-}) {
+export default function JoinTeamPage({ params }: { params: Promise<{ inviteCode: string }> }) {
   const { inviteCode } = use(params);
   const router = useRouter();
   const { data: session } = useSession();
@@ -64,9 +60,7 @@ export default function JoinTeamPage({
           <div className="size-11 rounded-full bg-white/15 text-white flex items-center justify-center mx-auto mb-1">
             <Sparkles className="size-5 text-amber-300" />
           </div>
-          <h1 className="text-2xl font-sans font-bold tracking-tight text-white">
-            Join Team
-          </h1>
+          <h1 className="text-2xl font-sans font-bold tracking-tight text-white">Join Team</h1>
           <p className="text-xs text-white/85 leading-relaxed">
             You were invited to join an asteroid research team.
           </p>

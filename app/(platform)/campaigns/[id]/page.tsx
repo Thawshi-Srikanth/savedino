@@ -114,10 +114,21 @@ function getHumanizedCountdown(targetDateMs: number, now: number): string {
   }
 }
 
-function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string, nowMs: number = Date.now()) {
+function getRegistrationDeadlineInfo(
+  regEndStr?: string,
+  startDateStr?: string,
+  nowMs: number = Date.now()
+) {
   const targetStr = regEndStr || startDateStr;
   if (!targetStr) {
-    return { text: "TBA", formattedDate: "TBA", countdownText: null, isUrgent: false, isClosed: false, daysLeft: null };
+    return {
+      text: "TBA",
+      formattedDate: "TBA",
+      countdownText: null,
+      isUrgent: false,
+      isClosed: false,
+      daysLeft: null,
+    };
   }
 
   const targetDate = new Date(targetStr);
@@ -190,11 +201,7 @@ function getStageTimelineData(startStr?: string, endStr?: string, now: number = 
   return { status, progress, countdownText, start, end };
 }
 
-export default function CampaignDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const { data: session } = useSession();
@@ -341,9 +348,7 @@ export default function CampaignDetailPage({
     return (
       <div className="w-full py-24 text-center space-y-3 font-sans">
         <Rocket className="size-8 mx-auto text-primary animate-bounce" />
-        <div className="text-sm font-semibold text-foreground">
-          Loading campaign details...
-        </div>
+        <div className="text-sm font-semibold text-foreground">Loading campaign details...</div>
       </div>
     );
   }
@@ -453,14 +458,17 @@ export default function CampaignDetailPage({
             </h1>
 
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {event.description || "International Astronomical Search Collaboration campaign for asteroid discovery."}
+              {event.description ||
+                "International Astronomical Search Collaboration campaign for asteroid discovery."}
             </p>
 
             {/* Campaign Specs Strip */}
             <div className="pt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
               <div className="inline-flex items-center gap-1.5">
                 <span className="text-muted-foreground">Timeline:</span>
-                <strong className="text-foreground font-mono">{formatStageDate(event.startDate)} &ndash; {formatStageDate(event.endDate)}</strong>
+                <strong className="text-foreground font-mono">
+                  {formatStageDate(event.startDate)} &ndash; {formatStageDate(event.endDate)}
+                </strong>
               </div>
 
               <div className="inline-flex items-center gap-1.5">
@@ -486,9 +494,7 @@ export default function CampaignDetailPage({
                 </h2>
               </div>
 
-              <span className="text-xs text-muted-foreground font-sans font-medium">
-                4 Steps
-              </span>
+              <span className="text-xs text-muted-foreground font-sans font-medium">4 Steps</span>
             </div>
 
             {/* Vertical Non-Containerized Flow for All Stages */}
@@ -517,8 +523,8 @@ export default function CampaignDetailPage({
                             isLive
                               ? "bg-[#8b5cf6] text-white border-0 shadow-arcade-primary"
                               : isDone
-                              ? "bg-[#10b981] text-white border-0 shadow-arcade-emerald"
-                              : "bg-muted text-muted-foreground border-border shadow-arcade-sm"
+                                ? "bg-[#10b981] text-white border-0 shadow-arcade-emerald"
+                                : "bg-muted text-muted-foreground border-border shadow-arcade-sm"
                           }`}
                         >
                           Step {idx + 1}
@@ -550,9 +556,7 @@ export default function CampaignDetailPage({
                           </span>
                         )}
                         {!isLive && !isDone && (
-                          <span className="font-medium text-muted-foreground">
-                            Upcoming
-                          </span>
+                          <span className="font-medium text-muted-foreground">Upcoming</span>
                         )}
                       </div>
                     </div>
@@ -573,8 +577,8 @@ export default function CampaignDetailPage({
                             isDone
                               ? "bg-[#10b981]"
                               : isLive
-                              ? "bg-gradient-to-b from-[#8b5cf6] to-[#a855f7]"
-                              : "bg-transparent"
+                                ? "bg-gradient-to-b from-[#8b5cf6] to-[#a855f7]"
+                                : "bg-transparent"
                           }`}
                           style={{ height: `${phaseData.progress}%` }}
                         />
@@ -587,8 +591,8 @@ export default function CampaignDetailPage({
                             isDone
                               ? "bg-[#10b981] border-[#059669] text-white shadow-arcade-emerald"
                               : isLive
-                              ? "bg-[#8b5cf6] border-[#7c3aed] text-white shadow-arcade-primary"
-                              : "bg-card border-border text-muted-foreground shadow-arcade-sm"
+                                ? "bg-[#8b5cf6] border-[#7c3aed] text-white shadow-arcade-primary"
+                                : "bg-card border-border text-muted-foreground shadow-arcade-sm"
                           }`}
                         >
                           {isDone || isLive ? (
@@ -602,9 +606,7 @@ export default function CampaignDetailPage({
                           <span className="font-mono font-bold text-foreground">
                             {startDateFormatted}
                           </span>
-                          <span className="text-muted-foreground text-xs font-medium">
-                            (Start)
-                          </span>
+                          <span className="text-muted-foreground text-xs font-medium">(Start)</span>
                         </div>
                       </div>
 
@@ -639,8 +641,8 @@ export default function CampaignDetailPage({
                             isDone
                               ? "bg-[#10b981] border-[#059669] text-white shadow-arcade-emerald"
                               : isLive
-                              ? "bg-card border-[#8b5cf6] text-[#8b5cf6] shadow-arcade-sm"
-                              : "bg-card border-border text-muted-foreground shadow-arcade-sm"
+                                ? "bg-card border-[#8b5cf6] text-[#8b5cf6] shadow-arcade-sm"
+                                : "bg-card border-border text-muted-foreground shadow-arcade-sm"
                           }`}
                         >
                           {isDone ? (
@@ -654,9 +656,7 @@ export default function CampaignDetailPage({
                           <span className="font-mono font-bold text-foreground">
                             {endDateFormatted}
                           </span>
-                          <span className="text-muted-foreground text-xs font-medium">
-                            (End)
-                          </span>
+                          <span className="text-muted-foreground text-xs font-medium">(End)</span>
                         </div>
                       </div>
                     </div>
@@ -692,10 +692,10 @@ export default function CampaignDetailPage({
                     {allStagesCompleted
                       ? "Campaign Status"
                       : activePipelineStage?.name === "Image Search"
-                      ? "Search Window Closes"
-                      : activePipelineStage?.name === "Submit Reports"
-                      ? "Submission Deadline"
-                      : "Registration Deadline"}
+                        ? "Search Window Closes"
+                        : activePipelineStage?.name === "Submit Reports"
+                          ? "Submission Deadline"
+                          : "Registration Deadline"}
                   </div>
 
                   <div
@@ -707,10 +707,10 @@ export default function CampaignDetailPage({
                     {allStagesCompleted
                       ? "Completed"
                       : activePipelineStage?.name === "Image Search"
-                      ? formatStageDate(event.endDate)
-                      : activePipelineStage?.name === "Submit Reports"
-                      ? formatStageDate(event.submissionEnd || event.endDate)
-                      : regInfo.formattedDate}
+                        ? formatStageDate(event.endDate)
+                        : activePipelineStage?.name === "Submit Reports"
+                          ? formatStageDate(event.submissionEnd || event.endDate)
+                          : regInfo.formattedDate}
                   </div>
 
                   {(() => {
@@ -765,12 +765,12 @@ export default function CampaignDetailPage({
                       {allStagesCompleted
                         ? "Campaign Concluded"
                         : activePipelineStage?.name === "Image Search"
-                        ? "Image Search Live"
-                        : activePipelineStage?.name === "Submit Reports"
-                        ? "Submissions Open"
-                        : isRegClosed
-                        ? "Registration Closed"
-                        : "Registration Active"}
+                          ? "Image Search Live"
+                          : activePipelineStage?.name === "Submit Reports"
+                            ? "Submissions Open"
+                            : isRegClosed
+                              ? "Registration Closed"
+                              : "Registration Active"}
                     </span>
                     <span className="size-2 rounded-full bg-white animate-pulse" />
                   </div>
@@ -828,9 +828,7 @@ export default function CampaignDetailPage({
                           </div>
                         ) : (
                           <Link href={`/teams?eventId=${event.id}`} className="block w-full">
-                            <Button
-                              className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all"
-                            >
+                            <Button className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all">
                               <Users className="size-4" />
                               <span>View Joined Teams ({squadCount})</span>
                             </Button>
@@ -853,9 +851,7 @@ export default function CampaignDetailPage({
                         </Link>
 
                         <Link href={`/teams?eventId=${event.id}`} className="block w-full">
-                          <Button
-                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all"
-                          >
+                          <Button className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all">
                             <Users className="size-4" />
                             <span>View Teams ({squadCount})</span>
                           </Button>
@@ -928,9 +924,7 @@ export default function CampaignDetailPage({
                           )}
 
                           <Link href={`/teams?eventId=${event.id}`} className="block w-full">
-                            <Button
-                              className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber active:translate-y-0.5 border-0 rounded-xl transition-all"
-                            >
+                            <Button className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber active:translate-y-0.5 border-0 rounded-xl transition-all">
                               <Users className="size-4" />
                               <span>View Joined Teams ({squadCount})</span>
                             </Button>
@@ -997,7 +991,8 @@ export default function CampaignDetailPage({
               <span>Form a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Create a new team for <strong className="text-foreground">{event.title}</strong> ({event.code}).
+              Create a new team for <strong className="text-foreground">{event.title}</strong> (
+              {event.code}).
             </DialogDescription>
           </DialogHeader>
 
@@ -1009,9 +1004,7 @@ export default function CampaignDetailPage({
 
           <form onSubmit={handleCreateTeam} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-foreground">
-                Team Name
-              </label>
+              <label className="block text-xs font-semibold text-foreground">Team Name</label>
               <Input
                 type="text"
                 required
@@ -1025,11 +1018,15 @@ export default function CampaignDetailPage({
             <div className="text-xs text-muted-foreground p-3 rounded-lg border border-border bg-muted/40 space-y-1.5">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>You will be the <strong>Team Leader</strong>.</span>
+                <span>
+                  You will be the <strong>Team Leader</strong>.
+                </span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>An <strong>invite code</strong> will be generated for your teammates.</span>
+                <span>
+                  An <strong>invite code</strong> will be generated for your teammates.
+                </span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
@@ -1071,7 +1068,8 @@ export default function CampaignDetailPage({
               <span>Join a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Enter the invite code from your team leader for <strong className="text-foreground">{event.title}</strong>.
+              Enter the invite code from your team leader for{" "}
+              <strong className="text-foreground">{event.title}</strong>.
             </DialogDescription>
           </DialogHeader>
 

@@ -29,11 +29,19 @@ export function parseMpcReport(fileContent: string): ParsedMpcFile {
       continue;
     }
     if (line.startsWith("OBS ")) {
-      observers = line.substring(4).split(",").map((s) => s.trim()).filter(Boolean);
+      observers = line
+        .substring(4)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
       continue;
     }
     if (line.startsWith("MEA ")) {
-      measurers = line.substring(4).split(",").map((s) => s.trim()).filter(Boolean);
+      measurers = line
+        .substring(4)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
       continue;
     }
     if (line.startsWith("TEL ")) {
@@ -52,8 +60,8 @@ export function parseMpcReport(fileContent: string): ParsedMpcFile {
 
       const isDiscovery = line[12] === "*";
       const datePart = line.substring(15, 32).trim(); // "YYYY MM DD.ddddd"
-      const raPart = line.substring(32, 44).trim();   // "HH MM SS.ss"
-      const decPart = line.substring(44, 56).trim();  // "+DD MM SS.s"
+      const raPart = line.substring(32, 44).trim(); // "HH MM SS.ss"
+      const decPart = line.substring(44, 56).trim(); // "+DD MM SS.s"
       const magStr = line.substring(65, 70).trim();
       const band = line[70] || "R";
       const obsCode = line.length >= 80 ? line.substring(77, 80).trim() : observatoryCode;
@@ -112,8 +120,7 @@ export function parseMpcReport(fileContent: string): ParsedMpcFile {
   const candidates: CandidateReport[] = [];
   for (const [code, obsList] of candidatesMap.entries()) {
     const hasAsterisk = obsList.some((o) => o.isDiscovery);
-    const avgMag =
-      obsList.reduce((acc, curr) => acc + curr.magnitude, 0) / (obsList.length || 1);
+    const avgMag = obsList.reduce((acc, curr) => acc + curr.magnitude, 0) / (obsList.length || 1);
 
     obsList.sort((a, b) => a.utcDate.getTime() - b.utcDate.getTime());
 
@@ -168,8 +175,6 @@ export function extractImageSetIds(pastedText: string): string[] {
   const matches = [...pastedText.matchAll(regex)];
 
   return Array.from(
-    new Set(
-      matches.map((m) => `${m[1].toUpperCase()}-${m[2].toUpperCase()}-${m[3]}`)
-    )
+    new Set(matches.map((m) => `${m[1].toUpperCase()}-${m[2].toUpperCase()}-${m[3]}`))
   );
 }

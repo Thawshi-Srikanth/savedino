@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { UserData, TeamData } from "./types";
 
@@ -32,13 +39,16 @@ export function AssignUserModal({
             Assign Solo Student to Squad
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Assigning <strong className="text-foreground">{assigningUser?.name}</strong> ({assigningUser?.email}) into an open team slot.
+            Assigning <strong className="text-foreground">{assigningUser?.name}</strong> (
+            {assigningUser?.email}) into an open team slot.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onAssign} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase mb-1.5 text-foreground">Select Open Squad</label>
+            <label className="block text-xs font-bold uppercase mb-1.5 text-foreground">
+              Select Open Squad
+            </label>
             <select
               className="w-full h-10 px-3 rounded-lg border border-border bg-background text-xs text-foreground focus:outline-hidden font-sans"
               value={selectedTeamId}

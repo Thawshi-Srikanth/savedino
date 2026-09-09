@@ -2,11 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   addMonths,
@@ -56,17 +52,12 @@ export interface DateTimeRangePickerProps {
   className?: string;
 }
 
-const formatDateTime = (
-  date: Date | undefined,
-  locale: Locale = enUS,
-): string => {
+const formatDateTime = (date: Date | undefined, locale: Locale = enUS): string => {
   if (!date || !isValid(date)) return "Select date";
   return format(date, "PPP p", { locale });
 };
 
-const getDateAdjustedForTimezone = (
-  dateInput: Date | string | undefined,
-): Date | undefined => {
+const getDateAdjustedForTimezone = (dateInput: Date | string | undefined): Date | undefined => {
   if (!dateInput) return undefined;
   if (typeof dateInput === "string") {
     const parts = dateInput.split("-").map((part) => Number.parseInt(part, 10));
@@ -90,66 +81,61 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
   });
 
   const openedRangeRef = React.useRef<DateTimeRange>(range);
-  const [selectedPreset, setSelectedPreset] = React.useState<
-    string | undefined
-  >(undefined);
+  const [selectedPreset, setSelectedPreset] = React.useState<string | undefined>(undefined);
   const [calendarMonths, setCalendarMonths] = React.useState<[Date, Date]>([
     new Date(),
     addMonths(new Date(), 1),
   ]);
 
-  const getPresetRange = React.useCallback(
-    (presetName: string): DateTimeRange => {
-      const now = new Date();
-      const today = startOfDay(now);
-      const endToday = endOfDay(now);
+  const getPresetRange = React.useCallback((presetName: string): DateTimeRange => {
+    const now = new Date();
+    const today = startOfDay(now);
+    const endToday = endOfDay(now);
 
-      switch (presetName) {
-        case "today":
-          return { from: today, to: endToday };
-        case "yesterday": {
-          const yesterday = subDays(today, 1);
-          return { from: yesterday, to: endOfDay(yesterday) };
-        }
-        case "last7":
-          return { from: subDays(today, 6), to: endToday };
-        case "last14":
-          return { from: subDays(today, 13), to: endToday };
-        case "last30":
-          return { from: subDays(today, 29), to: endToday };
-        case "thisWeek":
-          return {
-            from: startOfWeek(today, { weekStartsOn: 0 }),
-            to: endToday,
-          };
-        case "lastWeek": {
-          const lastWeekStart = startOfWeek(subDays(today, 7), {
-            weekStartsOn: 0,
-          });
-          const lastWeekEnd = endOfWeek(lastWeekStart, { weekStartsOn: 0 });
-          return {
-            from: lastWeekStart,
-            to: lastWeekEnd,
-          };
-        }
-        case "thisMonth":
-          return {
-            from: startOfMonth(today),
-            to: endToday,
-          };
-        case "lastMonth": {
-          const lastMonth = subMonths(today, 1);
-          return {
-            from: startOfMonth(lastMonth),
-            to: endOfMonth(lastMonth),
-          };
-        }
-        default:
-          throw new Error(`Unknown date range preset: ${presetName}`);
+    switch (presetName) {
+      case "today":
+        return { from: today, to: endToday };
+      case "yesterday": {
+        const yesterday = subDays(today, 1);
+        return { from: yesterday, to: endOfDay(yesterday) };
       }
-    },
-    [],
-  );
+      case "last7":
+        return { from: subDays(today, 6), to: endToday };
+      case "last14":
+        return { from: subDays(today, 13), to: endToday };
+      case "last30":
+        return { from: subDays(today, 29), to: endToday };
+      case "thisWeek":
+        return {
+          from: startOfWeek(today, { weekStartsOn: 0 }),
+          to: endToday,
+        };
+      case "lastWeek": {
+        const lastWeekStart = startOfWeek(subDays(today, 7), {
+          weekStartsOn: 0,
+        });
+        const lastWeekEnd = endOfWeek(lastWeekStart, { weekStartsOn: 0 });
+        return {
+          from: lastWeekStart,
+          to: lastWeekEnd,
+        };
+      }
+      case "thisMonth":
+        return {
+          from: startOfMonth(today),
+          to: endToday,
+        };
+      case "lastMonth": {
+        const lastMonth = subMonths(today, 1);
+        return {
+          from: startOfMonth(lastMonth),
+          to: endOfMonth(lastMonth),
+        };
+      }
+      default:
+        throw new Error(`Unknown date range preset: ${presetName}`);
+    }
+  }, []);
 
   const setPreset = (preset: string): void => {
     const newRange = getPresetRange(preset);
@@ -207,7 +193,10 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
       onClick={() => setPreset(preset)}
     >
       <CheckIcon
-        className={cn("mr-1.5 h-3.5 w-3.5 text-[#8b5cf6]", isSelected ? "opacity-100" : "opacity-0")}
+        className={cn(
+          "mr-1.5 h-3.5 w-3.5 text-[#8b5cf6]",
+          isSelected ? "opacity-100" : "opacity-0"
+        )}
       />
       {label}
     </Button>
@@ -242,7 +231,7 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
           variant="outline"
           className={cn(
             "w-full justify-between text-left text-xs font-mono font-normal h-10 border-border bg-card cursor-pointer shadow-arcade hover:bg-card/90",
-            className,
+            className
           )}
         >
           <div className="flex items-center gap-2 truncate">
@@ -258,7 +247,11 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-auto p-0 bg-card border border-border shadow-2xl rounded-2xl overflow-hidden" align={align} sideOffset={6}>
+      <PopoverContent
+        className="w-auto p-0 bg-card border border-border shadow-2xl rounded-2xl overflow-hidden"
+        align={align}
+        sideOffset={6}
+      >
         <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border">
           {/* Calendar Section */}
           <div className="space-y-4 p-4 md:p-6">
@@ -267,25 +260,17 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
               <Calendar
                 mode="range"
                 selected={range}
-                onSelect={(newRange) =>
-                  newRange && setRange(newRange as DateTimeRange)
-                }
+                onSelect={(newRange) => newRange && setRange(newRange as DateTimeRange)}
                 month={calendarMonths[0]}
-                onMonthChange={(month) =>
-                  setCalendarMonths([month, addMonths(month, 1)])
-                }
+                onMonthChange={(month) => setCalendarMonths([month, addMonths(month, 1)])}
                 className="rounded-lg border border-border p-3 shadow-xs"
               />
               <Calendar
                 mode="range"
                 selected={range}
-                onSelect={(newRange) =>
-                  newRange && setRange(newRange as DateTimeRange)
-                }
+                onSelect={(newRange) => newRange && setRange(newRange as DateTimeRange)}
                 month={calendarMonths[1]}
-                onMonthChange={(month) =>
-                  setCalendarMonths([subMonths(month, 1), month])
-                }
+                onMonthChange={(month) => setCalendarMonths([subMonths(month, 1), month])}
                 className="rounded-lg border border-border p-3 shadow-xs"
               />
             </div>
@@ -295,9 +280,7 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
               <Calendar
                 mode="range"
                 selected={range}
-                onSelect={(newRange) =>
-                  newRange && setRange(newRange as DateTimeRange)
-                }
+                onSelect={(newRange) => newRange && setRange(newRange as DateTimeRange)}
                 className="rounded-lg border border-border p-3 shadow-xs"
               />
             </div>
@@ -320,7 +303,9 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
           {/* Presets Section */}
           <div className="w-full lg:w-48 p-4 md:p-6 space-y-3 bg-muted/20 flex flex-col justify-between">
             <div>
-              <h3 className="font-mono font-bold text-xs uppercase tracking-wider text-foreground mb-2">Presets</h3>
+              <h3 className="font-mono font-bold text-xs uppercase tracking-wider text-foreground mb-2">
+                Presets
+              </h3>
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
                 {PRESETS.map((preset) => (
                   <PresetButton
@@ -338,7 +323,9 @@ export const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({
         {/* Footer Actions */}
         <div className="flex items-center justify-between p-4 border-t border-border bg-muted/30">
           <div className="text-xs font-mono text-muted-foreground hidden sm:block">
-            {range.from && range.to ? `${format(range.from, "MMM d, yyyy")} → ${format(range.to, "MMM d, yyyy")}` : "Select date range"}
+            {range.from && range.to
+              ? `${format(range.from, "MMM d, yyyy")} → ${format(range.to, "MMM d, yyyy")}`
+              : "Select date range"}
           </div>
           <div className="flex items-center gap-2">
             <Button

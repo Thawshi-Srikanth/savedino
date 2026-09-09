@@ -52,7 +52,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   // Navigation Items
   const navItems = [
     { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Teams", url: "/teams", icon: Users, active: pathname === "/teams" || pathname.startsWith("/team/") },
+    {
+      title: "Teams",
+      url: "/teams",
+      icon: Users,
+      active: pathname === "/teams" || pathname.startsWith("/team/"),
+    },
   ];
 
   // @ts-ignore
@@ -71,7 +76,6 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
-          
           {/* SaveDino Branding Logo */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <div className="block sm:hidden">
@@ -125,7 +129,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                     className="h-9 px-2.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
                     title="Profile & Studio"
                   >
-                    <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={22} showBorder={false} />
+                    <PixelAvatar
+                      seed={session.user.image || session.user.name || session.user.id}
+                      size={22}
+                      showBorder={false}
+                    />
                     <span className="font-bold max-w-[120px] truncate">{session.user.name}</span>
                   </Button>
                 </Link>
@@ -142,10 +150,22 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             ) : (
               <div className="flex items-center gap-2 text-xs">
                 <Link href="/login">
-                  <Button size="sm" variant="outline" className="h-9 px-3.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5">Sign In</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    Sign In
+                  </Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" variant="default" className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5">Register</Button>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
+                  >
+                    Register
+                  </Button>
                 </Link>
               </div>
             )}
@@ -177,8 +197,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                     className="h-9 px-2 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-1.5"
                     title="Profile"
                   >
-                    <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={20} showBorder={false} />
-                    <span className="max-w-[70px] truncate">{session.user.name?.split(" ")[0]}</span>
+                    <PixelAvatar
+                      seed={session.user.image || session.user.name || session.user.id}
+                      size={20}
+                      showBorder={false}
+                    />
+                    <span className="max-w-[70px] truncate">
+                      {session.user.name?.split(" ")[0]}
+                    </span>
                   </Button>
                 </Link>
                 <Button
@@ -203,7 +229,6 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               </Link>
             )}
           </div>
-
         </div>
       </header>
 
@@ -288,7 +313,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               title="User Profile & Studio"
               aria-label="Profile"
             >
-              <PixelAvatar seed={session.user.image || session.user.name || session.user.id} size={18} showBorder={false} />
+              <PixelAvatar
+                seed={session.user.image || session.user.name || session.user.id}
+                size={18}
+                showBorder={false}
+              />
               {pathname === "/profile" && <span>Profile</span>}
             </Link>
           )}
@@ -297,4 +326,3 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     </div>
   );
 }
-

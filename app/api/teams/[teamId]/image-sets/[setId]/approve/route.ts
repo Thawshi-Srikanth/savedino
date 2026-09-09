@@ -39,7 +39,10 @@ export async function POST(
 
     if (!isLeader && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: "Only the squad leader or administrator can approve or reject submissions." },
+        {
+          success: false,
+          error: "Only the squad leader or administrator can approve or reject submissions.",
+        },
         { status: 403 }
       );
     }

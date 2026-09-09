@@ -47,7 +47,11 @@ export async function DELETE(
     // Squad disabled guard
     if (team.status === "DISQUALIFIED" && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: "This squad has been disabled by platform administration and roster changes are locked." },
+        {
+          success: false,
+          error:
+            "This squad has been disabled by platform administration and roster changes are locked.",
+        },
         { status: 403 }
       );
     }
@@ -59,7 +63,8 @@ export async function DELETE(
         return NextResponse.json(
           {
             success: false,
-            error: "Members can only be removed during the campaign registration and team formation period. Once the campaign begins, squad rosters are locked.",
+            error:
+              "Members can only be removed during the campaign registration and team formation period. Once the campaign begins, squad rosters are locked.",
           },
           { status: 400 }
         );
@@ -67,9 +72,7 @@ export async function DELETE(
     }
 
     // Find the member (supports matching by TeamMember.id or User.id)
-    const targetMember = team.members.find(
-      (m) => m.id === memberId || m.userId === memberId
-    );
+    const targetMember = team.members.find((m) => m.id === memberId || m.userId === memberId);
 
     if (!targetMember) {
       return NextResponse.json(
@@ -83,7 +86,8 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          error: "The squad leader cannot be removed from the roster. Transfer leadership in Squad Settings first.",
+          error:
+            "The squad leader cannot be removed from the roster. Transfer leadership in Squad Settings first.",
         },
         { status: 400 }
       );

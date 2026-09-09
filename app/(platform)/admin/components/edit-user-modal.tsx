@@ -1,10 +1,23 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { UserData } from "./types";
 
 interface EditUserModalProps {
@@ -48,7 +61,8 @@ export function EditUserModal({
             Edit User &amp; Platform Role
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Update platform access level, contact information, and role for <strong className="text-foreground">{editingUser?.email}</strong>.
+            Update platform access level, contact information, and role for{" "}
+            <strong className="text-foreground">{editingUser?.email}</strong>.
           </DialogDescription>
         </DialogHeader>
 
@@ -114,7 +128,10 @@ export function EditUserModal({
               onChange={(e) => setEditVerified(e.target.checked)}
               className="w-4 h-4 cursor-pointer accent-primary"
             />
-            <label htmlFor="editVerifiedCheckbox" className="text-xs font-medium cursor-pointer text-foreground">
+            <label
+              htmlFor="editVerifiedCheckbox"
+              className="text-xs font-medium cursor-pointer text-foreground"
+            >
               Email Verified / Active Account
             </label>
           </div>

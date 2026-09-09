@@ -386,7 +386,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         s.score += 0.15;
         const currentScoreInt = Math.floor(s.score);
 
-        if (currentScoreInt > 0 && currentScoreInt % 100 === 0 && Math.floor(s.score - 0.15) % 100 !== 0) {
+        if (
+          currentScoreInt > 0 &&
+          currentScoreInt % 100 === 0 &&
+          Math.floor(s.score - 0.15) % 100 !== 0
+        ) {
           audioSynth.playScore();
         }
 
@@ -553,7 +557,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
               s.meteorsDestroyed++;
               setMeteorsDestroyed(s.meteorsDestroyed);
-              
+
               const pts = m.type === "small" ? 50 : m.type === "giant" ? 30 : 40;
               s.score += pts;
               s.screenShake = m.type === "giant" ? 6 : 3.5;
@@ -570,7 +574,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
                   vx: Math.cos(pAngle) * pSpeed,
                   vy: Math.sin(pAngle) * pSpeed,
                   size: Math.random() * (m.type === "giant" ? 5 : 3.5) + 2,
-                  color: Math.random() > 0.4 ? "#facc15" : (Math.random() > 0.5 ? "#f97316" : "#ef4444"),
+                  color:
+                    Math.random() > 0.4 ? "#facc15" : Math.random() > 0.5 ? "#f97316" : "#ef4444",
                   life: 20,
                   maxLife: 20,
                 });
@@ -790,7 +795,13 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         const pSize = Math.max(2, Math.floor(r / 7)); // Grid pixel block step
 
         // Helper to draw stepped 8-bit pixel circle
-        const fillPixelCircle = (cx: number, cy: number, radius: number, step: number, color: string) => {
+        const fillPixelCircle = (
+          cx: number,
+          cy: number,
+          radius: number,
+          step: number,
+          color: string
+        ) => {
           ctx.fillStyle = color;
           for (let dy = -radius; dy <= radius; dy += step) {
             const dx = Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
@@ -845,7 +856,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
         // Crater dots
         ctx.fillStyle = "#292524";
-        ctx.fillRect(-m.radius + 4, -m.radius + 4, m.type === "giant" ? 5 : 3, m.type === "giant" ? 5 : 3);
+        ctx.fillRect(
+          -m.radius + 4,
+          -m.radius + 4,
+          m.type === "giant" ? 5 : 3,
+          m.type === "giant" ? 5 : 3
+        );
         if (m.type === "giant") {
           ctx.fillRect(-m.radius + m.size - 10, -m.radius + 8, 4, 4);
           ctx.fillRect(-m.radius + 8, -m.radius + m.size - 10, 4, 4);
@@ -884,8 +900,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
         // 8-bit Pixel Muzzle Blast at Dino's Snout/Mouth
         if (s.dino.fireGlowTimer > 0) {
-          const mx = Math.floor(s.dino.x + (s.dino.isShootingCrouch && !s.dino.isJumping ? 52 : 38));
-          const my = Math.floor(s.dino.isShootingCrouch && !s.dino.isJumping ? s.dino.y + 12 : s.dino.y + 14);
+          const mx = Math.floor(
+            s.dino.x + (s.dino.isShootingCrouch && !s.dino.isJumping ? 52 : 38)
+          );
+          const my = Math.floor(
+            s.dino.isShootingCrouch && !s.dino.isJumping ? s.dino.y + 12 : s.dino.y + 14
+          );
 
           // 1. Electric Cyan Pixel Blast (#00ffff - pure glowing energy)
           ctx.fillStyle = "#00ffff";
@@ -909,7 +929,6 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           ctx.fillRect(mx + 14, my + 3, 2, 2);
         }
       }
-
 
       // Start Screen if IDLE
       if (s.gameState === "IDLE") {
@@ -958,9 +977,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   return (
     <div className="w-full flex flex-col items-center select-none gap-3">
       {/* HUD Header Bar: Seamlessly blended with the background (no container box) */}
-      <div className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 ${
-        isNight ? "text-[#e8eaed]" : "text-[#535353]"
-      }`}>
+      <div
+        className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 ${
+          isNight ? "text-[#e8eaed]" : "text-[#535353]"
+        }`}
+      >
         {/* Left: 3 Circular Plasma Orbs + Blasted Counter */}
         <div className="flex items-center gap-3">
           {/* 8-bit Pixel Plasma Orbs */}
@@ -974,13 +995,15 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
                 <div
                   key={idx}
                   className="w-5 h-5 flex items-center justify-center relative select-none"
-                  title={isFilled ? "Plasma Ready" : isCurrentlyRecharging ? "Recharging Plasma..." : "Depleted"}
+                  title={
+                    isFilled
+                      ? "Plasma Ready"
+                      : isCurrentlyRecharging
+                        ? "Recharging Plasma..."
+                        : "Depleted"
+                  }
                 >
-                  <svg
-                    viewBox="0 0 14 14"
-                    className="w-full h-full"
-                    shapeRendering="crispEdges"
-                  >
+                  <svg viewBox="0 0 14 14" className="w-full h-full" shapeRendering="crispEdges">
                     <defs>
                       <clipPath id={`recharge-clip-${idx}`}>
                         <rect x="0" y={clipY} width="14" height="14" />
@@ -1009,11 +1032,20 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
                       /* Recharging: Dark Cavity + Pixel Rising Plasma */
                       <>
                         {/* Background Empty Cavity */}
-                        <path d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z" fill={isNight ? "#3c4043" : "#d1d5db"} />
+                        <path
+                          d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z"
+                          fill={isNight ? "#3c4043" : "#d1d5db"}
+                        />
                         {/* Rising Recharge Liquid */}
                         <g clipPath={`url(#recharge-clip-${idx})`}>
-                          <path d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z" fill="#f97316" />
-                          <path d="M5 3h4v1h2v2h1v2h-1v2h-2v1H5v-1H3V8H2V6h1V4h2V3z" fill="#fde047" />
+                          <path
+                            d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z"
+                            fill="#f97316"
+                          />
+                          <path
+                            d="M5 3h4v1h2v2h1v2h-1v2h-2v1H5v-1H3V8H2V6h1V4h2V3z"
+                            fill="#fde047"
+                          />
                           <rect x="4" y="3" width="2" height="2" fill="#ffffff" />
                         </g>
                       </>
@@ -1031,15 +1063,21 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           </div>
 
           {/* Asteroid Destroyed Count (Clean & shortened on mobile) */}
-          <div className={`text-[10px] font-pixel tracking-wide ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
+          <div
+            className={`text-[10px] font-pixel tracking-wide ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
+          >
             <span className="hidden sm:inline">BLASTED: </span>
             <span className="font-bold text-[#0284c7]">×{meteorsDestroyed}</span>
           </div>
         </div>
 
         {/* Right: Scores (HI 00000  00000) */}
-        <div className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
-          <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span> {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;{Math.floor(score).toString().padStart(5, "0")}
+        <div
+          className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
+        >
+          <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span>{" "}
+          {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;
+          {Math.floor(score).toString().padStart(5, "0")}
         </div>
       </div>
 
@@ -1058,9 +1096,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       </div>
 
       {/* Controls Hint with Pixel Keyboard Keycap Sprites (Helper contents) */}
-      <div className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono ${
-        isNight ? "text-[#9aa0a6]" : "text-[#535353]"
-      }`}>
+      <div
+        className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono ${
+          isNight ? "text-[#9aa0a6]" : "text-[#535353]"
+        }`}
+      >
         <div className="flex items-center gap-3">
           {/* SPACE sprite + Laser */}
           <div className="flex items-center gap-1.5">

@@ -30,7 +30,10 @@ export async function POST(
       const subCheck = isSubmissionClosed(team.event);
       if (subCheck.closed) {
         return NextResponse.json(
-          { success: false, error: subCheck.reason || "The report submission window for this campaign has closed." },
+          {
+            success: false,
+            error: subCheck.reason || "The report submission window for this campaign has closed.",
+          },
           { status: 400 }
         );
       }
@@ -65,7 +68,7 @@ export async function POST(
       );
     }
 
-    const targetStatus = (isLeader || isAdmin) ? "SUBMITTED" : "PENDING_APPROVAL";
+    const targetStatus = isLeader || isAdmin ? "SUBMITTED" : "PENDING_APPROVAL";
 
     // 1. If marked clean (no asteroids in this set)
     if (markClean) {
@@ -76,16 +79,17 @@ export async function POST(
           isClean: true,
           mpcReportText: null,
           claimedById: session.user.id,
-          submittedAt: (isLeader || isAdmin) ? new Date() : null,
+          submittedAt: isLeader || isAdmin ? new Date() : null,
         },
       });
 
       return NextResponse.json({
         success: true,
         pendingApproval: targetStatus === "PENDING_APPROVAL",
-        message: targetStatus === "PENDING_APPROVAL"
-          ? "Picture set marked clean. Awaiting team leader approval."
-          : "Picture set marked clean and submitted.",
+        message:
+          targetStatus === "PENDING_APPROVAL"
+            ? "Picture set marked clean. Awaiting team leader approval."
+            : "Picture set marked clean and submitted.",
         imageSet: updatedSet,
       });
     }
@@ -108,16 +112,17 @@ export async function POST(
         isClean: false,
         mpcReportText: reportText,
         claimedById: session.user.id,
-        submittedAt: (isLeader || isAdmin) ? new Date() : null,
+        submittedAt: isLeader || isAdmin ? new Date() : null,
       },
     });
 
     return NextResponse.json({
       success: true,
       pendingApproval: targetStatus === "PENDING_APPROVAL",
-      message: targetStatus === "PENDING_APPROVAL"
-        ? "Discovery report submitted. Awaiting team leader approval."
-        : "Discovery report submitted and approved for squad.",
+      message:
+        targetStatus === "PENDING_APPROVAL"
+          ? "Discovery report submitted. Awaiting team leader approval."
+          : "Discovery report submitted and approved for squad.",
       observatory: parsed.observatoryCode,
       telescope: parsed.telescope,
       totalObservations: parsed.totalObservations,

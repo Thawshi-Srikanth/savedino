@@ -1,11 +1,24 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { TeamData } from "./types";
@@ -89,7 +102,9 @@ export function EditTeamModal({
             <div className="space-y-1">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Invite Code</span>
-                <span className="text-[10px] text-muted-foreground font-normal">Auto-generated</span>
+                <span className="text-[10px] text-muted-foreground font-normal">
+                  Auto-generated
+                </span>
               </label>
               <div className="flex items-center gap-1.5">
                 <Input
@@ -162,7 +177,8 @@ export function EditTeamModal({
                 className="text-xs bg-background text-foreground resize-none font-sans border-destructive/30"
               />
               <span className="text-[11px] text-destructive/80 block">
-                This explanation is stored in the database and displayed to squad members on their workspace.
+                This explanation is stored in the database and displayed to squad members on their
+                workspace.
               </span>
             </div>
           )}
@@ -195,7 +211,9 @@ export function EditTeamModal({
             </div>
 
             <div className="space-y-1 pt-1">
-              <label className="text-xs font-semibold text-foreground">Disclaimer &amp; Recruitment Notes</label>
+              <label className="text-xs font-semibold text-foreground">
+                Disclaimer &amp; Recruitment Notes
+              </label>
               <Textarea
                 placeholder="e.g. Looking for data analysis / Astrometrica specialists..."
                 value={editRecruitmentNotes}

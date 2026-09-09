@@ -7,9 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Rocket,
   PlusCircle,
@@ -123,7 +143,10 @@ export function CampaignsTab({
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
             Campaign Status
           </span>
-          <Badge variant="secondary" className="text-[10px] font-mono font-bold px-1.5 py-0 bg-muted text-foreground">
+          <Badge
+            variant="secondary"
+            className="text-[10px] font-mono font-bold px-1.5 py-0 bg-muted text-foreground"
+          >
             {events.length}
           </Badge>
         </div>
@@ -145,9 +168,7 @@ export function CampaignsTab({
           <button
             type="button"
             onClick={() =>
-              setCampaignStatusFilter(
-                campaignStatusFilter === "ACTIVE" ? "ALL" : "ACTIVE"
-              )
+              setCampaignStatusFilter(campaignStatusFilter === "ACTIVE" ? "ALL" : "ACTIVE")
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "ACTIVE"
@@ -156,15 +177,17 @@ export function CampaignsTab({
             }`}
           >
             <span>Active Now</span>
-            <span className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "ACTIVE" ? "text-white" : "text-muted-foreground"}`}>{activeCampCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "ACTIVE" ? "text-white" : "text-muted-foreground"}`}
+            >
+              {activeCampCount}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() =>
-              setCampaignStatusFilter(
-                campaignStatusFilter === "UPCOMING" ? "ALL" : "UPCOMING"
-              )
+              setCampaignStatusFilter(campaignStatusFilter === "UPCOMING" ? "ALL" : "UPCOMING")
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "UPCOMING"
@@ -173,16 +196,18 @@ export function CampaignsTab({
             }`}
           >
             <span>Upcoming</span>
-            <span className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "UPCOMING" ? "text-white dark:text-slate-950" : "text-muted-foreground"}`}>{upcomingCampCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "UPCOMING" ? "text-white dark:text-slate-950" : "text-muted-foreground"}`}
+            >
+              {upcomingCampCount}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() =>
               setCampaignStatusFilter(
-                campaignStatusFilter === "SUBMISSION_OPEN"
-                  ? "ALL"
-                  : "SUBMISSION_OPEN"
+                campaignStatusFilter === "SUBMISSION_OPEN" ? "ALL" : "SUBMISSION_OPEN"
               )
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
@@ -192,15 +217,17 @@ export function CampaignsTab({
             }`}
           >
             <span>Submissions</span>
-            <span className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "SUBMISSION_OPEN" ? "text-[#0f172a]" : "text-muted-foreground"}`}>{subOpenCampCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "SUBMISSION_OPEN" ? "text-[#0f172a]" : "text-muted-foreground"}`}
+            >
+              {subOpenCampCount}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() =>
-              setCampaignStatusFilter(
-                campaignStatusFilter === "COMPLETED" ? "ALL" : "COMPLETED"
-              )
+              setCampaignStatusFilter(campaignStatusFilter === "COMPLETED" ? "ALL" : "COMPLETED")
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               campaignStatusFilter === "COMPLETED"
@@ -209,7 +236,11 @@ export function CampaignsTab({
             }`}
           >
             <span>Completed</span>
-            <span className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "COMPLETED" ? "text-white" : "text-muted-foreground"}`}>{completedCampCount}</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${campaignStatusFilter === "COMPLETED" ? "text-white" : "text-muted-foreground"}`}
+            >
+              {completedCampCount}
+            </span>
           </button>
         </nav>
 
@@ -297,13 +328,18 @@ export function CampaignsTab({
                   <HelpCircle className="size-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" align="end" className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg">
+              <TooltipContent
+                side="bottom"
+                align="end"
+                className="max-w-xs p-3 space-y-1 shadow-lg border border-border bg-popover text-popover-foreground rounded-lg"
+              >
                 <div className="font-bold text-xs text-foreground flex items-center gap-1.5">
                   <HelpCircle className="size-3.5 text-[#8b5cf6]" />
                   <span>Campaign Events Management</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Configure campaign codes, status stages, milestone schedules, dataset allocations, and squad limits.
+                  Configure campaign codes, status stages, milestone schedules, dataset allocations,
+                  and squad limits.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -331,9 +367,12 @@ export function CampaignsTab({
           ) : filteredCampaigns.length === 0 ? (
             <div className="py-16 text-center text-xs text-muted-foreground space-y-2">
               <Rocket className="size-8 mx-auto text-muted-foreground/30 mb-1" />
-              <div className="font-semibold text-sm text-foreground">No matching campaigns found</div>
+              <div className="font-semibold text-sm text-foreground">
+                No matching campaigns found
+              </div>
               <p className="text-muted-foreground max-w-sm mx-auto">
-                No campaigns match your active search and status filter criteria. Try clearing filters.
+                No campaigns match your active search and status filter criteria. Try clearing
+                filters.
               </p>
               {(campaignSearch || campaignStatusFilter !== "ALL") && (
                 <Button
@@ -353,10 +392,18 @@ export function CampaignsTab({
             <Table className="w-full table-fixed border-b border-border">
               <TableHeader className="sticky top-0 z-20 bg-card">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[30%] border-b border-border shadow-xs">Campaign &amp; Code</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[16%] border-b border-border shadow-xs">Status</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[12%] border-b border-border shadow-xs">Squads</TableHead>
-                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[36%] border-b border-border shadow-xs">Milestone Schedule</TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[30%] border-b border-border shadow-xs">
+                    Campaign &amp; Code
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[16%] border-b border-border shadow-xs">
+                    Status
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[12%] border-b border-border shadow-xs">
+                    Squads
+                  </TableHead>
+                  <TableHead className="sticky top-0 z-20 bg-card text-xs font-bold py-2.5 px-3 w-[36%] border-b border-border shadow-xs">
+                    Milestone Schedule
+                  </TableHead>
                   <TableHead className="sticky top-0 z-20 bg-card text-right text-xs font-bold py-2.5 px-3 w-[6%] border-b border-border shadow-xs"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -514,7 +561,9 @@ export function CampaignsTab({
             <span>
               Showing{" "}
               <strong className="text-foreground font-mono">
-                {filteredCampaigns.length === 0 ? 0 : (campaignCurrentPage - 1) * campaignPageSize + 1}
+                {filteredCampaigns.length === 0
+                  ? 0
+                  : (campaignCurrentPage - 1) * campaignPageSize + 1}
               </strong>
               &ndash;
               <strong className="text-foreground font-mono">
@@ -566,7 +615,10 @@ export function CampaignsTab({
               {getCampaignPageNumbers().map((pNum, idx) => {
                 if (pNum === "...") {
                   return (
-                    <span key={`camp-ellipsis-${idx}`} className="px-1 text-muted-foreground text-xs font-mono">
+                    <span
+                      key={`camp-ellipsis-${idx}`}
+                      className="px-1 text-muted-foreground text-xs font-mono"
+                    >
                       ...
                     </span>
                   );
@@ -594,7 +646,9 @@ export function CampaignsTab({
               size="sm"
               variant="outline"
               onClick={() => setCampaignCurrentPage((p) => Math.min(totalCampaignPages, p + 1))}
-              disabled={campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0}
+              disabled={
+                campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0
+              }
               className="h-6.5 px-2 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Next Page"
             >
@@ -604,7 +658,9 @@ export function CampaignsTab({
               size="sm"
               variant="outline"
               onClick={() => setCampaignCurrentPage(totalCampaignPages)}
-              disabled={campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0}
+              disabled={
+                campaignCurrentPage === totalCampaignPages || filteredCampaigns.length === 0
+              }
               className="h-6.5 px-1.5 text-xs shadow-arcade-xs active:translate-y-0.5"
               title="Last Page"
             >

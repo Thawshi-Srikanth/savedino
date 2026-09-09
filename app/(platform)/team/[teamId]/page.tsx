@@ -67,7 +67,16 @@ interface ImageSetItem {
   id: string;
   setCode: string;
   fitsUrl?: string | null;
-  status: "UNASSIGNED" | "CLAIM_REQUESTED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED" | "PENDING" | "CLAIMED" | "REPORTED" | "CLEAN";
+  status:
+    | "UNASSIGNED"
+    | "CLAIM_REQUESTED"
+    | "IN_PROGRESS"
+    | "PENDING_APPROVAL"
+    | "SUBMITTED"
+    | "PENDING"
+    | "CLAIMED"
+    | "REPORTED"
+    | "CLEAN";
   isClean?: boolean;
   mpcReportText?: string | null;
   submittedAt?: string | null;
@@ -133,11 +142,7 @@ interface TeamData {
   members: TeamMember[];
 }
 
-export default function TeamWorkspacePage({
-  params,
-}: {
-  params: Promise<{ teamId: string }>;
-}) {
+export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId: string }> }) {
   const { teamId } = use(params);
   const { data: session } = useSession();
 
@@ -151,7 +156,9 @@ export default function TeamWorkspacePage({
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<string>("imagesets");
 
   // Filter & Search for Image Sets
-  const [imageSetTab, setImageSetTab] = useState<"ALL" | "UNASSIGNED" | "CLAIM_REQUESTED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED">("ALL");
+  const [imageSetTab, setImageSetTab] = useState<
+    "ALL" | "UNASSIGNED" | "CLAIM_REQUESTED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED"
+  >("ALL");
   const [setSearch, setSetSearch] = useState<string>("");
 
   // Leader Assign Modal State
@@ -162,7 +169,9 @@ export default function TeamWorkspacePage({
 
   // Filter & Search for Join Requests
   const [requestSearch, setRequestSearch] = useState<string>("");
-  const [requestStatusFilter, setRequestStatusFilter] = useState<"ALL" | "PENDING" | "ACCEPTED" | "REJECTED">("ALL");
+  const [requestStatusFilter, setRequestStatusFilter] = useState<
+    "ALL" | "PENDING" | "ACCEPTED" | "REJECTED"
+  >("ALL");
   const [requestPage, setRequestPage] = useState<number>(1);
   const REQUESTS_PER_PAGE = 8;
 
@@ -206,7 +215,9 @@ export default function TeamWorkspacePage({
 
       const teamData = await teamRes.json();
       if (!teamData.success) {
-        setAccessDeniedError(teamData.error || "Access denied. You are not a member of this squad.");
+        setAccessDeniedError(
+          teamData.error || "Access denied. You are not a member of this squad."
+        );
         setLoading(false);
         return;
       }
@@ -267,7 +278,11 @@ export default function TeamWorkspacePage({
   };
 
   const handleRotateInviteCode = async () => {
-    if (!confirm("Are you sure you want to rotate the invite code? The old invite code will stop working.")) {
+    if (
+      !confirm(
+        "Are you sure you want to rotate the invite code? The old invite code will stop working."
+      )
+    ) {
       return;
     }
     setRotatingCode(true);
@@ -399,17 +414,14 @@ export default function TeamWorkspacePage({
     setReportLoading(true);
 
     try {
-      const res = await fetch(
-        `/api/teams/${teamId}/image-sets/${activeSetForReport.id}/report`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            reportText: mpcText,
-            markClean: markCleanOnly,
-          }),
-        }
-      );
+      const res = await fetch(`/api/teams/${teamId}/image-sets/${activeSetForReport.id}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportText: mpcText,
+          markClean: markCleanOnly,
+        }),
+      });
       const data = await res.json();
 
       if (!data.success) {
@@ -498,10 +510,7 @@ export default function TeamWorkspacePage({
     isOrganizer: isStaffOrAdmin,
     isObserverMode,
     canManageTeam,
-  } = useMemo(
-    () => getTeamContextPermissions(session?.user, team),
-    [session?.user, team]
-  );
+  } = useMemo(() => getTeamContextPermissions(session?.user, team), [session?.user, team]);
   const isAdminUser = isAdmin(session?.user);
   const isAdminRole = isAdminUser;
   const isLeaderOrAdmin = isLeader || isAdminUser;
@@ -528,7 +537,8 @@ export default function TeamWorkspacePage({
       const matchesSearch =
         !setSearch.trim() ||
         s.setCode.toLowerCase().includes(setSearch.toLowerCase()) ||
-        (s.claimedByUser?.name && s.claimedByUser.name.toLowerCase().includes(setSearch.toLowerCase())) ||
+        (s.claimedByUser?.name &&
+          s.claimedByUser.name.toLowerCase().includes(setSearch.toLowerCase())) ||
         s.candidates.some((c) => c.candidateCode.toLowerCase().includes(setSearch.toLowerCase()));
       return matchesTab && matchesSearch;
     });
@@ -537,8 +547,7 @@ export default function TeamWorkspacePage({
   // Filtered Join Requests
   const filteredRequests = useMemo(() => {
     return joinRequests.filter((r) => {
-      const matchesStatus =
-        requestStatusFilter === "ALL" || r.status === requestStatusFilter;
+      const matchesStatus = requestStatusFilter === "ALL" || r.status === requestStatusFilter;
       const q = requestSearch.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -559,13 +568,22 @@ export default function TeamWorkspacePage({
   );
 
   const parsedPreview = mpcText ? parseMpcReport(mpcText) : null;
-  const reviewingPreview = reviewingSet?.mpcReportText ? parseMpcReport(reviewingSet.mpcReportText) : null;
+  const reviewingPreview = reviewingSet?.mpcReportText
+    ? parseMpcReport(reviewingSet.mpcReportText)
+    : null;
 
   const pendingRequests = joinRequests.filter((r) => r.status === "PENDING");
-  const pendingClaimRequests = imageSets.filter((s) => getNormalizedStatus(s.status) === "CLAIM_REQUESTED");
-  const awaitingApprovalSets = imageSets.filter((s) => getNormalizedStatus(s.status) === "PENDING_APPROVAL");
+  const pendingClaimRequests = imageSets.filter(
+    (s) => getNormalizedStatus(s.status) === "CLAIM_REQUESTED"
+  );
+  const awaitingApprovalSets = imageSets.filter(
+    (s) => getNormalizedStatus(s.status) === "PENDING_APPROVAL"
+  );
   const approvedSets = imageSets.filter((s) => getNormalizedStatus(s.status) === "SUBMITTED");
-  const reportedCandidatesCount = imageSets.reduce((acc, s) => acc + (s.candidates?.length || 0), 0);
+  const reportedCandidatesCount = imageSets.reduce(
+    (acc, s) => acc + (s.candidates?.length || 0),
+    0
+  );
 
   if (loading) {
     return (
@@ -587,7 +605,8 @@ export default function TeamWorkspacePage({
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-foreground">Squad Workspace Restricted</h1>
             <p className="text-xs text-muted-foreground leading-relaxed font-sans">
-              {accessDeniedError || "You must be an active member of this squad to view its workspace. If you were previously a member, you may have been removed or left the squad."}
+              {accessDeniedError ||
+                "You must be an active member of this squad to view its workspace. If you were previously a member, you may have been removed or left the squad."}
             </p>
           </div>
 
@@ -635,7 +654,11 @@ export default function TeamWorkspacePage({
             className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-primary transition-colors"
           >
             <Telescope className="size-3.5 text-primary" />
-            <span>Campaign: <strong className="text-foreground font-semibold">{team.event.title}</strong> ({team.event.code})</span>
+            <span>
+              Campaign:{" "}
+              <strong className="text-foreground font-semibold">{team.event.title}</strong> (
+              {team.event.code})
+            </span>
           </Link>
         )}
       </div>
@@ -650,7 +673,8 @@ export default function TeamWorkspacePage({
             <div className="text-xs">
               <span className="font-bold text-foreground">Organizer Read-Only Mode:</span>{" "}
               <span className="text-muted-foreground">
-                You are inspecting this squad workspace with administrator privileges. All participant actions are in read-only mode.
+                You are inspecting this squad workspace with administrator privileges. All
+                participant actions are in read-only mode.
               </span>
             </div>
           </div>
@@ -672,12 +696,17 @@ export default function TeamWorkspacePage({
           <div className="space-y-1.5 flex-1">
             <div className="font-bold text-sm">Squad Disabled by Platform Administration</div>
             <p className="text-xs text-destructive/90 leading-relaxed font-sans">
-              This squad has been disabled by platform administrators. Recruitment, invitations, and roster modifications are locked.
+              This squad has been disabled by platform administrators. Recruitment, invitations, and
+              roster modifications are locked.
             </p>
             {team.disqualificationReason ? (
               <div className="mt-1.5 text-xs font-sans bg-background text-foreground p-3 rounded-xl border border-destructive/30 space-y-0.5">
-                <span className="font-bold block text-[11px] uppercase tracking-wider text-destructive">Reason:</span>
-                <p className="text-muted-foreground whitespace-pre-wrap">{team.disqualificationReason}</p>
+                <span className="font-bold block text-[11px] uppercase tracking-wider text-destructive">
+                  Reason:
+                </span>
+                <p className="text-muted-foreground whitespace-pre-wrap">
+                  {team.disqualificationReason}
+                </p>
               </div>
             ) : null}
           </div>
@@ -729,10 +758,16 @@ export default function TeamWorkspacePage({
               <div
                 onClick={team?.status !== "DISQUALIFIED" ? handleCopyInvite : undefined}
                 className="flex items-center gap-2 bg-background hover:bg-muted/50 transition-colors border border-border px-3 py-1.5 rounded-xl cursor-pointer select-none shadow-arcade active:translate-y-0.5"
-                title={team?.status === "DISQUALIFIED" ? "Invite code deactivated" : "Click to copy invite code"}
+                title={
+                  team?.status === "DISQUALIFIED"
+                    ? "Invite code deactivated"
+                    : "Click to copy invite code"
+                }
               >
                 <div>
-                  <span className="block text-[9px] font-mono text-muted-foreground uppercase">Invite Code</span>
+                  <span className="block text-[9px] font-mono text-muted-foreground uppercase">
+                    Invite Code
+                  </span>
                   <span className="text-xs font-mono font-bold text-foreground tracking-wider">
                     {team.inviteCode}
                   </span>
@@ -749,7 +784,11 @@ export default function TeamWorkspacePage({
                   className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40"
                   title="Copy Invite Code"
                 >
-                  {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                  {copied ? (
+                    <Check className="size-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -759,20 +798,34 @@ export default function TeamWorkspacePage({
         {/* Clean Metrics Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border/60">
           <div className="p-3 rounded-xl bg-background border border-border">
-            <span className="text-[10px] font-mono text-muted-foreground uppercase block">Squad Roster</span>
-            <span className="text-sm font-bold text-foreground">{memberCount} / {team?.event?.maxTeamSize || 6} Members</span>
+            <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+              Squad Roster
+            </span>
+            <span className="text-sm font-bold text-foreground">
+              {memberCount} / {team?.event?.maxTeamSize || 6} Members
+            </span>
           </div>
           <div className="p-3 rounded-xl bg-background border border-border">
-            <span className="text-[10px] font-mono text-muted-foreground uppercase block">Image Sets</span>
+            <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+              Image Sets
+            </span>
             <span className="text-sm font-bold text-foreground">{imageSets.length} Total</span>
           </div>
           <div className="p-3 rounded-xl bg-background border border-border">
-            <span className="text-[10px] font-mono text-muted-foreground uppercase block">Approved Sets</span>
-            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{approvedSets.length} Finished</span>
+            <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+              Approved Sets
+            </span>
+            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+              {approvedSets.length} Finished
+            </span>
           </div>
           <div className="p-3 rounded-xl bg-background border border-border">
-            <span className="text-[10px] font-mono text-muted-foreground uppercase block">Discoveries</span>
-            <span className="text-sm font-bold text-[#8b5cf6]">{reportedCandidatesCount} Candidates</span>
+            <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+              Discoveries
+            </span>
+            <span className="text-sm font-bold text-[#8b5cf6]">
+              {reportedCandidatesCount} Candidates
+            </span>
           </div>
         </div>
       </Card>
@@ -882,7 +935,8 @@ export default function TeamWorkspacePage({
                   Telescope Image Sets &amp; Observation Reports
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Request telescope batch sets, inspect for moving asteroids, and submit reports for squad leader approval.
+                  Request telescope batch sets, inspect for moving asteroids, and submit reports for
+                  squad leader approval.
                 </p>
               </div>
 
@@ -924,7 +978,8 @@ export default function TeamWorkspacePage({
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
-                  To Analyze ({imageSets.filter((s) => getNormalizedStatus(s.status) === "UNASSIGNED").length})
+                  To Analyze (
+                  {imageSets.filter((s) => getNormalizedStatus(s.status) === "UNASSIGNED").length})
                 </button>
 
                 <button
@@ -948,7 +1003,8 @@ export default function TeamWorkspacePage({
                       : "bg-background text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
-                  In Analysis ({imageSets.filter((s) => getNormalizedStatus(s.status) === "IN_PROGRESS").length})
+                  In Analysis (
+                  {imageSets.filter((s) => getNormalizedStatus(s.status) === "IN_PROGRESS").length})
                 </button>
 
                 <button
@@ -997,7 +1053,7 @@ export default function TeamWorkspacePage({
                   <div className="font-bold text-sm text-foreground">No image sets added yet</div>
                   <p>
                     {isLeaderOrAdmin
-                      ? "Click \"Import Image Sets\" above to add telescope batches for this campaign."
+                      ? 'Click "Import Image Sets" above to add telescope batches for this campaign.'
                       : "The squad leader has not imported any image sets for this campaign yet."}
                   </p>
                 </div>
@@ -1064,8 +1120,13 @@ export default function TeamWorkspacePage({
                           {normalized === "CLAIM_REQUESTED" ? (
                             <div className="space-y-1">
                               <div>
-                                Requested by: <strong className="text-foreground">{s.claimedByUser?.name || "Member"}</strong>
-                                {isClaimedByMe && <span className="text-primary ml-1 font-semibold">(You)</span>}
+                                Requested by:{" "}
+                                <strong className="text-foreground">
+                                  {s.claimedByUser?.name || "Member"}
+                                </strong>
+                                {isClaimedByMe && (
+                                  <span className="text-primary ml-1 font-semibold">(You)</span>
+                                )}
                               </div>
                               <span className="text-[11px] text-[#d97706] font-semibold block">
                                 Awaiting Squad Leader Approval
@@ -1073,22 +1134,34 @@ export default function TeamWorkspacePage({
                             </div>
                           ) : normalized === "IN_PROGRESS" ? (
                             <div>
-                              Analyst: <strong className="text-foreground">{s.claimedByUser?.name || "Member"}</strong>
-                              {isClaimedByMe && <span className="text-primary ml-1 font-semibold">(You)</span>}
+                              Analyst:{" "}
+                              <strong className="text-foreground">
+                                {s.claimedByUser?.name || "Member"}
+                              </strong>
+                              {isClaimedByMe && (
+                                <span className="text-primary ml-1 font-semibold">(You)</span>
+                              )}
                             </div>
                           ) : normalized === "PENDING_APPROVAL" ? (
                             <div className="space-y-1">
                               <div>
-                                Submitted by: <strong className="text-foreground">{s.claimedByUser?.name || "Member"}</strong>
+                                Submitted by:{" "}
+                                <strong className="text-foreground">
+                                  {s.claimedByUser?.name || "Member"}
+                                </strong>
                               </div>
                               <span className="text-[11px] text-[#d97706] font-semibold block">
-                                {s.isClean ? "Reported Clean (No Asteroids)" : `${s.candidates.length} Candidate(s) Found`}
+                                {s.isClean
+                                  ? "Reported Clean (No Asteroids)"
+                                  : `${s.candidates.length} Candidate(s) Found`}
                               </span>
                             </div>
                           ) : normalized === "SUBMITTED" ? (
                             <div className="space-y-1">
                               {s.isClean ? (
-                                <span className="text-[11px] text-muted-foreground">Verified clean &bull; No moving objects</span>
+                                <span className="text-[11px] text-muted-foreground">
+                                  Verified clean &bull; No moving objects
+                                </span>
                               ) : (
                                 <div className="space-y-1">
                                   <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
@@ -1108,7 +1181,9 @@ export default function TeamWorkspacePage({
                               )}
                             </div>
                           ) : (
-                            <span className="text-[11px] text-muted-foreground">Ready for download and blinking</span>
+                            <span className="text-[11px] text-muted-foreground">
+                              Ready for download and blinking
+                            </span>
                           )}
                         </div>
                       </div>
@@ -1118,7 +1193,11 @@ export default function TeamWorkspacePage({
                         {isObserverMode ? (
                           <Button
                             onClick={() => {
-                              if (s.mpcReportText || s.status === "SUBMITTED" || s.status === "IN_PROGRESS") {
+                              if (
+                                s.mpcReportText ||
+                                s.status === "SUBMITTED" ||
+                                s.status === "IN_PROGRESS"
+                              ) {
                                 setActiveSetForReport(s);
                                 setMpcText(s.mpcReportText || "");
                               }
@@ -1132,10 +1211,10 @@ export default function TeamWorkspacePage({
                               {normalized === "UNASSIGNED"
                                 ? "Unassigned Batch"
                                 : normalized === "CLAIM_REQUESTED"
-                                ? "Claim Pending Approval"
-                                : normalized === "SUBMITTED"
-                                ? "Inspect Final Report"
-                                : "Inspect Batch Progress"}
+                                  ? "Claim Pending Approval"
+                                  : normalized === "SUBMITTED"
+                                    ? "Inspect Final Report"
+                                    : "Inspect Batch Progress"}
                             </span>
                           </Button>
                         ) : normalized === "UNASSIGNED" ? (
@@ -1309,8 +1388,16 @@ export default function TeamWorkspacePage({
                     <span className="text-xs font-mono font-bold text-foreground">
                       {memberCount} of {maxCapacity} Slots Filled
                     </span>
-                    <Badge className={isFull ? "bg-slate-700 text-white text-[10px] font-bold border-0" : "bg-[#8b5cf6] text-white text-[10px] font-bold border-0 shadow-arcade-primary"}>
-                      {isFull ? "Full Roster" : `${openSlots} Slot${openSlots === 1 ? "" : "s"} Open`}
+                    <Badge
+                      className={
+                        isFull
+                          ? "bg-slate-700 text-white text-[10px] font-bold border-0"
+                          : "bg-[#8b5cf6] text-white text-[10px] font-bold border-0 shadow-arcade-primary"
+                      }
+                    >
+                      {isFull
+                        ? "Full Roster"
+                        : `${openSlots} Slot${openSlots === 1 ? "" : "s"} Open`}
                     </Badge>
                   </div>
                 );
@@ -1322,7 +1409,8 @@ export default function TeamWorkspacePage({
               <div className="p-3.5 rounded-xl border border-border bg-muted/40 text-muted-foreground flex items-center gap-2.5 text-xs">
                 <Info className="size-4 shrink-0 text-primary" />
                 <span>
-                  <strong>Campaign Active / Roster Locked:</strong> Member additions and removals are only permitted during the campaign registration and team formation period.
+                  <strong>Campaign Active / Roster Locked:</strong> Member additions and removals
+                  are only permitted during the campaign registration and team formation period.
                 </span>
               </div>
             )}
@@ -1371,7 +1459,9 @@ export default function TeamWorkspacePage({
 
                     <div className="flex items-center justify-between pt-2 border-t border-border/50 text-[11px] font-sans">
                       <span className="text-muted-foreground font-mono">
-                        {m.createdAt ? `Joined ${new Date(m.createdAt).toLocaleDateString()}` : "Active Squad Member"}
+                        {m.createdAt
+                          ? `Joined ${new Date(m.createdAt).toLocaleDateString()}`
+                          : "Active Squad Member"}
                       </span>
 
                       {/* Remove Member Button: Leader or Admin only (can't remove self) */}
@@ -1410,7 +1500,9 @@ export default function TeamWorkspacePage({
                       className="p-4 border border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-muted-foreground min-h-[110px] space-y-1.5 text-center bg-background/50"
                     >
                       <Users className="size-5 opacity-40" />
-                      <span className="text-xs font-bold text-foreground">Open Slot #{memberCount + idx + 1}</span>
+                      <span className="text-xs font-bold text-foreground">
+                        Open Slot #{memberCount + idx + 1}
+                      </span>
                       <span className="text-[11px] text-muted-foreground">
                         {team?.isRecruiting ? "Accepting student applications" : "Awaiting invites"}
                       </span>
@@ -1427,9 +1519,13 @@ export default function TeamWorkspacePage({
                         className="p-4 border border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-muted-foreground min-h-[110px] space-y-1.5 text-center bg-background/50"
                       >
                         <Users className="size-5 opacity-40" />
-                        <span className="text-xs font-bold text-foreground">Open Slot #{memberCount + idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground">
+                          Open Slot #{memberCount + idx + 1}
+                        </span>
                         <span className="text-[11px] text-muted-foreground">
-                          {team?.isRecruiting ? "Accepting student applications" : "Awaiting invites"}
+                          {team?.isRecruiting
+                            ? "Accepting student applications"
+                            : "Awaiting invites"}
                         </span>
                       </div>
                     ))}
@@ -1437,7 +1533,9 @@ export default function TeamWorkspacePage({
                       <div className="size-8 rounded-full bg-[#8b5cf6]/15 text-primary flex items-center justify-center font-bold text-xs font-mono">
                         +{openSlots - 3}
                       </div>
-                      <span className="text-xs font-bold text-foreground">+{openSlots - 3} More Open Slots</span>
+                      <span className="text-xs font-bold text-foreground">
+                        +{openSlots - 3} More Open Slots
+                      </span>
                       <span className="text-[11px] text-muted-foreground font-mono">
                         x{openSlots} total open slots ({memberCount}/{maxCapacity} filled)
                       </span>
@@ -1451,8 +1549,12 @@ export default function TeamWorkspacePage({
             {isLeaderOrAdmin && team?.inviteCode && (
               <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-foreground">Invite Scientists to Your Squad</span>
-                  <p className="text-xs text-muted-foreground">Share this 6-character code with students so they can join directly.</p>
+                  <span className="text-xs font-bold text-foreground">
+                    Invite Scientists to Your Squad
+                  </span>
+                  <p className="text-xs text-muted-foreground">
+                    Share this 6-character code with students so they can join directly.
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1465,7 +1567,11 @@ export default function TeamWorkspacePage({
                     onClick={handleCopyInvite}
                     className="h-8 text-xs font-bold gap-1 rounded-xl shadow-arcade active:translate-y-0.5"
                   >
-                    {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                    {copied ? (
+                      <Check className="size-3.5 text-emerald-500" />
+                    ) : (
+                      <Copy className="size-3.5" />
+                    )}
                     <span>{copied ? "Copied" : "Copy"}</span>
                   </Button>
                 </div>
@@ -1579,8 +1685,13 @@ export default function TeamWorkspacePage({
               {joinRequests.length === 0 ? (
                 <div className="py-14 text-center border border-dashed border-border rounded-2xl p-8 text-xs text-muted-foreground space-y-2">
                   <Inbox className="size-8 mx-auto text-muted-foreground/40" />
-                  <div className="font-bold text-sm text-foreground">No join requests received yet</div>
-                  <p>When students discover your team in the matchmaking directory, their requests will appear here.</p>
+                  <div className="font-bold text-sm text-foreground">
+                    No join requests received yet
+                  </div>
+                  <p>
+                    When students discover your team in the matchmaking directory, their requests
+                    will appear here.
+                  </p>
                 </div>
               ) : filteredRequests.length === 0 ? (
                 <div className="py-10 text-center text-xs text-muted-foreground border border-dashed border-border rounded-2xl">
@@ -1610,7 +1721,9 @@ export default function TeamWorkspacePage({
                             </div>
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-bold text-sm text-foreground">{req.user.name}</span>
+                                <span className="font-bold text-sm text-foreground">
+                                  {req.user.name}
+                                </span>
                                 {req.status === "ACCEPTED" ? (
                                   <Badge className="bg-[#10b981] text-white font-bold text-[10px] border-0 shadow-arcade-emerald">
                                     Accepted
@@ -1665,8 +1778,10 @@ export default function TeamWorkspacePage({
                           <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-start gap-2.5 text-xs font-sans">
                             <AlertCircle className="size-4 shrink-0 mt-0.5" />
                             <div>
-                              <strong>Already joined another squad:</strong> This citizen has already joined squad{" "}
-                              <strong>&quot;{req.alreadyJoinedSquad?.teamName}&quot;</strong> for this campaign. You cannot accept them into this squad.
+                              <strong>Already joined another squad:</strong> This citizen has
+                              already joined squad{" "}
+                              <strong>&quot;{req.alreadyJoinedSquad?.teamName}&quot;</strong> for
+                              this campaign. You cannot accept them into this squad.
                             </div>
                           </div>
                         )}
@@ -1677,17 +1792,19 @@ export default function TeamWorkspacePage({
                             <Button
                               size="sm"
                               variant="emerald"
-                              disabled={hasJoinedOtherSquad || isFull || isSquadDisabled || isProcessing}
+                              disabled={
+                                hasJoinedOtherSquad || isFull || isSquadDisabled || isProcessing
+                              }
                               onClick={() => handleRespondToRequest(req.id, "ACCEPT")}
                               className="h-8.5 px-4 text-xs font-bold rounded-xl gap-1.5 active:translate-y-0.5 border-0 shadow-arcade-emerald"
                               title={
                                 hasJoinedOtherSquad
                                   ? `Already in squad "${req.alreadyJoinedSquad?.teamName}"`
                                   : isFull
-                                  ? `Squad roster is full (${memberCount}/${maxCapacity})`
-                                  : isSquadDisabled
-                                  ? "Squad is disabled"
-                                  : "Accept applicant into squad"
+                                    ? `Squad roster is full (${memberCount}/${maxCapacity})`
+                                    : isSquadDisabled
+                                      ? "Squad is disabled"
+                                      : "Accept applicant into squad"
                               }
                             >
                               <UserCheck className="size-3.5" />
@@ -1695,8 +1812,8 @@ export default function TeamWorkspacePage({
                                 {hasJoinedOtherSquad
                                   ? "Joined Another Squad"
                                   : isFull
-                                  ? `Roster Full (${memberCount}/${maxCapacity})`
-                                  : "Accept into Squad"}
+                                    ? `Roster Full (${memberCount}/${maxCapacity})`
+                                    : "Accept into Squad"}
                               </span>
                             </Button>
 
@@ -1763,9 +1880,12 @@ export default function TeamWorkspacePage({
           <TabsContent value="settings" className="space-y-5">
             <Card className="p-5 sm:p-6 bg-card border-border shadow-arcade rounded-2xl space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-foreground">Squad Recruitment &amp; Access Controls</h2>
+                <h2 className="text-lg font-bold text-foreground">
+                  Squad Recruitment &amp; Access Controls
+                </h2>
                 <p className="text-xs text-muted-foreground">
-                  Configure whether your squad is open to receive applications and manage invite keys.
+                  Configure whether your squad is open to receive applications and manage invite
+                  keys.
                 </p>
               </div>
 
@@ -1773,11 +1893,15 @@ export default function TeamWorkspacePage({
                 {/* Recruitment Stance Switch */}
                 <div className="p-4 rounded-2xl border border-border bg-background flex items-center justify-between gap-4">
                   <div className="space-y-0.5">
-                    <label htmlFor="recruitingSwitch" className="text-xs font-bold text-foreground block cursor-pointer">
+                    <label
+                      htmlFor="recruitingSwitch"
+                      className="text-xs font-bold text-foreground block cursor-pointer"
+                    >
                       Open for Public Student Applications
                     </label>
                     <p className="text-xs text-muted-foreground">
-                      When enabled, solo students searching in the Campaign Directory can submit join requests to your squad.
+                      When enabled, solo students searching in the Campaign Directory can submit
+                      join requests to your squad.
                     </p>
                   </div>
                   <input
@@ -1804,7 +1928,8 @@ export default function TeamWorkspacePage({
                     className="text-xs bg-background rounded-xl"
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    This note will be visible to students browsing the campaign matchmaking directory.
+                    This note will be visible to students browsing the campaign matchmaking
+                    directory.
                   </p>
                 </div>
 
@@ -1822,16 +1947,23 @@ export default function TeamWorkspacePage({
               {/* Invite Code Rotation Section */}
               <div className="pt-6 border-t border-border/60 space-y-3">
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">Squad Invite Code Management</h3>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Squad Invite Code Management
+                  </h3>
                   <p className="text-xs text-muted-foreground">
-                    If unauthorized students are joining, you can rotate the invite code to revoke the old one.
+                    If unauthorized students are joining, you can rotate the invite code to revoke
+                    the old one.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-background border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Current Code</span>
-                    <div className="font-mono font-bold text-sm text-foreground">{team?.inviteCode}</div>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">
+                      Current Code
+                    </span>
+                    <div className="font-mono font-bold text-sm text-foreground">
+                      {team?.inviteCode}
+                    </div>
                   </div>
 
                   <Button
@@ -1872,10 +2004,22 @@ export default function TeamWorkspacePage({
             />
 
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" size="sm" onClick={() => setShowIngestModal(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowIngestModal(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="default" size="sm" disabled={ingestLoading || !bulkText.trim()} className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-arcade-primary active:translate-y-0.5">
+              <Button
+                type="submit"
+                variant="default"
+                size="sm"
+                disabled={ingestLoading || !bulkText.trim()}
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-arcade-primary active:translate-y-0.5"
+              >
                 {ingestLoading ? "Importing..." : "Import Sets"}
               </Button>
             </DialogFooter>
@@ -1884,15 +2028,20 @@ export default function TeamWorkspacePage({
       </Dialog>
 
       {/* MPC REPORT SUBMISSION MODAL (Member Submission) */}
-      <Dialog open={!!activeSetForReport} onOpenChange={(open) => !open && setActiveSetForReport(null)}>
+      <Dialog
+        open={!!activeSetForReport}
+        onOpenChange={(open) => !open && setActiveSetForReport(null)}
+      >
         <DialogContent className="bg-card border-border max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Submit Observation Report</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Submitting report for Set: <strong className="text-foreground font-mono">{activeSetForReport?.setCode}</strong>
+              Submitting report for Set:{" "}
+              <strong className="text-foreground font-mono">{activeSetForReport?.setCode}</strong>
               {!isLeaderOrAdmin && (
                 <span className="block mt-1 text-[#d97706] font-medium">
-                  Note: Your submission will be routed to your squad leader for approval before final campaign submission.
+                  Note: Your submission will be routed to your squad leader for approval before
+                  final campaign submission.
                 </span>
               )}
             </DialogDescription>
@@ -1900,8 +2049,12 @@ export default function TeamWorkspacePage({
 
           <div className="p-3.5 border border-border rounded-xl bg-background flex items-center justify-between">
             <div className="space-y-0.5">
-              <span className="text-xs font-bold text-foreground block">No moving candidates found?</span>
-              <span className="text-[11px] text-muted-foreground">Mark this set clean without submitting MPC lines.</span>
+              <span className="text-xs font-bold text-foreground block">
+                No moving candidates found?
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                Mark this set clean without submitting MPC lines.
+              </span>
             </div>
             <Button
               type="button"
@@ -1948,13 +2101,21 @@ export default function TeamWorkspacePage({
                   Parsed {parsedPreview.candidates.length} Candidate(s):
                 </div>
                 {parsedPreview.candidates.map((c) => (
-                  <div key={c.candidateCode} className="p-2 border border-border bg-card rounded-xl">
+                  <div
+                    key={c.candidateCode}
+                    className="p-2 border border-border bg-card rounded-xl"
+                  >
                     <div className="flex justify-between font-bold text-foreground">
-                      <span className="font-mono">{c.candidateCode} {c.isNewDiscovery && "(New Discovery)"}</span>
+                      <span className="font-mono">
+                        {c.candidateCode} {c.isNewDiscovery && "(New Discovery)"}
+                      </span>
                       <span className="font-mono text-muted-foreground">Mag: {c.avgMagnitude}</span>
                     </div>
                     <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                      Frames: {c.observationCount} &bull; Motion: {c.speedArcsecPerHour ? `${c.speedArcsecPerHour} arcsec/hr` : "Calculating..."}
+                      Frames: {c.observationCount} &bull; Motion:{" "}
+                      {c.speedArcsecPerHour
+                        ? `${c.speedArcsecPerHour} arcsec/hr`
+                        : "Calculating..."}
                     </div>
                   </div>
                 ))}
@@ -1962,7 +2123,13 @@ export default function TeamWorkspacePage({
             )}
 
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" size="sm" onClick={() => setActiveSetForReport(null)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSetForReport(null)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
               <Button
@@ -1973,7 +2140,11 @@ export default function TeamWorkspacePage({
                 disabled={reportLoading || !mpcText.trim()}
                 className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-arcade-primary active:translate-y-0.5"
               >
-                {reportLoading ? "Saving..." : isLeaderOrAdmin ? "Confirm & Submit" : "Submit for Leader Approval"}
+                {reportLoading
+                  ? "Saving..."
+                  : isLeaderOrAdmin
+                    ? "Confirm & Submit"
+                    : "Submit for Leader Approval"}
               </Button>
             </DialogFooter>
           </div>
@@ -1989,7 +2160,8 @@ export default function TeamWorkspacePage({
               <span>Review Analyst Submission</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Review observation data submitted for Image Set: <strong className="text-foreground font-mono">{reviewingSet?.setCode}</strong>
+              Review observation data submitted for Image Set:{" "}
+              <strong className="text-foreground font-mono">{reviewingSet?.setCode}</strong>
             </DialogDescription>
           </DialogHeader>
 
@@ -2002,8 +2174,12 @@ export default function TeamWorkspacePage({
                     {reviewingSet.claimedByUser?.name.substring(0, 2) || "AN"}
                   </div>
                   <div>
-                    <div className="font-bold text-foreground">{reviewingSet.claimedByUser?.name || "Team Member"}</div>
-                    <div className="text-[11px] text-muted-foreground">{reviewingSet.claimedByUser?.email}</div>
+                    <div className="font-bold text-foreground">
+                      {reviewingSet.claimedByUser?.name || "Team Member"}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {reviewingSet.claimedByUser?.email}
+                    </div>
                   </div>
                 </div>
                 <Badge className="bg-[#f59e0b] text-slate-950 font-bold text-[10px] border-0 shadow-arcade-amber">
@@ -2028,11 +2204,18 @@ export default function TeamWorkspacePage({
                       </span>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {reviewingPreview.candidates.map((c) => (
-                          <div key={c.candidateCode} className="p-2.5 border border-border bg-background rounded-xl text-xs flex justify-between items-center">
+                          <div
+                            key={c.candidateCode}
+                            className="p-2.5 border border-border bg-background rounded-xl text-xs flex justify-between items-center"
+                          >
                             <div>
-                              <span className="font-mono font-bold text-foreground">{c.candidateCode}</span>
+                              <span className="font-mono font-bold text-foreground">
+                                {c.candidateCode}
+                              </span>
                               <span className="text-[11px] text-muted-foreground block font-mono">
-                                Frames: {c.observationCount} &bull; RA: {c.observations?.[0]?.raRaw || "N/A"} Dec: {c.observations?.[0]?.decRaw || "N/A"}
+                                Frames: {c.observationCount} &bull; RA:{" "}
+                                {c.observations?.[0]?.raRaw || "N/A"} Dec:{" "}
+                                {c.observations?.[0]?.decRaw || "N/A"}
                               </span>
                             </div>
                             <Badge className="bg-[#10b981] text-white font-mono font-bold text-[10px] border-0">
@@ -2097,7 +2280,9 @@ export default function TeamWorkspacePage({
               <span>Assign Image Set</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Select a squad member to analyze <strong className="text-foreground font-mono">{selectedSetForAssign?.setCode}</strong>.
+              Select a squad member to analyze{" "}
+              <strong className="text-foreground font-mono">{selectedSetForAssign?.setCode}</strong>
+              .
             </DialogDescription>
           </DialogHeader>
 
@@ -2124,12 +2309,14 @@ export default function TeamWorkspacePage({
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-foreground truncate">{m.user.name}</span>
-                            {isLeaderMember && (
-                              <Crown className="size-3 text-amber-500 shrink-0" />
-                            )}
+                            <span className="font-bold text-xs text-foreground truncate">
+                              {m.user.name}
+                            </span>
+                            {isLeaderMember && <Crown className="size-3 text-amber-500 shrink-0" />}
                           </div>
-                          <div className="text-[11px] text-muted-foreground truncate">{m.user.email}</div>
+                          <div className="text-[11px] text-muted-foreground truncate">
+                            {m.user.email}
+                          </div>
                         </div>
                       </div>
                       {isSelected && (
@@ -2162,7 +2349,11 @@ export default function TeamWorkspacePage({
               onClick={async () => {
                 if (!selectedSetForAssign || !selectedMemberIdForAssign) return;
                 setIsAssigning(true);
-                await handleClaimAction(selectedSetForAssign.id, "ASSIGN", selectedMemberIdForAssign);
+                await handleClaimAction(
+                  selectedSetForAssign.id,
+                  "ASSIGN",
+                  selectedMemberIdForAssign
+                );
                 setIsAssigning(false);
                 setAssignModalOpen(false);
               }}
@@ -2184,10 +2375,13 @@ export default function TeamWorkspacePage({
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground space-y-1.5">
               <span>
-                Are you sure you want to remove <strong className="text-foreground">{memberToRemove?.user.name}</strong> ({memberToRemove?.user.email}) from this squad?
+                Are you sure you want to remove{" "}
+                <strong className="text-foreground">{memberToRemove?.user.name}</strong> (
+                {memberToRemove?.user.email}) from this squad?
               </span>
               <span className="block text-[11px] text-muted-foreground">
-                Any unclaimed or in-progress image sets will be released back to the squad. This action is only permitted during the campaign registration and team formation period.
+                Any unclaimed or in-progress image sets will be released back to the squad. This
+                action is only permitted during the campaign registration and team formation period.
               </span>
             </DialogDescription>
           </DialogHeader>

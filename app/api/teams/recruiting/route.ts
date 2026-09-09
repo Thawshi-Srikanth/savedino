@@ -40,7 +40,9 @@ export async function GET() {
     });
 
     // Filter out full teams based on campaign maxTeamSize
-    const recruitingTeams = teams.filter((t: any) => t.members.length < (t.event?.maxTeamSize || 6));
+    const recruitingTeams = teams.filter(
+      (t: any) => t.members.length < (t.event?.maxTeamSize || 6)
+    );
 
     return NextResponse.json({
       success: true,

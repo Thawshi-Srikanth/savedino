@@ -48,7 +48,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               [+] Mission Objective
             </h3>
             <p className="text-muted-foreground">
-              Meteors are plunging into Earth! Help Save the Dino by blasting falling asteroids with your Laser Cannon or leaping over them to survive.
+              Meteors are plunging into Earth! Help Save the Dino by blasting falling asteroids with
+              your Laser Cannon or leaping over them to survive.
             </p>
           </div>
 
@@ -59,7 +60,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-2 mt-2">
               <div className="rounded-md border border-border bg-muted/40 p-2.5 flex items-center justify-between">
                 <div>
-                  <span className="font-pixel text-[9px] block font-bold text-foreground">SPACEBAR</span>
+                  <span className="font-pixel text-[9px] block font-bold text-foreground">
+                    SPACEBAR
+                  </span>
                   <span className="text-[11px] text-muted-foreground">Laser Cannon</span>
                 </div>
                 <span
@@ -77,7 +80,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               </div>
               <div className="rounded-md border border-border bg-muted/40 p-2.5 flex items-center justify-between">
                 <div>
-                  <span className="font-pixel text-[9px] block font-bold text-foreground">UP ARROW</span>
+                  <span className="font-pixel text-[9px] block font-bold text-foreground">
+                    UP ARROW
+                  </span>
                   <span className="text-[11px] text-muted-foreground">Jump / Mid-air</span>
                 </div>
                 <span
@@ -94,8 +99,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 />
               </div>
               <div className="rounded-md border border-border bg-muted/40 p-2.5 col-span-2">
-                <span className="font-pixel text-[9px] block font-bold text-foreground">TOUCH CONTROLS</span>
-                <span className="text-[11px] text-muted-foreground">Tap on-screen JUMP and BLAST buttons.</span>
+                <span className="font-pixel text-[9px] block font-bold text-foreground">
+                  TOUCH CONTROLS
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  Tap on-screen JUMP and BLAST buttons.
+                </span>
               </div>
             </div>
           </div>
@@ -105,9 +114,18 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               [!] Asteroid Classes
             </h3>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li><strong className="text-foreground">Small Meteors:</strong> Fast and agile (+50 pts).</li>
-              <li><strong className="text-foreground">Medium Meteors:</strong> Standard pace and weight (+40 pts).</li>
-              <li><strong className="text-foreground">Giant Meteors:</strong> Slow, massive craters with heavy screen tremors (+30 pts).</li>
+              <li>
+                <strong className="text-foreground">Small Meteors:</strong> Fast and agile (+50
+                pts).
+              </li>
+              <li>
+                <strong className="text-foreground">Medium Meteors:</strong> Standard pace and
+                weight (+40 pts).
+              </li>
+              <li>
+                <strong className="text-foreground">Giant Meteors:</strong> Slow, massive craters
+                with heavy screen tremors (+30 pts).
+              </li>
             </ul>
           </div>
         </div>

@@ -9,10 +9,7 @@ export const revalidate = 0;
 const VALID_ROLES = ["admin", "staff", "user"] as const;
 
 // PATCH /api/admin/users/[userId] - Update user role, profile details, or emailVerified
-export async function PATCH(
-  req: Request,
-  context: { params: Promise<{ userId: string }> }
-) {
+export async function PATCH(req: Request, context: { params: Promise<{ userId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -59,10 +56,10 @@ export async function PATCH(
         ...(name !== undefined && { name: typeof name === "string" ? name.trim() : "" }),
         ...(role !== undefined && { role }),
         ...(institution !== undefined && {
-          institution: typeof institution === "string" ? (institution.trim() || null) : null,
+          institution: typeof institution === "string" ? institution.trim() || null : null,
         }),
         ...(country !== undefined && {
-          country: typeof country === "string" ? (country.trim() || null) : null,
+          country: typeof country === "string" ? country.trim() || null : null,
         }),
         ...(emailVerified !== undefined && { emailVerified: Boolean(emailVerified) }),
       },
@@ -82,10 +79,7 @@ export async function PATCH(
 }
 
 // DELETE /api/admin/users/[userId] - Delete user account
-export async function DELETE(
-  req: Request,
-  context: { params: Promise<{ userId: string }> }
-) {
+export async function DELETE(req: Request, context: { params: Promise<{ userId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
