@@ -1371,7 +1371,7 @@ export default function TeamWorkspacePage({
 
                     <div className="flex items-center justify-between pt-2 border-t border-border/50 text-[11px] font-sans">
                       <span className="text-muted-foreground font-mono">
-                        Joined {new Date(m.joinedAt).toLocaleDateString()}
+                        {m.createdAt ? `Joined ${new Date(m.createdAt).toLocaleDateString()}` : "Active Squad Member"}
                       </span>
 
                       {/* Remove Member Button: Leader or Admin only (can't remove self) */}
@@ -1379,11 +1379,11 @@ export default function TeamWorkspacePage({
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={isRegClosed && !isOrganizerAdmin}
+                          disabled={isRegClosed && !isAdminUser}
                           onClick={() => setMemberToRemove(m)}
                           className="h-7 px-2 text-[11px] font-bold text-muted-foreground hover:text-destructive hover:border-destructive/40 rounded-xl gap-1 shrink-0 disabled:opacity-40"
                           title={
-                            isRegClosed && !isOrganizerAdmin
+                            isRegClosed && !isAdminUser
                               ? "Roster modifications locked after registration ends"
                               : "Remove member from squad"
                           }
