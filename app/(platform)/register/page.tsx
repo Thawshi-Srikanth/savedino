@@ -213,7 +213,7 @@ function RegisterForm() {
 
       {/* Bottom Footer */}
       <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
-        SaveDino — NASA &amp; IASC Asteroid Search Collaboration
+        SaveDino: NASA &amp; IASC Asteroid Search Collaboration
       </div>
     </div>
   );

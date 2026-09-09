@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { isOrganizer } from "@/lib/rbac";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -391,7 +392,7 @@ export default function CampaignsPage() {
       router.push("/login");
       return;
     }
-    if (session.user.role === "admin" || session.user.role === "staff") {
+    if (isOrganizer(session.user)) {
       toast.info("Administrators and staff manage campaigns and cannot join participant teams.");
       return;
     }
@@ -406,7 +407,7 @@ export default function CampaignsPage() {
       router.push("/login");
       return;
     }
-    if (session.user.role === "admin" || session.user.role === "staff") {
+    if (isOrganizer(session.user)) {
       toast.info("Administrators and staff manage campaigns and cannot form participant teams.");
       return;
     }

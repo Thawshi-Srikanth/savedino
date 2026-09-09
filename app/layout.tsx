@@ -35,7 +35,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Save Dino — Asteroid Finding Challenge",
+  title: "Save Dino | Asteroid Finding Challenge",
   description: "Dodge incoming sky meteorites, avoid obstacles, and save the Dino from extinction!",
 };
 

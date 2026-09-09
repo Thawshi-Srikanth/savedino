@@ -100,28 +100,45 @@ Every core role has a dedicated single test persona:
 
 ---
 
-### Test Suite C: FITS Image Batch Claiming and Astrometry Reports
+### Test Suite C: Image Set Claim Requests, Leader Approval, and Direct Assignment
 
-#### Goal: Verify team members can claim unassigned image batches and leaders can finalize submissions.
+#### Goal: Verify that regular members request unassigned image sets, team leaders approve or decline requests, and team leaders can directly assign sets to members.
 
-1. **Member Claims Batch**:
+1. **Member Submits Claim Request**:
    - Switch to **Marcus Vance** (`member@savedino.org`).
    - Go to the *Nova Orbitals* workspace.
-   - Find the unassigned image set `PS1-26A-03`.
-   - Click **Claim Image Set**.
-   - **Expected Result**: The image set status changes to **In Progress** and is assigned to Marcus.
+   - Switch to the **To Analyze** filter or view `PS1-26A-03`.
+   - Click **Request to Claim**.
+   - **Expected Result**: The status changes to **Claim Requested**. Marcus sees a notification pill saying **Awaiting Squad Leader Approval** and a **Cancel** button if he changes his mind.
 
-2. **Member Submits Discovery Report**:
-   - Click into `PS1-26A-03`.
-   - Enter MPC discovery report lines or check **Mark Clean (No Asteroids Found)**.
-   - Click **Submit Report**.
-   - **Expected Result**: Status updates to **Submitted** and enters the leader review queue.
-
-3. **Leader Final Approval**:
+2. **Team Leader Approves or Declines Claim Request**:
    - Switch to **Sarah Chen** (`leader@savedino.org`).
-   - Review Marcus Vance's submission in the team dashboard.
-   - Click **Approve Submission**.
-   - **Expected Result**: The report is verified for campaign scoring.
+   - Go to *Nova Orbitals* workspace.
+   - Notice the **Image Sets** tab displays a notification badge (e.g. `1 Claim`).
+   - Click on the **Claim Requests** filter pill.
+   - On set `PS1-26A-03`, Sarah sees **Approve Claim** (emerald button) and **Decline** (outline button).
+   - Click **Approve Claim**.
+   - **Expected Result**: The image set transitions to **In Analysis** assigned to Marcus Vance.
+
+3. **Leader Directly Assigns Image Set to a Member**:
+   - As **Sarah Chen** (`leader@savedino.org`), find any unassigned image set (or click **Import Image Sets** to add a new batch like `PS1-26A-04`).
+   - On the unassigned card, click **Assign**.
+   - A modal opens displaying the squad members list.
+   - Select **Marcus Vance** (or any active member) and click **Assign Set**.
+   - **Expected Result**: The set immediately enters **In Analysis** assigned directly to the chosen member.
+
+4. **Member Submits Discovery Report**:
+   - Switch to **Marcus Vance** (`member@savedino.org`).
+   - On his active set `PS1-26A-03`, click **Submit Report**.
+   - Enter MPC discovery lines or click **Mark Clean**.
+   - Click **Submit for Leader Approval**.
+   - **Expected Result**: Set status updates to **In Review**.
+
+5. **Leader Reviews and Approves Report**:
+   - Switch to **Sarah Chen** (`leader@savedino.org`).
+   - On the **In Review** tab, click **Review Submission**.
+   - Inspect the detected asteroid candidates and click **Approve Submission**.
+   - **Expected Result**: The report is officially logged with green **Approved** status.
 
 ---
 

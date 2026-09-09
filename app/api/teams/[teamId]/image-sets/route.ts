@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { extractImageSetIds } from "@/lib/mpc-parser";
+import { parseMpcReport, extractImageSetIds } from "@/lib/mpc-parser";
+import { CandidateReport } from "@/types/mpc";
+import { isOrganizer } from "@/lib/rbac";
 
 // GET /api/teams/[teamId]/image-sets - List image sets for the team
 export async function GET(
@@ -30,7 +32,7 @@ export async function GET(
       },
     });
 
-    const isStaffOrAdmin = session.user.role === "admin" || session.user.role === "staff";
+    const isStaffOrAdmin = isOrganizer(session.user);
 
     if (!isMember && !isStaffOrAdmin) {
       return NextResponse.json(
@@ -54,11 +56,11 @@ export async function GET(
       if (s.mpcReportText) {
         try {
           const parsed = parseMpcReport(s.mpcReportText);
-          candidates = parsed.candidates.map((c, i) => ({
+          candidates = parsed.candidates.map((c: CandidateReport, i: number) => ({
             id: `${s.id}-${i}`,
             candidateCode: c.candidateCode,
-            ra: c.ra || "",
-            dec: c.dec || "",
+            ra: c.observations?.[0]?.raRaw || "",
+            dec: c.observations?.[0]?.decRaw || "",
             magnitude: c.avgMagnitude || 0,
             status: "REPORTED",
             observationCount: c.observationCount || 0,

@@ -67,7 +67,7 @@ interface ImageSetItem {
   id: string;
   setCode: string;
   fitsUrl?: string | null;
-  status: "UNASSIGNED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED" | "PENDING" | "CLAIMED" | "REPORTED" | "CLEAN";
+  status: "UNASSIGNED" | "CLAIM_REQUESTED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED" | "PENDING" | "CLAIMED" | "REPORTED" | "CLEAN";
   isClean?: boolean;
   mpcReportText?: string | null;
   submittedAt?: string | null;
@@ -150,8 +150,14 @@ export default function TeamWorkspacePage({
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<string>("imagesets");
 
   // Filter & Search for Image Sets
-  const [imageSetTab, setImageSetTab] = useState<"ALL" | "UNASSIGNED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED">("ALL");
+  const [imageSetTab, setImageSetTab] = useState<"ALL" | "UNASSIGNED" | "CLAIM_REQUESTED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED">("ALL");
   const [setSearch, setSetSearch] = useState<string>("");
+
+  // Leader Assign Modal State
+  const [assignModalOpen, setAssignModalOpen] = useState<boolean>(false);
+  const [selectedSetForAssign, setSelectedSetForAssign] = useState<ImageSetItem | null>(null);
+  const [selectedMemberIdForAssign, setSelectedMemberIdForAssign] = useState<string>("");
+  const [isAssigning, setIsAssigning] = useState<boolean>(false);
 
   // Filter & Search for Join Requests
   const [requestSearch, setRequestSearch] = useState<string>("");
@@ -337,21 +343,23 @@ export default function TeamWorkspacePage({
     }
   };
 
-  const handleClaimSet = async (setId: string, unclaim = false) => {
+  const handleClaimAction = async (
+    setId: string,
+    action?: "REQUEST_CLAIM" | "APPROVE_CLAIM" | "REJECT_CLAIM" | "ASSIGN" | "RELEASE",
+    targetUserId?: string
+  ) => {
     try {
       const res = await fetch(`/api/teams/${teamId}/image-sets/${setId}/claim`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, targetUserId }),
       });
       const data = await res.json();
       if (data.success) {
-        if (unclaim) {
-          toast.info("Image set released.");
-        } else {
-          toast.success("Claimed image set for analysis!");
-        }
+        toast.success(data.message || "Action updated successfully.");
         fetchTeamData();
       } else {
-        toast.error(data.error || "Failed to update claim");
+        toast.error(data.error || "Failed to process image set action.");
       }
     } catch (err: any) {
       toast.error(err.message || "An error occurred");
@@ -504,6 +512,7 @@ export default function TeamWorkspacePage({
   // Normalized Status Helper
   const getNormalizedStatus = (status: string) => {
     if (status === "UNASSIGNED" || status === "PENDING") return "UNASSIGNED";
+    if (status === "CLAIM_REQUESTED") return "CLAIM_REQUESTED";
     if (status === "IN_PROGRESS" || status === "CLAIMED") return "IN_PROGRESS";
     if (status === "PENDING_APPROVAL") return "PENDING_APPROVAL";
     if (status === "SUBMITTED" || status === "REPORTED" || status === "CLEAN") return "SUBMITTED";
@@ -552,6 +561,7 @@ export default function TeamWorkspacePage({
   const reviewingPreview = reviewingSet?.mpcReportText ? parseMpcReport(reviewingSet.mpcReportText) : null;
 
   const pendingRequests = joinRequests.filter((r) => r.status === "PENDING");
+  const pendingClaimRequests = imageSets.filter((s) => getNormalizedStatus(s.status) === "CLAIM_REQUESTED");
   const awaitingApprovalSets = imageSets.filter((s) => getNormalizedStatus(s.status) === "PENDING_APPROVAL");
   const approvedSets = imageSets.filter((s) => getNormalizedStatus(s.status) === "SUBMITTED");
   const reportedCandidatesCount = imageSets.reduce((acc, s) => acc + (s.candidates?.length || 0), 0);
@@ -790,6 +800,11 @@ export default function TeamWorkspacePage({
                 >
                   {imageSets.length}
                 </Badge>
+                {pendingClaimRequests.length > 0 && isLeaderOrAdmin && (
+                  <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-[0_1.5px_0_0_#d97706]">
+                    {pendingClaimRequests.length} Claim{pendingClaimRequests.length > 1 ? "s" : ""}
+                  </Badge>
+                )}
                 {awaitingApprovalSets.length > 0 && isLeaderOrAdmin && (
                   <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-[0_1.5px_0_0_#d97706]">
                     {awaitingApprovalSets.length} to Review
@@ -824,15 +839,13 @@ export default function TeamWorkspacePage({
                   <Inbox className="size-3.5 shrink-0" />
                   <span>Join Requests</span>
                   {pendingRequests.length > 0 ? (
-                    <Badge
-                      className="bg-[#10b981] text-white text-[10px] px-1.5 py-0 h-4 min-w-4 flex items-center justify-center font-bold border-0 shadow-[0_1.5px_0_0_#059669]"
-                    >
-                      {pendingRequests.length}
+                    <Badge className="bg-[#f59e0b] text-slate-950 text-[10px] px-1.5 py-0 font-bold border-0 shadow-[0_1.5px_0_0_#d97706]">
+                      {pendingRequests.length} New
                     </Badge>
                   ) : (
                     <Badge
                       variant="secondary"
-                      className="text-[10px] px-1.5 py-0 font-mono text-muted-foreground bg-muted"
+                      className="text-[10px] px-1.5 py-0 font-mono font-semibold text-muted-foreground bg-muted"
                     >
                       {joinRequests.length}
                     </Badge>
@@ -847,16 +860,16 @@ export default function TeamWorkspacePage({
                   className="h-10 px-3 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-xl rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
                 >
                   <Settings className="size-3.5 shrink-0" />
-                  <span>Squad Settings</span>
+                  <span>Settings</span>
                 </TabsTrigger>
               )}
             </TabsList>
           </div>
         </div>
 
-        {/* ------------------------------------------------------------- */}
-        {/* TAB 1: IMAGE SETS & ANALYSIS WORKSPACE */}
-        {/* ------------------------------------------------------------- */}
+        {/* ========================================================================= */}
+        {/* TAB 1: IMAGE SETS (ASTEROID SEARCH)                                       */}
+        {/* ========================================================================= */}
         <TabsContent value="imagesets" className="space-y-5">
           <Card className="p-5 sm:p-6 bg-card border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d] rounded-2xl space-y-5">
             {/* Header Controls */}
@@ -866,7 +879,7 @@ export default function TeamWorkspacePage({
                   Telescope Image Sets &amp; Observation Reports
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Claim telescope batch sets, inspect for moving asteroids, and submit reports for squad leader approval.
+                  Request telescope batch sets, inspect for moving asteroids, and submit reports for squad leader approval.
                 </p>
               </div>
 
@@ -909,6 +922,18 @@ export default function TeamWorkspacePage({
                   }`}
                 >
                   To Analyze ({imageSets.filter((s) => getNormalizedStatus(s.status) === "UNASSIGNED").length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setImageSetTab("CLAIM_REQUESTED")}
+                  className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium cursor-pointer ${
+                    imageSetTab === "CLAIM_REQUESTED"
+                      ? "bg-primary text-primary-foreground font-bold shadow-[0_1.5px_0_0_#6d28d9]"
+                      : "bg-background text-muted-foreground hover:text-foreground border border-border"
+                  }`}
+                >
+                  Claim Requests ({pendingClaimRequests.length})
                 </button>
 
                 <button
@@ -1009,6 +1034,10 @@ export default function TeamWorkspacePage({
                             <Badge className="bg-slate-600 text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#334155]">
                               To Analyze
                             </Badge>
+                          ) : normalized === "CLAIM_REQUESTED" ? (
+                            <Badge className="bg-[#f59e0b] text-slate-950 font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#d97706]">
+                              Claim Requested
+                            </Badge>
                           ) : normalized === "IN_PROGRESS" ? (
                             <Badge className="bg-[#0284c7] text-white font-mono font-bold text-[10px] border-0 shadow-[0_1.5px_0_0_#0369a1]">
                               In Analysis
@@ -1029,7 +1058,17 @@ export default function TeamWorkspacePage({
                         </div>
 
                         <div className="text-xs text-muted-foreground min-h-[32px]">
-                          {normalized === "IN_PROGRESS" ? (
+                          {normalized === "CLAIM_REQUESTED" ? (
+                            <div className="space-y-1">
+                              <div>
+                                Requested by: <strong className="text-foreground">{s.claimedByUser?.name || "Member"}</strong>
+                                {isClaimedByMe && <span className="text-primary ml-1 font-semibold">(You)</span>}
+                              </div>
+                              <span className="text-[11px] text-[#d97706] font-semibold block">
+                                Awaiting Squad Leader Approval
+                              </span>
+                            </div>
+                          ) : normalized === "IN_PROGRESS" ? (
                             <div>
                               Analyst: <strong className="text-foreground">{s.claimedByUser?.name || "Member"}</strong>
                               {isClaimedByMe && <span className="text-primary ml-1 font-semibold">(You)</span>}
@@ -1089,20 +1128,93 @@ export default function TeamWorkspacePage({
                             <span>
                               {normalized === "UNASSIGNED"
                                 ? "Unassigned Batch"
+                                : normalized === "CLAIM_REQUESTED"
+                                ? "Claim Pending Approval"
                                 : normalized === "SUBMITTED"
                                 ? "Inspect Final Report"
                                 : "Inspect Batch Progress"}
                             </span>
                           </Button>
                         ) : normalized === "UNASSIGNED" ? (
-                          <Button
-                            onClick={() => handleClaimSet(s.id)}
-                            size="sm"
-                            variant="outline"
-                            className="w-full h-8 text-xs font-bold gap-1 bg-card hover:bg-accent rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
-                          >
-                            <span>Claim Set</span>
-                          </Button>
+                          isLeaderOrAdmin ? (
+                            <div className="flex gap-1.5">
+                              <Button
+                                onClick={() => handleClaimAction(s.id)}
+                                size="sm"
+                                variant="default"
+                                className="flex-1 h-8 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-[0_1.5px_0_0_#6d28d9] dark:shadow-[0_1.5px_0_0_#5b21b6] active:translate-y-0.5"
+                              >
+                                <span>Claim for Self</span>
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setSelectedSetForAssign(s);
+                                  setSelectedMemberIdForAssign(team?.members[0]?.user.id || "");
+                                  setAssignModalOpen(true);
+                                }}
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-2.5 text-xs font-bold rounded-xl"
+                                title="Assign to Member"
+                              >
+                                Assign
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => handleClaimAction(s.id, "REQUEST_CLAIM")}
+                              size="sm"
+                              variant="outline"
+                              className="w-full h-8 text-xs font-bold gap-1 bg-card hover:bg-accent rounded-xl shadow-[0_1.5px_0_0_#e2e8f0] dark:shadow-[0_1.5px_0_0_#27282d] active:translate-y-0.5"
+                            >
+                              <span>Request to Claim</span>
+                            </Button>
+                          )
+                        ) : normalized === "CLAIM_REQUESTED" ? (
+                          isLeaderOrAdmin ? (
+                            <div className="flex gap-1.5">
+                              <Button
+                                onClick={() => handleClaimAction(s.id, "APPROVE_CLAIM")}
+                                size="sm"
+                                variant="default"
+                                className="flex-1 h-8 text-xs font-bold gap-1 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl shadow-[0_1.5px_0_0_#047857] active:translate-y-0.5"
+                              >
+                                <Check className="size-3.5" />
+                                <span>Approve Claim</span>
+                              </Button>
+                              <Button
+                                onClick={() => handleClaimAction(s.id, "REJECT_CLAIM")}
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-2.5 text-xs font-bold text-destructive hover:border-destructive/40 rounded-xl"
+                              >
+                                Decline
+                              </Button>
+                            </div>
+                          ) : isClaimedByMe ? (
+                            <div className="flex items-center justify-between gap-1.5">
+                              <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold px-2 py-1 bg-amber-500/10 rounded-lg flex-1 text-center truncate">
+                                Awaiting Approval
+                              </div>
+                              <Button
+                                onClick={() => handleClaimAction(s.id, "RELEASE")}
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-2.5 text-xs font-bold text-muted-foreground hover:text-foreground rounded-xl shrink-0"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled
+                              className="w-full h-8 text-xs opacity-60 rounded-xl"
+                            >
+                              Requested by {s.claimedByUser?.name || "Member"}
+                            </Button>
+                          )
                         ) : normalized === "IN_PROGRESS" ? (
                           <div className="flex gap-1.5">
                             {(isClaimedByMe || isLeaderOrAdmin) && (
@@ -1120,7 +1232,7 @@ export default function TeamWorkspacePage({
                             )}
                             {(isClaimedByMe || isLeaderOrAdmin) && (
                               <Button
-                                onClick={() => handleClaimSet(s.id, true)}
+                                onClick={() => handleClaimAction(s.id, "RELEASE")}
                                 size="sm"
                                 variant="outline"
                                 className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground rounded-xl"
@@ -1880,7 +1992,7 @@ export default function TeamWorkspacePage({
                             <div>
                               <span className="font-mono font-bold text-foreground">{c.candidateCode}</span>
                               <span className="text-[11px] text-muted-foreground block font-mono">
-                                Frames: {c.observationCount} &bull; RA: {c.ra} Dec: {c.dec}
+                                Frames: {c.observationCount} &bull; RA: {c.observations?.[0]?.raRaw || "N/A"} Dec: {c.observations?.[0]?.decRaw || "N/A"}
                               </span>
                             </div>
                             <Badge className="bg-[#10b981] text-white font-mono font-bold text-[10px] border-0">
@@ -1933,6 +2045,92 @@ export default function TeamWorkspacePage({
               </DialogFooter>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* LEADER DIRECT ASSIGNMENT MODAL */}
+      <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
+        <DialogContent className="bg-card border-border max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <Users className="size-5 text-primary" />
+              <span>Assign Image Set</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Select a squad member to analyze <strong className="text-foreground font-mono">{selectedSetForAssign?.setCode}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground">Select Squad Member</label>
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {team?.members.map((m) => {
+                  const isSelected = selectedMemberIdForAssign === m.user.id;
+                  const isLeaderMember = m.user.id === team.leaderId;
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => setSelectedMemberIdForAssign(m.user.id)}
+                      className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                        isSelected
+                          ? "border-primary bg-primary/10 shadow-xs"
+                          : "border-border bg-background hover:border-border/80"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="size-8 rounded-lg bg-muted flex items-center justify-center font-bold text-xs font-mono uppercase">
+                          {m.user.name.substring(0, 2)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-foreground truncate">{m.user.name}</span>
+                            {isLeaderMember && (
+                              <Crown className="size-3 text-amber-500 shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground truncate">{m.user.email}</div>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAssignModalOpen(false)}
+              className="rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              disabled={!selectedMemberIdForAssign || isAssigning}
+              onClick={async () => {
+                if (!selectedSetForAssign || !selectedMemberIdForAssign) return;
+                setIsAssigning(true);
+                await handleClaimAction(selectedSetForAssign.id, "ASSIGN", selectedMemberIdForAssign);
+                setIsAssigning(false);
+                setAssignModalOpen(false);
+              }}
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6] active:translate-y-0.5"
+            >
+              {isAssigning ? "Assigning..." : "Assign Set"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

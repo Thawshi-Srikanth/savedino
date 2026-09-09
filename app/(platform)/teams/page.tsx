@@ -74,6 +74,7 @@ interface Team {
   recruitmentNotes?: string | null;
   disqualificationReason?: string | null;
   createdAt: string;
+  myRequestStatus?: string | null;
   event: TeamEvent;
   members: TeamMember[];
   _count?: {
