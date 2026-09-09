@@ -57,53 +57,37 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <h3 className="font-pixel text-[10px] font-bold uppercase text-[#8b5cf6] mb-1">
               [&gt;] Controls
             </h3>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <div className="rounded-md border border-border bg-muted/40 p-2.5 flex items-center justify-between">
+            <div className="grid grid-cols-2 gap-2.5 mt-2">
+              <div className="rounded-xl border border-border bg-muted/40 p-3 flex items-center justify-between">
                 <div>
-                  <span className="font-pixel text-[9px] block font-bold text-foreground">
+                  <span className="font-sans text-xs block font-bold text-foreground">
                     SPACEBAR
                   </span>
-                  <span className="text-[11px] text-muted-foreground">Laser Cannon</span>
+                  <span className="text-[11px] text-muted-foreground font-sans">Laser Cannon</span>
                 </div>
-                <span
-                  className="inline-block flex-shrink-0"
-                  style={{
-                    width: "32px",
-                    height: "16px",
-                    backgroundImage: "url('/Keyboard-Extras.png')",
-                    backgroundPosition: "-64px -32px",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                  }}
-                  title="SPACEBAR"
-                />
+                <kbd className="px-2 py-1 text-[11px] font-mono font-bold bg-card text-foreground border border-border rounded shadow-arcade-xs select-none">
+                  SPACE
+                </kbd>
               </div>
-              <div className="rounded-md border border-border bg-muted/40 p-2.5 flex items-center justify-between">
+              <div className="rounded-xl border border-border bg-muted/40 p-3 flex items-center justify-between">
                 <div>
-                  <span className="font-pixel text-[9px] block font-bold text-foreground">
+                  <span className="font-sans text-xs block font-bold text-foreground">
                     UP ARROW
                   </span>
-                  <span className="text-[11px] text-muted-foreground">Jump / Mid-air</span>
+                  <span className="text-[11px] text-muted-foreground font-sans">
+                    Jump / Mid-air
+                  </span>
                 </div>
-                <span
-                  className="inline-block flex-shrink-0"
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundImage: "url('/Keyboard-Letter.png')",
-                    backgroundPosition: "0px 0px",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                  }}
-                  title="UP ARROW"
-                />
+                <kbd className="px-2 py-1 text-[11px] font-mono font-bold bg-card text-foreground border border-border rounded shadow-arcade-xs select-none">
+                  &uarr; UP
+                </kbd>
               </div>
-              <div className="rounded-md border border-border bg-muted/40 p-2.5 col-span-2">
-                <span className="font-pixel text-[9px] block font-bold text-foreground">
-                  TOUCH CONTROLS
+              <div className="rounded-xl border border-border bg-muted/40 p-3 col-span-2">
+                <span className="font-sans text-xs block font-bold text-foreground">
+                  TOUCH CONTROLS (MOBILE)
                 </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Tap on-screen JUMP and BLAST buttons.
+                <span className="text-[11px] text-muted-foreground font-sans">
+                  Tap on-screen JUMP and BLAST action buttons or tap left/right sides of canvas.
                 </span>
               </div>
             </div>
@@ -136,9 +120,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             size="default"
             variant="default"
-            className="font-pixel text-[10px] uppercase px-6"
+            className="font-sans text-xs font-bold uppercase tracking-wider px-6 h-9 shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
           >
-            START MISSION
+            Start Mission
           </Button>
         </div>
       </div>

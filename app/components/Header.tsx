@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
               variant="outline"
               size="icon"
               onClick={onToggleTheme}
-              className="h-8 w-8 rounded-md"
+              className="h-8 w-8 rounded-lg shadow-arcade active:translate-y-0.5 cursor-pointer"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
             variant="outline"
             size="icon"
             onClick={onToggleMute}
-            className="h-8 w-8 rounded-md"
+            className="h-8 w-8 rounded-lg shadow-arcade active:translate-y-0.5 cursor-pointer"
             title={isMuted ? "Unmute Music & Sound" : "Mute Music & Sound"}
           >
             {isMuted ? (
@@ -84,10 +84,10 @@ export const Header: React.FC<HeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={onOpenHelp}
-            className="h-8 text-xs font-bold flex items-center gap-1 px-2.5"
+            className="h-8 text-xs font-bold flex items-center gap-1.5 px-2.5 rounded-lg shadow-arcade active:translate-y-0.5 cursor-pointer"
             title="View Game Controls & Instructions"
           >
-            <HelpCircle className="size-3.5 text-[#38bdf8]" />
+            <HelpCircle className="size-3.5 text-[#8b5cf6]" />
             <span className="hidden sm:inline">Controls</span>
           </Button>
         </div>

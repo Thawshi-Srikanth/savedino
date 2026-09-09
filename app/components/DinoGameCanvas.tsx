@@ -1194,58 +1194,37 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         />
       </div>
 
-      {/* Controls Hint with Pixel Keyboard Keycap Sprites (Helper contents) */}
-      <div
-        className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono ${
-          isNight ? "text-[#9aa0a6]" : "text-[#535353]"
-        }`}
-      >
+      {/* Controls Bar with Clean Theme-Aware Keycaps */}
+      <div className="w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-2 px-2 mt-1 text-xs font-mono text-muted-foreground">
         <div className="flex items-center gap-3">
-          {/* SPACE sprite + Laser */}
+          {/* Spacebar Keycap */}
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block flex-shrink-0"
-              style={{
-                width: "32px",
-                height: "16px",
-                backgroundImage: "url('/Keyboard-Extras.png')",
-                backgroundPosition: isNight ? "-64px -96px" : "-64px -32px",
-                backgroundRepeat: "no-repeat",
-                imageRendering: "pixelated",
-              }}
-              title="SPACEBAR: Laser"
-            />
-            <span className="font-pixel text-[10px]">: Laser</span>
+            <kbd className="px-2 py-0.5 text-[10px] font-mono font-bold bg-muted text-foreground border border-border rounded shadow-arcade-xs select-none">
+              SPACE
+            </kbd>
+            <span className="text-[11px] font-medium text-foreground">Laser</span>
           </div>
 
-          <span className="opacity-40">|</span>
+          <span className="text-border">&bull;</span>
 
-          {/* UP ARROW sprite + Jump */}
+          {/* Up Arrow Keycap */}
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block flex-shrink-0"
-              style={{
-                width: "16px",
-                height: "16px",
-                backgroundImage: "url('/Keyboard-Letter.png')",
-                backgroundPosition: isNight ? "0px -112px" : "0px 0px",
-                backgroundRepeat: "no-repeat",
-                imageRendering: "pixelated",
-              }}
-              title="UP ARROW: Jump"
-            />
-            <span className="font-pixel text-[10px]">: Jump</span>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-muted text-foreground border border-border rounded shadow-arcade-xs select-none">
+              &uarr; UP
+            </kbd>
+            <span className="text-[11px] font-medium text-foreground">Jump</span>
           </div>
         </div>
 
-        <span className="text-[10px] font-mono opacity-75">
-          <span className="sm:hidden">Tap left Jump, right Shoot • </span>Laser expands in flight
+        <span className="text-[11px] text-muted-foreground font-sans">
+          <span className="sm:hidden">Tap left Jump, right Shoot &bull; </span>Laser expands in
+          flight
         </span>
       </div>
 
-      {/* Dedicated Touch Arcade Controls at Bottom (Hidden on desktop / wide screens, visible on mobile) */}
-      <div className="w-full max-w-[600px] flex sm:hidden items-center justify-between gap-3 px-1 mt-3 z-30 relative select-none">
-        {/* JUMP Touch Pad (White 3D PostHog Button) */}
+      {/* Dedicated Touch Arcade Controls at Bottom (Visible on mobile) */}
+      <div className="w-full max-w-[600px] flex sm:hidden items-center justify-between gap-3 px-1 mt-2 z-30 relative select-none">
+        {/* JUMP Touch Pad */}
         <Button
           type="button"
           variant="outline"
@@ -1254,12 +1233,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             e.stopPropagation();
             jump();
           }}
-          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
+          className="flex-1 py-3.5 h-11 font-sans text-xs uppercase tracking-wider font-bold cursor-pointer select-none shadow-arcade active:translate-y-0.5"
         >
           JUMP
         </Button>
 
-        {/* LASER BLAST Touch Pad (Purple 3D PostHog Button) */}
+        {/* LASER BLAST Touch Pad */}
         <Button
           type="button"
           variant={laserCharges > 0 ? "default" : "secondary"}
@@ -1269,7 +1248,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             e.stopPropagation();
             fireLaser();
           }}
-          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
+          className={`flex-1 py-3.5 h-11 font-sans text-xs uppercase tracking-wider font-bold cursor-pointer select-none ${
+            laserCharges > 0 ? "shadow-arcade-primary" : "shadow-arcade"
+          } active:translate-y-0.5`}
         >
           BLAST ({laserCharges})
         </Button>
