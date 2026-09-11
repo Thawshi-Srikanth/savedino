@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DinoLoading } from "@/components/dino-loading";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableHeader,
@@ -47,6 +48,17 @@ export function MatchmakingTab({
   fetchAdminData,
   onAssignClick,
 }: MatchmakingTabProps) {
+  const [hideStaffAdmin, setHideStaffAdmin] = useState(true);
+
+  const filteredSoloUsers = useMemo(() => {
+    return unassignedSoloUsers.filter((u) => {
+      if (hideStaffAdmin && (u.role === "admin" || u.role === "staff")) {
+        return false;
+      }
+      return true;
+    });
+  }, [unassignedSoloUsers, hideStaffAdmin]);
+
   const renderRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
@@ -101,6 +113,33 @@ export function MatchmakingTab({
               </button>
             )}
           </div>
+
+          {/* Hide Staff & Admin Toggle Button */}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setHideStaffAdmin((prev) => !prev)}
+            className={cn(
+              "h-8 text-xs font-semibold gap-1.5 shrink-0 transition-all cursor-pointer shadow-arcade active:translate-y-0.5",
+              hideStaffAdmin
+                ? "bg-[#8b5cf6]/10 text-[#8b5cf6] border-[#8b5cf6]/40 hover:bg-[#8b5cf6]/20"
+                : "bg-muted/50 text-muted-foreground hover:text-foreground border-border"
+            )}
+          >
+            <Shield className="size-3.5" />
+            <span>Hide Staff &amp; Admins</span>
+            <span
+              className={cn(
+                "text-[10px] font-mono px-1.5 py-0.5 rounded font-bold uppercase",
+                hideStaffAdmin
+                  ? "bg-[#8b5cf6] text-white"
+                  : "bg-muted-foreground/20 text-muted-foreground"
+              )}
+            >
+              {hideStaffAdmin ? "ON" : "OFF"}
+            </span>
+          </Button>
 
           {/* Refresh Icon Button with Tooltip */}
           <Tooltip>
@@ -161,11 +200,17 @@ export function MatchmakingTab({
             </div>
             <p>There are no unassigned solo students at this moment.</p>
           </div>
-        ) : unassignedSoloUsers.length === 0 ? (
+        ) : filteredSoloUsers.length === 0 ? (
           <div className="py-16 text-center text-xs text-muted-foreground space-y-1">
             <Search className="size-8 mx-auto text-muted-foreground/30 mb-1" />
-            <div className="font-semibold text-sm text-foreground">No matching researchers</div>
-            <p>No unassigned researchers match your search term.</p>
+            <div className="font-semibold text-sm text-foreground">
+              {unassignedSoloUsers.length > 0 ? "Staff & Admin members are hidden" : "No matching researchers"}
+            </div>
+            <p>
+              {unassignedSoloUsers.length > 0
+                ? "Turn off the 'Hide Staff & Admins' toggle above to view them."
+                : "No unassigned researchers match your search term."}
+            </p>
           </div>
         ) : (
           <Table className="w-full table-fixed border-b border-border">
@@ -186,7 +231,7 @@ export function MatchmakingTab({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {unassignedSoloUsers.map((u) => (
+              {filteredSoloUsers.map((u) => (
                 <TableRow key={u.id} className="hover:bg-muted/30 border-b border-border/60">
                   <TableCell className="py-2 px-3 w-[35%] min-w-0 overflow-hidden">
                     <div className="flex items-center gap-2.5 min-w-0">
