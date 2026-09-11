@@ -204,6 +204,10 @@ export async function invalidateSessionCache() {
   return fetchSessionDeduplicated(true);
 }
 
+const SERVER_SNAPSHOT: SessionStoreState = { data: null, isPending: false, error: null };
+const getServerSnapshot = () => SERVER_SNAPSHOT;
+const getClientSnapshot = () => memoryState;
+
 /**
  * Optimized React hook: Drop-in replacement for Better-Auth `useSession()`
  * - Instant local storage hydration (zero layout shift)
@@ -216,8 +220,8 @@ export function useSession() {
       listeners.add(onStoreChange);
       return () => listeners.delete(onStoreChange);
     }, []),
-    () => memoryState,
-    () => ({ data: null, isPending: false, error: null })
+    getClientSnapshot,
+    getServerSnapshot
   );
 
   const refetch = useCallback(async () => {
