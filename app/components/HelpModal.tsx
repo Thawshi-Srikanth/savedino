@@ -72,10 +72,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <div className="rounded-xl border border-border bg-muted/40 p-3 flex items-center justify-between">
                 <div>
                   <span className="font-sans text-xs block font-bold text-foreground">
-                    UP ARROW
+                    UP ARROW (x2)
                   </span>
                   <span className="text-[11px] text-muted-foreground font-sans">
-                    Jump / Mid-air
+                    Jump / Double Jump
                   </span>
                 </div>
                 <kbd className="px-2 py-1 text-[11px] font-mono font-bold bg-card text-foreground border border-border rounded shadow-arcade-xs select-none">
@@ -87,7 +87,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                   TOUCH CONTROLS (MOBILE)
                 </span>
                 <span className="text-[11px] text-muted-foreground font-sans">
-                  Tap on-screen JUMP and BLAST action buttons or tap left/right sides of canvas.
+                  Tap JUMP button (tap again in air for Double Jump) and BLAST button, or tap left/right canvas sides.
                 </span>
               </div>
             </div>

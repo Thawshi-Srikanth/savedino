@@ -52,6 +52,72 @@ const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 // Offscreen Sprite Cache for High-Performance 60fps Blitting
 const spriteCache: Record<string, HTMLCanvasElement> = {};
 
+// 8-Bit Pixel Art Color Palette for Retro Asteroid Sprites
+const PIXEL_PALETTE: Record<string, string> = {
+  ".": "transparent",
+  E: "#ef4444", // Outer plasma re-entry fire aura
+  O: "#18181b", // Dark 8-bit pixel outline
+  R: "#44403c", // Dark stone basalt
+  M: "#78716c", // Mid stone
+  H: "#a8a29e", // Light stone highlight
+  W: "#f5f5f4", // Specular glint white
+  C: "#0c0a09", // Deep crater cavity
+  F: "#ea580c", // Magma fissure
+  Y: "#fde047", // Molten heat core
+};
+
+// Handcrafted 8-Bit Retro Pixel Art Asteroid Matrices
+const SMALL_ASTEROID = [
+  "....EEEE....",
+  "..EEOOOOEE..",
+  ".EOOMMMMRROE.",
+  ".EOMMHWMMMRE.",
+  "EOMMMCYMMFFOE",
+  "EOMMMCFFMFFOE",
+  "EORMMMMMMRROE",
+  ".EORRRRRRROE.",
+  "..EEOOOOEE..",
+  "....EEEE....",
+];
+
+const MEDIUM_ASTEROID = [
+  ".....EEEEEE.....",
+  "..EEEOOOOOOEEE..",
+  ".EEOOMMMHHMMROOE",
+  ".EOMMMHHWWHMMROE",
+  "EOMMMMHWHHHMMCROE",
+  "EOMMMMMHHHHMCYROE",
+  "EOMMMCMMMMFFMCROE",
+  "EOMMCYCMFFFFMMROE",
+  "EOMMMCMMMFFMMRROE",
+  "EOMMMMMMCMMMRROE",
+  ".EORRRMMCYMRROE.",
+  ".EORRRMMCMFRROE.",
+  "..EEOOOOOOOOEE..",
+  ".....EEEEEE.....",
+];
+
+const GIANT_ASTEROID = [
+  ".......EEEEEEEE.......",
+  "....EEEOOOOOOOOOEEE...",
+  "..EEOOMMMHHHHHHMMROOE.",
+  ".EEOOMMHHHWWWHHHMMROOE",
+  ".EOMMMHHWWWWWHHHMMCROE",
+  "EOMMMMMHHWWWHHHMCCYROE",
+  "EOMMMMHHMMHHHMMMCCMROE",
+  "EOMMMMCMMMMMMMMFFFMMROE",
+  "EOMMMCYCMMMMFFFFYFFMROE",
+  "EOMMMMCMMMMFFFFFFFMMROE",
+  "EOMMMMMMMMCMMMMFFFMROE",
+  "EOMMMMMMMCYCMMMMMMMRROE",
+  "EORRRMMMMMCMMMMMMMRROE",
+  ".EORRRMMMMCYCMMMMRROE.",
+  ".EORRRRMMMCCCMMMRRROE.",
+  "..EEOORRRRRRRRRROOEE..",
+  "....EEEOOOOOOOOOEEE...",
+  ".......EEEEEEEE.......",
+];
+
 function getMeteorSprite(
   type: "small" | "medium" | "giant",
   rad: number,
@@ -60,110 +126,38 @@ function getMeteorSprite(
   const key = `${type}_${rad}_${step}`;
   if (spriteCache[key]) return spriteCache[key];
 
-  const size = (rad + step * 2) * 2;
+  const grid =
+    type === "giant"
+      ? GIANT_ASTEROID
+      : type === "medium"
+        ? MEDIUM_ASTEROID
+        : SMALL_ASTEROID;
+
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const pixelSize = Math.max(2, Math.floor((rad * 2.2) / cols));
+  const width = cols * pixelSize;
+  const height = rows * pixelSize;
+
   const c = document.createElement("canvas");
-  c.width = size;
-  c.height = size;
+  c.width = width;
+  c.height = height;
   const sCtx = c.getContext("2d");
   if (!sCtx) return c;
 
-  const cx = size / 2;
-  const cy = size / 2;
+  sCtx.imageSmoothingEnabled = false;
 
-  // Draw 8-bit stepped pixel circles once onto offscreen canvas
-  const drawPixelCircle = (radius: number, color: string, offsetX = 0, offsetY = 0) => {
-    sCtx.fillStyle = color;
-    for (let dy = -radius; dy <= radius; dy += step) {
-      const width = Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
-      if (width > 0) {
-        sCtx.fillRect(cx + offsetX - width, cy + offsetY + dy, width * 2, step);
+  for (let r = 0; r < rows; r++) {
+    const rowStr = grid[r];
+    for (let col = 0; col < cols; col++) {
+      const char = rowStr[col];
+      const color = PIXEL_PALETTE[char];
+      if (color && color !== "transparent") {
+        sCtx.fillStyle = color;
+        sCtx.fillRect(col * pixelSize, r * pixelSize, pixelSize, pixelSize);
       }
     }
-  };
-
-  // A. Fiery Atmospheric Plasma Corona / Outer Burn
-  const fireColor = type === "giant" ? "#dc2626" : type === "small" ? "#f59e0b" : "#f97316";
-  drawPixelCircle(rad + step, fireColor);
-
-  // B. Bright Molten Corona Edge
-  drawPixelCircle(rad, type === "giant" ? "#f97316" : "#fde047");
-
-  // C. Dark Shadowed Rocky Crust (Dark base stone sphere)
-  drawPixelCircle(rad - step, "#292524");
-
-  // D. Mid Rock Body (Offset slightly top-left for 3D depth)
-  drawPixelCircle(
-    Math.max(step, rad - step * 2),
-    "#57534e",
-    -Math.floor(step * 0.5),
-    -Math.floor(step * 0.5)
-  );
-
-  // E. Lit Stone Highlight (Top-left crescent)
-  drawPixelCircle(Math.max(step, Math.floor(rad * 0.55)), "#78716c", -step, -step);
-
-  // F. Glowing Magma Veins & Heat Cracks
-  sCtx.fillStyle = "#f97316";
-  sCtx.fillRect(cx - step * 2, cy, step * 3, step);
-  sCtx.fillRect(cx, cy - step * 2, step, step * 3);
-  sCtx.fillRect(cx + step, cy + step, step * 2, step);
-
-  sCtx.fillStyle = "#fde047";
-  sCtx.fillRect(cx - step, cy, step, step);
-  sCtx.fillRect(cx, cy - step, step, step);
-
-  // G. Rotating Detailed Pixel Craters
-  if (type === "giant") {
-    sCtx.fillStyle = "#a8a29e";
-    sCtx.fillRect(cx - step * 4, cy - step * 3, step * 4, step);
-    sCtx.fillStyle = "#1c1917";
-    sCtx.fillRect(cx - step * 3, cy - step * 2, step * 3, step * 2);
-    sCtx.fillRect(cx - step * 4, cy - step, step * 5, step);
-    sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(cx - step * 2, cy - step, step * 2, step);
-
-    sCtx.fillStyle = "#78716c";
-    sCtx.fillRect(cx + step * 2, cy - step * 2, step * 2, step);
-    sCtx.fillStyle = "#1c1917";
-    sCtx.fillRect(cx + step * 2, cy - step * 2, step * 2, step * 2);
-    sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(cx + step * 2 + Math.floor(step * 0.5), cy, step, step);
-
-    sCtx.fillStyle = "#1c1917";
-    sCtx.fillRect(cx - step * 2, cy + step * 2, step * 2, step * 2);
-    sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(cx - Math.floor(step * 1.5), cy + Math.floor(step * 2.5), step, step);
-  } else if (type === "medium") {
-    sCtx.fillStyle = "#78716c";
-    sCtx.fillRect(cx - step * 2, cy - step * 2, step * 2, step);
-    sCtx.fillStyle = "#1c1917";
-    sCtx.fillRect(cx - step * 2, cy - step * 2, step * 2, step * 2);
-    sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(cx - Math.floor(step * 1.5), cy, step, step);
-
-    sCtx.fillStyle = "#1c1917";
-    sCtx.fillRect(cx + step, cy + step, step * 2, step * 2);
-    sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(
-      cx + step + Math.floor(step * 0.5),
-      cy + step + Math.floor(step * 0.5),
-      step,
-      step
-    );
-  } else {
-    sCtx.fillStyle = "#78716c";
-    sCtx.fillRect(cx - step, cy - step, step * 2, step);
-    sCtx.fillStyle = "#1c1917";
-    sCtx.fillRect(cx - step, cy, step * 2, step);
-    sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(cx, cy, step, step);
   }
-
-  // H. Specular Glint Pixels
-  sCtx.fillStyle = "#e7e5e4";
-  const glintDist = Math.floor(rad * 0.5);
-  sCtx.fillRect(cx - glintDist, cy - glintDist, step * 2, step);
-  sCtx.fillRect(cx - glintDist - step, cy - glintDist + step, step, step);
 
   spriteCache[key] = c;
   return c;
@@ -232,7 +226,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
     sourceX1: 2,
     sourceX2: 602,
 
-    // Dino State (Crouches into shooting stance when firing)
+    // Dino State (Crouches into shooting stance when firing, supports double jump)
     dino: {
       x: 50,
       y: 101, // 148 - 47
@@ -242,6 +236,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       duckWidth: 59,
       duckHeight: 25,
       isJumping: false,
+      jumpCount: 0, // 0 = ground, 1 = first jump, 2 = double jump
       isShootingCrouch: false,
       shootCrouchTimer: 0,
       legFrame: 0,
@@ -298,6 +293,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       s.dino.y = s.groundY - s.dino.height;
       s.dino.vy = 0;
       s.dino.isJumping = false;
+      s.dino.jumpCount = 0;
       s.dino.isShootingCrouch = false;
       s.meteorSpawnTimer = 15;
 
@@ -335,6 +331,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       s.dino.y = s.groundY - s.dino.height;
       s.dino.vy = 0;
       s.dino.isJumping = false;
+      s.dino.jumpCount = 0;
       s.dino.isShootingCrouch = false;
       s.meteorSpawnTimer = 15;
 
@@ -410,18 +407,55 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
     }
   }, []);
 
-  // Jump Action (Jump)
+  // Jump & Double Jump Action
   const jump = useCallback(() => {
     const s = stateRef.current;
     if (s.gameState === "IDLE" || s.gameState === "GAMEOVER") {
       fireLaser();
       return;
     }
-    if (s.gameState === "RUNNING" && !s.dino.isJumping) {
-      s.dino.isJumping = true;
-      s.dino.isShootingCrouch = false;
-      s.dino.vy = s.jumpVelocity;
-      audioSynth.playJump();
+    if (s.gameState === "RUNNING") {
+      // First Jump from Ground
+      if (!s.dino.isJumping || s.dino.jumpCount === 0) {
+        s.dino.isJumping = true;
+        s.dino.jumpCount = 1;
+        s.dino.isShootingCrouch = false;
+        s.dino.vy = s.jumpVelocity;
+        audioSynth.playJump();
+
+        // Ground takeoff dust puffs
+        for (let i = 0; i < 5; i++) {
+          s.particles.push({
+            x: s.dino.x + 8 + Math.random() * 26,
+            y: s.groundY - 2,
+            vx: (Math.random() - 0.5) * 3,
+            vy: -Math.random() * 2 - 0.5,
+            size: Math.random() * 2.5 + 1.5,
+            color: "#9ca3af",
+            life: 9,
+            maxLife: 9,
+          });
+        }
+      } else if (s.dino.isJumping && s.dino.jumpCount === 1) {
+        // Double Jump in Mid-Air!
+        s.dino.jumpCount = 2;
+        s.dino.vy = s.jumpVelocity * 0.92; // Fresh upward boost
+        audioSynth.playDoubleJump();
+
+        // Mid-air energy thrust ring & sparks
+        for (let i = 0; i < 9; i++) {
+          s.particles.push({
+            x: s.dino.x + 16 + (Math.random() - 0.5) * 18,
+            y: s.dino.y + s.dino.height - 2,
+            vx: (Math.random() - 0.5) * 5,
+            vy: Math.random() * 3 + 2, // blast downwards
+            size: Math.random() * 3 + 2,
+            color: Math.random() > 0.4 ? "#00ffff" : "#ffffff",
+            life: 14,
+            maxLife: 14,
+          });
+        }
+      }
     }
   }, [fireLaser]);
 
@@ -563,7 +597,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           }
         }
 
-        // Dino Physics (Jumping only)
+        // Dino Physics (Jumping only, reset jumpCount upon touchdown)
         if (s.dino.isJumping) {
           s.dino.y += s.dino.vy;
           s.dino.vy += s.gravity;
@@ -571,10 +605,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           if (s.dino.y >= groundY - s.dino.height) {
             s.dino.y = groundY - s.dino.height;
             s.dino.isJumping = false;
+            s.dino.jumpCount = 0;
             s.dino.vy = 0;
           }
         } else if (!s.dino.isShootingCrouch) {
           s.dino.y = groundY - s.dino.height;
+          s.dino.jumpCount = 0;
           if (s.frameCount % 6 === 0) {
             s.dino.legFrame = (s.dino.legFrame + 1) % 2;
           }
@@ -585,55 +621,74 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         }
 
         // ----------------------------------------------------
-        // SPAWN METEORS TOWARDS GROUND / DINO
+        // SPAWN METEORS TOWARDS GROUND / DINO (PACED & ANTI-BUNCHING)
         // ----------------------------------------------------
         s.meteorSpawnTimer++;
-        const spawnInterval = Math.max(45, 110 - Math.floor(s.score / 50) * 5);
-        if (s.meteorSpawnTimer >= spawnInterval) {
-          s.meteorSpawnTimer = 0;
-          audioSynth.playMeteor();
+        const baseInterval = Math.max(68, 128 - Math.floor(s.score / 40) * 4);
+        if (s.meteorSpawnTimer >= baseInterval) {
+          // Check if any existing meteor is within 130px of spawn entry zone
+          const isSpawnZoneOccupied = s.meteors.some(
+            (m) => m.x > CANVAS_WIDTH - 130
+          );
 
-          const startX = CANVAS_WIDTH + 25;
-          const startY = -20 + Math.random() * 30;
-          const targetX = s.dino.x + 10 + (Math.random() > 0.5 ? 0 : 35);
-          const targetY = groundY - (Math.random() > 0.4 ? 18 : 34);
+          if (!isSpawnZoneOccupied) {
+            // Add randomized jitter to timer so spawns feel organic with breathing room
+            s.meteorSpawnTimer = -Math.floor(Math.random() * 26);
+            audioSynth.playMeteor();
 
-          const dx = targetX - startX;
-          const dy = targetY - startY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+            const startX = CANVAS_WIDTH + 25;
+            const startY = -22 + Math.random() * 32;
+            const targetX = s.dino.x + 8 + (Math.random() > 0.5 ? 0 : 35);
+            const targetY = groundY - (Math.random() > 0.4 ? 18 : 34);
 
-          const randClass = Math.random();
-          let meteorType: "small" | "medium" | "giant" = "medium";
-          let size = 22;
-          let speed = 3.6;
+            const dx = targetX - startX;
+            const dy = targetY - startY;
+            const dist = Math.hypot(dx, dy);
 
-          if (randClass < 0.35) {
-            meteorType = "small";
-            size = 14 + Math.floor(Math.random() * 4);
-            speed = 4.8 + (s.speed - 6) * 0.4 + Math.random() * 0.8;
-          } else if (randClass < 0.75) {
-            meteorType = "medium";
-            size = 22 + Math.floor(Math.random() * 5);
-            speed = 3.5 + (s.speed - 6) * 0.3 + Math.random() * 0.6;
-          } else {
-            meteorType = "giant";
-            size = 32 + Math.floor(Math.random() * 8);
-            speed = 2.4 + (s.speed - 6) * 0.2 + Math.random() * 0.5;
+            const randClass = Math.random();
+            let meteorType: "small" | "medium" | "giant" = "medium";
+            let size = 22;
+            let speed = 3.6;
+
+            if (randClass < 0.35) {
+              meteorType = "small";
+              size = 14 + Math.floor(Math.random() * 4);
+              speed = 4.6 + (s.speed - 6) * 0.3 + Math.random() * 0.6;
+            } else if (randClass < 0.75) {
+              meteorType = "medium";
+              size = 22 + Math.floor(Math.random() * 5);
+              speed = 3.5 + (s.speed - 6) * 0.25 + Math.random() * 0.5;
+            } else {
+              meteorType = "giant";
+              size = 32 + Math.floor(Math.random() * 8);
+              speed = 2.5 + (s.speed - 6) * 0.2 + Math.random() * 0.4;
+              // Giant meteors take longer to traverse, grant extra breather
+              s.meteorSpawnTimer -= 22;
+            }
+
+            // Anti-overtake velocity guard: prevent fast small meteors from ramming preceding meteors
+            const precedingMeteor = s.meteors[s.meteors.length - 1];
+            if (precedingMeteor) {
+              const prevSpeed = Math.hypot(precedingMeteor.vx, precedingMeteor.vy);
+              if (speed > prevSpeed + 0.4) {
+                speed = prevSpeed + 0.3;
+              }
+            }
+
+            s.meteors.push({
+              id: Date.now() + Math.random(),
+              type: meteorType,
+              x: startX,
+              y: startY,
+              vx: (dx / dist) * speed,
+              vy: (dy / dist) * speed,
+              size: size,
+              radius: size / 2,
+              rotation: Math.random() * Math.PI * 2,
+              rotationSpeed: (Math.random() - 0.5) * 0.07,
+              hp: 1,
+            });
           }
-
-          s.meteors.push({
-            id: Date.now() + Math.random(),
-            type: meteorType,
-            x: startX,
-            y: startY,
-            vx: (dx / dist) * speed,
-            vy: (dy / dist) * speed,
-            size: size,
-            radius: size / 2,
-            rotation: 0,
-            rotationSpeed: (Math.random() - 0.5) * 0.08,
-            hp: 1,
-          });
         }
 
         // ----------------------------------------------------
@@ -851,6 +906,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
       // Transparent Canvas Clear (Lets the smooth 700ms page background transition show through directly)
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.imageSmoothingEnabled = false;
 
       const mainColor = night ? "#e8eaed" : "#535353";
       const spriteImg = spriteImgRef.current;
@@ -952,26 +1008,45 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         const rad = Math.floor(m.radius);
         const step = Math.max(2, Math.floor(rad / 6));
 
-        // 1. Draw Trailing Flame Tail
+        // 1. Draw Multi-Layered Plasma Flame Thrust Tail
         ctx.save();
         const angle = Math.atan2(m.vy, m.vx);
-        const tailColor =
-          m.type === "giant" ? "#ef4444" : m.type === "small" ? "#f59e0b" : "#f97316";
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
 
+        // Animated oscillating flame tongues
+        const flameWave = Math.sin(s.frameCount * 0.4 + m.id) * (step * 0.8);
+        const tailColor =
+          m.type === "giant" ? "#dc2626" : m.type === "small" ? "#f59e0b" : "#ea580c";
+
+        // Outer Re-entry Flare
         ctx.fillStyle = tailColor;
-        for (let t = 1; t <= 3; t++) {
+        for (let t = 1; t <= 4; t++) {
           const tDist = rad + t * (step * 1.5);
-          const tx = cx - Math.cos(angle) * tDist + Math.sin(s.frameCount * 0.4 + t) * step;
-          const ty = cy - Math.sin(angle) * tDist + Math.cos(s.frameCount * 0.4 + t) * step;
-          const tSize = Math.max(step, step * (4 - t));
+          const tx = cx - cosA * tDist - sinA * (t % 2 === 0 ? flameWave : -flameWave);
+          const ty = cy - sinA * tDist + cosA * (t % 2 === 0 ? flameWave : -flameWave);
+          const tSize = Math.max(step, step * (5 - t));
           ctx.fillRect(Math.floor(tx - tSize / 2), Math.floor(ty - tSize / 2), tSize, tSize);
         }
 
-        // Inner Yellow Flame Core in Tail
-        ctx.fillStyle = "#fde047";
-        const txCore = cx - Math.cos(angle) * (rad + step);
-        const tyCore = cy - Math.sin(angle) * (rad + step);
+        // Mid Molten Orange Flare
+        ctx.fillStyle = "#f97316";
+        for (let t = 1; t <= 2; t++) {
+          const tDist = rad + t * (step * 1.2);
+          const tx = cx - cosA * tDist;
+          const ty = cy - sinA * tDist;
+          const tSize = Math.max(step, step * (3.5 - t));
+          ctx.fillRect(Math.floor(tx - tSize / 2), Math.floor(ty - tSize / 2), tSize, tSize);
+        }
+
+        // Inner White/Yellow Hot Core
+        ctx.fillStyle = "#fef08a";
+        const txCore = cx - cosA * (rad + step * 0.7);
+        const tyCore = cy - sinA * (rad + step * 0.7);
         ctx.fillRect(Math.floor(txCore - step), Math.floor(tyCore - step), step * 2, step * 2);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(Math.floor(txCore - Math.floor(step * 0.5)), Math.floor(tyCore - Math.floor(step * 0.5)), step, step);
         ctx.restore();
 
         // 2. Draw Cached High-Res Pixel Sprite with zero per-frame square root calculations
@@ -1052,7 +1127,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           ctx.fillText("PRESS SPACE TO FIRE & START", CANVAS_WIDTH / 2, 75);
         }
         ctx.font = '9px "Press Start 2P", monospace';
-        ctx.fillText("SPACE: LASER | UP ARROW: JUMP", CANVAS_WIDTH / 2, 105);
+        ctx.fillText("SPACE: LASER | UP: JUMP & DBL-JUMP", CANVAS_WIDTH / 2, 105);
       }
 
       // Game Over Screen if GAMEOVER
@@ -1223,15 +1298,14 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           {/* Up Arrow Keycap */}
           <div className="flex items-center gap-1.5">
             <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-muted text-foreground border border-border rounded shadow-arcade-xs select-none">
-              &uarr; UP
+              &uarr; UP (x2)
             </kbd>
-            <span className="text-[11px] font-medium text-foreground">Jump</span>
+            <span className="text-[11px] font-medium text-foreground">Jump / Double Jump</span>
           </div>
         </div>
 
         <span className="text-[11px] text-muted-foreground font-sans">
-          <span className="sm:hidden">Tap left Jump, right Shoot &bull; </span>Laser expands in
-          flight
+          <span className="sm:hidden">Tap left Jump / Dbl-Jump, right Shoot &bull; </span>Laser expands in flight
         </span>
       </div>
 
@@ -1248,7 +1322,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           }}
           className="flex-1 py-3.5 h-11 font-sans text-xs uppercase tracking-wider font-bold cursor-pointer select-none shadow-arcade active:translate-y-0.5"
         >
-          JUMP
+          JUMP / DBL-JUMP
         </Button>
 
         {/* LASER BLAST Touch Pad */}

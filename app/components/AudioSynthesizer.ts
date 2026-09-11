@@ -95,6 +95,30 @@ class AudioSynthesizer {
     osc.stop(now + 0.12);
   }
 
+  // 8-Bit Double Jump Sound (High energetic twin-tone boost)
+  public playDoubleJump() {
+    if (this.muted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
+
+    gain.gain.setValueAtTime(0.14, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.14);
+  }
+
   // 8-Bit Score Milestone Sound (Two cheerful high beeps)
   public playScore() {
     if (this.muted) return;
