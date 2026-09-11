@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions - SaveDino",
@@ -220,6 +221,24 @@ export default function TermsPage() {
             </a>
           </p>
         </section>
+
+        {/* Footer Navigation Back Link */}
+        <div className="pt-6 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs font-sans text-muted-foreground">
+          <div>
+            <span>SaveDino &bull; SEDS Sri Lanka</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="hover:text-foreground underline underline-offset-4">
+              Return Home
+            </Link>
+            <Link href="/credits" className="hover:text-foreground underline underline-offset-4">
+              Credits
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground underline underline-offset-4">
+              Privacy Policy
+            </Link>
+          </div>
+        </div>
       </main>
     </div>
   );

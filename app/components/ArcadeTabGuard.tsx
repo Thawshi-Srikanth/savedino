@@ -196,8 +196,11 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
         </div>
 
         {/* Footer Note */}
-        <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
-          SaveDino: NASA &amp; IASC Asteroid Search Collaboration
+        <div className="w-full max-w-md mx-auto flex items-center justify-between text-[10px] font-mono text-muted-foreground opacity-60 py-2">
+          <span>SaveDino &bull; NASA &amp; IASC Collaboration</span>
+          <Link href="/credits" className="hover:text-foreground underline underline-offset-2">
+            Credits
+          </Link>
         </div>
       </div>
     );

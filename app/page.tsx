@@ -349,19 +349,26 @@ export default function Home() {
           <span className="opacity-40">&bull;</span>
           <span className="opacity-75 hidden sm:inline">SEDS Sri Lanka</span>
         </div>
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <Link
+            href="/credits"
+            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+          >
+            Credits
+          </Link>
+          <span className="opacity-40">|</span>
           <Link
             href="/privacy"
             className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
           >
-            Privacy Policy
+            Privacy
           </Link>
           <span className="opacity-40">|</span>
           <Link
             href="/terms"
             className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
           >
-            Terms &amp; Conditions
+            Terms
           </Link>
         </div>
       </footer>
