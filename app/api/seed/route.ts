@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { seedDatabase } from "@/lib/seed";
 
-// GET or POST /api/seed - Trigger database seeding
+// GET or POST /api/seed - Trigger database seeding (Development Only)
 export async function GET() {
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json(
+      { error: "Dev seed is only available in development mode" },
+      { status: 403 }
+    );
+  }
+
   try {
     const result = await seedDatabase();
     return NextResponse.json({
