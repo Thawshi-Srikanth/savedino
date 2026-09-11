@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -150,6 +152,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
   const [imageSets, setImageSets] = useState<ImageSetItem[]>([]);
   const [joinRequests, setJoinRequests] = useState<JoinRequestItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
   const [copied, setCopied] = useState<boolean>(false);
 
   // Active workspace tab
@@ -585,13 +588,8 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
     0
   );
 
-  if (loading) {
-    return (
-      <div className="py-24 text-center flex flex-col items-center gap-3">
-        <RefreshCw className="size-6 animate-spin text-primary" />
-        <span className="text-xs font-mono text-muted-foreground">Loading squad workspace...</span>
-      </div>
-    );
+  if (isDisplayLoading) {
+    return <DinoLoading size="lg" text="Loading squad workspace..." fullScreen />;
   }
 
   if (accessDeniedError) {

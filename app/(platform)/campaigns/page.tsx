@@ -17,8 +17,15 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import {
   Telescope,
   PlusCircle,
@@ -269,6 +276,7 @@ export default function CampaignsPage() {
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
 
   // Filter and Search States
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("ALL");
@@ -738,11 +746,8 @@ export default function CampaignsPage() {
                   </div>
                 )}
 
-                {loading ? (
-                  <div className="py-12 text-center text-xs text-muted-foreground animate-pulse space-y-2">
-                    <Rocket className="size-6 mx-auto text-muted-foreground/30 animate-bounce" />
-                    <div>Loading campaign...</div>
-                  </div>
+                {isDisplayLoading ? (
+                  <DinoLoading size="md" text="Loading active campaign..." className="py-12" />
                 ) : !currentActiveEvent ? null : (
                   <div
                     className="relative touch-pan-y select-none"
@@ -953,10 +958,8 @@ export default function CampaignsPage() {
               </span>
             </div>
 
-            {loading ? (
-              <div className="py-12 text-center text-xs text-muted-foreground animate-pulse">
-                Loading campaigns list...
-              </div>
+            {isDisplayLoading ? (
+              <DinoLoading size="md" text="Loading campaigns list..." className="py-12" />
             ) : filteredEvents.length === 0 ? (
               <Card className="p-8 text-center text-xs text-muted-foreground">
                 No campaigns match the selected filter.

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
+import { DinoLoading } from "@/components/dino-loading";
 
 function VerifyContent() {
   const router = useRouter();
@@ -197,29 +198,29 @@ function VerifyContent() {
       </div>
 
       {/* Main Centered Verification Section */}
-      <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
-        {/* Brand Logo */}
-        <div className="flex flex-col items-center justify-center">
-          <Logo href="/" size="lg" />
+      {verifying ? (
+        <div className="w-full max-w-md mx-auto my-auto py-12 flex flex-col items-center justify-center text-center space-y-4">
+          <Logo href="/" size="lg" className="mb-2" />
+          <DinoLoading size="lg" text="Authenticating..." />
+          <div className="space-y-1">
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+              Authenticating...
+            </h1>
+            <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
+              Verifying your sign-in link and preparing your workspace.
+            </p>
+          </div>
         </div>
+      ) : (
+        <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
+          {/* Brand Logo */}
+          <div className="flex flex-col items-center justify-center">
+            <Logo href="/" size="lg" />
+          </div>
 
-        {/* Consistent Theme Verification Card */}
-        <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
-          {verifying ? (
-            <div className="text-center space-y-4 py-4">
-              <RefreshCw className="w-8 h-8 animate-spin mx-auto text-primary" />
-              <div className="space-y-1">
-                <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-                  Authenticating...
-                </h1>
-                <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-                  Verifying your sign-in link and preparing your workspace.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="text-center space-y-1.5">
+          {/* Consistent Theme Verification Card */}
+          <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
+            <div className="text-center space-y-1.5">
                 <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
                   Check your email
                 </h1>
@@ -308,13 +309,7 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<DinoLoading size="lg" text="Loading..." fullScreen />}>
       <VerifyContent />
     </Suspense>
   );

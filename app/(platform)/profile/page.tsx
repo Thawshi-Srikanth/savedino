@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   User,
@@ -121,6 +123,7 @@ export default function ProfilePage() {
   const { data: session, isPending: isSessionLoading } = useSession();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(isSessionLoading || isLoading, 1000);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Profile data from server
@@ -257,13 +260,8 @@ export default function ProfilePage() {
   // Live profile of the selected avatar preview
   const liveAvatarProfile = generateSeedProfile(selectedAvatar || user?.image || user?.id);
 
-  if (isSessionLoading || isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
-        <Loader2 className="size-7 animate-spin text-primary" />
-        <span className="text-xs font-mono text-muted-foreground">Loading Profile...</span>
-      </div>
-    );
+  if (isDisplayLoading) {
+    return <DinoLoading size="lg" text="Loading citizen profile..." fullScreen />;
   }
 
   const savedAvatarSeed = user?.image || user?.id || "Astro-Dino-101";

@@ -7,6 +7,8 @@ import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -208,6 +210,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
   // Real-time 1s ticker for live countdowns & progress
@@ -344,13 +347,8 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full py-24 text-center space-y-3 font-sans">
-        <Rocket className="size-8 mx-auto text-primary animate-bounce" />
-        <div className="text-sm font-semibold text-foreground">Loading campaign details...</div>
-      </div>
-    );
+  if (isDisplayLoading) {
+    return <DinoLoading size="lg" text="Loading campaign details..." fullScreen />;
   }
 
   if (!event) {

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { DinoLoading } from "@/components/dino-loading";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   Table,
@@ -407,7 +408,9 @@ export function TeamsTab({
 
         {/* Scrollable Table Area */}
         <div className="w-full overflow-x-auto min-h-0 relative">
-          {filteredTeams.length === 0 ? (
+          {loading ? (
+            <DinoLoading size="md" text="Loading squads..." className="py-16" />
+          ) : filteredTeams.length === 0 ? (
             <div className="py-16 text-center text-xs text-muted-foreground space-y-2">
               <Telescope className="size-8 mx-auto text-muted-foreground/30 mb-1" />
               <div className="font-semibold text-sm text-foreground">No matching squads found</div>

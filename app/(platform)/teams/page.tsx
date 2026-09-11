@@ -25,8 +25,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import {
   Search,
   User,
@@ -98,6 +105,7 @@ function TeamsContent() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [events, setEvents] = useState<CampaignEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -715,25 +723,8 @@ function TeamsContent() {
           </div>
 
           {/* Squad Cards Grid */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Array.from({ length: pageSize }).map((_, idx) => (
-                <Card key={idx} className="p-4 space-y-3 bg-card border-border animate-pulse">
-                  <div className="h-4 w-20 bg-muted rounded" />
-                  <div className="h-5 w-3/4 bg-muted rounded" />
-                  <div className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-1.5">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="size-6 rounded bg-muted" />
-                      ))}
-                    </div>
-                    <div className="h-3 w-10 bg-muted rounded" />
-                  </div>
-                  <div className="h-8 w-full bg-muted/60 rounded" />
-                  <div className="h-8 w-full bg-muted rounded mt-2" />
-                </Card>
-              ))}
-            </div>
+          {isDisplayLoading ? (
+            <DinoLoading size="md" text="Loading squads..." className="py-16" />
           ) : filteredTeams.length === 0 ? (
             <Card className="p-12 text-center text-sm text-muted-foreground space-y-2 border-dashed min-h-[280px] flex flex-col items-center justify-center">
               <div className="font-sans font-bold text-foreground text-sm">
@@ -1101,13 +1092,7 @@ function TeamsContent() {
 
 export default function TeamsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="p-12 text-center text-xs font-mono text-muted-foreground">
-          Loading citizen teams...
-        </div>
-      }
-    >
+    <Suspense fallback={<DinoLoading size="lg" text="Loading citizen teams..." fullScreen />}>
       <TeamsContent />
     </Suspense>
   );

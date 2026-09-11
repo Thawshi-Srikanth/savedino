@@ -6,9 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, User, Building, Globe, ArrowRight, RefreshCw } from "lucide-react";
+import { User, Mail, Building, Globe, ArrowRight, RefreshCw, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
+import { DinoLoading } from "@/components/dino-loading";
 
 function RegisterForm() {
   const router = useRouter();
@@ -227,13 +228,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<DinoLoading size="lg" text="Loading..." fullScreen />}>
       <RegisterForm />
     </Suspense>
   );

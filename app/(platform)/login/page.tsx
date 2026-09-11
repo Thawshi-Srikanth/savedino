@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
+import { DinoLoading } from "@/components/dino-loading";
 
 function LoginForm() {
   const router = useRouter();
@@ -179,13 +180,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<DinoLoading size="lg" text="Loading..." fullScreen />}>
       <LoginForm />
     </Suspense>
   );

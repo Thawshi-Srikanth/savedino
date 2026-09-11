@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth-client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
 import { Users, Telescope, Rocket, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,6 +69,7 @@ export default function AdminDashboardPage() {
   const [teams, setTeams] = useState<TeamData[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
 
   // User Management Filters & Pagination
   const [userSearch, setUserSearch] = useState<string>("");
@@ -901,7 +903,7 @@ export default function AdminDashboardPage() {
               staffCount={staffCount}
               citizenCount={citizenCount}
               unassignedCount={unassignedCount}
-              loading={loading}
+              loading={isDisplayLoading}
               fetchAdminData={fetchAdminData}
               onQuickRoleChange={handleQuickRoleChange}
               onEditUser={handleOpenEditUser}
@@ -916,7 +918,7 @@ export default function AdminDashboardPage() {
               unassignedSoloUsers={unassignedSoloUsers}
               soloSearch={soloSearch}
               setSoloSearch={setSoloSearch}
-              loading={loading}
+              loading={isDisplayLoading}
               fetchAdminData={fetchAdminData}
               onAssignClick={(u) => {
                 setAssigningUser(u);
@@ -948,7 +950,7 @@ export default function AdminDashboardPage() {
               fullSquadsCount={fullSquadsCount}
               totalSquadMembers={totalSquadMembers}
               totalOpenSlots={totalOpenSlots}
-              loading={loading}
+              loading={isDisplayLoading}
               fetchAdminData={fetchAdminData}
               onQuickStatusChange={handleQuickTeamStatus}
               onRotateInviteCode={handleRotateInviteCode}
@@ -978,7 +980,7 @@ export default function AdminDashboardPage() {
               upcomingCampCount={upcomingCampCount}
               subOpenCampCount={subOpenCampCount}
               completedCampCount={completedCampCount}
-              loading={loading}
+              loading={isDisplayLoading}
               fetchAdminData={fetchAdminData}
               onQuickStatusChange={handleQuickCampaignStatus}
               onEditCampaign={handleOpenEditCampaign}
