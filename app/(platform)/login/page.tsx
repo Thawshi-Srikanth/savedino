@@ -107,9 +107,11 @@ function LoginForm() {
         {/* Auth Card */}
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="text-center space-y-1.5">
-            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">Sign in</h1>
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+              Sign in to SaveDino
+            </h1>
             <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-              Enter your email address to receive a sign-in link.
+              No account creation needed. Enter your email to receive an instant access link.
             </p>
           </div>
 
@@ -145,28 +147,19 @@ function LoginForm() {
                 </>
               ) : (
                 <>
-                  <span>Send Login Link</span>
+                  <span>Send Sign-in Link</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </Button>
           </form>
 
-          <div className="text-center text-xs font-sans text-muted-foreground pt-2 border-t border-border">
-            No password needed. We&apos;ll email you a secure link to sign in.
+          <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-0.5">
+            <p className="font-semibold text-foreground">No separate sign-up or password required.</p>
+            <p className="text-[11px] text-muted-foreground">
+              First time? Entering your email sets up your citizen scientist account automatically.
+            </p>
           </div>
-        </div>
-
-        {/* Bottom Navigation */}
-        <div className="text-center text-xs font-sans text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
-          >
-            <span>Create account</span>
-            <span>&rarr;</span>
-          </Link>
         </div>
       </div>
 

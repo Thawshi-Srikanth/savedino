@@ -33,7 +33,8 @@ export const auth = betterAuth({
               ...user,
               role,
               institution: user.institution || metadata.institution || null,
-              country: user.country || metadata.country || null,
+              country: user.country || metadata.country || "Sri Lanka",
+              whatsapp: (user as any).whatsapp || metadata.whatsapp || null,
               image: user.image || `Astro-Dino-${Math.floor(100 + Math.random() * 900)}`,
             },
           };
@@ -59,6 +60,11 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      whatsapp: {
+        type: "string",
+        required: false,
+      },
     },
   },
 });
+// Auth configuration reloaded

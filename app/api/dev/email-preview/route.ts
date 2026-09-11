@@ -696,10 +696,7 @@ export async function POST(request: NextRequest) {
       provider: provider as "auto" | "resend" | "brevo",
     });
 
-    return NextResponse.json({
-      success: true,
-      ...result,
-    });
+    return NextResponse.json(result);
   } catch (err: any) {
     console.error("[POST /api/dev/email-preview Error]:", err);
     return NextResponse.json(

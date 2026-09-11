@@ -42,7 +42,25 @@ function VerifyContent() {
           setVerifying(false);
         } else {
           toast.success("Authenticated successfully!");
-          router.push(redirectTo);
+          const profileRes = await fetch("/api/user/profile");
+          const profileData = await profileRes.json();
+          if (profileData.success && profileData.user) {
+            const u = profileData.user;
+            const isComplete =
+              u.name &&
+              u.name.trim().length > 0 &&
+              !u.name.includes("@") &&
+              u.name.toLowerCase() !== u.email?.toLowerCase() &&
+              u.whatsapp &&
+              u.whatsapp.trim().length > 0;
+
+            if (isComplete) {
+              sessionStorage.setItem("savedino_profile_completed", "true");
+              window.location.href = redirectTo;
+              return;
+            }
+          }
+          window.location.href = `/onboarding?redirectTo=${encodeURIComponent(redirectTo)}`;
         }
       } catch (err: any) {
         const msg = err.message || "Failed to verify link. Please request a new one.";
@@ -57,15 +75,29 @@ function VerifyContent() {
   // If already authenticated and not verifying token, forward to destination
   useEffect(() => {
     if (token) return;
-    authClient
-      .getSession()
-      .then((res) => {
-        if (res?.data?.session) {
-          router.push(redirectTo);
+    fetch("/api/user/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.user) {
+          const u = data.user;
+          const isComplete =
+            u.name &&
+            u.name.trim().length > 0 &&
+            !u.name.includes("@") &&
+            u.name.toLowerCase() !== u.email?.toLowerCase() &&
+            u.whatsapp &&
+            u.whatsapp.trim().length > 0;
+
+          if (isComplete) {
+            sessionStorage.setItem("savedino_profile_completed", "true");
+            window.location.href = redirectTo;
+          } else {
+            window.location.href = `/onboarding?redirectTo=${encodeURIComponent(redirectTo)}`;
+          }
         }
       })
       .catch(() => {});
-  }, [token, redirectTo, router]);
+  }, [token, redirectTo]);
 
   // Handle URL errors
   useEffect(() => {
@@ -96,9 +128,28 @@ function VerifyContent() {
     const checkSession = async () => {
       try {
         const res = await authClient.getSession();
-        if (res?.data?.session && isSubscribed) {
+        const user = res?.data?.user as any;
+        if (user && isSubscribed) {
           toast.success("Signed in successfully!");
-          router.push(redirectTo);
+          const profileRes = await fetch("/api/user/profile");
+          const profileData = await profileRes.json();
+          if (profileData.success && profileData.user) {
+            const u = profileData.user;
+            const isComplete =
+              u.name &&
+              u.name.trim().length > 0 &&
+              !u.name.includes("@") &&
+              u.name.toLowerCase() !== u.email?.toLowerCase() &&
+              u.whatsapp &&
+              u.whatsapp.trim().length > 0;
+
+            if (isComplete) {
+              sessionStorage.setItem("savedino_profile_completed", "true");
+              window.location.href = redirectTo;
+              return;
+            }
+          }
+          window.location.href = `/onboarding?redirectTo=${encodeURIComponent(redirectTo)}`;
         }
       } catch {
         // Ignore polling errors
@@ -282,18 +333,6 @@ function VerifyContent() {
                 <span>Use a different email</span>
               </Link>
             </div>
-          </div>
-
-          {/* Bottom Navigation */}
-          <div className="text-center text-xs font-sans text-muted-foreground">
-            Need an account?{" "}
-            <Link
-              href="/register"
-              className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
-            >
-              <span>Create account</span>
-              <span>&rarr;</span>
-            </Link>
           </div>
         </div>
       )}

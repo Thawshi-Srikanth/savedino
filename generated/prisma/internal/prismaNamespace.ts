@@ -1139,6 +1139,7 @@ export const UserScalarFieldEnum = {
   role: 'role',
   institution: 'institution',
   country: 'country',
+  whatsapp: 'whatsapp',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

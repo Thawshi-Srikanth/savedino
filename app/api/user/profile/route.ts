@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { validatePhoneNumber } from "@/lib/phone-validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -33,6 +34,7 @@ export async function GET(req: Request) {
         image: true,
         institution: true,
         country: true,
+        whatsapp: true,
         createdAt: true,
         teamMembers: {
           include: {
@@ -154,6 +156,7 @@ export async function GET(req: Request) {
         image: user.image,
         institution: user.institution,
         country: user.country,
+        whatsapp: user.whatsapp,
         createdAt: user.createdAt,
       },
       campaigns,
@@ -206,7 +209,7 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { name, institution, country, image } = body;
+    const { name, institution, country, whatsapp, image } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
@@ -215,12 +218,29 @@ export async function PATCH(req: Request) {
       );
     }
 
+    let formattedWhatsapp: string | null | undefined = undefined;
+    if (whatsapp !== undefined) {
+      if (whatsapp && typeof whatsapp === "string" && whatsapp.trim().length > 0) {
+        const phoneValidation = validatePhoneNumber(whatsapp, country || "Sri Lanka");
+        if (!phoneValidation.isValid) {
+          return NextResponse.json(
+            { success: false, error: phoneValidation.error || "Invalid phone number format." },
+            { status: 400 }
+          );
+        }
+        formattedWhatsapp = phoneValidation.formatted || whatsapp.trim();
+      } else {
+        formattedWhatsapp = null;
+      }
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
         name: name.trim(),
         institution: institution !== undefined ? institution?.trim() || null : undefined,
         country: country !== undefined ? country?.trim() || null : undefined,
+        whatsapp: formattedWhatsapp,
         image: image !== undefined ? image?.trim() || null : undefined,
       },
       select: {
@@ -231,6 +251,7 @@ export async function PATCH(req: Request) {
         image: true,
         institution: true,
         country: true,
+        whatsapp: true,
         updatedAt: true,
       },
     });

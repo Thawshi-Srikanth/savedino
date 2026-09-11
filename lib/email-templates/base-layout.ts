@@ -142,6 +142,8 @@ export function renderBaseEmailLayout({
                       <a href="mailto:info@sedssl.org" style="color:#8b5cf6;text-decoration:underline;" target="_blank">Contact us</a>
                       <span style="color:#38393e;margin:0 8px;">|</span>
                       <a href="${baseUrl}/privacy" style="color:#8b5cf6;text-decoration:underline;" target="_blank">Privacy Policy</a>
+                      <span style="color:#38393e;margin:0 8px;">|</span>
+                      <a href="${baseUrl}/terms" style="color:#8b5cf6;text-decoration:underline;" target="_blank">Terms</a>
                     </p>
                     <div style="font-family:'Space Mono', ui-monospace, monospace;font-size:10px;color:#475569;border-top:1px dashed #1e2025;padding-top:12px;">
                       <p class="email-footer-brand" style="margin:0 0 3px 0;font-weight:700;color:#94a3b8;font-size:12px;">SaveDino</p>

@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DinoLoading } from "@/components/dino-loading";
 import { useMinimumLoading } from "@/hooks/use-minimum-loading";
+import { validatePhoneNumber, getCountryName } from "@/lib/phone-validation";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   User,
@@ -23,6 +25,7 @@ import {
   Calendar,
   Building2,
   Globe,
+  Phone,
   Mail,
   ShieldCheck,
   Check,
@@ -44,6 +47,7 @@ interface UserProfileData {
   image?: string | null;
   institution?: string | null;
   country?: string | null;
+  whatsapp?: string | null;
   createdAt: string;
 }
 
@@ -142,6 +146,7 @@ export default function ProfilePage() {
 
   // Edit Form state (Client-side only until user clicks Save)
   const [formName, setFormName] = useState<string>("");
+  const [formWhatsapp, setFormWhatsapp] = useState<string>("");
   const [formInstitution, setFormInstitution] = useState<string>("");
   const [formCountry, setFormCountry] = useState<string>("");
   const [selectedAvatar, setSelectedAvatar] = useState<string>("");
@@ -177,6 +182,7 @@ export default function ProfilePage() {
 
         // Initialize local form fields
         setFormName(data.user.name || "");
+        setFormWhatsapp(data.user.whatsapp || "");
         setFormInstitution(data.user.institution || "");
         setFormCountry(data.user.country || "");
         setSelectedAvatar(data.user.image || data.user.id || "Astro-Dino-101");
@@ -208,6 +214,16 @@ export default function ProfilePage() {
       return;
     }
 
+    let formattedWhatsapp: string | null = null;
+    if (formWhatsapp.trim()) {
+      const phoneValidation = validatePhoneNumber(formWhatsapp, formCountry || "Sri Lanka");
+      if (!phoneValidation.isValid) {
+        toast.error(phoneValidation.error || "Please enter a valid phone number.");
+        return;
+      }
+      formattedWhatsapp = phoneValidation.formatted || formWhatsapp.trim();
+    }
+
     try {
       setIsSaving(true);
       const res = await fetch("/api/user/profile", {
@@ -215,6 +231,7 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formName.trim(),
+          whatsapp: formattedWhatsapp,
           institution: formInstitution.trim() || null,
           country: formCountry.trim() || null,
           image: selectedAvatar.trim() || null,
@@ -224,6 +241,7 @@ export default function ProfilePage() {
       const data = await res.json();
       if (data.success) {
         toast.success("Profile changes saved successfully!");
+        if (formattedWhatsapp) setFormWhatsapp(formattedWhatsapp);
         setUser((prev) => (prev ? { ...prev, ...data.user } : data.user));
       } else {
         toast.error(data.error || "Failed to save profile changes.");
@@ -267,6 +285,7 @@ export default function ProfilePage() {
   const savedAvatarSeed = user?.image || user?.id || "Astro-Dino-101";
   const hasUnsavedChanges =
     (formName || "").trim() !== (user?.name || "").trim() ||
+    (formWhatsapp || "").trim() !== (user?.whatsapp || "").trim() ||
     (formInstitution || "").trim() !== (user?.institution || "").trim() ||
     (formCountry || "").trim() !== (user?.country || "").trim() ||
     selectedAvatar !== savedAvatarSeed;
@@ -274,6 +293,7 @@ export default function ProfilePage() {
   const handleDiscardChanges = () => {
     if (user) {
       setFormName(user.name || "");
+      setFormWhatsapp(user.whatsapp || "");
       setFormInstitution(user.institution || "");
       setFormCountry(user.country || "");
       setSelectedAvatar(user.image || user.id || "Astro-Dino-101");
@@ -314,31 +334,8 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Email & Affiliation */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground font-sans">
-              <span className="inline-flex items-center gap-1 truncate">
-                <Mail className="size-3 opacity-70 shrink-0" />
-                <span className="truncate">{user?.email}</span>
-              </span>
-
-              {user?.institution && (
-                <span className="inline-flex items-center gap-1">
-                  <span className="opacity-40">•</span>
-                  <Building2 className="size-3 opacity-70 shrink-0" />
-                  <span>{user.institution}</span>
-                </span>
-              )}
-
-              {user?.country && (
-                <span className="inline-flex items-center gap-1">
-                  <span className="opacity-40">•</span>
-                  <Globe className="size-3 opacity-70 shrink-0" />
-                  <span>{user.country}</span>
-                </span>
-              )}
-
-              <span className="inline-flex items-center gap-1 text-[11px] opacity-75 font-mono">
-                <span className="opacity-40">•</span>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+              <span>
                 Joined{" "}
                 {new Date(user?.createdAt || Date.now()).toLocaleDateString("en-US", {
                   month: "short",
@@ -464,7 +461,7 @@ export default function ProfilePage() {
                     <span>Personal Details</span>
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Update your public display name, affiliation, and country.
+                    Update your public display name, WhatsApp number, affiliation, and country.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -497,6 +494,32 @@ export default function ProfilePage() {
                     </p>
                   </div>
 
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="whatsapp"
+                      className="text-xs font-bold flex items-center justify-between"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Phone className="size-3.5 text-primary" />
+                        <span>WhatsApp Number</span>
+                      </span>
+                      <span className="text-[11px] font-normal text-muted-foreground">
+                        squad &amp; campaign coordination
+                      </span>
+                    </Label>
+                    <PhoneInput
+                      id="whatsapp"
+                      value={formWhatsapp}
+                      defaultCountry={formCountry || "Sri Lanka"}
+                      onChange={(val, meta) => {
+                        setFormWhatsapp(val);
+                        if (meta?.country && !formCountry) {
+                          setFormCountry(getCountryName(meta.country));
+                        }
+                      }}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="institution" className="text-xs font-bold">
@@ -519,7 +542,7 @@ export default function ProfilePage() {
                         id="country"
                         value={formCountry}
                         onChange={(e) => setFormCountry(e.target.value)}
-                        placeholder="e.g. United States, Japan"
+                        placeholder="Sri Lanka"
                         className="h-9 text-xs rounded-xl"
                       />
                     </div>

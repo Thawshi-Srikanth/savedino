@@ -40,8 +40,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  // Dedicated Full-Screen Layout for Login, Register & Verify (No Navbar)
-  if (pathname === "/login" || pathname === "/register" || pathname === "/verify") {
+  // Dedicated Full-Screen Layout for Login, Register, Verify, Onboarding & Create (No Navbar)
+  if (
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/verify" ||
+    pathname === "/onboarding" ||
+    pathname === "/create"
+  ) {
     return (
       <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans select-none">
         {children}
@@ -152,19 +158,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Link href="/login">
                   <Button
                     size="sm"
-                    variant="outline"
-                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5"
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button
-                    size="sm"
                     variant="default"
                     className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
                   >
-                    Register
+                    Sign In
                   </Button>
                 </Link>
               </div>
@@ -233,8 +230,35 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       </header>
 
       {/* Main Content Body (With pb-24 on mobile so bottom bar never obscures content) */}
-      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
-        {children}
+      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 flex flex-col justify-between">
+        <div className="flex-1">{children}</div>
+
+        {/* Platform Bottom Footer Note */}
+        <footer className="w-full pt-8 mt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-sans text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-foreground">SaveDino</span>
+            <span className="opacity-40">&bull;</span>
+            <span>NASA &amp; IASC Asteroid Search Collaboration</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/privacy" className="hover:text-foreground transition-colors hover:underline">
+              Privacy Policy
+            </Link>
+            <span className="opacity-40">|</span>
+            <Link href="/terms" className="hover:text-foreground transition-colors hover:underline">
+              Terms &amp; Conditions
+            </Link>
+            <span className="opacity-40">|</span>
+            <a
+              href="https://sedssl.org"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-foreground transition-colors hover:underline"
+            >
+              SEDS Sri Lanka
+            </a>
+          </div>
+        </footer>
       </main>
 
       {/* Profile Onboarding Modal for Incomplete Magic-Link Profiles */}

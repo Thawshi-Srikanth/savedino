@@ -1,226 +1,75 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { getRandomSeed } from "@/lib/seed-avatar";
-import { Sparkles, User, Building2, Globe, Loader2, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
 
 export function ProfileOnboardingDialog() {
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const pathname = usePathname();
   const router = useRouter();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [hasChecked, setHasChecked] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Form Fields
-  const [name, setName] = useState("");
-  const [institution, setInstitution] = useState("");
-  const [country, setCountry] = useState("");
-  const [avatarSeed, setAvatarSeed] = useState("");
+  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
-    // Don't pop up on auth pages (login, register, verify) or on the dedicated profile page
+    // Don't intercept auth pages, onboarding, verify, or when not signed in
     if (
+      isPending ||
       !session?.user?.id ||
       pathname === "/login" ||
       pathname === "/register" ||
       pathname === "/verify" ||
-      pathname === "/profile"
+      pathname === "/onboarding" ||
+      pathname === "/create"
     ) {
-      setIsOpen(false);
       return;
     }
 
-    // Check if user dismissed onboarding in this browser session
-    const dismissed = sessionStorage.getItem("savedino_onboarding_dismissed");
-    if (dismissed) {
+    // Fast-path: check if profile completion was already verified in this session
+    if (typeof window !== "undefined" && sessionStorage.getItem("savedino_profile_completed") === "true") {
       return;
     }
 
-    // Determine if profile is incomplete:
-    // Missing institution OR name is empty / default email prefix
-    const user = session.user as any;
-    const isEmailPrefixName =
-      !user.name ||
-      user.name.trim() === "" ||
-      user.name.includes("@") ||
-      (user.email && user.name.toLowerCase() === user.email.split("@")[0].toLowerCase());
+    if (hasCheckedRef.current) return;
+    hasCheckedRef.current = true;
 
-    const isMissingInstitution = !user.institution || user.institution.trim() === "";
+    // Verify against fresh server profile data
+    fetch("/api/user/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.user) {
+          const u = data.user;
+          const isCompleteName =
+            u.name &&
+            u.name.trim().length > 0 &&
+            !u.name.includes("@") &&
+            u.name.toLowerCase() !== u.email?.toLowerCase();
 
-    if ((isEmailPrefixName || isMissingInstitution) && !hasChecked) {
-      setName(user.name && !user.name.includes("@") ? user.name : "");
-      setInstitution(user.institution || "");
-      setCountry(user.country || "");
-      // System assigns a default random avatar seed if one does not already exist
-      setAvatarSeed(user.image || getRandomSeed());
-      setIsOpen(true);
-      setHasChecked(true);
-    }
-  }, [session, pathname, hasChecked]);
+          const isCompleteWhatsapp = u.whatsapp && u.whatsapp.trim().length > 0;
 
-  const handleDismiss = () => {
-    sessionStorage.setItem("savedino_onboarding_dismissed", "true");
-    setIsOpen(false);
-  };
+          if (isCompleteName && isCompleteWhatsapp) {
+            sessionStorage.setItem("savedino_profile_completed", "true");
+          } else {
+            sessionStorage.removeItem("savedino_profile_completed");
+            router.push(`/onboarding?redirectTo=${encodeURIComponent(pathname)}`);
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback to session user if API fails
+        const user = session.user as any;
+        const isMissingName =
+          !user.name ||
+          user.name.trim() === "" ||
+          user.name.includes("@") ||
+          (user.email && user.name.toLowerCase() === user.email.toLowerCase());
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Please enter your full name.");
-      return;
-    }
+        const isMissingWhatsapp = !user.whatsapp || user.whatsapp.trim() === "";
 
-    setIsSaving(true);
-    try {
-      const res = await fetch("/api/user/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          institution: institution.trim() || null,
-          country: country.trim() || null,
-          image: avatarSeed.trim() || null,
-        }),
+        if (isMissingName || isMissingWhatsapp) {
+          router.push(`/onboarding?redirectTo=${encodeURIComponent(pathname)}`);
+        }
       });
+  }, [session, isPending, pathname, router]);
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to save profile details");
-      }
-
-      toast.success("Profile setup complete! Welcome aboard.");
-      sessionStorage.setItem("savedino_onboarding_dismissed", "true");
-      setIsOpen(false);
-      router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save details. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) handleDismiss();
-      }}
-    >
-      <DialogContent className="w-[calc(100%-2rem)] max-w-md mx-auto p-5 sm:p-6 bg-card border border-border rounded-2xl shadow-2xl font-sans">
-        <DialogHeader className="space-y-2 text-left">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold w-fit">
-            <Sparkles className="size-3" />
-            <span>Welcome Citizen Scientist</span>
-          </div>
-          <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-            Complete Your Profile
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Please enter your display name and affiliation to get started with observation campaigns
-            and squads.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-          {/* Form Fields */}
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="onboard-name" className="text-xs font-bold flex items-center gap-1.5">
-                <User className="size-3.5 text-primary" />
-                <span>
-                  Full Name <span className="text-destructive">*</span>
-                </span>
-              </Label>
-              <Input
-                id="onboard-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Alex Hunter"
-                className="h-9 text-xs rounded-xl"
-                required
-                autoFocus
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="onboard-inst" className="text-xs font-bold flex items-center gap-1.5">
-                <Building2 className="size-3.5 text-primary" />
-                <span>School / University / Organization</span>
-              </Label>
-              <Input
-                id="onboard-inst"
-                value={institution}
-                onChange={(e) => setInstitution(e.target.value)}
-                placeholder="e.g. Astro Club, Stanford University"
-                className="h-9 text-xs rounded-xl"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="onboard-country"
-                className="text-xs font-bold flex items-center gap-1.5"
-              >
-                <Globe className="size-3.5 text-primary" />
-                <span>Country / Region</span>
-              </Label>
-              <Input
-                id="onboard-country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                placeholder="e.g. United States, Japan, Germany"
-                className="h-9 text-xs rounded-xl"
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between gap-2 pt-3 border-t border-border">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleDismiss}
-              className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              Do this later
-            </Button>
-
-            <Button
-              type="submit"
-              disabled={isSaving}
-              className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <span>Save &amp; Continue</span>
-                  <ArrowRight className="size-3.5" />
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+  return null;
 }

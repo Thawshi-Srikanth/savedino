@@ -263,6 +263,30 @@ export default function Home() {
         )}
       </div>
 
+      {/* Footer Note */}
+      <footer className="w-full max-w-[600px] flex items-center justify-between pt-2 pb-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0">
+        <div className="flex items-center gap-1.5 truncate">
+          <span className="font-bold text-foreground">SaveDino</span>
+          <span className="opacity-40">&bull;</span>
+          <span className="opacity-75 hidden sm:inline">SEDS Sri Lanka</span>
+        </div>
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <Link
+            href="/privacy"
+            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+          >
+            Privacy Policy
+          </Link>
+          <span className="opacity-40">|</span>
+          <Link
+            href="/terms"
+            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+          >
+            Terms &amp; Conditions
+          </Link>
+        </div>
+      </footer>
+
       {/* Notify Me Popup Modal */}
       <Dialog open={isNotifyModalOpen} onOpenChange={setIsNotifyModalOpen}>
         <DialogContent className="sm:max-w-[425px] bg-card border-border text-card-foreground font-sans shadow-2xl">

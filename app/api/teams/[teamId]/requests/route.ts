@@ -154,12 +154,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       where: { id: teamId },
       include: {
         event: true,
-        members: true,
-        leader: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },
@@ -253,15 +256,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
     });
 
     // Send email notification to squad leader asynchronously without blocking response
-    if (team.leader?.email) {
+    const leaderUser =
+      team.members.find((m) => m.role === "leader")?.user ||
+      (team.leaderId
+        ? await prisma.user.findUnique({
+            where: { id: team.leaderId },
+            select: { id: true, name: true, email: true },
+          })
+        : null);
+
+    if (leaderUser?.email) {
       const appUrl =
         process.env.NEXT_PUBLIC_APP_URL ||
         process.env.BETTER_AUTH_URL ||
         "https://savedino.sedssl.org";
       const reviewUrl = `${appUrl}/team/${team.id}?tab=requests`;
 
-      sendTeamJoinRequestEmail(team.leader.email, {
-        leaderName: team.leader.name || "Squad Leader",
+      sendTeamJoinRequestEmail(leaderUser.email, {
+        leaderName: leaderUser.name || "Squad Leader",
         applicantName: session.user.name || "A Citizen Scientist",
         applicantEmail: session.user.email,
         teamName: team.name,

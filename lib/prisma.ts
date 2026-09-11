@@ -18,4 +18,5 @@ const basePrisma = createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = basePrisma;
 
+// Export singleton prisma client with latest schema bindings
 export const prisma = basePrisma;
