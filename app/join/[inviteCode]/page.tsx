@@ -49,6 +49,7 @@ export default function JoinTeamPage({ params }: { params: Promise<{ inviteCode:
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground select-none">
       <Link
         href="/teams"
+        prefetch={false}
         className="flex items-center gap-1.5 mb-6 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="size-3.5" />

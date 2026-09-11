@@ -651,7 +651,7 @@ function ProfileContent() {
                 All asteroid search campaigns you have participated in.
               </p>
             </div>
-            <Link href="/campaigns">
+            <Link href="/campaigns" prefetch={false}>
               <Button
                 size="sm"
                 variant="outline"
@@ -673,7 +673,7 @@ function ProfileContent() {
                   campaigns and form a squad to get started!
                 </p>
               </div>
-              <Link href="/campaigns">
+              <Link href="/campaigns" prefetch={false}>
                 <Button
                   size="sm"
                   className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary"
@@ -727,7 +727,11 @@ function ProfileContent() {
 
                       {/* Main Title & Squad Details */}
                       <div className="space-y-2">
-                        <Link href={`/campaigns/${event.id}`} className="block group">
+                        <Link
+                          href={`/campaigns/${event.id}`}
+                          prefetch={false}
+                          className="block group"
+                        >
                           <h3 className="text-base sm:text-lg font-bold text-foreground break-words group-hover:text-primary transition-colors">
                             {event.title}
                           </h3>
@@ -762,7 +766,11 @@ function ProfileContent() {
 
                       {/* Bottom Action Buttons Row */}
                       <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-border/60">
-                        <Link href={`/campaigns/${event.id}`} className="w-full sm:w-auto">
+                        <Link
+                          href={`/campaigns/${event.id}`}
+                          prefetch={false}
+                          className="w-full sm:w-auto"
+                        >
                           <Button
                             size="sm"
                             variant="outline"
@@ -773,7 +781,11 @@ function ProfileContent() {
                           </Button>
                         </Link>
 
-                        <Link href={`/team/${team.id}`} className="w-full sm:w-auto">
+                        <Link
+                          href={`/team/${team.id}`}
+                          prefetch={false}
+                          className="w-full sm:w-auto"
+                        >
                           <Button
                             size="sm"
                             variant="default"
@@ -803,7 +815,7 @@ function ProfileContent() {
                 Teams you have formed or joined across campaigns.
               </p>
             </div>
-            <Link href="/teams">
+            <Link href="/teams" prefetch={false}>
               <Button
                 size="sm"
                 variant="outline"
@@ -825,7 +837,7 @@ function ProfileContent() {
                   for an upcoming campaign!
                 </p>
               </div>
-              <Link href="/teams">
+              <Link href="/teams" prefetch={false}>
                 <Button
                   size="sm"
                   className="h-9 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary"
@@ -890,7 +902,7 @@ function ProfileContent() {
                       <span>{team.imageSetsCount} Image Sets</span>
                     </div>
 
-                    <Link href={`/team/${team.id}`} className="block w-full">
+                    <Link href={`/team/${team.id}`} prefetch={false} className="block w-full">
                       <Button
                         variant="outline"
                         size="sm"

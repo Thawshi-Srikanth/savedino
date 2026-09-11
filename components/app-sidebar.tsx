@@ -83,7 +83,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     }
                   >
-                    <Link href={item.url} className="flex items-center gap-3">
+                    <Link href={item.url} prefetch={false} className="flex items-center gap-3">
                       <item.icon className="size-4 shrink-0" />
                       <span>{item.title}</span>
                     </Link>
@@ -103,7 +103,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               tooltip="Play Dino Game"
               className="text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
             >
-              <Link href="/" className="flex items-center gap-3 font-medium">
+              <Link href="/" prefetch={false} className="flex items-center gap-3 font-medium">
                 <Gamepad2 className="size-4 shrink-0" />
                 <span>Play Dino Game</span>
               </Link>

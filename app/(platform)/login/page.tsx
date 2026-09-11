@@ -91,6 +91,7 @@ function LoginForm() {
         {/* Back to Arcade */}
         <Link
           href="/"
+          prefetch={false}
           className="hidden sm:inline-flex items-center gap-1 text-xs font-pixel text-muted-foreground hover:text-foreground transition-colors"
         >
           <span>&lt; Arcade Game</span>
@@ -160,7 +161,11 @@ function LoginForm() {
             </p>
             <p className="text-[11px] text-muted-foreground">
               New here?{" "}
-              <Link href="/register" className="font-semibold text-primary hover:underline">
+              <Link
+                href="/register"
+                prefetch={false}
+                className="font-semibold text-primary hover:underline"
+              >
                 Create an account
               </Link>
             </p>

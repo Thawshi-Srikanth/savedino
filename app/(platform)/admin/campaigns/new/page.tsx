@@ -87,7 +87,7 @@ export default function CreateCampaignPage() {
     <div className="w-full max-w-5xl mx-auto space-y-6 font-sans py-4">
       {/* Top Header & Breadcrumb */}
       <div className="flex items-center justify-between">
-        <Link href="/admin">
+        <Link href="/admin" prefetch={false}>
           <Button
             variant="outline"
             size="sm"
@@ -415,7 +415,7 @@ export default function CreateCampaignPage() {
                   <span>Previous Tab</span>
                 </Button>
               ) : (
-                <Link href="/admin">
+                <Link href="/admin" prefetch={false}>
                   <Button
                     type="button"
                     variant="ghost"

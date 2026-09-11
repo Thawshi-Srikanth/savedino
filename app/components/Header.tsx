@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action button shown only when authenticated and not in Demo Mode */}
           {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && isAuthenticated && (
-            <Link href="/campaigns" className="inline-flex" title="Open Dashboard">
+            <Link href="/campaigns" prefetch={false} className="inline-flex" title="Open Dashboard">
               <Button
                 size="sm"
                 variant="default"

@@ -607,7 +607,7 @@ function TeamsContent() {
           </TooltipProvider>
         </div>
 
-        <Link href="/campaigns" className="hidden sm:inline-flex">
+        <Link href="/campaigns" prefetch={false} className="hidden sm:inline-flex">
           <Button
             variant="outline"
             className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl shrink-0"
@@ -855,7 +855,7 @@ function TeamsContent() {
                       {/* Card Bottom Action Button */}
                       <div className="pt-2 border-t border-border/60">
                         {isUserMember || isStaffOrAdmin ? (
-                          <Link href={`/team/${team.id}`} className="block w-full">
+                          <Link href={`/team/${team.id}`} prefetch={false} className="block w-full">
                             <Button
                               size="sm"
                               className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5"

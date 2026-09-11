@@ -242,6 +242,7 @@ function VerifyContent() {
         {/* Back to Arcade */}
         <Link
           href="/"
+          prefetch={false}
           className="hidden sm:inline-flex items-center gap-1 text-xs font-pixel text-muted-foreground hover:text-foreground transition-colors"
         >
           <span>&lt; Arcade Game</span>
@@ -327,6 +328,7 @@ function VerifyContent() {
             <div className="text-center pt-2 border-t border-border">
               <Link
                 href="/login"
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

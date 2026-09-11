@@ -147,6 +147,7 @@ function OnboardingForm() {
         {/* Back to Arcade */}
         <Link
           href="/"
+          prefetch={false}
           className="hidden sm:inline-flex items-center gap-1 text-xs font-pixel text-muted-foreground hover:text-foreground transition-colors"
         >
           <span>&lt; Arcade Game</span>

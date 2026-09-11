@@ -72,6 +72,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "", href = "/", size = "
     return (
       <Link
         href={href}
+        prefetch={false}
         className="inline-flex items-center group cursor-pointer focus:outline-hidden"
       >
         {content}

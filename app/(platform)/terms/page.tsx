@@ -242,13 +242,25 @@ export default function TermsPage() {
             <span>SaveDino &bull; SEDS Sri Lanka</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-foreground underline underline-offset-4">
+            <Link
+              href="/"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-4"
+            >
               Return Home
             </Link>
-            <Link href="/credits" className="hover:text-foreground underline underline-offset-4">
+            <Link
+              href="/credits"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-4"
+            >
               Credits
             </Link>
-            <Link href="/privacy" className="hover:text-foreground underline underline-offset-4">
+            <Link
+              href="/privacy"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-4"
+            >
               Privacy Policy
             </Link>
           </div>

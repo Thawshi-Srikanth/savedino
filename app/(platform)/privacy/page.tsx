@@ -248,13 +248,25 @@ export default function PrivacyPolicyPage() {
             <span>SaveDino &bull; SEDS Sri Lanka</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-foreground underline underline-offset-4">
+            <Link
+              href="/"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-4"
+            >
               Return Home
             </Link>
-            <Link href="/credits" className="hover:text-foreground underline underline-offset-4">
+            <Link
+              href="/credits"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-4"
+            >
               Credits
             </Link>
-            <Link href="/terms" className="hover:text-foreground underline underline-offset-4">
+            <Link
+              href="/terms"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-4"
+            >
               Terms &amp; Conditions
             </Link>
           </div>

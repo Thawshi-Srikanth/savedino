@@ -247,7 +247,7 @@ export function CampaignsTab({
 
         {/* Create New Campaign Shortcut */}
         <div className="pt-2.5 border-t border-border">
-          <Link href="/admin/campaigns/new" className="block w-full">
+          <Link href="/admin/campaigns/new" prefetch={false} className="block w-full">
             <Button
               size="sm"
               className="w-full text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5"
@@ -346,7 +346,7 @@ export function CampaignsTab({
             </Tooltip>
 
             {/* New Campaign Button */}
-            <Link href="/admin/campaigns/new">
+            <Link href="/admin/campaigns/new" prefetch={false}>
               <Button
                 size="sm"
                 variant="default"
@@ -416,6 +416,7 @@ export function CampaignsTab({
                           <span className="truncate">{ev.title}</span>
                           <Link
                             href={`/campaigns/${ev.id}`}
+                            prefetch={false}
                             className="text-muted-foreground hover:text-primary transition-colors shrink-0"
                             title="View Public Campaign Page"
                           >

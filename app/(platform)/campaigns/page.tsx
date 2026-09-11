@@ -712,7 +712,7 @@ export default function CampaignsPage() {
 
         {/* Global Action Buttons */}
         <div className="flex items-center gap-2 shrink-0">
-          <Link href="/teams">
+          <Link href="/teams" prefetch={false}>
             <Button
               variant="outline"
               className="hidden sm:inline-flex h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl"
@@ -803,6 +803,7 @@ export default function CampaignsPage() {
                           </div>
                           <Link
                             href={`/campaigns/${currentActiveEvent.id}`}
+                            prefetch={false}
                             className="hover:text-primary transition-colors block"
                           >
                             <h2 className="text-lg sm:text-xl font-bold text-foreground hover:underline leading-snug">
@@ -890,7 +891,7 @@ export default function CampaignsPage() {
                           if (myTeam) {
                             return (
                               <div className="flex items-center gap-2">
-                                <Link href={`/team/${myTeam.teamId}`}>
+                                <Link href={`/team/${myTeam.teamId}`} prefetch={false}>
                                   <Button
                                     size="sm"
                                     variant="default"
@@ -946,7 +947,10 @@ export default function CampaignsPage() {
 
                           return (
                             <div className="flex items-center gap-2">
-                              <Link href={action.href || `/campaigns/${currentActiveEvent.id}`}>
+                              <Link
+                                href={action.href || `/campaigns/${currentActiveEvent.id}`}
+                                prefetch={false}
+                              >
                                 <Button
                                   variant="default"
                                   size="sm"
@@ -1054,6 +1058,7 @@ export default function CampaignsPage() {
                       <div className="space-y-1">
                         <Link
                           href={`/campaigns/${ev.id}`}
+                          prefetch={false}
                           className="hover:text-primary transition-colors block"
                         >
                           <h4 className="text-base sm:text-lg font-bold text-foreground hover:underline leading-snug">
@@ -1129,7 +1134,7 @@ export default function CampaignsPage() {
                             const myTeam = userTeamsByEventId[ev.id];
                             if (myTeam) {
                               return (
-                                <Link href={`/team/${myTeam.teamId}`}>
+                                <Link href={`/team/${myTeam.teamId}`} prefetch={false}>
                                   <Button
                                     size="sm"
                                     variant="default"
@@ -1181,7 +1186,7 @@ export default function CampaignsPage() {
                               );
                             }
                             return (
-                              <Link href={action.href || `/campaigns/${ev.id}`}>
+                              <Link href={action.href || `/campaigns/${ev.id}`} prefetch={false}>
                                 <Button
                                   size="sm"
                                   variant="default"

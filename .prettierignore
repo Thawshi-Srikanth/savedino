@@ -9,3 +9,4 @@ pnpm-lock.yaml
 .agents
 *.tsbuildinfo
 next-env.d.ts
+public/Splash_20240424a.json

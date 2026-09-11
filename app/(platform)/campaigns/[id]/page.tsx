@@ -355,7 +355,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     return (
       <div className="w-full py-20 text-center space-y-4 font-sans">
         <div className="text-base font-semibold text-foreground">Campaign Not Found</div>
-        <Link href="/campaigns">
+        <Link href="/campaigns" prefetch={false}>
           <Button variant="outline" size="sm" className="gap-2 cursor-pointer shadow-arcade-sm">
             <ArrowLeft className="size-4" />
             <span>Back to Campaigns</span>
@@ -410,6 +410,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
               <BreadcrumbLink asChild>
                 <Link
                   href="/campaigns"
+                  prefetch={false}
                   className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
                 >
                   <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
@@ -474,6 +475,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 <strong className="text-foreground">{squadCount} registered</strong>
                 <Link
                   href={`/teams?eventId=${event.id}`}
+                  prefetch={false}
                   className="text-primary font-sans hover:underline font-semibold"
                 >
                   (view teams)
@@ -778,7 +780,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                     {/* If Image Search is active */}
                     {activePipelineStage?.name === "Image Search" && (
                       <>
-                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                        <Link
+                          href={`/teams?eventId=${event.id}`}
+                          prefetch={false}
+                          className="block w-full"
+                        >
                           <Button
                             variant="default"
                             className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
@@ -825,7 +831,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                             </Button>
                           </div>
                         ) : (
-                          <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Link
+                            href={`/teams?eventId=${event.id}`}
+                            prefetch={false}
+                            className="block w-full"
+                          >
                             <Button className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all">
                               <Users className="size-4" />
                               <span>View Joined Teams ({squadCount})</span>
@@ -838,7 +848,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                     {/* If Submit Reports is active */}
                     {activePipelineStage?.name === "Submit Reports" && (
                       <>
-                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                        <Link
+                          href={`/teams?eventId=${event.id}`}
+                          prefetch={false}
+                          className="block w-full"
+                        >
                           <Button
                             variant="default"
                             className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-arcade-emerald-lg active:translate-y-0.5 border-0 rounded-xl"
@@ -848,7 +862,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                           </Button>
                         </Link>
 
-                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                        <Link
+                          href={`/teams?eventId=${event.id}`}
+                          prefetch={false}
+                          className="block w-full"
+                        >
                           <Button className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all">
                             <Users className="size-4" />
                             <span>View Teams ({squadCount})</span>
@@ -859,7 +877,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
                     {/* If Completed */}
                     {allStagesCompleted && (
-                      <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                      <Link
+                        href={`/teams?eventId=${event.id}`}
+                        prefetch={false}
+                        className="block w-full"
+                      >
                         <Button
                           variant="default"
                           className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
@@ -921,7 +943,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                             </>
                           )}
 
-                          <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Link
+                            href={`/teams?eventId=${event.id}`}
+                            prefetch={false}
+                            className="block w-full"
+                          >
                             <Button className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber active:translate-y-0.5 border-0 rounded-xl transition-all">
                               <Users className="size-4" />
                               <span>View Joined Teams ({squadCount})</span>

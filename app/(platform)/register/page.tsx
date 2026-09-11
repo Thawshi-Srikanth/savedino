@@ -157,18 +157,22 @@ function RegisterForm() {
           <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-1.5">
             <p className="text-[11px] text-muted-foreground">
               By joining, you agree to our{" "}
-              <Link href="/terms" className="text-primary hover:underline">
+              <Link href="/terms" prefetch={false} className="text-primary hover:underline">
                 Terms
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-primary hover:underline">
+              <Link href="/privacy" prefetch={false} className="text-primary hover:underline">
                 Privacy Policy
               </Link>
               .
             </p>
             <p className="text-xs pt-1">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-primary hover:underline">
+              <Link
+                href="/login"
+                prefetch={false}
+                className="font-semibold text-primary hover:underline"
+              >
                 Sign in
               </Link>
             </p>

@@ -280,7 +280,7 @@ export default function Home() {
               <div className="pt-2 flex flex-wrap items-center gap-2.5">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/campaigns">
+                    <Link href="/campaigns" prefetch={false}>
                       <Button
                         size="sm"
                         variant="default"
@@ -291,7 +291,7 @@ export default function Home() {
                       </Button>
                     </Link>
                     {userHasSquads ? (
-                      <Link href="/profile?tab=teams">
+                      <Link href="/profile?tab=teams" prefetch={false}>
                         <Button
                           size="sm"
                           variant="outline"
@@ -302,7 +302,7 @@ export default function Home() {
                         </Button>
                       </Link>
                     ) : (
-                      <Link href="/teams">
+                      <Link href="/teams" prefetch={false}>
                         <Button
                           size="sm"
                           variant="outline"
@@ -316,7 +316,7 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Link href="/campaigns">
+                    <Link href="/campaigns" prefetch={false}>
                       <Button
                         size="sm"
                         variant="default"
@@ -326,7 +326,7 @@ export default function Home() {
                         <span>Explore Campaigns</span>
                       </Button>
                     </Link>
-                    <Link href="/login">
+                    <Link href="/login" prefetch={false}>
                       <Button
                         size="sm"
                         variant="outline"
@@ -353,6 +353,7 @@ export default function Home() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/credits"
+              prefetch={false}
               className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
             >
               Credits
@@ -360,6 +361,7 @@ export default function Home() {
             <span className="opacity-40">|</span>
             <Link
               href="/privacy"
+              prefetch={false}
               className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
             >
               Privacy
@@ -367,6 +369,7 @@ export default function Home() {
             <span className="opacity-40">|</span>
             <Link
               href="/terms"
+              prefetch={false}
               className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
             >
               Terms

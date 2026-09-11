@@ -614,7 +614,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
               variant="default"
               className="w-full sm:w-auto h-9 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary"
             >
-              <Link href="/teams">
+              <Link href="/teams" prefetch={false}>
                 <Users className="size-3.5 mr-1.5" />
                 <span>Browse Squads Directory</span>
               </Link>
@@ -624,7 +624,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
               variant="outline"
               className="w-full sm:w-auto h-9 text-xs font-bold rounded-xl shadow-arcade"
             >
-              <Link href="/profile">
+              <Link href="/profile" prefetch={false}>
                 <span>View My Profile</span>
               </Link>
             </Button>
@@ -640,6 +640,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/teams"
+          prefetch={false}
           className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-3.5" />
@@ -649,6 +650,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
         {team?.event && (
           <Link
             href={`/campaigns/${team.event.id}`}
+            prefetch={false}
             className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-primary transition-colors"
           >
             <Telescope className="size-3.5 text-primary" />
@@ -682,7 +684,9 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
             variant="outline"
             className="h-8 text-xs font-bold shrink-0 rounded-xl border-violet-500/30 hover:bg-violet-500/20"
           >
-            <Link href="/admin?tab=teams">Open Admin Console</Link>
+            <Link href="/admin?tab=teams" prefetch={false}>
+              Open Admin Console
+            </Link>
           </Button>
         </div>
       )}

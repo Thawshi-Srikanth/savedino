@@ -150,7 +150,7 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
             <div className="space-y-3 pt-1">
               {isAuthenticated ? (
                 <div className="space-y-2">
-                  <Link href="/campaigns" className="block w-full">
+                  <Link href="/campaigns" prefetch={false} className="block w-full">
                     <Button
                       size="default"
                       variant="default"
@@ -162,7 +162,7 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Link href="/campaigns" className="block w-full">
+                  <Link href="/campaigns" prefetch={false} className="block w-full">
                     <Button
                       size="default"
                       variant="default"
@@ -171,7 +171,7 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
                       <span>Explore Campaigns</span>
                     </Button>
                   </Link>
-                  <Link href="/login" className="block w-full">
+                  <Link href="/login" prefetch={false} className="block w-full">
                     <Button
                       variant="outline"
                       size="sm"
@@ -199,7 +199,11 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
         {/* Footer Note */}
         <div className="w-full max-w-md mx-auto flex items-center justify-between text-[10px] font-mono text-muted-foreground opacity-60 py-2">
           <span>SaveDino &bull; NASA &amp; IASC Collaboration</span>
-          <Link href="/credits" className="hover:text-foreground underline underline-offset-2">
+          <Link
+            href="/credits"
+            prefetch={false}
+            className="hover:text-foreground underline underline-offset-2"
+          >
             Credits
           </Link>
         </div>
