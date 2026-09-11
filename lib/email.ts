@@ -265,12 +265,10 @@ export async function sendTeamInvitationEmail(
 export async function subscribeToNewsletter(email: string) {
   // 1. Primary: Resend Contacts
   if (resend) {
-    const segmentId = process.env.RESEND_SEGMENT_ID || "ed40a4c8-4b89-4a0b-94b5-1246d21b597c";
     try {
       const { data, error } = await (resend.contacts as any).create({
         email,
         unsubscribed: false,
-        segments: [{ id: segmentId }],
       });
 
       if (!error && data) {
@@ -279,20 +277,6 @@ export async function subscribeToNewsletter(email: string) {
 
       if (error) {
         console.warn("[Resend Contact Info]:", error.message);
-      }
-
-      // If contact already existed, ensure it is attached to the segment
-      try {
-        const lookup: any = await resend.contacts.get({ email });
-        const contactId = lookup?.data?.id || (data as any)?.id;
-        if (contactId && (resend.contacts as any)?.segments?.add) {
-          await (resend.contacts as any).segments.add({
-            contactId,
-            segmentId,
-          });
-        }
-      } catch (segErr) {
-        console.warn("[Resend Segment Add Warning]:", segErr);
       }
 
       return { success: true, provider: "resend", data };
@@ -304,9 +288,6 @@ export async function subscribeToNewsletter(email: string) {
   // 2. Backup: Brevo Contacts API
   if (isBrevoConfigured && brevoApiKey) {
     try {
-      const listId = process.env.BREVO_LIST_ID
-        ? [parseInt(process.env.BREVO_LIST_ID, 10)]
-        : undefined;
       const response = await fetch("https://api.brevo.com/v3/contacts", {
         method: "POST",
         headers: {
@@ -317,7 +298,6 @@ export async function subscribeToNewsletter(email: string) {
         body: JSON.stringify({
           email,
           updateEnabled: true,
-          ...(listId ? { listIds: listId } : {}),
         }),
       });
 
