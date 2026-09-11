@@ -17,7 +17,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signOut } from "@/lib/auth-client";
 import { PixelAvatar } from "@/components/pixel-avatar";
 
 interface Persona {
@@ -87,7 +87,7 @@ export function DevPersonaSwitcher() {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await authClient.signOut();
+      await signOut();
       toast.info("Logged out to Guest Mode");
       window.location.href = "/";
     } catch (err: any) {

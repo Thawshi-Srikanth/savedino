@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { useSession, invalidateSessionCache } from "@/lib/auth-client";
 import { PixelAvatar } from "@/components/pixel-avatar";
 import { getRandomSeed, generateSeedProfile } from "@/lib/seed-avatar";
 import { Button } from "@/components/ui/button";
@@ -253,6 +253,7 @@ function ProfileContent() {
         toast.success("Profile changes saved successfully!");
         if (formattedWhatsapp) setFormWhatsapp(formattedWhatsapp);
         setUser((prev) => (prev ? { ...prev, ...data.user } : data.user));
+        invalidateSessionCache();
       } else {
         toast.error(data.error || "Failed to save profile changes.");
       }

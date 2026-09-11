@@ -131,16 +131,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 }
 
-// DELETE /api/events/[id] - Delete campaign event (Admin only)
+// DELETE /api/events/[id] - Delete campaign event (Admin & Staff only)
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || (session.user.role !== "admin" && session.user.role !== "staff")) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized. Administrator privileges required." },
+        { success: false, error: "Unauthorized. Administrator or Staff privileges required." },
         { status: 403 }
       );
     }
@@ -155,18 +155,46 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ success: false, error: "Campaign not found." }, { status: 404 });
     }
 
-    // Explicitly delete any related imageSets before deleting the event
-    await prisma.imageSet.deleteMany({
-      where: { eventId: existingEvent.id },
-    });
+    // Cleanly delete all associated child records in safe foreign key order
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete all image sets in this campaign
+      await tx.imageSet.deleteMany({
+        where: { eventId: existingEvent.id },
+      });
 
-    await prisma.event.delete({
-      where: { id: existingEvent.id },
+      // 2. Find all teams in this campaign
+      const teams = await tx.team.findMany({
+        where: { eventId: existingEvent.id },
+        select: { id: true },
+      });
+      const teamIds = teams.map((t) => t.id);
+
+      if (teamIds.length > 0) {
+        // 3. Delete join requests for these teams
+        await tx.teamJoinRequest.deleteMany({
+          where: { teamId: { in: teamIds } },
+        });
+
+        // 4. Delete team members
+        await tx.teamMember.deleteMany({
+          where: { teamId: { in: teamIds } },
+        });
+
+        // 5. Delete the teams
+        await tx.team.deleteMany({
+          where: { id: { in: teamIds } },
+        });
+      }
+
+      // 6. Delete the campaign event
+      await tx.event.delete({
+        where: { id: existingEvent.id },
+      });
     });
 
     return NextResponse.json({
       success: true,
-      message: `Campaign '${existingEvent.title}' (${existingEvent.code}) deleted successfully.`,
+      message: `Campaign '${existingEvent.title}' (${existingEvent.code}) and all related data deleted successfully.`,
     });
   } catch (error: any) {
     console.error("DELETE /api/events/[id] error:", error);
