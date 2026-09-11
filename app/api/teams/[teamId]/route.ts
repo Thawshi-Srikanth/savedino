@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { generateInviteCode } from "@/lib/campaign-engine";
 import { maskEmail } from "@/lib/mask-email";
+import { invalidateTeamsCache } from "../route";
 
 export const dynamic = "force-dynamic";
 
@@ -273,6 +274,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ te
       },
     });
 
+    invalidateTeamsCache();
+
     return NextResponse.json({
       success: true,
       team: updatedTeam,
@@ -323,6 +326,8 @@ export async function DELETE(
     await prisma.team.delete({
       where: { id: teamId },
     });
+
+    invalidateTeamsCache();
 
     return NextResponse.json({
       success: true,

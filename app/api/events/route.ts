@@ -3,9 +3,26 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-// GET /api/events - List all events
+// Server-side in-memory cache for Events (TTL: 10 seconds)
+let cachedEvents: { timestamp: number; data: any } | null = null;
+const EVENTS_CACHE_TTL_MS = 10 * 1000;
+
+export function invalidateEventsCache() {
+  cachedEvents = null;
+}
+
+// GET /api/events - List all events (Cached)
 export async function GET() {
   try {
+    if (cachedEvents && Date.now() - cachedEvents.timestamp < EVENTS_CACHE_TTL_MS) {
+      return NextResponse.json(cachedEvents.data, {
+        headers: {
+          "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
     const events = await prisma.event.findMany({
       orderBy: { startDate: "asc" },
       include: {
@@ -15,7 +32,15 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ success: true, events });
+    const responseData = { success: true, events };
+    cachedEvents = { timestamp: Date.now(), data: responseData };
+
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+        "X-Cache": "MISS",
+      },
+    });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -72,6 +97,8 @@ export async function POST(req: Request) {
         status: "ACTIVE",
       },
     });
+
+    invalidateEventsCache();
 
     return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
   } catch (error: any) {

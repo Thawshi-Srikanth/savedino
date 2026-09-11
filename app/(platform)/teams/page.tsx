@@ -181,7 +181,10 @@ function TeamsContent() {
   }, [fetchEvents]);
 
   useEffect(() => {
-    fetchTeams();
+    const timer = setTimeout(() => {
+      fetchTeams();
+    }, 250);
+    return () => clearTimeout(timer);
   }, [fetchTeams]);
 
   // STRICT GUARD: Exclude all DISQUALIFIED squads completely from public directory

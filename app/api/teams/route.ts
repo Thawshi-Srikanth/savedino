@@ -8,6 +8,14 @@ import {
   isRegistrationClosed,
 } from "@/lib/campaign-engine";
 
+// Server-side in-memory cache for Teams (TTL: 5 seconds)
+const teamsCache = new Map<string, { timestamp: number; data: any }>();
+const TEAMS_CACHE_TTL_MS = 5 * 1000;
+
+export function invalidateTeamsCache() {
+  teamsCache.clear();
+}
+
 // POST /api/teams - Create a team in an event
 export async function POST(req: Request) {
   try {
@@ -98,6 +106,8 @@ export async function POST(req: Request) {
       },
     });
 
+    invalidateTeamsCache();
+
     return NextResponse.json({ success: true, team: newTeam }, { status: 201 });
   } catch (error: any) {
     if (error.code === "P2002") {
@@ -110,7 +120,7 @@ export async function POST(req: Request) {
   }
 }
 
-// GET /api/teams - List all teams with search & filter support
+// GET /api/teams - List all teams with search & filter support (Cached)
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -119,6 +129,21 @@ export async function GET(req: Request) {
     const isRecruiting = searchParams.get("isRecruiting");
     const status = searchParams.get("status") || "";
     const includeDisqualified = searchParams.get("includeDisqualified") === "true";
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const cacheKey = `${session?.user?.id || "anon"}:${search}:${eventId}:${isRecruiting}:${status}:${includeDisqualified}`;
+    const cached = teamsCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < TEAMS_CACHE_TTL_MS) {
+      return NextResponse.json(cached.data, {
+        headers: {
+          "Cache-Control": "private, max-age=5, stale-while-revalidate=10",
+          "X-Cache": "HIT",
+        },
+      });
+    }
 
     const where: any = {};
 
@@ -225,7 +250,15 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json({ success: true, teams: formattedTeams });
+    const responseData = { success: true, teams: formattedTeams };
+    teamsCache.set(cacheKey, { timestamp: Date.now(), data: responseData });
+
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "private, max-age=5, stale-while-revalidate=10",
+        "X-Cache": "MISS",
+      },
+    });
   } catch (error: any) {
     console.error("GET /api/teams error:", error);
     return NextResponse.json(

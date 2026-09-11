@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { invalidateEventsCache } from "../route";
 
 // GET /api/events/[id] - Get detailed campaign by ID or Code
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -121,6 +122,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       data: dataToUpdate,
     });
 
+    invalidateEventsCache();
+
     return NextResponse.json({ success: true, event: updatedEvent });
   } catch (error: any) {
     console.error("PATCH /api/events/[id] error:", error);
@@ -191,6 +194,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         where: { id: existingEvent.id },
       });
     });
+
+    invalidateEventsCache();
 
     return NextResponse.json({
       success: true,
