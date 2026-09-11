@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { PixelAvatar } from "@/components/pixel-avatar";
 import { getRandomSeed, generateSeedProfile } from "@/lib/seed-avatar";
@@ -122,8 +122,10 @@ interface JoinRequestItem {
   };
 }
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
   const { data: session, isPending: isSessionLoading } = useSession();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -151,8 +153,16 @@ export default function ProfilePage() {
   const [formCountry, setFormCountry] = useState<string>("");
   const [selectedAvatar, setSelectedAvatar] = useState<string>("");
 
-  const [activeTab, setActiveTab] = useState<string>("edit");
+  const [activeTab, setActiveTab] = useState<string>(
+    tabParam && ["edit", "history", "teams", "activity"].includes(tabParam) ? tabParam : "edit"
+  );
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tabParam && ["edit", "history", "teams", "activity"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // Fetch profile details
   const fetchProfile = async () => {
@@ -1048,5 +1058,13 @@ export default function ProfilePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<DinoLoading size="lg" text="Loading Profile..." fullScreen />}>
+      <ProfileContent />
+    </Suspense>
   );
 }

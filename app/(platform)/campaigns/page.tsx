@@ -40,13 +40,13 @@ import {
   ChevronRight,
   Clock,
   Layers,
-  Sparkles,
   ArrowRight,
   ExternalLink,
   Check,
   Pin,
   HelpCircle,
   X,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -302,6 +302,37 @@ export default function CampaignsPage() {
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  // User's existing team memberships mapped by eventId
+  const [userTeamsByEventId, setUserTeamsByEventId] = useState<
+    Record<string, { teamId: string; teamName: string; role: string }>
+  >({});
+
+  const fetchUserTeams = async () => {
+    if (!session?.user?.id) {
+      setUserTeamsByEventId({});
+      return;
+    }
+    try {
+      const res = await fetch("/api/user/profile");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.teams)) {
+        const map: Record<string, { teamId: string; teamName: string; role: string }> = {};
+        data.teams.forEach((t: any) => {
+          if (t.event?.id) {
+            map[t.event.id] = {
+              teamId: t.id,
+              teamName: t.name,
+              role: t.role,
+            };
+          }
+        });
+        setUserTeamsByEventId(map);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user squads for campaigns page:", err);
+    }
+  };
+
   const fetchCampaignData = async () => {
     setLoading(true);
     try {
@@ -321,6 +352,10 @@ export default function CampaignsPage() {
   useEffect(() => {
     fetchCampaignData();
   }, []);
+
+  useEffect(() => {
+    fetchUserTeams();
+  }, [session?.user?.id]);
 
   // Filtered list based on status and search query
   const filteredEvents = useMemo(() => {
@@ -560,7 +595,7 @@ export default function CampaignsPage() {
             className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Layers className="size-3.5" />
+              <Layers className="size-3.5 shrink-0" />
               <span>All Campaigns</span>
             </div>
             <Badge
@@ -579,7 +614,7 @@ export default function CampaignsPage() {
             className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
+              <Activity className="size-3.5 shrink-0" />
               <span>Active Now</span>
             </div>
             <Badge
@@ -598,7 +633,7 @@ export default function CampaignsPage() {
             className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Clock className="size-3.5 text-[#38bdf8]" />
+              <Clock className="size-3.5 shrink-0" />
               <span>Registration Open</span>
             </div>
             <Badge
@@ -617,7 +652,7 @@ export default function CampaignsPage() {
             className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Calendar className="size-3.5" />
+              <Calendar className="size-3.5 shrink-0" />
               <span>Upcoming</span>
             </div>
             <Badge
@@ -628,18 +663,6 @@ export default function CampaignsPage() {
             </Badge>
           </Button>
         </div>
-      </Card>
-
-      {/* Quick Team Info Box */}
-      <Card className="p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5">
-        <div className="font-semibold text-foreground flex items-center gap-1.5 text-[11px]">
-          <Sparkles className="size-3.5 text-[#8b5cf6]" />
-          <span>Team Rules</span>
-        </div>
-        <p className="text-[11px] leading-relaxed">
-          Teams have <strong>2 to 6 members</strong>. Team leaders can invite members using a
-          private invite code.
-        </p>
       </Card>
     </div>
   );
@@ -868,6 +891,24 @@ export default function CampaignsPage() {
                       {/* Action Buttons */}
                       <div className="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-border">
                         {(() => {
+                          const myTeam = userTeamsByEventId[currentActiveEvent.id];
+                          if (myTeam) {
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Link href={`/team/${myTeam.teamId}`}>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                  >
+                                    <Users className="size-3.5 text-white" />
+                                    <span>Squad Workspace</span>
+                                  </Button>
+                                </Link>
+                              </div>
+                            );
+                          }
+
                           const action = getStageAction(currentActiveEvent);
                           if (action.isClosed) {
                             return (
@@ -1088,8 +1129,24 @@ export default function CampaignsPage() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50">
+                        <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-border/50">
                           {(() => {
+                            const myTeam = userTeamsByEventId[ev.id];
+                            if (myTeam) {
+                              return (
+                                <Link href={`/team/${myTeam.teamId}`}>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                  >
+                                    <Users className="size-3.5 text-white" />
+                                    <span>Squad Workspace</span>
+                                  </Button>
+                                </Link>
+                              );
+                            }
+
                             const action = getStageAction(ev);
                             if (action.isClosed) {
                               return (
@@ -1106,15 +1163,26 @@ export default function CampaignsPage() {
                             }
                             if (action.isModal) {
                               return (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => handleOpenCreateModal(ev)}
-                                  className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
-                                >
-                                  <action.icon className="size-3.5" />
-                                  <span>{action.label}</span>
-                                </Button>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleOpenJoinModal(ev)}
+                                    className="h-9 px-3 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl"
+                                  >
+                                    <KeyRound className="size-3.5 text-primary" />
+                                    <span>Join with Code</span>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => handleOpenCreateModal(ev)}
+                                    className="h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                  >
+                                    <action.icon className="size-3.5" />
+                                    <span>{action.label}</span>
+                                  </Button>
+                                </div>
                               );
                             }
                             return (

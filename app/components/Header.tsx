@@ -36,14 +36,14 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action button shown only when authenticated and not in Demo Mode */}
           {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && isAuthenticated && (
-            <Link href="/campaigns" className="inline-flex">
+            <Link href="/campaigns" className="inline-flex" title="Open Dashboard">
               <Button
                 size="sm"
                 variant="default"
-                className="text-[10px] sm:text-xs font-bold flex items-center gap-1.5 px-2.5 sm:px-3 shadow-arcade-primary"
+                className="h-8 px-2 sm:px-3 text-[10px] sm:text-xs font-bold flex items-center gap-1.5 shadow-arcade-primary active:translate-y-0.5 rounded-lg"
               >
                 <LayoutDashboard className="size-3.5" />
-                <span>Dashboard</span>
+                <span className="hidden sm:inline">Dashboard</span>
               </Button>
             </Link>
           )}

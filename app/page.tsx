@@ -17,7 +17,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useSession } from "@/lib/auth-client";
-import { Check, Mail, Bell, LayoutDashboard, LogIn, Users } from "lucide-react";
+import { Check, Mail, Bell, LayoutDashboard, LogIn, Users, Telescope } from "lucide-react";
 import { toast } from "sonner";
 
 // Dynamically import DinoGameCanvas with SSR disabled
@@ -62,6 +62,28 @@ export default function Home() {
   const [email, setEmail] = useState<string>("");
   const [isSubscribing, setIsSubscribing] = useState<boolean>(false);
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+
+  // User squads membership state
+  const [userHasSquads, setUserHasSquads] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch("/api/user/profile")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success && Array.isArray(d.teams) && d.teams.length > 0) {
+            setUserHasSquads(true);
+          } else {
+            setUserHasSquads(false);
+          }
+        })
+        .catch(() => {
+          setUserHasSquads(false);
+        });
+    } else {
+      setUserHasSquads(false);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setMounted(true);
@@ -265,16 +287,29 @@ export default function Home() {
                       <span>Open Dashboard</span>
                     </Button>
                   </Link>
-                  <Link href="/teams">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
-                    >
-                      <Users className="size-3.5 text-[#10b981]" />
-                      <span>Squads</span>
-                    </Button>
-                  </Link>
+                  {userHasSquads ? (
+                    <Link href="/profile?tab=teams">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                      >
+                        <Users className="size-3.5 text-[#10b981]" />
+                        <span>My Squads</span>
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/teams">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                      >
+                        <Users className="size-3.5 text-[#10b981]" />
+                        <span>Squad Directory</span>
+                      </Button>
+                    </Link>
+                  )}
                 </>
               ) : (
                 <>
@@ -282,9 +317,10 @@ export default function Home() {
                     <Button
                       size="sm"
                       variant="default"
-                      className="text-xs font-bold shadow-arcade-primary cursor-pointer"
+                      className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
                     >
-                      <span>Explore Campaigns &gt;</span>
+                      <Telescope className="size-3.5" />
+                      <span>Explore Campaigns</span>
                     </Button>
                   </Link>
                   <Link href="/login">
