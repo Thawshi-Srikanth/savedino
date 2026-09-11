@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
+import { ArcadeTabGuard } from "./components/ArcadeTabGuard";
 import { audioSynth } from "./components/AudioSynthesizer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,11 +186,12 @@ export default function Home() {
   };
 
   return (
-    <main
-      className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none ${
-        isNight ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
-      }`}
-    >
+    <ArcadeTabGuard>
+      <main
+        className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none ${
+          isNight ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
+        }`}
+      >
       {/* Header */}
       <Header
         onOpenHelp={() => setIsHelpOpen(true)}
@@ -436,5 +438,6 @@ export default function Home() {
       {/* Help Modal */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </main>
+  </ArcadeTabGuard>
   );
 }

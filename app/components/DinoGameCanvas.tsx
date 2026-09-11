@@ -49,6 +49,119 @@ interface Particle {
 const MAX_CHARGES = 3;
 const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 
+// Offscreen Sprite Cache for High-Performance 60fps Blitting
+const spriteCache: Record<string, HTMLCanvasElement> = {};
+
+function getMeteorSprite(type: "small" | "medium" | "giant", rad: number, step: number): HTMLCanvasElement {
+  const key = `${type}_${rad}_${step}`;
+  if (spriteCache[key]) return spriteCache[key];
+
+  const size = (rad + step * 2) * 2;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const sCtx = c.getContext("2d");
+  if (!sCtx) return c;
+
+  const cx = size / 2;
+  const cy = size / 2;
+
+  // Draw 8-bit stepped pixel circles once onto offscreen canvas
+  const drawPixelCircle = (radius: number, color: string, offsetX = 0, offsetY = 0) => {
+    sCtx.fillStyle = color;
+    for (let dy = -radius; dy <= radius; dy += step) {
+      const width =
+        Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
+      if (width > 0) {
+        sCtx.fillRect(cx + offsetX - width, cy + offsetY + dy, width * 2, step);
+      }
+    }
+  };
+
+  // A. Fiery Atmospheric Plasma Corona / Outer Burn
+  const fireColor =
+    type === "giant" ? "#dc2626" : type === "small" ? "#f59e0b" : "#f97316";
+  drawPixelCircle(rad + step, fireColor);
+
+  // B. Bright Molten Corona Edge
+  drawPixelCircle(rad, type === "giant" ? "#f97316" : "#fde047");
+
+  // C. Dark Shadowed Rocky Crust (Dark base stone sphere)
+  drawPixelCircle(rad - step, "#292524");
+
+  // D. Mid Rock Body (Offset slightly top-left for 3D depth)
+  drawPixelCircle(
+    Math.max(step, rad - step * 2),
+    "#57534e",
+    -Math.floor(step * 0.5),
+    -Math.floor(step * 0.5)
+  );
+
+  // E. Lit Stone Highlight (Top-left crescent)
+  drawPixelCircle(Math.max(step, Math.floor(rad * 0.55)), "#78716c", -step, -step);
+
+  // F. Glowing Magma Veins & Heat Cracks
+  sCtx.fillStyle = "#f97316";
+  sCtx.fillRect(cx - step * 2, cy, step * 3, step);
+  sCtx.fillRect(cx, cy - step * 2, step, step * 3);
+  sCtx.fillRect(cx + step, cy + step, step * 2, step);
+
+  sCtx.fillStyle = "#fde047";
+  sCtx.fillRect(cx - step, cy, step, step);
+  sCtx.fillRect(cx, cy - step, step, step);
+
+  // G. Rotating Detailed Pixel Craters
+  if (type === "giant") {
+    sCtx.fillStyle = "#a8a29e";
+    sCtx.fillRect(cx - step * 4, cy - step * 3, step * 4, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step * 3, cy - step * 2, step * 3, step * 2);
+    sCtx.fillRect(cx - step * 4, cy - step, step * 5, step);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx - step * 2, cy - step, step * 2, step);
+
+    sCtx.fillStyle = "#78716c";
+    sCtx.fillRect(cx + step * 2, cy - step * 2, step * 2, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx + step * 2, cy - step * 2, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx + step * 2 + Math.floor(step * 0.5), cy, step, step);
+
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step * 2, cy + step * 2, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx - Math.floor(step * 1.5), cy + Math.floor(step * 2.5), step, step);
+  } else if (type === "medium") {
+    sCtx.fillStyle = "#78716c";
+    sCtx.fillRect(cx - step * 2, cy - step * 2, step * 2, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step * 2, cy - step * 2, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx - Math.floor(step * 1.5), cy, step, step);
+
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx + step, cy + step, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx + step + Math.floor(step * 0.5), cy + step + Math.floor(step * 0.5), step, step);
+  } else {
+    sCtx.fillStyle = "#78716c";
+    sCtx.fillRect(cx - step, cy - step, step * 2, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step, cy, step * 2, step);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx, cy, step, step);
+  }
+
+  // H. Specular Glint Pixels
+  sCtx.fillStyle = "#e7e5e4";
+  const glintDist = Math.floor(rad * 0.5);
+  sCtx.fillRect(cx - glintDist, cy - glintDist, step * 2, step);
+  sCtx.fillRect(cx - glintDist - step, cy - glintDist + step, step, step);
+
+  spriteCache[key] = c;
+  return c;
+}
+
 export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   onScoreUpdate,
   onNightModeChange,
@@ -781,71 +894,60 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       ctx.globalAlpha = 1.0;
 
       // ----------------------------------------------------
-      // DRAW PIXELATED EXPANDING PLASMA BALL (8-BIT RETRO)
+      // DRAW PIXELATED EXPANDING PLASMA BALL (8-BIT RETRO) - FAST ARCS
       // ----------------------------------------------------
       s.balls.forEach((b) => {
         ctx.save();
         const bx = Math.floor(b.x);
         const by = Math.floor(b.y);
         const r = Math.floor(b.radius);
-        const pSize = Math.max(2, Math.floor(r / 7)); // Grid pixel block step
+        const pSize = Math.max(2, Math.floor(r / 7));
 
-        // Helper to draw stepped 8-bit pixel circle
-        const fillPixelCircle = (
-          cx: number,
-          cy: number,
-          radius: number,
-          step: number,
-          color: string
-        ) => {
-          ctx.fillStyle = color;
-          for (let dy = -radius; dy <= radius; dy += step) {
-            const dx = Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
-            if (dx > 0) {
-              ctx.fillRect(cx - dx, cy + dy, dx * 2, step);
-            }
-          }
-        };
+        // 1. Plasma Outer Corona
+        ctx.fillStyle = "#0284c7";
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fill();
 
-        // 1. Outer Electric Blue/Cyan Plasma Corona (Blends seamlessly with background)
-        fillPixelCircle(bx, by, r, pSize, "#0284c7");
-
-        // 2. Bright Electric Cyan Pixel Ring
-        fillPixelCircle(bx, by, Math.floor(r * 0.78), pSize, "#00ffff");
+        // 2. Bright Cyan Ring
+        ctx.fillStyle = "#00ffff";
+        ctx.beginPath();
+        ctx.arc(bx, by, Math.floor(r * 0.78), 0, Math.PI * 2);
+        ctx.fill();
 
         // 3. Bright Cyan/White Mid Core
-        fillPixelCircle(bx, by, Math.floor(r * 0.52), pSize, "#e0f2fe");
+        ctx.fillStyle = "#e0f2fe";
+        ctx.beginPath();
+        ctx.arc(bx, by, Math.floor(r * 0.52), 0, Math.PI * 2);
+        ctx.fill();
 
-        // 4. Blinding White Pure Energy Center
-        fillPixelCircle(bx + Math.floor(r * 0.12), by, Math.floor(r * 0.32), pSize, "#ffffff");
-
-        // 5. White Pixel Highlights (Top-Left Glints)
+        // 4. Pure White Energy Center
         ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(bx + Math.floor(r * 0.12), by, Math.floor(r * 0.32), 0, Math.PI * 2);
+        ctx.fill();
+
+        // 5. Pixel Sparks & Leading Edge Highlights
         const hx = bx - Math.floor(r * 0.35);
         const hy = by - Math.floor(r * 0.35);
         ctx.fillRect(hx, hy, pSize * 2, pSize * 2);
-
-        // 6. Leading Pixel Energy Sparks on Front Edge
-        ctx.fillStyle = "#ffffff";
         ctx.fillRect(bx + r - pSize, by - Math.floor(r * 0.35), pSize, pSize * 2);
         ctx.fillRect(bx + r - pSize, by + Math.floor(r * 0.2), pSize, pSize * 2);
         ctx.restore();
       });
 
       // ----------------------------------------------------
-      // DRAW 8-BIT PIXEL ART BALL ASTEROIDS (TUMBLING & DETAILED)
-      // Stepped circular pixel matrix with fiery aura, magma veins, and rotating craters
+      // DRAW 8-BIT PIXEL ART BALL ASTEROIDS (CACHED SPRITES + GPU BLIT)
       // ----------------------------------------------------
       s.meteors.forEach((m) => {
         const cx = Math.floor(m.x + m.radius);
         const cy = Math.floor(m.y + m.radius);
         const rad = Math.floor(m.radius);
-        const step = Math.max(2, Math.floor(rad / 6)); // Discrete pixel block size
+        const step = Math.max(2, Math.floor(rad / 6));
 
-        // 1. Draw Trailing Flame Tail (Aligned with flight path, behind the asteroid)
+        // 1. Draw Trailing Flame Tail
         ctx.save();
         const angle = Math.atan2(m.vy, m.vx);
-        const tailLen = m.type === "giant" ? 18 : m.type === "small" ? 10 : 14;
         const tailColor =
           m.type === "giant" ? "#ef4444" : m.type === "small" ? "#f59e0b" : "#f97316";
 
@@ -865,109 +967,13 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         ctx.fillRect(Math.floor(txCore - step), Math.floor(tyCore - step), step * 2, step * 2);
         ctx.restore();
 
-        // 2. Draw Tumbling Asteroid Body (Centered at (0, 0) for authentic spin)
+        // 2. Draw Cached High-Res Pixel Sprite with zero per-frame square root calculations
+        const sprite = getMeteorSprite(m.type, rad, step);
+        const half = sprite.width / 2;
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(m.rotation);
-
-        // Stepped Pixel Circle Drawer relative to local (0, 0)
-        const drawPixelCircle = (radius: number, color: string, offsetX = 0, offsetY = 0) => {
-          ctx.fillStyle = color;
-          for (let dy = -radius; dy <= radius; dy += step) {
-            const width =
-              Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
-            if (width > 0) {
-              ctx.fillRect(offsetX - width, offsetY + dy, width * 2, step);
-            }
-          }
-        };
-
-        // A. Fiery Atmospheric Plasma Corona / Outer Burn
-        const fireColor =
-          m.type === "giant" ? "#dc2626" : m.type === "small" ? "#f59e0b" : "#f97316";
-        drawPixelCircle(rad + step, fireColor);
-
-        // B. Bright Molten Corona Edge
-        drawPixelCircle(rad, m.type === "giant" ? "#f97316" : "#fde047");
-
-        // C. Dark Shadowed Rocky Crust (Dark base stone sphere)
-        drawPixelCircle(rad - step, "#292524");
-
-        // D. Mid Rock Body (Offset slightly top-left for 3D depth)
-        drawPixelCircle(
-          Math.max(step, rad - step * 2),
-          "#57534e",
-          -Math.floor(step * 0.5),
-          -Math.floor(step * 0.5)
-        );
-
-        // E. Lit Stone Highlight (Top-left crescent)
-        drawPixelCircle(Math.max(step, Math.floor(rad * 0.55)), "#78716c", -step, -step);
-
-        // F. Glowing Magma Veins & Heat Cracks (Pulses through rock)
-        ctx.fillStyle = "#f97316";
-        ctx.fillRect(-step * 2, 0, step * 3, step);
-        ctx.fillRect(0, -step * 2, step, step * 3);
-        ctx.fillRect(step, step, step * 2, step);
-
-        ctx.fillStyle = "#fde047";
-        ctx.fillRect(-step, 0, step, step);
-        ctx.fillRect(0, -step, step, step);
-
-        // G. Rotating Detailed Pixel Craters with Lit Lips and Dark Pits
-        if (m.type === "giant") {
-          // Large main crater with lit rim
-          ctx.fillStyle = "#a8a29e"; // Lit rim
-          ctx.fillRect(-step * 3 - step, -step * 2 - step, step * 4, step);
-          ctx.fillStyle = "#1c1917"; // Crater wall
-          ctx.fillRect(-step * 3, -step * 2, step * 3, step * 2);
-          ctx.fillRect(-step * 4, -step, step * 5, step);
-          ctx.fillStyle = "#0c0a09"; // Deep abyss
-          ctx.fillRect(-step * 2, -step, step * 2, step);
-
-          // Second crater
-          ctx.fillStyle = "#78716c";
-          ctx.fillRect(step * 2, -step * 2, step * 2, step);
-          ctx.fillStyle = "#1c1917";
-          ctx.fillRect(step * 2, -step, step * 2, step * 2);
-          ctx.fillStyle = "#0c0a09";
-          ctx.fillRect(step * 2 + Math.floor(step * 0.5), 0, step, step);
-
-          // Third crater
-          ctx.fillStyle = "#1c1917";
-          ctx.fillRect(-step * 2, step * 2, step * 2, step * 2);
-          ctx.fillStyle = "#0c0a09";
-          ctx.fillRect(-step * 1.5, step * 2.5, step, step);
-        } else if (m.type === "medium") {
-          // Medium crater 1
-          ctx.fillStyle = "#78716c";
-          ctx.fillRect(-step * 2, -step * 2, step * 2, step);
-          ctx.fillStyle = "#1c1917";
-          ctx.fillRect(-step * 2, -step, step * 2, step * 2);
-          ctx.fillStyle = "#0c0a09";
-          ctx.fillRect(-step * 1.5, 0, step, step);
-
-          // Medium crater 2
-          ctx.fillStyle = "#1c1917";
-          ctx.fillRect(step, step, step * 2, step * 2);
-          ctx.fillStyle = "#0c0a09";
-          ctx.fillRect(step + Math.floor(step * 0.5), step + Math.floor(step * 0.5), step, step);
-        } else {
-          // Small crater
-          ctx.fillStyle = "#78716c";
-          ctx.fillRect(-step, -step, step * 2, step);
-          ctx.fillStyle = "#1c1917";
-          ctx.fillRect(-step, 0, step * 2, step);
-          ctx.fillStyle = "#0c0a09";
-          ctx.fillRect(0, 0, step, step);
-        }
-
-        // H. Specular Glint Pixels on top-left rock face
-        ctx.fillStyle = "#e7e5e4";
-        const glintDist = Math.floor(rad * 0.5);
-        ctx.fillRect(-glintDist, -glintDist, step * 2, step);
-        ctx.fillRect(-glintDist - step, -glintDist + step, step, step);
-
+        ctx.drawImage(sprite, -half, -half);
         ctx.restore();
       });
 
