@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { sendTeamJoinRequestEmail } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -154,6 +155,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       include: {
         event: true,
         members: true,
+        leader: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -243,6 +251,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
         status: "PENDING",
       },
     });
+
+    // Send email notification to squad leader asynchronously without blocking response
+    if (team.leader?.email) {
+      const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        process.env.BETTER_AUTH_URL ||
+        "https://savedino.sedssl.org";
+      const reviewUrl = `${appUrl}/team/${team.id}?tab=requests`;
+
+      sendTeamJoinRequestEmail(team.leader.email, {
+        leaderName: team.leader.name || "Squad Leader",
+        applicantName: session.user.name || "A Citizen Scientist",
+        applicantEmail: session.user.email,
+        teamName: team.name,
+        campaignName: team.event?.title || "Asteroid Campaign",
+        message,
+        reviewUrl,
+      }).catch((emailErr) => {
+        console.warn("[Send Team Join Request Email Warning]:", emailErr?.message || emailErr);
+      });
+    }
 
     return NextResponse.json({
       success: true,

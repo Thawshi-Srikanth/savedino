@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { calculateTeamStatus } from "@/lib/campaign-engine";
+import { sendTeamRequestAcceptedEmail, sendTeamRequestRejectedEmail } from "@/lib/email";
 
 // PUT: Team Leader accepts or rejects a join request
 export async function PUT(
@@ -48,17 +49,43 @@ export async function PUT(
 
     const joinReq = await prisma.teamJoinRequest.findUnique({
       where: { id: requestId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!joinReq || joinReq.teamId !== teamId) {
       return NextResponse.json({ success: false, error: "Request not found." }, { status: 404 });
     }
 
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.BETTER_AUTH_URL ||
+      "https://savedino.sedssl.org";
+
     if (action === "REJECT") {
       await prisma.teamJoinRequest.update({
         where: { id: requestId },
         data: { status: "REJECTED" },
       });
+
+      // Send rejection notification email asynchronously
+      if (joinReq.user?.email) {
+        sendTeamRequestRejectedEmail(joinReq.user.email, {
+          applicantName: joinReq.user.name || "Citizen Scientist",
+          teamName: team.name,
+          campaignName: team.event?.title || "Asteroid Campaign",
+          exploreTeamsUrl: `${appUrl}/teams?eventId=${team.eventId}`,
+        }).catch((err) => {
+          console.warn("[Send Team Rejection Email Warning]:", err?.message || err);
+        });
+      }
 
       return NextResponse.json({
         success: true,
@@ -148,6 +175,19 @@ export async function PUT(
         isRecruiting: updatedMemberCount < maxLimit,
       },
     });
+
+    // Send acceptance notification email asynchronously
+    if (joinReq.user?.email) {
+      sendTeamRequestAcceptedEmail(joinReq.user.email, {
+        applicantName: joinReq.user.name || "Citizen Scientist",
+        teamName: team.name,
+        campaignName: team.event?.title || "Asteroid Campaign",
+        leaderName: session.user.name || "Squad Leader",
+        workspaceUrl: `${appUrl}/team/${team.id}`,
+      }).catch((err) => {
+        console.warn("[Send Team Acceptance Email Warning]:", err?.message || err);
+      });
+    }
 
     return NextResponse.json({
       success: true,

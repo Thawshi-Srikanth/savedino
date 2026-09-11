@@ -221,83 +221,82 @@ function VerifyContent() {
           {/* Consistent Theme Verification Card */}
           <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
             <div className="text-center space-y-1.5">
-                <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-                  Check your email
-                </h1>
-                <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-                  {email ? (
-                    <>
-                      We sent a sign-in link to{" "}
-                      <span className="font-semibold text-foreground">{email}</span>
-                    </>
-                  ) : (
-                    "We sent a sign-in link to your email address."
-                  )}
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-1">
-                {emailProvider ? (
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
-                    onClick={() => window.open(emailProvider.url, "_blank")}
-                  >
-                    <span>Open {emailProvider.name}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : null}
-
+              <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+                Check your email
+              </h1>
+              <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
                 {email ? (
-                  <Button
-                    type="button"
-                    variant={emailProvider ? "outline" : "default"}
-                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
-                    disabled={loading || cooldown > 0}
-                    onClick={handleResendLink}
-                  >
-                    <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                    <span>{cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Link"}</span>
-                  </Button>
+                  <>
+                    We sent a sign-in link to{" "}
+                    <span className="font-semibold text-foreground">{email}</span>
+                  </>
                 ) : (
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
-                    onClick={() => router.push("/login")}
-                  >
-                    <span>Back to Sign In</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  "We sent a sign-in link to your email address."
                 )}
-              </div>
+              </p>
+            </div>
 
-              <div className="text-center pt-2 border-t border-border">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
+            <div className="space-y-3 pt-1">
+              {emailProvider ? (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                  onClick={() => window.open(emailProvider.url, "_blank")}
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Use a different email</span>
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
+                  <span>Open {emailProvider.name}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : null}
 
-        {/* Bottom Navigation */}
-        <div className="text-center text-xs font-sans text-muted-foreground">
-          Need an account?{" "}
-          <Link
-            href="/register"
-            className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
-          >
-            <span>Create account</span>
-            <span>&rarr;</span>
-          </Link>
+              {email ? (
+                <Button
+                  type="button"
+                  variant={emailProvider ? "outline" : "default"}
+                  className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                  disabled={loading || cooldown > 0}
+                  onClick={handleResendLink}
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  <span>{cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Link"}</span>
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                  onClick={() => router.push("/login")}
+                >
+                  <span>Back to Sign In</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className="text-center pt-2 border-t border-border">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Use a different email</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Bottom Navigation */}
+          <div className="text-center text-xs font-sans text-muted-foreground">
+            Need an account?{" "}
+            <Link
+              href="/register"
+              className="font-bold text-foreground hover:underline inline-flex items-center gap-1"
+            >
+              <span>Create account</span>
+              <span>&rarr;</span>
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Footer */}
       <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
