@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { isOrganizer } from "@/lib/rbac";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import {
   Telescope,
   PlusCircle,
@@ -30,9 +35,13 @@ import {
   ChevronRight,
   Clock,
   Layers,
-  Sparkles,
   ArrowRight,
   ExternalLink,
+  Check,
+  Pin,
+  HelpCircle,
+  X,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,8 +59,152 @@ interface EventItem {
   submissionStart: string;
   submissionEnd: string;
   status: string;
+  maxTeamSize?: number;
   _count?: {
     teams: number;
+  };
+}
+
+function formatStageDate(dateStr?: string) {
+  if (!dateStr) return "TBA";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "TBA";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getEventStages(ev: EventItem, now: number = Date.now()) {
+  const s3Start = ev.startDate ? new Date(ev.startDate).getTime() : NaN;
+  const s3End = ev.endDate ? new Date(ev.endDate).getTime() : NaN;
+
+  const s1Start = ev.regStart
+    ? new Date(ev.regStart).getTime()
+    : !isNaN(s3Start)
+      ? s3Start - 14 * 86400000
+      : NaN;
+  const s1End = ev.regEnd ? new Date(ev.regEnd).getTime() : !isNaN(s3Start) ? s3Start : NaN;
+
+  const s2Start = ev.teamFormationStart ? new Date(ev.teamFormationStart).getTime() : s1End;
+  const s2End = ev.teamFormationEnd
+    ? new Date(ev.teamFormationEnd).getTime()
+    : !isNaN(s3Start)
+      ? s3Start
+      : NaN;
+
+  const s4Start = ev.submissionStart ? new Date(ev.submissionStart).getTime() : s3Start;
+  const s4End = ev.submissionEnd ? new Date(ev.submissionEnd).getTime() : s3End;
+
+  const getStatus = (start: number, end: number): "COMPLETED" | "ACTIVE" | "UPCOMING" => {
+    if (isNaN(start) || isNaN(end)) return "UPCOMING";
+    if (now >= end) return "COMPLETED";
+    if (now >= start && now < end) return "ACTIVE";
+    return "UPCOMING";
+  };
+
+  return [
+    { name: "Registration", start: ev.regStart || ev.startDate, status: getStatus(s1Start, s1End) },
+    {
+      name: "Team Setup",
+      start: ev.teamFormationStart || ev.regStart || ev.startDate,
+      status: getStatus(s2Start, s2End),
+    },
+    { name: "Image Search", start: ev.startDate, status: getStatus(s3Start, s3End) },
+    { name: "Submit", start: ev.submissionStart || ev.endDate, status: getStatus(s4Start, s4End) },
+  ];
+}
+
+function getStageAction(ev: EventItem, now: number = Date.now()) {
+  const stages = getEventStages(ev, now);
+  const s3Start = ev.startDate ? new Date(ev.startDate).getTime() : NaN;
+  const s3End = ev.endDate ? new Date(ev.endDate).getTime() : NaN;
+  const s4End = ev.submissionEnd ? new Date(ev.submissionEnd).getTime() : s3End;
+
+  const regDeadline = ev.teamFormationEnd || ev.regEnd || ev.startDate;
+  const regDeadlineMs = regDeadline ? new Date(regDeadline).getTime() : NaN;
+  const isRegClosed = !isNaN(regDeadlineMs) && now > regDeadlineMs;
+
+  // 1. Completed
+  if (ev.status === "COMPLETED" || (!isNaN(s4End) && now >= s4End)) {
+    return {
+      isModal: false,
+      isClosed: false,
+      label: "View Results",
+      href: `/campaigns/${ev.id}`,
+      icon: ArrowRight,
+      className: "bg-slate-700 hover:bg-slate-800 text-white shadow-arcade",
+    };
+  }
+
+  // 2. Submit Reports stage
+  const submitStage = stages.find((s) => s.name === "Submit");
+  if (submitStage?.status === "ACTIVE" || (!isNaN(s3End) && now >= s3End && now < s4End)) {
+    return {
+      isModal: false,
+      isClosed: false,
+      label: "Submit Reports",
+      href: `/campaigns/${ev.id}`,
+      icon: CheckCircle2,
+      className: "bg-[#10b981] hover:bg-[#059669] text-white shadow-arcade-emerald",
+    };
+  }
+
+  // 3. Image Search stage (Live telescope analysis)
+  const imageSearchStage = stages.find((s) => s.name === "Image Search");
+  if (
+    imageSearchStage?.status === "ACTIVE" ||
+    (ev.status === "ACTIVE" && !isNaN(s3Start) && now >= s3Start && (isNaN(s3End) || now < s3End))
+  ) {
+    return {
+      isModal: false,
+      isClosed: false,
+      label: "Start Image Search",
+      href: `/campaigns/${ev.id}`,
+      icon: Telescope,
+      className: "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary",
+    };
+  }
+
+  // 4. Registration or Team Setup (Active & Open)
+  const regStage = stages.find((s) => s.name === "Registration");
+  const teamStage = stages.find((s) => s.name === "Team Setup");
+  if (
+    (regStage?.status === "ACTIVE" || teamStage?.status === "ACTIVE" || ev.status === "ACTIVE") &&
+    !isRegClosed
+  ) {
+    return {
+      isModal: true,
+      isClosed: false,
+      label: "Form a Team",
+      href: null,
+      icon: PlusCircle,
+      className: "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary",
+    };
+  }
+
+  // 5. If registration is closed before start date
+  if (isRegClosed && !isNaN(s3Start) && now < s3Start) {
+    return {
+      isModal: false,
+      isClosed: true,
+      label: "Registration Closed",
+      href: `/campaigns/${ev.id}`,
+      icon: Clock,
+      className:
+        "bg-muted text-muted-foreground border border-border opacity-80 cursor-not-allowed shadow-arcade-sm",
+    };
+  }
+
+  // 6. Default / Upcoming
+  return {
+    isModal: false,
+    isClosed: false,
+    label: "Explore Campaign",
+    href: `/campaigns/${ev.id}`,
+    icon: ArrowRight,
+    className: "bg-muted hover:bg-muted/80 text-foreground border border-border shadow-arcade-sm",
   };
 }
 
@@ -118,6 +271,7 @@ export default function CampaignsPage() {
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
 
   // Filter and Search States
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("ALL");
@@ -143,6 +297,37 @@ export default function CampaignsPage() {
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  // User's existing team memberships mapped by eventId
+  const [userTeamsByEventId, setUserTeamsByEventId] = useState<
+    Record<string, { teamId: string; teamName: string; role: string }>
+  >({});
+
+  const fetchUserTeams = async () => {
+    if (!session?.user?.id) {
+      setUserTeamsByEventId({});
+      return;
+    }
+    try {
+      const res = await fetch("/api/user/profile");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.teams)) {
+        const map: Record<string, { teamId: string; teamName: string; role: string }> = {};
+        data.teams.forEach((t: any) => {
+          if (t.event?.id) {
+            map[t.event.id] = {
+              teamId: t.id,
+              teamName: t.name,
+              role: t.role,
+            };
+          }
+        });
+        setUserTeamsByEventId(map);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user squads for campaigns page:", err);
+    }
+  };
+
   const fetchCampaignData = async () => {
     setLoading(true);
     try {
@@ -162,6 +347,10 @@ export default function CampaignsPage() {
   useEffect(() => {
     fetchCampaignData();
   }, []);
+
+  useEffect(() => {
+    fetchUserTeams();
+  }, [session?.user?.id]);
 
   // Filtered list based on status and search query
   const filteredEvents = useMemo(() => {
@@ -228,6 +417,10 @@ export default function CampaignsPage() {
       router.push("/login");
       return;
     }
+    if (isOrganizer(session.user)) {
+      toast.info("Administrators and staff manage campaigns and cannot join participant teams.");
+      return;
+    }
     setSelectedEventForJoin(event || null);
     setJoinCode("");
     setJoinError(null);
@@ -237,6 +430,10 @@ export default function CampaignsPage() {
   const handleOpenCreateModal = (event: EventItem) => {
     if (!session) {
       router.push("/login");
+      return;
+    }
+    if (isOrganizer(session.user)) {
+      toast.info("Administrators and staff manage campaigns and cannot form participant teams.");
       return;
     }
     setSelectedEventForTeam(event);
@@ -326,6 +523,8 @@ export default function CampaignsPage() {
     ? getRegistrationDeadlineInfo(currentActiveEvent.regEnd, currentActiveEvent.startDate)
     : null;
 
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
   // Status Filter counts
   const countAll = events.length;
   const countActive = events.filter((e) => e.status === "ACTIVE").length;
@@ -335,28 +534,199 @@ export default function CampaignsPage() {
   }).length;
   const countUpcoming = events.filter((e) => e.status === "UPCOMING").length;
 
-  return (
-    <div className="w-full space-y-6 font-sans">
-      {/* 1. TOP HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <Telescope className="size-6 text-primary" />
-            <span>Search Campaigns</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Discover Near-Earth Asteroids with survey telescope data.
-          </p>
+  const activeFilterCount = (searchQuery.trim() ? 1 : 0) + (selectedStatusFilter !== "ALL" ? 1 : 0);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedStatusFilter("ALL");
+  };
+
+  const renderCampaignFilterControls = (
+    <div className="space-y-4">
+      <Card className="p-3 bg-card border-border shadow-arcade-lg space-y-3">
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Search campaigns..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pl-8 pr-7 text-xs bg-background"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
 
-        {/* Global Join with Invite Code Button */}
-        <div className="flex items-center gap-2.5">
+        {/* Status Navigation Buttons */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between px-1 pb-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Filter Campaigns
+            </span>
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-[10px] text-primary hover:underline font-bold cursor-pointer"
+              >
+                Reset All
+              </button>
+            )}
+          </div>
+
+          {/* All Campaigns */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "ALL" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("ALL")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Layers className="size-3.5 shrink-0" />
+              <span>All Campaigns</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "ALL" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countAll}
+            </Badge>
+          </Button>
+
+          {/* Active Now */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "ACTIVE" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("ACTIVE")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Activity className="size-3.5 shrink-0" />
+              <span>Active Now</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "ACTIVE" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countActive}
+            </Badge>
+          </Button>
+
+          {/* Registration Open */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "REGISTRATION" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("REGISTRATION")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="size-3.5 shrink-0" />
+              <span>Registration Open</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "REGISTRATION" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countRegistrationOpen}
+            </Badge>
+          </Button>
+
+          {/* Upcoming */}
+          <Button
+            type="button"
+            variant={selectedStatusFilter === "UPCOMING" ? "default" : "outline"}
+            onClick={() => setSelectedStatusFilter("UPCOMING")}
+            className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar className="size-3.5 shrink-0" />
+              <span>Upcoming</span>
+            </div>
+            <Badge
+              variant={selectedStatusFilter === "UPCOMING" ? "secondary" : "outline"}
+              className="text-[10px] px-1.5 py-0 font-mono"
+            >
+              {countUpcoming}
+            </Badge>
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+
+  return (
+    <div className="w-full space-y-6 font-sans max-w-6xl mx-auto py-2">
+      {/* Mobile Draggable Filter Trigger + Drawer */}
+      <MobileFilterDrawer
+        title="Filter Campaigns"
+        description="Search and filter observation campaigns"
+        activeCount={activeFilterCount}
+        totalResults={filteredEvents.length}
+        isOpen={isMobileFilterOpen}
+        onOpenChange={setIsMobileFilterOpen}
+        onReset={handleResetFilters}
+      >
+        {renderCampaignFilterControls}
+      </MobileFilterDrawer>
+
+      {/* 1. TOP HEADER (Sticky) */}
+      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Telescope className="size-5 text-primary" />
+            <span>Campaigns</span>
+          </h1>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="size-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors flex items-center justify-center cursor-pointer"
+                  aria-label="About Campaigns"
+                >
+                  <HelpCircle className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                align="start"
+                className="text-xs max-w-xs bg-card text-card-foreground border-border shadow-lg p-3 space-y-1"
+              >
+                <div className="font-bold text-foreground">About Campaigns</div>
+                <p className="text-muted-foreground leading-relaxed">
+                  Scheduled observation events where teams analyze sky survey images from global
+                  observatories to detect asteroids and submit scientific discoveries.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* Global Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Link href="/teams">
+            <Button
+              variant="outline"
+              className="hidden sm:inline-flex h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl"
+            >
+              <Users className="size-3.5 text-[#10b981]" />
+              <span>Squad Directory</span>
+            </Button>
+          </Link>
           <Button
             onClick={() => handleOpenJoinModal()}
-            variant="outline"
-            className="h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shrink-0"
+            variant="default"
+            className="inline-flex h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer shadow-arcade-primary active:translate-y-0.5 rounded-xl"
           >
-            <KeyRound className="size-3.5 text-primary" />
+            <KeyRound className="size-3.5 text-white" />
             <span>Join with Code</span>
           </Button>
         </div>
@@ -364,141 +734,30 @@ export default function CampaignsPage() {
 
       {/* 2. MAIN LAYOUT: SIDEBAR FILTER + CAMPAIGN CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* === LEFT COLUMN: SIDEBAR FILTERS (THEMED BUTTONS LIKE ADMIN PANEL) === */}
-        <div className="lg:col-span-1 space-y-4">
-          <Card className="p-3 bg-card border-border shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-3">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search campaigns..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 text-xs bg-background"
-              />
-            </div>
-
-            {/* Status Themed Navigation Buttons */}
-            <div className="space-y-1.5 pt-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1 pb-0.5">
-                Filter Campaigns
-              </div>
-
-              {/* All Campaigns */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "ALL" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("ALL")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Layers className="size-3.5" />
-                  <span>All Campaigns</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "ALL" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countAll}
-                </Badge>
-              </Button>
-
-              {/* Active Now */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "ACTIVE" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("ACTIVE")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
-                  <span>Active Now</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "ACTIVE" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countActive}
-                </Badge>
-              </Button>
-
-              {/* Registration Open */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "REGISTRATION" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("REGISTRATION")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Clock className="size-3.5 text-[#38bdf8]" />
-                  <span>Registration Open</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "REGISTRATION" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countRegistrationOpen}
-                </Badge>
-              </Button>
-
-              {/* Upcoming */}
-              <Button
-                type="button"
-                variant={selectedStatusFilter === "UPCOMING" ? "default" : "outline"}
-                onClick={() => setSelectedStatusFilter("UPCOMING")}
-                className="w-full justify-between h-9 px-3 text-xs font-bold cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Calendar className="size-3.5" />
-                  <span>Upcoming</span>
-                </div>
-                <Badge
-                  variant={selectedStatusFilter === "UPCOMING" ? "secondary" : "outline"}
-                  className="text-[10px] px-1.5 py-0 font-mono"
-                >
-                  {countUpcoming}
-                </Badge>
-              </Button>
-            </div>
-          </Card>
-
-          {/* Quick Info Box */}
-          <Card className="p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5">
-            <div className="font-semibold text-foreground flex items-center gap-1.5 text-[11px]">
-              <Sparkles className="size-3.5 text-[#8b5cf6]" />
-              <span>Squad Guidelines</span>
-            </div>
-            <p className="text-[11px] leading-relaxed">
-              Squads have <strong>2 to 6 researchers</strong>. Squad leaders can invite members via private invite code.
-            </p>
-          </Card>
-        </div>
+        {/* === LEFT COLUMN: SIDEBAR FILTERS (Sticky on Desktop, Hidden on Mobile) === */}
+        <aside className="hidden lg:block lg:col-span-1 space-y-4 lg:sticky lg:top-36 z-20">
+          {renderCampaignFilterControls}
+        </aside>
 
         {/* === RIGHT COLUMN: SPOTLIGHT & CAMPAIGN FEED === */}
         <div className="lg:col-span-3 space-y-6">
           {/* A. ACTIVE SPOTLIGHT CAROUSEL (If filtering ALL or ACTIVE) */}
-          {(selectedStatusFilter === "ALL" || selectedStatusFilter === "ACTIVE") && !searchQuery && (
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-[#10b981] animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                    Featured Active Campaign
-                  </span>
-                </div>
-
-                {/* Carousel Controls */}
+          {(selectedStatusFilter === "ALL" || selectedStatusFilter === "ACTIVE") &&
+            !searchQuery && (
+              <div className="space-y-2.5">
+                {/* Carousel Controls (If multiple active campaigns) */}
                 {activeEvents.length > 1 && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-end gap-2 pb-0.5">
                     <span className="text-xs font-mono text-muted-foreground">
-                      <strong className="text-foreground">{activeEventIndex + 1}</strong> of {activeEvents.length}
+                      <strong className="text-foreground">{activeEventIndex + 1}</strong> of{" "}
+                      {activeEvents.length}
                     </span>
                     <div className="flex items-center gap-1">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={handlePrevActive}
-                        className="h-7 w-7 p-0 cursor-pointer"
+                        className="h-7 w-7 p-0 cursor-pointer shadow-arcade"
                         title="Previous Campaign"
                       >
                         <ChevronLeft className="size-3.5" />
@@ -507,7 +766,7 @@ export default function CampaignsPage() {
                         size="sm"
                         variant="outline"
                         onClick={handleNextActive}
-                        className="h-7 w-7 p-0 cursor-pointer"
+                        className="h-7 w-7 p-0 cursor-pointer shadow-arcade"
                         title="Next Campaign"
                       >
                         <ChevronRight className="size-3.5" />
@@ -515,144 +774,216 @@ export default function CampaignsPage() {
                     </div>
                   </div>
                 )}
+
+                {isDisplayLoading ? (
+                  <DinoLoading size="md" text="Loading active campaign..." className="py-12" />
+                ) : !currentActiveEvent ? null : (
+                  <div
+                    className="relative touch-pan-y select-none"
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                  >
+                    <Card className="p-5 bg-card border-border shadow-arcade-lg space-y-4">
+                      {/* Top Header with Pin Badge */}
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted border border-border shadow-arcade whitespace-nowrap">
+                              {currentActiveEvent.code}
+                            </span>
+                            <Badge className="bg-[#8b5cf6] text-white border-0 font-sans font-bold text-xs px-2.5 py-0.5 shadow-arcade-primary rounded-lg gap-1 whitespace-nowrap">
+                              <Pin className="size-3 fill-white -rotate-45" />
+                              <span>Featured</span>
+                            </Badge>
+                            <Badge className="bg-[#10b981] hover:bg-[#10b981] text-white border-0 font-sans font-bold text-xs px-2.5 py-0.5 shadow-arcade-emerald rounded-lg gap-1.5 whitespace-nowrap">
+                              <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                              <span>Active</span>
+                            </Badge>
+                          </div>
+                          <Link
+                            href={`/campaigns/${currentActiveEvent.id}`}
+                            className="hover:text-primary transition-colors block"
+                          >
+                            <h2 className="text-lg sm:text-xl font-bold text-foreground hover:underline leading-snug">
+                              {currentActiveEvent.title}
+                            </h2>
+                          </Link>
+                          <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                            {currentActiveEvent.description ||
+                              "International Astronomical Search Collaboration campaign for asteroid discovery."}
+                          </p>
+                        </div>
+
+                        {/* Team Count */}
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/40 shrink-0 self-start shadow-arcade">
+                          <Users className="size-3.5 text-primary" />
+                          <span className="text-xs font-mono font-bold text-foreground">
+                            {currentActiveEvent._count?.teams || 0}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">Teams</span>
+                        </div>
+                      </div>
+
+                      {/* Dashed Timeline (2x2 on Mobile, 4-Cols on Desktop) */}
+                      <div className="pt-3 pb-1 border-t border-border">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 items-center relative py-1">
+                          {getEventStages(currentActiveEvent).map((stage, sIdx) => {
+                            const isLive = stage.status === "ACTIVE";
+                            const isDone = stage.status === "COMPLETED";
+
+                            return (
+                              <div
+                                key={stage.name}
+                                className="flex flex-col items-center text-center space-y-1.5 z-10 px-1"
+                              >
+                                <span
+                                  className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[130px] sm:max-w-none ${
+                                    isLive
+                                      ? "text-[#8b5cf6]"
+                                      : isDone
+                                        ? "text-[#10b981]"
+                                        : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {stage.name}
+                                </span>
+                                <div
+                                  className={`size-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold transition-all ${
+                                    isLive
+                                      ? "bg-[#8b5cf6] text-white border-0 shadow-arcade-primary ring-2 ring-[#8b5cf6]/40 scale-105"
+                                      : isDone
+                                        ? "bg-[#10b981] text-white border-0 shadow-arcade-emerald"
+                                        : "bg-card text-muted-foreground border border-border shadow-arcade"
+                                  }`}
+                                >
+                                  {isDone ? <Check className="size-3.5 stroke-[3]" /> : sIdx + 1}
+                                </div>
+                                <span
+                                  className={`text-[11px] font-mono font-semibold ${
+                                    isLive
+                                      ? "text-[#8b5cf6] font-bold"
+                                      : isDone
+                                        ? "text-foreground"
+                                        : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {formatStageDate(stage.start)}
+                                </span>
+                              </div>
+                            );
+                          })}
+
+                          {/* Dashed Connecting Line (Desktop) */}
+                          <div className="hidden sm:block absolute top-[36px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+
+                          {/* Dashed Connecting Lines (Mobile Continuum: Row 1 to right edge, Row 2 from left edge) */}
+                          <div className="sm:hidden absolute top-[36px] left-[25%] right-0 border-t-2 border-dashed border-border pointer-events-none z-0" />
+                          <div className="sm:hidden absolute bottom-[35px] left-0 right-[25%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-border">
+                        {(() => {
+                          const myTeam = userTeamsByEventId[currentActiveEvent.id];
+                          if (myTeam) {
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Link href={`/team/${myTeam.teamId}`}>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                  >
+                                    <Users className="size-3.5 text-white" />
+                                    <span>Squad Workspace</span>
+                                  </Button>
+                                </Link>
+                              </div>
+                            );
+                          }
+
+                          const action = getStageAction(currentActiveEvent);
+                          if (action.isClosed) {
+                            return (
+                              <Button
+                                disabled
+                                variant="outline"
+                                size="sm"
+                                className="h-9 px-4 text-xs font-bold gap-1.5 opacity-60 border-border bg-muted rounded-xl"
+                              >
+                                <Clock className="size-3.5" />
+                                <span>Registration Closed</span>
+                              </Button>
+                            );
+                          }
+                          if (action.isModal) {
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  onClick={() => handleOpenJoinModal(currentActiveEvent)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5 rounded-xl"
+                                >
+                                  <KeyRound className="size-3.5 text-primary" />
+                                  <span>Join with Code</span>
+                                </Button>
+
+                                <Button
+                                  onClick={() => handleOpenCreateModal(currentActiveEvent)}
+                                  variant="default"
+                                  size="sm"
+                                  className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                >
+                                  <action.icon className="size-3.5" />
+                                  <span>{action.label}</span>
+                                </Button>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div className="flex items-center gap-2">
+                              <Link href={action.href || `/campaigns/${currentActiveEvent.id}`}>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className={`h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer ${action.className} active:translate-y-0.5 rounded-xl border-0`}
+                                >
+                                  <action.icon className="size-3.5" />
+                                  <span>{action.label}</span>
+                                </Button>
+                              </Link>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </Card>
+
+                    {/* Dot Indicators */}
+                    {activeEvents.length > 1 && (
+                      <div className="flex items-center justify-center gap-1.5 mt-2">
+                        {activeEvents.map((_, idx) => (
+                          <button
+                            key={`dot-${idx}`}
+                            type="button"
+                            onClick={() => setActiveEventIndex(idx)}
+                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                              activeEventIndex === idx
+                                ? "w-6 bg-[#8b5cf6]"
+                                : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+                            }`}
+                            title={`Go to Campaign ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-
-              {loading ? (
-                <div className="py-12 text-center text-xs text-muted-foreground animate-pulse space-y-2">
-                  <Rocket className="size-6 mx-auto text-muted-foreground/30 animate-bounce" />
-                  <div>Loading campaign spotlight...</div>
-                </div>
-              ) : !currentActiveEvent ? null : (
-                <div
-                  className="relative touch-pan-y select-none"
-                  onTouchStart={onTouchStart}
-                  onTouchMove={onTouchMove}
-                  onTouchEnd={onTouchEnd}
-                >
-                  <Card className="p-5 bg-card border-border shadow-[0_4px_0_0_#e2e8f0] dark:shadow-[0_4px_0_0_#27282d] space-y-4">
-                    {/* Top Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
-                            {currentActiveEvent.code}
-                          </span>
-                          <span className="text-[10px] font-bold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded-full uppercase">
-                            Live
-                          </span>
-                        </div>
-                        <Link
-                          href={`/campaigns/${currentActiveEvent.id}`}
-                          className="hover:text-primary transition-colors block"
-                        >
-                          <h2 className="text-lg font-bold text-foreground hover:underline">
-                            {currentActiveEvent.title}
-                          </h2>
-                        </Link>
-                        <p className="text-xs text-muted-foreground max-w-xl line-clamp-2">
-                          {currentActiveEvent.description || "International Astronomical Search Collaboration campaign for astrometric asteroid discovery."}
-                        </p>
-                      </div>
-
-                      {/* Squad Count */}
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/40 shrink-0 self-start">
-                        <Users className="size-3.5 text-primary" />
-                        <span className="text-xs font-mono font-bold text-foreground">
-                          {currentActiveEvent._count?.teams || 0}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">Squads</span>
-                      </div>
-                    </div>
-
-                    {/* KEY HIGHLIGHT: REGISTRATION DEADLINE & DATES */}
-                    <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`p-2 rounded-lg shrink-0 ${
-                          currentActiveRegInfo?.isUrgent
-                            ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                            : "bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20"
-                        }`}>
-                          <Clock className="size-4" />
-                        </div>
-                        <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Registration Deadline
-                          </div>
-                          <div className="text-xs font-bold text-foreground mt-0.5 font-mono">
-                            {currentActiveRegInfo?.text}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-xs font-mono text-muted-foreground sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-border/50">
-                        <div className="text-[10px] font-sans font-semibold uppercase text-muted-foreground">
-                          Observation Period
-                        </div>
-                        <div className="text-foreground font-medium mt-0.5">
-                          {new Date(currentActiveEvent.startDate).toLocaleDateString()} &ndash; {new Date(currentActiveEvent.endDate).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
-                      <Link href={`/campaigns/${currentActiveEvent.id}`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
-                        >
-                          <span>View Campaign Details</span>
-                          <ArrowRight className="size-3.5" />
-                        </Button>
-                      </Link>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={() => handleOpenJoinModal(currentActiveEvent)}
-                          variant="outline"
-                          size="sm"
-                          className="h-9 px-4 text-xs font-semibold gap-1.5 cursor-pointer border-border hover:bg-muted"
-                        >
-                          <UserPlus className="size-3.5 text-primary" />
-                          <span>Join a Team</span>
-                        </Button>
-
-                        <Button
-                          onClick={() => handleOpenCreateModal(currentActiveEvent)}
-                          variant="default"
-                          size="sm"
-                          className="h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
-                        >
-                          <PlusCircle className="size-3.5" />
-                          <span>Form a Team</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Dot Indicators */}
-                  {activeEvents.length > 1 && (
-                    <div className="flex items-center justify-center gap-1.5 mt-2">
-                      {activeEvents.map((_, idx) => (
-                        <button
-                          key={`dot-${idx}`}
-                          type="button"
-                          onClick={() => setActiveEventIndex(idx)}
-                          className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                            activeEventIndex === idx
-                              ? "w-6 bg-[#8b5cf6]"
-                              : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
-                          }`}
-                          title={`Go to Campaign ${idx + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+            )}
 
           {/* B. FILTERED CAMPAIGNS LIST */}
           <div className="space-y-3">
@@ -661,12 +992,12 @@ export default function CampaignsPage() {
                 <Calendar className="size-4 text-primary" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   {selectedStatusFilter === "ALL"
-                    ? "Campaigns Schedule"
+                    ? "Campaigns List"
                     : selectedStatusFilter === "ACTIVE"
-                    ? "Active Campaigns"
-                    : selectedStatusFilter === "REGISTRATION"
-                    ? "Open for Registration"
-                    : "Upcoming Campaigns"}
+                      ? "Active Campaigns"
+                      : selectedStatusFilter === "REGISTRATION"
+                        ? "Open for Registration"
+                        : "Upcoming Campaigns"}
                 </h3>
               </div>
               <span className="text-xs font-mono text-muted-foreground">
@@ -674,96 +1005,195 @@ export default function CampaignsPage() {
               </span>
             </div>
 
-            {loading ? (
-              <div className="py-12 text-center text-xs text-muted-foreground animate-pulse">
-                Loading campaigns list...
-              </div>
+            {isDisplayLoading ? (
+              <DinoLoading size="md" text="Loading campaigns list..." className="py-12" />
             ) : filteredEvents.length === 0 ? (
               <Card className="p-8 text-center text-xs text-muted-foreground">
                 No campaigns match the selected filter.
               </Card>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {filteredEvents.map((ev) => {
-                  const regInfo = getRegistrationDeadlineInfo(ev.regEnd, ev.startDate);
-
                   return (
                     <Card
                       key={ev.id}
-                      className="p-4 bg-card border-border shadow-xs hover:border-primary/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                      className="p-4 sm:p-5 bg-card border-border shadow-arcade-sm hover:border-primary/40 transition-all space-y-3.5"
                     >
-                      {/* Left: Info */}
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                      {/* Top Header: Code + Status on one line, Teams on right */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted border border-border shadow-arcade-sm whitespace-nowrap">
                             {ev.code}
                           </span>
-                          <span className="text-[10px] font-mono text-muted-foreground">
-                            {ev.status}
-                          </span>
+                          {ev.status === "ACTIVE" ? (
+                            <Badge className="bg-[#10b981] text-white border-0 font-sans font-bold text-[11px] px-2.5 py-0.5 shadow-arcade-emerald rounded-lg gap-1.5 whitespace-nowrap">
+                              <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                              <span>Active</span>
+                            </Badge>
+                          ) : ev.status === "UPCOMING" ? (
+                            <Badge className="bg-sky-500 text-white border-0 font-sans font-bold text-[11px] px-2.5 py-0.5 shadow-arcade-sm rounded-lg whitespace-nowrap">
+                              Upcoming
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-slate-700 text-white border-0 font-sans font-bold text-[11px] px-2.5 py-0.5 shadow-arcade-sm rounded-lg whitespace-nowrap">
+                              {ev.status}
+                            </Badge>
+                          )}
                         </div>
+
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                          <Users className="size-3.5 text-primary" />
+                          <span className="font-mono font-bold text-foreground">
+                            {ev._count?.teams || 0}
+                          </span>
+                          <span>Teams</span>
+                        </div>
+                      </div>
+
+                      {/* Main Title & Description (Untruncated title) */}
+                      <div className="space-y-1">
                         <Link
                           href={`/campaigns/${ev.id}`}
                           className="hover:text-primary transition-colors block"
                         >
-                          <h4 className="text-sm font-bold text-foreground truncate hover:underline">
+                          <h4 className="text-base sm:text-lg font-bold text-foreground hover:underline leading-snug">
                             {ev.title}
                           </h4>
                         </Link>
-                        <p className="text-xs text-muted-foreground line-clamp-1">
-                          {ev.description || "International Asteroid Search Collaboration campaign."}
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                          {ev.description ||
+                            "International Asteroid Search Collaboration campaign for asteroid discovery."}
                         </p>
                       </div>
 
-                      {/* Middle: Prominent Registration Deadline */}
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className={`p-2 rounded-lg border text-center min-w-[135px] ${
-                          regInfo.isUrgent
-                            ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
-                            : regInfo.isClosed
-                            ? "bg-muted/40 border-border text-muted-foreground"
-                            : "bg-[#8b5cf6]/10 border-[#8b5cf6]/25 text-[#8b5cf6]"
-                        }`}>
-                          <div className="text-[9px] uppercase font-sans font-bold">
-                            Registration Deadline
-                          </div>
-                          <div className="text-[11px] font-bold mt-0.5 text-foreground font-mono">
-                            {regInfo.text}
-                          </div>
+                      {/* Dashed Timeline (2x2 on Mobile, 4-Cols on Desktop) */}
+                      <div className="pt-3 border-t border-border space-y-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 items-center relative py-1">
+                          {getEventStages(ev).map((stage, sIdx) => {
+                            const isLive = stage.status === "ACTIVE";
+                            const isDone = stage.status === "COMPLETED";
+
+                            return (
+                              <div
+                                key={stage.name}
+                                className="flex flex-col items-center text-center space-y-1.5 z-10 px-1"
+                              >
+                                <span
+                                  className={`text-[10px] uppercase font-bold tracking-wider truncate max-w-[130px] sm:max-w-none ${
+                                    isLive
+                                      ? "text-[#8b5cf6]"
+                                      : isDone
+                                        ? "text-[#10b981]"
+                                        : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {stage.name}
+                                </span>
+                                <div
+                                  className={`size-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold transition-all ${
+                                    isLive
+                                      ? "bg-[#8b5cf6] text-white border-0 shadow-arcade-primary ring-2 ring-[#8b5cf6]/40 scale-105"
+                                      : isDone
+                                        ? "bg-[#10b981] text-white border-0 shadow-arcade-emerald"
+                                        : "bg-card text-muted-foreground border border-border shadow-arcade-sm"
+                                  }`}
+                                >
+                                  {isDone ? <Check className="size-3.5 stroke-[3]" /> : sIdx + 1}
+                                </div>
+                                <span
+                                  className={`text-[11px] font-mono font-semibold ${
+                                    isLive
+                                      ? "text-[#8b5cf6] font-bold"
+                                      : isDone
+                                        ? "text-foreground"
+                                        : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {formatStageDate(stage.start)}
+                                </span>
+                              </div>
+                            );
+                          })}
+
+                          {/* Dashed Connecting Line (Desktop) */}
+                          <div className="hidden sm:block absolute top-[36px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border pointer-events-none z-0" />
+
+                          {/* Dashed Connecting Lines (Mobile Continuum: Row 1 to right edge, Row 2 from left edge) */}
+                          <div className="sm:hidden absolute top-[36px] left-[25%] right-0 border-t-2 border-dashed border-border pointer-events-none z-0" />
+                          <div className="sm:hidden absolute bottom-[35px] left-0 right-[25%] border-t-2 border-dashed border-border pointer-events-none z-0" />
                         </div>
 
-                        {/* Observation Window */}
-                        <div className="hidden sm:block p-2 rounded-lg border border-border bg-muted/20 text-center min-w-[125px] font-mono text-xs">
-                          <div className="text-[9px] uppercase font-sans font-semibold text-muted-foreground">
-                            Observation
-                          </div>
-                          <div className="text-[11px] text-foreground mt-0.5">
-                            {new Date(ev.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &ndash; {new Date(ev.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          </div>
+                        {/* Actions */}
+                        <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-border/50">
+                          {(() => {
+                            const myTeam = userTeamsByEventId[ev.id];
+                            if (myTeam) {
+                              return (
+                                <Link href={`/team/${myTeam.teamId}`}>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                  >
+                                    <Users className="size-3.5 text-white" />
+                                    <span>Squad Workspace</span>
+                                  </Button>
+                                </Link>
+                              );
+                            }
+
+                            const action = getStageAction(ev);
+                            if (action.isClosed) {
+                              return (
+                                <Button
+                                  disabled
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-9 px-4 text-xs font-bold gap-1.5 opacity-60 border-border bg-muted rounded-xl"
+                                >
+                                  <Clock className="size-3.5" />
+                                  <span>Registration Closed</span>
+                                </Button>
+                              );
+                            }
+                            if (action.isModal) {
+                              return (
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleOpenJoinModal(ev)}
+                                    className="h-9 px-3 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl"
+                                  >
+                                    <KeyRound className="size-3.5 text-primary" />
+                                    <span>Join with Code</span>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => handleOpenCreateModal(ev)}
+                                    className="h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5 rounded-xl border-0"
+                                  >
+                                    <action.icon className="size-3.5" />
+                                    <span>{action.label}</span>
+                                  </Button>
+                                </div>
+                              );
+                            }
+                            return (
+                              <Link href={action.href || `/campaigns/${ev.id}`}>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className={`h-9 px-4 text-xs font-bold gap-1.5 cursor-pointer ${action.className} active:translate-y-0.5 rounded-xl border-0`}
+                                >
+                                  <action.icon className="size-3.5" />
+                                  <span>{action.label}</span>
+                                </Button>
+                              </Link>
+                            );
+                          })()}
                         </div>
-                      </div>
-
-                      {/* Right: Actions */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Link href={`/campaigns/${ev.id}`}>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-2.5 text-xs font-semibold cursor-pointer border-border hover:bg-muted"
-                          >
-                            <span>Details</span>
-                          </Button>
-                        </Link>
-
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handleOpenCreateModal(ev)}
-                          className="h-8 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
-                        >
-                          <PlusCircle className="size-3" />
-                          <span>Form Squad</span>
-                        </Button>
                       </div>
                     </Card>
                   );
@@ -783,10 +1213,12 @@ export default function CampaignsPage() {
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <PlusCircle className="size-4 text-primary" />
-              <span>Form a Research Squad</span>
+              <span>Form a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Registering a new squad for <strong className="text-foreground">{selectedEventForTeam?.title}</strong> ({selectedEventForTeam?.code}).
+              Register a team for{" "}
+              <strong className="text-foreground">{selectedEventForTeam?.title}</strong> (
+              {selectedEventForTeam?.code}).
             </DialogDescription>
           </DialogHeader>
 
@@ -798,9 +1230,7 @@ export default function CampaignsPage() {
 
           <form onSubmit={handleCreateTeam} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-foreground">
-                Squad / Team Name
-              </label>
+              <label className="block text-xs font-semibold text-foreground">Team Name</label>
               <Input
                 type="text"
                 required
@@ -814,15 +1244,19 @@ export default function CampaignsPage() {
             <div className="text-xs text-muted-foreground p-3 rounded-lg border border-border bg-muted/40 space-y-1.5">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>You will be registered as the <strong>Squad Leader</strong>.</span>
+                <span>
+                  You will be registered as the <strong>Team Leader</strong>.
+                </span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>A private <strong>invite code</strong> will be generated for your teammates.</span>
+                <span>
+                  A private <strong>invite code</strong> will be generated for your teammates.
+                </span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Squads allow a minimum of 2 and maximum of 6 researchers.</span>
+                <span>Teams allow 2 to {selectedEventForTeam?.maxTeamSize || 6} members.</span>
               </div>
             </div>
 
@@ -841,9 +1275,9 @@ export default function CampaignsPage() {
                 variant="default"
                 size="sm"
                 disabled={createLoading || !teamName.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-arcade-primary active:translate-y-0.5 rounded-lg"
               >
-                {createLoading ? "Creating..." : "Create Squad"}
+                {createLoading ? "Creating..." : "Create Team"}
               </Button>
             </DialogFooter>
           </form>
@@ -856,12 +1290,12 @@ export default function CampaignsPage() {
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <KeyRound className="size-4 text-primary" />
-              <span>Join a Research Squad</span>
+              <span>Join a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               {selectedEventForJoin
-                ? `Enter the invite code provided by your squad leader for ${selectedEventForJoin.title}.`
-                : "Enter the private 8-character invite code provided by your squad leader."}
+                ? `Enter the invite code from your team leader for ${selectedEventForJoin.title}.`
+                : "Enter the private invite code provided by your team leader."}
             </DialogDescription>
           </DialogHeader>
 
@@ -874,7 +1308,7 @@ export default function CampaignsPage() {
           <form onSubmit={handleJoinTeamByCode} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-foreground">
-                Squad Invite Code
+                Team Invite Code
               </label>
               <Input
                 type="text"
@@ -888,7 +1322,7 @@ export default function CampaignsPage() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Invite codes are generated when a squad leader creates the squad for an active or upcoming campaign.
+              Invite codes are generated when a team leader creates a team for a campaign.
             </p>
 
             <DialogFooter className="gap-2 sm:gap-0">
@@ -906,9 +1340,9 @@ export default function CampaignsPage() {
                 variant="default"
                 size="sm"
                 disabled={joinLoading || !joinCode.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold shadow-arcade-primary active:translate-y-0.5 rounded-lg"
               >
-                {joinLoading ? "Joining..." : "Join Squad"}
+                {joinLoading ? "Joining..." : "Join Team"}
               </Button>
             </DialogFooter>
           </form>

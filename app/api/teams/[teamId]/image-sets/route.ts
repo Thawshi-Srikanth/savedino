@@ -2,59 +2,22 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { extractImageSetIds } from "@/lib/mpc-parser";
+import { parseMpcReport, extractImageSetIds } from "@/lib/mpc-parser";
+import { CandidateReport } from "@/types/mpc";
+import { isOrganizer } from "@/lib/rbac";
 
 // GET /api/teams/[teamId]/image-sets - List image sets for the team
-export async function GET(
-  req: Request,
-  context: { params: Promise<{ teamId: string }> }
-) {
-  try {
-    const { teamId } = await context.params;
-
-    const sets = await prisma.imageSet.findMany({
-      where: { teamId },
-      include: {
-        claimedBy: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-      orderBy: { name: "asc" },
-    });
-
-    return NextResponse.json({ success: true, imageSets: sets });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-}
-
-// POST /api/teams/[teamId]/image-sets - Add image set(s) (supports manual code or bulk pasted IASC text)
-export async function POST(
-  req: Request,
-  context: { params: Promise<{ teamId: string }> }
-) {
+export async function GET(req: Request, context: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
 
     const { teamId } = await context.params;
-
-    // Fetch team to get eventId
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-    });
-
-    if (!team) {
-      return NextResponse.json({ success: false, error: "Team not found." }, { status: 404 });
-    }
-
-    const body = await req.json();
-    const { rawText, setCode } = body;
 
     // Check membership
     const isMember = await prisma.teamMember.findUnique({
@@ -66,12 +29,101 @@ export async function POST(
       },
     });
 
-    if (!isMember && session.user.role !== "admin") {
+    const isStaffOrAdmin = isOrganizer(session.user);
+
+    if (!isMember && !isStaffOrAdmin) {
       return NextResponse.json(
-        { success: false, error: "Only team members can log image sets." },
+        { success: false, error: "Access denied. You are not an active member of this squad." },
         { status: 403 }
       );
     }
+
+    const sets = await prisma.imageSet.findMany({
+      where: { teamId },
+      include: {
+        claimedBy: {
+          select: { id: true, name: true, email: true, institution: true },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    const formattedSets = sets.map((s) => {
+      let candidates: any[] = [];
+      if (s.mpcReportText) {
+        try {
+          const parsed = parseMpcReport(s.mpcReportText);
+          candidates = parsed.candidates.map((c: CandidateReport, i: number) => ({
+            id: `${s.id}-${i}`,
+            candidateCode: c.candidateCode,
+            ra: c.observations?.[0]?.raRaw || "",
+            dec: c.observations?.[0]?.decRaw || "",
+            magnitude: c.avgMagnitude || 0,
+            status: "REPORTED",
+            observationCount: c.observationCount || 0,
+            speedArcsecPerHour: c.speedArcsecPerHour || null,
+          }));
+        } catch {
+          // ignore parse errors
+        }
+      }
+
+      return {
+        id: s.id,
+        setCode: s.name,
+        fitsUrl: s.fitsUrl,
+        status: s.status, // "UNASSIGNED" | "IN_PROGRESS" | "PENDING_APPROVAL" | "SUBMITTED"
+        isClean: s.isClean,
+        mpcReportText: s.mpcReportText,
+        submittedAt: s.submittedAt,
+        claimedByUser: s.claimedBy,
+        candidates,
+      };
+    });
+
+    return NextResponse.json({ success: true, imageSets: formattedSets });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+// POST /api/teams/[teamId]/image-sets - Add image set(s) (Only Team Leader or Admin)
+export async function POST(req: Request, context: { params: Promise<{ teamId: string }> }) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { teamId } = await context.params;
+
+    // Fetch team to verify leadership and event
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      return NextResponse.json({ success: false, error: "Team not found." }, { status: 404 });
+    }
+
+    const isLeader = team.leaderId === session.user.id;
+    const isAdmin = session.user.role === "admin";
+
+    if (!isLeader && !isAdmin) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Only the squad leader or administrator can upload or import image sets.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+    const { rawText, setCode } = body;
 
     let codesToAdd: string[] = [];
 
@@ -107,7 +159,8 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: `Successfully logged ${created.length} image set(s).`,
+      message: `Successfully imported ${created.length} image set(s).`,
+      totalAdded: created.length,
       sets: created,
     });
   } catch (error: any) {

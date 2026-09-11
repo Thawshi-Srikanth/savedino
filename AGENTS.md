@@ -15,6 +15,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 All components, designs, and pages created or modified in this repository MUST strictly follow the **SaveDino Developer Tech & Arcade Hybrid Theme**:
 
 ### 1. Color Palette & Scheme
+
 - **Light Theme**:
   - Background Canvas: `#f8fafc` (Light Slate)
   - Card & Container background: `#ffffff` (Pure Flat White)
@@ -28,15 +29,17 @@ All components, designs, and pages created or modified in this repository MUST s
   - Text: `#f3f4f6` (High Legibility Off-White)
 
 ### 2. Typography Rules & Constraints
+
 - **Standard Sans Font (`font-sans` / `Inter`)**: Use for standard UI components, form controls, tables, buttons, cards, modals, navigation links, **badges, and status pills**.
 - **Tech Monospace Font (`font-tech` / `font-mono` / `Space Mono`)**: Use for technical data, stats, metrics, IDs, timestamps, code blocks, and technical tags.
 - **Pixel Font (`font-pixel` / `Press Start 2P`)**: ONLY allowed for retro game canvas elements, main arcade header title, and Dino game HUD.
 - **CRITICAL RULE**: **DO NOT use pixel font (`font-pixel`) in badges, pills, buttons, form labels, or general platform UI components.**
 
 ### 3. Component Consistency
+
 - Every new page, modal, form, or component must use CSS variables and Tailwind theme tokens (`bg-background`, `text-foreground`, `bg-card`, `border-border`, etc.) to align seamlessly with this style scheme.
 
 ### 4. UI Copy & Language Simplicity (CRITICAL RULE)
+
 - **No Confusing Technical Jargon**: Never use overly complex terms or confusing technical jargon in user-facing copy (e.g., avoid "passwordless authentication", "cryptographic single-use tokens", "zero-password paradigm", etc.).
 - **Keep it Simple and Direct**: Use plain, clear, and friendly language across all titles, descriptions, buttons, and badges (e.g., "Sign in", "Create account", "Send link", "Check your email", "We sent a link to your email").
-

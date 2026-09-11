@@ -6,10 +6,7 @@ export const authClient = createAuthClient({
     typeof window !== "undefined"
       ? window.location.origin
       : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  plugins: [
-    magicLinkClient(),
-  ],
+  plugins: [magicLinkClient()],
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;
-

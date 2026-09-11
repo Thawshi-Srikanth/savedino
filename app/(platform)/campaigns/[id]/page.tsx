@@ -7,6 +7,16 @@ import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { DinoLoading } from "@/components/dino-loading";
+import { useMinimumLoading } from "@/hooks/use-minimum-loading";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +43,7 @@ import {
   Terminal,
   FileCode,
   Sparkles,
+  Flag,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,6 +61,7 @@ interface EventDetail {
   submissionStart: string;
   submissionEnd: string;
   status: string;
+  maxTeamSize?: number;
   teams: Array<{
     id: string;
     name: string;
@@ -61,15 +73,68 @@ interface EventDetail {
   };
 }
 
-function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) {
+function formatStageDate(dateStr?: string) {
+  if (!dateStr) return "TBA";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "TBA";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getDurationDays(startStr?: string, endStr?: string) {
+  if (!startStr || !endStr) return null;
+  const start = new Date(startStr).getTime();
+  const end = new Date(endStr).getTime();
+  if (isNaN(start) || isNaN(end) || end <= start) return null;
+  return Math.round((end - start) / (1000 * 60 * 60 * 24));
+}
+
+function getHumanizedCountdown(targetDateMs: number, now: number): string {
+  const diffMs = targetDateMs - now;
+  if (diffMs <= 0) return "Ending now";
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (totalDays > 1) {
+    const remHours = totalHours % 24;
+    return remHours > 0 ? `${totalDays} days ${remHours}h` : `${totalDays} days`;
+  } else if (totalDays === 1) {
+    const remHours = totalHours % 24;
+    return remHours > 0 ? `1 day ${remHours}h` : `1 day`;
+  } else if (totalHours >= 1) {
+    const remMinutes = totalMinutes % 60;
+    return remMinutes > 0 ? `${totalHours}h ${remMinutes}m` : `${totalHours} hours`;
+  } else if (totalMinutes >= 1) {
+    return `${totalMinutes} minutes`;
+  } else {
+    return "Less than a minute";
+  }
+}
+
+function getRegistrationDeadlineInfo(
+  regEndStr?: string,
+  startDateStr?: string,
+  nowMs: number = Date.now()
+) {
   const targetStr = regEndStr || startDateStr;
   if (!targetStr) {
-    return { text: "TBA", formattedDate: "TBA", isUrgent: false, isClosed: false, daysLeft: null };
+    return {
+      text: "TBA",
+      formattedDate: "TBA",
+      countdownText: null,
+      isUrgent: false,
+      isClosed: false,
+      daysLeft: null,
+    };
   }
 
   const targetDate = new Date(targetStr);
-  const now = new Date();
-  const diffMs = targetDate.getTime() - now.getTime();
+  const diffMs = targetDate.getTime() - nowMs;
   const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
   const formattedDate = targetDate.toLocaleDateString("en-US", {
@@ -78,48 +143,40 @@ function getRegistrationDeadlineInfo(regEndStr?: string, startDateStr?: string) 
     year: "numeric",
   });
 
-  if (daysLeft < 0) {
+  if (diffMs <= 0) {
     return {
       text: `Closed on ${formattedDate}`,
       formattedDate,
+      countdownText: "Closed",
       isUrgent: false,
       isClosed: true,
       daysLeft: 0,
     };
   }
 
-  if (daysLeft === 0) {
-    return {
-      text: `Closes Today (${formattedDate})`,
-      formattedDate,
-      isUrgent: true,
-      isClosed: false,
-      daysLeft: 0,
-    };
-  }
-
-  if (daysLeft === 1) {
-    return {
-      text: `Closes Tomorrow (${formattedDate})`,
-      formattedDate,
-      isUrgent: true,
-      isClosed: false,
-      daysLeft: 1,
-    };
-  }
+  const countdown = getHumanizedCountdown(targetDate.getTime(), nowMs);
 
   return {
-    text: `${formattedDate} (${daysLeft} days left)`,
+    text: `${formattedDate} (${countdown} left)`,
     formattedDate,
+    countdownText: `${countdown} left`,
     isUrgent: daysLeft <= 5,
     isClosed: false,
     daysLeft,
   };
 }
 
-function getStageTimelineData(startStr: string, endStr: string, now: number) {
+function getStageTimelineData(startStr?: string, endStr?: string, now: number = Date.now()) {
+  if (!startStr || !endStr) {
+    return { status: "UPCOMING" as const, progress: 0, countdownText: null, start: 0, end: 0 };
+  }
+
   const start = new Date(startStr).getTime();
   const end = new Date(endStr).getTime();
+
+  if (isNaN(start) || isNaN(end)) {
+    return { status: "UPCOMING" as const, progress: 0, countdownText: null, start: 0, end: 0 };
+  }
 
   let status: "UPCOMING" | "ACTIVE" | "COMPLETED" = "UPCOMING";
   let progress = 0;
@@ -136,47 +193,27 @@ function getStageTimelineData(startStr: string, endStr: string, now: number) {
     progress = 0;
   }
 
-  // Countdown timer calculation if <= 30 days
-  let timerText: string | null = null;
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-
+  let countdownText: string | null = null;
   if (status === "ACTIVE") {
-    const diff = Math.max(0, end - now);
-    if (diff <= thirtyDaysMs) {
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-      timerText = `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
-    }
+    countdownText = getHumanizedCountdown(end, now);
   } else if (status === "UPCOMING") {
-    const diff = Math.max(0, start - now);
-    if (diff <= thirtyDaysMs) {
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-      timerText = `${d}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
-    }
+    countdownText = getHumanizedCountdown(start, now);
   }
 
-  return { status, progress, timerText, start, end };
+  return { status, progress, countdownText, start, end };
 }
 
-export default function CampaignDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const { data: session } = useSession();
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const isDisplayLoading = useMinimumLoading(loading, 1000);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
-  // Real-time 1s ticker for live countdowns
+  // Real-time 1s ticker for live countdowns & progress
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(Date.now());
@@ -225,8 +262,15 @@ export default function CampaignDetailPage({
     }
     if (!event) return;
 
+    // Check registration deadline
+    const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+    if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
+      setCreateError("Registration and team formation for this campaign has closed.");
+      return;
+    }
+
     if (!teamName.trim()) {
-      setCreateError("Please provide a name for your research squad.");
+      setCreateError("Please enter a team name.");
       return;
     }
 
@@ -245,9 +289,9 @@ export default function CampaignDetailPage({
       const data = await res.json();
 
       if (!data.success) {
-        setCreateError(data.error || "Failed to create squad.");
+        setCreateError(data.error || "Failed to create team.");
       } else {
-        toast.success("Squad formed successfully!");
+        toast.success("Team created successfully!");
         setCreateModalOpen(false);
         router.push(`/team/${data.team.id}`);
       }
@@ -262,6 +306,14 @@ export default function CampaignDetailPage({
     e.preventDefault();
     if (!session) {
       router.push("/login");
+      return;
+    }
+    if (!event) return;
+
+    // Check registration deadline
+    const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+    if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
+      setJoinError("Team registration for this campaign has closed.");
       return;
     }
 
@@ -282,9 +334,9 @@ export default function CampaignDetailPage({
       const data = await res.json();
 
       if (!data.success) {
-        setJoinError(data.error || "Failed to join squad.");
+        setJoinError(data.error || "Failed to join team.");
       } else {
-        toast.success("Joined squad successfully!");
+        toast.success("Joined team successfully!");
         setJoinModalOpen(false);
         router.push(`/team/${data.teamId}`);
       }
@@ -295,15 +347,8 @@ export default function CampaignDetailPage({
     }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full py-24 text-center space-y-3 font-sans">
-        <Rocket className="size-8 mx-auto text-primary animate-bounce" />
-        <div className="text-sm font-semibold text-foreground">
-          Loading campaign details...
-        </div>
-      </div>
-    );
+  if (isDisplayLoading) {
+    return <DinoLoading size="lg" text="Loading campaign details..." fullScreen />;
   }
 
   if (!event) {
@@ -311,7 +356,7 @@ export default function CampaignDetailPage({
       <div className="w-full py-20 text-center space-y-4 font-sans">
         <div className="text-base font-semibold text-foreground">Campaign Not Found</div>
         <Link href="/campaigns">
-          <Button variant="outline" size="sm" className="gap-2 cursor-pointer shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
+          <Button variant="outline" size="sm" className="gap-2 cursor-pointer shadow-arcade-sm">
             <ArrowLeft className="size-4" />
             <span>Back to Campaigns</span>
           </Button>
@@ -320,36 +365,36 @@ export default function CampaignDetailPage({
     );
   }
 
-  const regInfo = getRegistrationDeadlineInfo(event.regEnd, event.startDate);
+  const regInfo = getRegistrationDeadlineInfo(event.regEnd, event.startDate, currentTime);
   const squadCount = event._count?.teams || event.teams?.length || 0;
 
-  // Pipeline Stages
+  // Simple, direct step stages without jargon
   const pipelineStages = [
     {
       stage: "Stage 1",
-      code: "Registration",
-      name: "Researcher Onboarding & Account Setup",
+      name: "Registration",
+      description: "Sign up and create your account to participate.",
       start: event.regStart,
       end: event.regEnd,
     },
     {
       stage: "Stage 2",
-      code: "Team Formation",
-      name: "Squad Roster Assembly & Solo Matching",
+      name: "Team Formation",
+      description: "Create a team of 2 to 6 members or join with an invite code.",
       start: event.teamFormationStart || event.regStart,
       end: event.teamFormationEnd || event.startDate,
     },
     {
       stage: "Stage 3",
-      code: "Observation",
-      name: "Telescope Image Analysis & Asteroid Search",
+      name: "Image Search",
+      description: "Analyze telescope images to find and track moving asteroids.",
       start: event.startDate,
       end: event.endDate,
     },
     {
       stage: "Stage 4",
-      code: "Discovery Report",
-      name: "Astrometry Verification & MPC Submission",
+      name: "Submit Reports",
+      description: "Submit your final discovery reports and measurements.",
       start: event.submissionStart || event.startDate,
       end: event.submissionEnd || event.endDate,
     },
@@ -357,22 +402,46 @@ export default function CampaignDetailPage({
 
   return (
     <div className="w-full space-y-8 font-sans max-w-6xl mx-auto py-2">
-      {/* 1. BREADCRUMB & HEADER STRIP */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-border text-xs font-sans">
-        <Link
-          href="/campaigns"
-          className="inline-flex items-center gap-2 font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
-        >
-          <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Back to Campaigns</span>
-        </Link>
+      {/* 1. STICKY BREADCRUMB & HEADER STRIP */}
+      <div className="sticky top-16 z-30 -mt-2 py-3 bg-background/95 dark:bg-background/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-3 text-xs font-sans">
+        <Breadcrumb>
+          <BreadcrumbList className="text-xs">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link
+                  href="/campaigns"
+                  className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+                >
+                  <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  <span>Campaigns</span>
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="text-muted-foreground/40" />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-mono font-bold text-foreground">
+                {event.code}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-        {/* Theme Spec Code Badge with 3D Shadow */}
+        {/* Theme Status Pill with 3D Shadow */}
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs font-medium">Campaign:</span>
-          <Badge variant="outline" className="font-sans font-bold bg-card border-border text-foreground px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-            {event.code}
-          </Badge>
+          {event.status === "ACTIVE" ? (
+            <Badge className="bg-[#10b981] hover:bg-[#059669] text-white border-0 font-sans font-bold text-xs px-2.5 py-1 gap-1.5 shadow-arcade-emerald rounded-lg">
+              <span className="size-1.5 rounded-full bg-white" />
+              <span>{event.status}</span>
+            </Badge>
+          ) : event.status === "UPCOMING" ? (
+            <Badge className="bg-sky-500 hover:bg-sky-600 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-arcade-sm rounded-lg">
+              Upcoming
+            </Badge>
+          ) : (
+            <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 font-sans font-bold text-xs px-2.5 py-1 shadow-arcade-sm rounded-lg">
+              {event.status}
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -382,161 +451,211 @@ export default function CampaignDetailPage({
         <div className="lg:col-span-8 space-y-8">
           {/* Header & Overview */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              {event.status === "ACTIVE" ? (
-                <Badge className="bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/40 font-sans font-semibold text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]">
-                  <span className="size-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                  <span>Active Campaign</span>
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                  {event.status}
-                </Badge>
-              )}
-            </div>
-
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground font-sans">
               {event.title}
             </h1>
 
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {event.description || "International Astronomical Search Collaboration campaign for astrometric asteroid discovery."}
+              {event.description ||
+                "International Astronomical Search Collaboration campaign for asteroid discovery."}
             </p>
 
             {/* Campaign Specs Strip */}
-            <div className="pt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
-              <div>
-                <span className="text-muted-foreground">Timeline: </span>
-                <strong className="text-foreground font-sans">{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</strong>
+            <div className="pt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-sans text-muted-foreground border-t border-border">
+              <div className="inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground">Timeline:</span>
+                <strong className="text-foreground font-mono">
+                  {formatStageDate(event.startDate)} &ndash; {formatStageDate(event.endDate)}
+                </strong>
               </div>
 
-              <div>
-                <span className="text-muted-foreground">Squads: </span>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground">Teams:</span>
                 <strong className="text-foreground">{squadCount} registered</strong>
                 <Link
                   href={`/teams?eventId=${event.id}`}
-                  className="text-primary font-sans hover:underline text-xs ml-1.5 font-semibold"
+                  className="text-primary font-sans hover:underline font-semibold"
                 >
-                  (view roster)
+                  (view teams)
                 </Link>
-              </div>
-
-              <div>
-                <span className="text-muted-foreground">Data Type: </span>
-                <span className="text-foreground font-medium">16-bit FITS Images</span>
               </div>
             </div>
           </div>
 
-          {/* === SINGLE VERTICAL TIMELINE === */}
+          {/* === VERTICAL STAGE FLOW (START & END CONNECTED WITH VERTICAL PROGRESS LINE) === */}
           <div className="space-y-6 pt-4 border-t border-border">
-            <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2">
                 <Calendar className="size-4 text-primary" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">
-                  Campaign Schedule
+                  Schedule & Steps
                 </h2>
               </div>
 
-              <span className="text-xs text-muted-foreground font-sans">
-                4 Stages
-              </span>
+              <span className="text-xs text-muted-foreground font-sans font-medium">4 Steps</span>
             </div>
 
-            {/* Single Continuous Vertical Timeline */}
-            <div className="relative pl-6 sm:pl-8 border-l-2 border-border space-y-9 my-4 ml-3 sm:ml-4">
+            {/* Vertical Non-Containerized Flow for All Stages */}
+            <div className="space-y-8 pt-2">
               {pipelineStages.map((phase, idx) => {
                 const phaseData = getStageTimelineData(phase.start, phase.end, currentTime);
                 const isLive = phaseData.status === "ACTIVE";
                 const isDone = phaseData.status === "COMPLETED";
+                const durationDays = getDurationDays(phase.start, phase.end);
+                const startDateFormatted = formatStageDate(phase.start);
+                const endDateFormatted = formatStageDate(phase.end);
 
                 return (
-                  <div key={phase.stage} className="relative">
-                    {/* Node Dot on Vertical Line */}
-                    <div
-                      className={`absolute -left-[31px] sm:-left-[39px] top-1.5 size-3.5 rounded-full border-2 transition-all flex items-center justify-center ${
-                        isLive
-                          ? "bg-[#8b5cf6] border-white dark:border-background ring-4 ring-[#8b5cf6]/30 shadow-xs"
-                          : isDone
-                          ? "bg-[#10b981] border-white dark:border-background ring-2 ring-[#10b981]/20"
-                          : "bg-muted border-border"
-                      }`}
-                    >
-                      {isDone && <Check className="size-2 text-white stroke-[3]" />}
-                      {isLive && <span className="size-1 rounded-full bg-white animate-ping" />}
+                  <div
+                    key={phase.stage}
+                    className={`space-y-3 pb-8 ${
+                      idx < pipelineStages.length - 1 ? "border-b border-border/50" : ""
+                    }`}
+                  >
+                    {/* 1. STAGE HEADER - Direct & Simple */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <Badge
+                          variant={isLive ? "default" : "outline"}
+                          className={`font-sans font-bold text-xs px-2.5 py-0.5 rounded-lg ${
+                            isLive
+                              ? "bg-[#8b5cf6] text-white border-0 shadow-arcade-primary"
+                              : isDone
+                                ? "bg-[#10b981] text-white border-0 shadow-arcade-emerald"
+                                : "bg-muted text-muted-foreground border-border shadow-arcade-sm"
+                          }`}
+                        >
+                          Step {idx + 1}
+                        </Badge>
+
+                        <h3 className="text-base sm:text-lg font-bold text-foreground font-sans">
+                          {phase.name}
+                        </h3>
+
+                        {durationDays && (
+                          <span className="text-xs font-mono text-muted-foreground">
+                            ({durationDays} days)
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Status indicator text (Not inside badge) */}
+                      <div className="flex items-center gap-2 text-xs font-sans">
+                        {isLive && (
+                          <span className="inline-flex items-center gap-1.5 font-bold text-[#8b5cf6] dark:text-[#a78bfa]">
+                            <span className="size-2 rounded-full bg-[#8b5cf6] animate-pulse" />
+                            <span>Active Now</span>
+                          </span>
+                        )}
+                        {isDone && (
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-[#10b981]">
+                            <Check className="size-3.5 stroke-[3]" />
+                            <span>Completed</span>
+                          </span>
+                        )}
+                        {!isLive && !isDone && (
+                          <span className="font-medium text-muted-foreground">Upcoming</span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Stage Details */}
-                    <div className="space-y-1.5">
-                      {/* Top Row: Stage Name & Theme Badges with 3D Shadow */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge
-                            variant={isLive ? "default" : "outline"}
-                            className={`font-sans font-semibold text-xs px-2.5 py-0.5 ${
-                              isLive
-                                ? "bg-[#8b5cf6] hover:bg-[#7c3aed] text-white border-0 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
-                                : isDone
-                                ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]"
-                                : "bg-card text-foreground border-border shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
-                            }`}
-                          >
-                            Stage {idx + 1}
-                          </Badge>
+                    {/* Stage Description */}
+                    {phase.description && (
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {phase.description}
+                      </p>
+                    )}
 
-                          <h3 className="text-base font-bold text-foreground font-sans">
-                            {phase.name}
-                          </h3>
+                    {/* 2. VERTICAL TWO-POINT TIMELINE (START TO END) */}
+                    <div className="relative pl-9 pt-3 pb-2">
+                      {/* Vertical Progress Line Track connecting Start to End */}
+                      <div className="absolute left-[12px] top-4 bottom-4 w-1 rounded-full bg-slate-200 dark:bg-[#28292e] overflow-hidden">
+                        <div
+                          className={`w-full transition-all duration-700 ease-out rounded-full ${
+                            isDone
+                              ? "bg-[#10b981]"
+                              : isLive
+                                ? "bg-gradient-to-b from-[#8b5cf6] to-[#a855f7]"
+                                : "bg-transparent"
+                          }`}
+                          style={{ height: `${phaseData.progress}%` }}
+                        />
+                      </div>
+
+                      {/* START POINT NODE (TOP) - Themed Rounded Box with 3D Shadow */}
+                      <div className="relative flex items-center gap-3">
+                        <div
+                          className={`absolute -left-9 size-7 rounded-lg border flex items-center justify-center transition-all ${
+                            isDone
+                              ? "bg-[#10b981] border-[#059669] text-white shadow-arcade-emerald"
+                              : isLive
+                                ? "bg-[#8b5cf6] border-[#7c3aed] text-white shadow-arcade-primary"
+                                : "bg-card border-border text-muted-foreground shadow-arcade-sm"
+                          }`}
+                        >
+                          {isDone || isLive ? (
+                            <Check className="size-3.5 stroke-[3]" />
+                          ) : (
+                            <span className="size-1.5 rounded-xs bg-muted-foreground/60" />
+                          )}
                         </div>
 
-                        {/* Status / Countdown Timer Badges with 3D Shadow */}
-                        <div className="flex flex-wrap items-center gap-2 font-sans text-xs shrink-0">
-                          {/* Live countdown timer badge if within 30 days */}
-                          {phaseData.timerText && isLive && (
-                            <Badge className="bg-[#8b5cf6]/15 text-[#8b5cf6] dark:text-[#a78bfa] border border-[#8b5cf6]/30 font-sans font-medium text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#d8b4fe] dark:shadow-[0_2px_0_0_#5b21b6] animate-pulse">
-                              <Clock className="size-3 text-[#8b5cf6]" />
-                              <span>Ends in {phaseData.timerText}</span>
-                            </Badge>
-                          )}
-
-                          {phaseData.timerText && !isLive && !isDone && (
-                            <Badge variant="outline" className="bg-card text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 gap-1.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                              <Clock className="size-3 text-muted-foreground" />
-                              <span>Starts in {phaseData.timerText}</span>
-                            </Badge>
-                          )}
-
-                          {isLive && (
-                            <Badge className="bg-[#8b5cf6] text-white border-0 font-sans font-semibold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]">
-                              Active
-                            </Badge>
-                          )}
-                          {isDone && (
-                            <Badge variant="outline" className="bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 font-sans font-semibold text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#a7f3d0] dark:shadow-[0_2px_0_0_#065f46]">
-                              Completed
-                            </Badge>
-                          )}
-                          {!isLive && !isDone && !phaseData.timerText && (
-                            <Badge variant="outline" className="bg-card text-muted-foreground border-border font-sans font-medium text-xs px-2.5 py-0.5 shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]">
-                              Upcoming
-                            </Badge>
-                          )}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-sans">
+                          <span className="font-mono font-bold text-foreground">
+                            {startDateFormatted}
+                          </span>
+                          <span className="text-muted-foreground text-xs font-medium">(Start)</span>
                         </div>
                       </div>
 
-                      {/* Start Date & End Date + Progress % */}
-                      <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-muted-foreground pt-0.5">
-                        <span className="text-foreground font-medium">
-                          Start: {new Date(phase.start).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
-                        <span className="text-muted-foreground/60">-</span>
-                        <span className="text-foreground font-medium">
-                          End: {new Date(phase.end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
-                        <span className="text-muted-foreground/50">|</span>
-                        <span className="text-muted-foreground text-xs">
-                          {phaseData.progress}% complete
-                        </span>
+                      {/* IN-PLACE COUNTDOWN FLOW (EXPANDED HEIGHT, NO PERCENTAGE) */}
+                      <div className="my-7 pl-2 py-3 min-h-[64px] flex flex-col justify-center space-y-1.5 text-xs font-sans">
+                        {isLive && phaseData.countdownText && (
+                          <div className="flex items-center gap-2 text-foreground font-medium">
+                            <Clock className="size-3.5 text-[#8b5cf6]" />
+                            <span>{phaseData.countdownText} remaining</span>
+                          </div>
+                        )}
+
+                        {!isLive && !isDone && phaseData.countdownText && (
+                          <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                            <Clock className="size-3.5 text-muted-foreground" />
+                            <span>Starts in {phaseData.countdownText}</span>
+                          </div>
+                        )}
+
+                        {isDone && (
+                          <div className="text-xs text-[#10b981] font-semibold flex items-center gap-1.5">
+                            <Check className="size-3.5 stroke-[3]" />
+                            <span>Completed</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* END POINT NODE (BOTTOM) - Themed Rounded Box with 3D Shadow */}
+                      <div className="relative flex items-center gap-3">
+                        <div
+                          className={`absolute -left-9 size-7 rounded-lg border flex items-center justify-center transition-all ${
+                            isDone
+                              ? "bg-[#10b981] border-[#059669] text-white shadow-arcade-emerald"
+                              : isLive
+                                ? "bg-card border-[#8b5cf6] text-[#8b5cf6] shadow-arcade-sm"
+                                : "bg-card border-border text-muted-foreground shadow-arcade-sm"
+                          }`}
+                        >
+                          {isDone ? (
+                            <Check className="size-3.5 stroke-[3]" />
+                          ) : (
+                            <Flag className="size-3" />
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-sans">
+                          <span className="font-mono font-bold text-foreground">
+                            {endDateFormatted}
+                          </span>
+                          <span className="text-muted-foreground text-xs font-medium">(End)</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -546,104 +665,332 @@ export default function CampaignDetailPage({
           </div>
         </div>
 
-        {/* === RIGHT COLUMN: SOLID PURPLE STICKY ACTION CARD (4 COLS) === */}
-        <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-4">
-          {/* Solid Electric Violet Sticky Card */}
-          <div className="relative rounded-2xl p-6 space-y-5 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-[0_4px_0_0_#6d28d9] dark:shadow-[0_4px_0_0_#5b21b6] border-0 transition-all">
-            {/* Top Header Note Tape */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/20 font-sans text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-white">
-                <Pin className="size-3.5" />
-                <span>Squad Actions</span>
-              </div>
-              <Badge className="bg-white/20 hover:bg-white/20 text-white border-0 font-sans font-bold text-xs px-2 py-0.5 shadow-[0_2px_0_0_rgba(0,0,0,0.15)]">
-                {event.code}
-              </Badge>
-            </div>
+        {/* === RIGHT COLUMN: STICKY SIDEBAR (4 COLS) === */}
+        <div className="lg:col-span-4 lg:sticky lg:top-36 z-20 space-y-4 font-sans">
+          {(() => {
+            const activePipelineStage = pipelineStages.find((phase) => {
+              const data = getStageTimelineData(phase.start, phase.end, currentTime);
+              return data.status === "ACTIVE";
+            });
+            const allStagesCompleted = pipelineStages.every((phase) => {
+              const data = getStageTimelineData(phase.start, phase.end, currentTime);
+              return data.status === "COMPLETED";
+            });
 
-            {/* Registration Deadline Alert Inside Purple Card */}
-            <div className="space-y-1.5 p-3.5 rounded-xl bg-black/20 border border-white/10">
-              <div className="text-xs font-medium uppercase tracking-wider text-white/80 flex items-center gap-1.5">
-                <Clock className="size-3 text-white/90" />
-                <span>Registration Deadline</span>
-              </div>
-              <div className="text-base sm:text-lg font-bold font-sans text-white">
-                {regInfo.text}
-              </div>
-            </div>
+            const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+            const isRegClosed = regDeadlineStr
+              ? currentTime > new Date(regDeadlineStr).getTime()
+              : false;
 
-            {/* 3D Action Buttons */}
-            <div className="space-y-2.5 pt-1">
-              <Button
-                onClick={() => {
-                  if (!session) {
-                    router.push("/login");
-                    return;
-                  }
-                  setCreateError(null);
-                  setTeamName("");
-                  setCreateModalOpen(true);
-                }}
-                variant="default"
-                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-[0_3px_0_0_#e2e8f0] active:translate-y-0.5 border-0 rounded-xl"
-              >
-                <PlusCircle className="size-4" />
-                <span>Form a Team</span>
-              </Button>
+            return (
+              <>
+                {/* 1. Dynamic Deadline & Countdown */}
+                <div className="space-y-1.5 px-2.5">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
+                    {allStagesCompleted
+                      ? "Campaign Status"
+                      : activePipelineStage?.name === "Image Search"
+                        ? "Search Window Closes"
+                        : activePipelineStage?.name === "Submit Reports"
+                          ? "Submission Deadline"
+                          : "Registration Deadline"}
+                  </div>
 
-              <Button
-                onClick={() => {
-                  if (!session) {
-                    router.push("/login");
-                    return;
-                  }
-                  setJoinError(null);
-                  setJoinCode("");
-                  setJoinModalOpen(true);
-                }}
-                variant="outline"
-                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
-              >
-                <KeyRound className="size-4" />
-                <span>Join with Code</span>
-              </Button>
+                  <div
+                    className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-foreground select-none"
+                    style={{
+                      textShadow: "0 3px 0 var(--border), 0 4px 6px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    {allStagesCompleted
+                      ? "Completed"
+                      : activePipelineStage?.name === "Image Search"
+                        ? formatStageDate(event.endDate)
+                        : activePipelineStage?.name === "Submit Reports"
+                          ? formatStageDate(event.submissionEnd || event.endDate)
+                          : regInfo.formattedDate}
+                  </div>
 
-              <Link href={`/teams?eventId=${event.id}`} className="block w-full">
-                <Button
-                  variant="ghost"
-                  className="w-full h-9 text-xs font-sans font-semibold gap-1.5 cursor-pointer text-white/90 hover:text-white hover:bg-white/15 rounded-xl"
-                >
-                  <Users className="size-3.5" />
-                  <span>View Joined Teams ({squadCount})</span>
-                </Button>
-              </Link>
-            </div>
+                  {(() => {
+                    if (allStagesCompleted) {
+                      return (
+                        <div className="text-xs font-mono font-semibold text-muted-foreground">
+                          All phases concluded
+                        </div>
+                      );
+                    }
+                    if (activePipelineStage?.name === "Image Search") {
+                      const searchTimeline = getStageTimelineData(
+                        event.startDate,
+                        event.endDate,
+                        currentTime
+                      );
+                      return searchTimeline.countdownText ? (
+                        <div className="text-xs font-mono font-semibold text-[#8b5cf6]">
+                          {searchTimeline.countdownText} remaining
+                        </div>
+                      ) : null;
+                    }
+                    if (activePipelineStage?.name === "Submit Reports") {
+                      const submitTimeline = getStageTimelineData(
+                        event.submissionStart || event.startDate,
+                        event.submissionEnd || event.endDate,
+                        currentTime
+                      );
+                      return submitTimeline.countdownText ? (
+                        <div className="text-xs font-mono font-semibold text-emerald-500">
+                          {submitTimeline.countdownText} remaining
+                        </div>
+                      ) : null;
+                    }
+                    return regInfo.countdownText ? (
+                      <div
+                        className={`text-xs font-mono font-semibold ${
+                          regInfo.isUrgent ? "text-amber-500" : "text-muted-foreground"
+                        }`}
+                      >
+                        {regInfo.countdownText}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
 
-            {/* Squad Rules Checklist */}
-            <div className="pt-3 border-t border-white/20 text-xs font-sans text-white/85 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>2 to 6 scientists per squad</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                <span>Share invite codes with colleagues</span>
-              </div>
-            </div>
-          </div>
+                {/* 2. Solid Theme Action Card with dynamic buttons based on active stage */}
+                <div className="relative rounded-2xl p-5 space-y-4 bg-[#8b5cf6] dark:bg-[#7c3aed] text-white shadow-arcade-primary-lg border-0 transition-all">
+                  {/* Header / Active Stage Status */}
+                  <div className="flex items-center justify-between pb-1 border-b border-white/20">
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-white/90">
+                      {allStagesCompleted
+                        ? "Campaign Concluded"
+                        : activePipelineStage?.name === "Image Search"
+                          ? "Image Search Live"
+                          : activePipelineStage?.name === "Submit Reports"
+                            ? "Submissions Open"
+                            : isRegClosed
+                              ? "Registration Closed"
+                              : "Registration Active"}
+                    </span>
+                    <span className="size-2 rounded-full bg-white animate-pulse" />
+                  </div>
+
+                  {/* 3D Action Buttons */}
+                  <div className="space-y-2.5">
+                    {/* If Image Search is active */}
+                    {activePipelineStage?.name === "Image Search" && (
+                      <>
+                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Button
+                            variant="default"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
+                          >
+                            <Telescope className="size-4" />
+                            <span>Start Image Search</span>
+                          </Button>
+                        </Link>
+
+                        {!isRegClosed ? (
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              onClick={() => {
+                                if (!session) {
+                                  router.push("/login");
+                                  return;
+                                }
+                                setCreateError(null);
+                                setTeamName("");
+                                setCreateModalOpen(true);
+                              }}
+                              variant="outline"
+                              className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                            >
+                              <PlusCircle className="size-3.5" />
+                              <span>Form Team</span>
+                            </Button>
+
+                            <Button
+                              onClick={() => {
+                                if (!session) {
+                                  router.push("/login");
+                                  return;
+                                }
+                                setJoinError(null);
+                                setJoinCode("");
+                                setJoinModalOpen(true);
+                              }}
+                              variant="outline"
+                              className="h-10 text-xs font-sans font-bold gap-1.5 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                            >
+                              <KeyRound className="size-3.5" />
+                              <span>Join Code</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                            <Button className="w-full h-10 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all">
+                              <Users className="size-4" />
+                              <span>View Joined Teams ({squadCount})</span>
+                            </Button>
+                          </Link>
+                        )}
+                      </>
+                    )}
+
+                    {/* If Submit Reports is active */}
+                    {activePipelineStage?.name === "Submit Reports" && (
+                      <>
+                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Button
+                            variant="default"
+                            className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-arcade-emerald-lg active:translate-y-0.5 border-0 rounded-xl"
+                          >
+                            <CheckCircle2 className="size-4" />
+                            <span>Submit Reports</span>
+                          </Button>
+                        </Link>
+
+                        <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                          <Button className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber-lg active:translate-y-0.5 border-0 rounded-xl transition-all">
+                            <Users className="size-4" />
+                            <span>View Teams ({squadCount})</span>
+                          </Button>
+                        </Link>
+                      </>
+                    )}
+
+                    {/* If Completed */}
+                    {allStagesCompleted && (
+                      <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                        <Button
+                          variant="default"
+                          className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
+                        >
+                          <Sparkles className="size-4" />
+                          <span>View Results & Teams ({squadCount})</span>
+                        </Button>
+                      </Link>
+                    )}
+
+                    {/* Default: Registration / Team Formation / Upcoming */}
+                    {!allStagesCompleted &&
+                      activePipelineStage?.name !== "Image Search" &&
+                      activePipelineStage?.name !== "Submit Reports" && (
+                        <>
+                          {isRegClosed ? (
+                            <Button
+                              disabled
+                              className="w-full h-11 text-xs font-sans font-bold gap-2 opacity-70 bg-white/20 text-white border border-white/30 rounded-xl cursor-not-allowed"
+                            >
+                              <Clock className="size-4" />
+                              <span>Registration Closed</span>
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() => {
+                                  if (!session) {
+                                    router.push("/login");
+                                    return;
+                                  }
+                                  setCreateError(null);
+                                  setTeamName("");
+                                  setCreateModalOpen(true);
+                                }}
+                                variant="default"
+                                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-white hover:bg-white/90 text-[#6d28d9] shadow-arcade-sm active:translate-y-0.5 border-0 rounded-xl"
+                              >
+                                <PlusCircle className="size-4" />
+                                <span>Form a Team</span>
+                              </Button>
+
+                              <Button
+                                onClick={() => {
+                                  if (!session) {
+                                    router.push("/login");
+                                    return;
+                                  }
+                                  setJoinError(null);
+                                  setJoinCode("");
+                                  setJoinModalOpen(true);
+                                }}
+                                variant="outline"
+                                className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer border-white/30 bg-white/15 text-white hover:bg-white/25 active:translate-y-0.5 rounded-xl"
+                              >
+                                <KeyRound className="size-4" />
+                                <span>Join with Code</span>
+                              </Button>
+                            </>
+                          )}
+
+                          <Link href={`/teams?eventId=${event.id}`} className="block w-full">
+                            <Button className="w-full h-11 text-xs font-sans font-bold gap-2 cursor-pointer bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-arcade-amber active:translate-y-0.5 border-0 rounded-xl transition-all">
+                              <Users className="size-4" />
+                              <span>View Joined Teams ({squadCount})</span>
+                            </Button>
+                          </Link>
+                        </>
+                      )}
+                  </div>
+
+                  {/* Checklist / Status Details */}
+                  <div className="pt-3 border-t border-white/20 text-xs font-sans text-white/85 space-y-1.5">
+                    {activePipelineStage?.name === "Image Search" ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Claim image sets from team workspace</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Blink 4 frames to detect moving asteroids</span>
+                        </div>
+                      </>
+                    ) : activePipelineStage?.name === "Submit Reports" ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Review astrometry measurements</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Export and submit MPC format reports</span>
+                        </div>
+                      </>
+                    ) : allStagesCompleted ? (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                        <span>Campaign observations completed and archived</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>2 to 6 members per team</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Share invite code with teammates</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
 
-      {/* FORM SQUAD MODAL */}
+      {/* FORM TEAM MODAL */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
         <DialogContent className="sm:max-w-md bg-card border-border font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <PlusCircle className="size-4 text-primary" />
-              <span>Form Research Squad</span>
+              <span>Form a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Registering a new squad for <strong className="text-foreground">{event.title}</strong> ({event.code}).
+              Create a new team for <strong className="text-foreground">{event.title}</strong> (
+              {event.code}).
             </DialogDescription>
           </DialogHeader>
 
@@ -655,13 +1002,11 @@ export default function CampaignDetailPage({
 
           <form onSubmit={handleCreateTeam} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-foreground">
-                Squad / Team Name
-              </label>
+              <label className="block text-xs font-semibold text-foreground">Team Name</label>
               <Input
                 type="text"
                 required
-                placeholder="e.g. Orion Asteroid Hunters, Team Kepler"
+                placeholder="e.g. Orion Hunters, Team Kepler"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 className="h-9 text-xs bg-background font-sans"
@@ -671,15 +1016,19 @@ export default function CampaignDetailPage({
             <div className="text-xs text-muted-foreground p-3 rounded-lg border border-border bg-muted/40 space-y-1.5">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>You will be registered as the <strong>Squad Leader</strong>.</span>
+                <span>
+                  You will be the <strong>Team Leader</strong>.
+                </span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>A private <strong>invite code</strong> will be generated for your teammates.</span>
+                <span>
+                  An <strong>invite code</strong> will be generated for your teammates.
+                </span>
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Squads allow a minimum of 2 and maximum of 6 researchers.</span>
+                <span>Teams have 2 to {event.maxTeamSize || 6} members.</span>
               </div>
             </div>
 
@@ -690,7 +1039,7 @@ export default function CampaignDetailPage({
                 size="sm"
                 onClick={() => setCreateModalOpen(false)}
                 disabled={createLoading}
-                className="text-xs shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                className="text-xs shadow-arcade-sm"
               >
                 Cancel
               </Button>
@@ -699,9 +1048,9 @@ export default function CampaignDetailPage({
                 variant="default"
                 size="sm"
                 disabled={createLoading || !teamName.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary"
               >
-                {createLoading ? "Creating..." : "Create Squad"}
+                {createLoading ? "Creating..." : "Create Team"}
               </Button>
             </DialogFooter>
           </form>
@@ -714,10 +1063,11 @@ export default function CampaignDetailPage({
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <KeyRound className="size-4 text-primary" />
-              <span>Join Research Squad</span>
+              <span>Join a Team</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Enter the private invite code provided by your squad leader for <strong className="text-foreground">{event.title}</strong>.
+              Enter the invite code from your team leader for{" "}
+              <strong className="text-foreground">{event.title}</strong>.
             </DialogDescription>
           </DialogHeader>
 
@@ -730,7 +1080,7 @@ export default function CampaignDetailPage({
           <form onSubmit={handleJoinTeamByCode} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-foreground">
-                Squad Invite Code
+                Team Invite Code
               </label>
               <Input
                 type="text"
@@ -750,7 +1100,7 @@ export default function CampaignDetailPage({
                 size="sm"
                 onClick={() => setJoinModalOpen(false)}
                 disabled={joinLoading}
-                className="text-xs shadow-[0_2px_0_0_#e2e8f0] dark:shadow-[0_2px_0_0_#27282d]"
+                className="text-xs shadow-arcade-sm"
               >
                 Cancel
               </Button>
@@ -759,9 +1109,9 @@ export default function CampaignDetailPage({
                 variant="default"
                 size="sm"
                 disabled={joinLoading || !joinCode.trim()}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]"
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary"
               >
-                {joinLoading ? "Joining..." : "Join Squad"}
+                {joinLoading ? "Joining..." : "Join Team"}
               </Button>
             </DialogFooter>
           </form>

@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Volume2, VolumeX, HelpCircle, Telescope } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import { Sun, Moon, Volume2, VolumeX, HelpCircle, LayoutDashboard } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 
@@ -22,20 +23,27 @@ export const Header: React.FC<HeaderProps> = ({
   isNight = false,
   onToggleTheme,
 }) => {
+  const { data: session } = useSession();
+  const isAuthenticated = Boolean(session?.user?.id);
+
   return (
     <header className="w-full relative px-2 py-3 flex flex-col items-center select-none">
       {/* Top Navigation Bar - Constrained to Game Window max-w-[600px] */}
       <div className="w-full max-w-[600px] flex items-center justify-between gap-3">
-        {/* SaveDino Branding Logo */}
+        {/* SaveDino Branding Logo & Nav Buttons */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Logo href="/" size="md" />
 
-          {/* Action button shown only when not in Demo Mode */}
-          {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
-            <Link href="/campaigns" className="hidden sm:inline-flex">
-              <Button size="sm" variant="default" className="text-[10px] sm:text-xs font-bold flex items-center gap-1.5 px-2.5 sm:px-3.5 shadow-[0_2px_0_0_#6d28d9] dark:shadow-[0_2px_0_0_#5b21b6]">
-                <Telescope className="size-3.5" />
-                <span>Explore Campaigns</span>
+          {/* Action button shown only when authenticated and not in Demo Mode */}
+          {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && isAuthenticated && (
+            <Link href="/campaigns" className="inline-flex" title="Open Dashboard">
+              <Button
+                size="sm"
+                variant="default"
+                className="h-8 px-2 sm:px-3 text-[10px] sm:text-xs font-bold flex items-center gap-1.5 shadow-arcade-primary active:translate-y-0.5 rounded-lg"
+              >
+                <LayoutDashboard className="size-3.5" />
+                <span className="hidden sm:inline">Dashboard</span>
               </Button>
             </Link>
           )}
@@ -49,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
               variant="outline"
               size="icon"
               onClick={onToggleTheme}
-              className="h-8 w-8 rounded-md"
+              className="h-8 w-8 rounded-lg shadow-arcade active:translate-y-0.5 cursor-pointer"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -65,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
             variant="outline"
             size="icon"
             onClick={onToggleMute}
-            className="h-8 w-8 rounded-md"
+            className="h-8 w-8 rounded-lg shadow-arcade active:translate-y-0.5 cursor-pointer"
             title={isMuted ? "Unmute Music & Sound" : "Mute Music & Sound"}
           >
             {isMuted ? (
@@ -80,10 +88,10 @@ export const Header: React.FC<HeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={onOpenHelp}
-            className="h-8 text-xs font-bold flex items-center gap-1 px-2.5"
+            className="h-8 text-xs font-bold flex items-center gap-1.5 px-2.5 rounded-lg shadow-arcade active:translate-y-0.5 cursor-pointer"
             title="View Game Controls & Instructions"
           >
-            <HelpCircle className="size-3.5 text-[#38bdf8]" />
+            <HelpCircle className="size-3.5 text-[#8b5cf6]" />
             <span className="hidden sm:inline">Controls</span>
           </Button>
         </div>

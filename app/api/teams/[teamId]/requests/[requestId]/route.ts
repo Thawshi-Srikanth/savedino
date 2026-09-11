@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { calculateTeamStatus } from "@/lib/campaign-engine";
+import { sendTeamRequestAcceptedEmail, sendTeamRequestRejectedEmail } from "@/lib/email";
 
 // PUT: Team Leader accepts or rejects a join request
 export async function PUT(
@@ -29,6 +30,7 @@ export async function PUT(
     const team = await prisma.team.findUnique({
       where: { id: teamId },
       include: {
+        event: true,
         members: true,
       },
     });
@@ -39,22 +41,51 @@ export async function PUT(
 
     // Verify leader authorization
     if (team.leaderId !== session.user.id && session.user.role !== "admin") {
-      return NextResponse.json({ success: false, error: "Only team leader or admin can process join requests." }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: "Only team leader or admin can process join requests." },
+        { status: 403 }
+      );
     }
 
     const joinReq = await prisma.teamJoinRequest.findUnique({
       where: { id: requestId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!joinReq || joinReq.teamId !== teamId) {
       return NextResponse.json({ success: false, error: "Request not found." }, { status: 404 });
     }
 
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.BETTER_AUTH_URL ||
+      "https://savedino.sedssl.org";
+
     if (action === "REJECT") {
       await prisma.teamJoinRequest.update({
         where: { id: requestId },
         data: { status: "REJECTED" },
       });
+
+      // Send rejection notification email asynchronously
+      if (joinReq.user?.email) {
+        sendTeamRequestRejectedEmail(joinReq.user.email, {
+          applicantName: joinReq.user.name || "Citizen Scientist",
+          teamName: team.name,
+          campaignName: team.event?.title || "Asteroid Campaign",
+          exploreTeamsUrl: `${appUrl}/teams?eventId=${team.eventId}`,
+        }).catch((err) => {
+          console.warn("[Send Team Rejection Email Warning]:", err?.message || err);
+        });
+      }
 
       return NextResponse.json({
         success: true,
@@ -63,8 +94,59 @@ export async function PUT(
     }
 
     // Action === "ACCEPT"
-    if (team.members.length >= 6) {
-      return NextResponse.json({ success: false, error: "Team is already at max capacity (6 members)." }, { status: 400 });
+    if (team.status === "DISQUALIFIED") {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "This squad has been disabled by platform administration and cannot accept new members.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const maxLimit = team.event?.maxTeamSize || 6;
+    if (team.members.length >= maxLimit) {
+      return NextResponse.json(
+        { success: false, error: `Squad is already at max capacity (${maxLimit} members).` },
+        { status: 400 }
+      );
+    }
+
+    // Check if user is already enrolled in ANY squad for this campaign
+    const existingMembership = await prisma.teamMember.findFirst({
+      where: {
+        userId: joinReq.userId,
+        team: {
+          eventId: team.eventId,
+        },
+      },
+      include: {
+        team: { select: { id: true, name: true } },
+      },
+    });
+
+    if (existingMembership) {
+      if (existingMembership.teamId === teamId) {
+        // Already a member of this team - update request to ACCEPTED
+        await prisma.teamJoinRequest.update({
+          where: { id: requestId },
+          data: { status: "ACCEPTED" },
+        });
+        return NextResponse.json({
+          success: true,
+          message: "This scientist is already a member of your squad.",
+        });
+      } else {
+        // Enrolled in a different team
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Cannot accept: This user has already joined squad "${existingMembership.team.name}" for this campaign.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Transaction to add member and mark request accepted
@@ -73,7 +155,7 @@ export async function PUT(
         data: {
           teamId,
           userId: joinReq.userId,
-          role: "MEMBER",
+          role: "member",
         },
       }),
       prisma.teamJoinRequest.update({
@@ -90,9 +172,22 @@ export async function PUT(
       where: { id: teamId },
       data: {
         status: newStatus,
-        isRecruiting: updatedMemberCount < 6,
+        isRecruiting: updatedMemberCount < maxLimit,
       },
     });
+
+    // Send acceptance notification email asynchronously
+    if (joinReq.user?.email) {
+      sendTeamRequestAcceptedEmail(joinReq.user.email, {
+        applicantName: joinReq.user.name || "Citizen Scientist",
+        teamName: team.name,
+        campaignName: team.event?.title || "Asteroid Campaign",
+        leaderName: session.user.name || "Squad Leader",
+        workspaceUrl: `${appUrl}/team/${team.id}`,
+      }).catch((err) => {
+        console.warn("[Send Team Acceptance Email Warning]:", err?.message || err);
+      });
+    }
 
     return NextResponse.json({
       success: true,

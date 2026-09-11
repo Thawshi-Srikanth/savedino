@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { checkUserEventConcurrency, calculateTeamStatus } from "@/lib/campaign-engine";
+import {
+  checkUserEventConcurrency,
+  calculateTeamStatus,
+  isRegistrationClosed,
+} from "@/lib/campaign-engine";
 
 // POST /api/teams/join - Join a team via invite code
 export async function POST(req: Request) {
@@ -15,6 +19,16 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { success: false, error: "Please log in to join a team." },
         { status: 401 }
+      );
+    }
+
+    if (session.user.role === "admin" || session.user.role === "staff") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Administrators and staff manage campaigns and cannot join participant teams.",
+        },
+        { status: 403 }
       );
     }
 
@@ -46,10 +60,40 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Check if team is full (Max 6 members)
-    if (team.members.length >= 6) {
+    // 2. Check if team is disabled / disqualified by administration
+    if (team.status === "DISQUALIFIED") {
       return NextResponse.json(
-        { success: false, error: "This team has already reached the maximum limit of 6 members." },
+        {
+          success: false,
+          error:
+            "This squad has been disabled by platform administration and is not accepting new members.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Check Event Registration Deadline
+    if (team.event) {
+      const regCheck = isRegistrationClosed(team.event);
+      if (regCheck.closed) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: regCheck.reason || "Team registration has closed for this campaign.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. Check if team is full based on campaign maxTeamSize
+    const maxLimit = team.event?.maxTeamSize || 6;
+    if (team.members.length >= maxLimit) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `This squad has already reached the maximum limit of ${maxLimit} members for this campaign.`,
+        },
         { status: 400 }
       );
     }
@@ -66,10 +110,7 @@ export async function POST(req: Request) {
     // 4. Check Event Concurrency
     const concurrency = await checkUserEventConcurrency(session.user.id, team.eventId);
     if (!concurrency.canEnroll) {
-      return NextResponse.json(
-        { success: false, error: concurrency.reason },
-        { status: 409 }
-      );
+      return NextResponse.json({ success: false, error: concurrency.reason }, { status: 409 });
     }
 
     // 5. Add user to team and update status

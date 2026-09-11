@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { checkUserEventConcurrency, generateInviteCode } from "@/lib/campaign-engine";
+import {
+  checkUserEventConcurrency,
+  generateInviteCode,
+  isRegistrationClosed,
+} from "@/lib/campaign-engine";
 
 // POST /api/teams - Create a team in an event
 export async function POST(req: Request) {
@@ -18,6 +22,16 @@ export async function POST(req: Request) {
       );
     }
 
+    if (session.user.role === "admin" || session.user.role === "staff") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Administrators and staff manage campaigns and cannot form participant teams.",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { eventId, name } = body;
 
@@ -28,16 +42,30 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Enforce Event Concurrency Rule
-    const concurrency = await checkUserEventConcurrency(session.user.id, eventId);
-    if (!concurrency.canEnroll) {
+    // 1. Check Event Existence & Registration Deadline
+    const targetEvent = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!targetEvent) {
+      return NextResponse.json({ success: false, error: "Campaign not found." }, { status: 404 });
+    }
+
+    const regCheck = isRegistrationClosed(targetEvent);
+    if (regCheck.closed) {
       return NextResponse.json(
-        { success: false, error: concurrency.reason },
-        { status: 409 }
+        { success: false, error: regCheck.reason || "Registration has closed for this campaign." },
+        { status: 400 }
       );
     }
 
-    // 2. Generate unique invite code
+    // 2. Enforce Event Concurrency Rule
+    const concurrency = await checkUserEventConcurrency(session.user.id, eventId);
+    if (!concurrency.canEnroll) {
+      return NextResponse.json({ success: false, error: concurrency.reason }, { status: 409 });
+    }
+
+    // 3. Generate unique invite code
     let inviteCode = generateInviteCode();
     while (await prisma.team.findUnique({ where: { inviteCode } })) {
       inviteCode = generateInviteCode();
@@ -90,6 +118,7 @@ export async function GET(req: Request) {
     const eventId = searchParams.get("eventId") || "";
     const isRecruiting = searchParams.get("isRecruiting");
     const status = searchParams.get("status") || "";
+    const includeDisqualified = searchParams.get("includeDisqualified") === "true";
 
     const where: any = {};
 
@@ -97,8 +126,10 @@ export async function GET(req: Request) {
       where.eventId = eventId;
     }
 
-    if (status) {
+    if (status && status !== "ALL") {
       where.status = status;
+    } else if (!includeDisqualified) {
+      where.status = { not: "DISQUALIFIED" };
     }
 
     if (isRecruiting === "true") {
@@ -132,6 +163,10 @@ export async function GET(req: Request) {
       ];
     }
 
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     const teams = await prisma.team.findMany({
       where,
       include: {
@@ -141,6 +176,7 @@ export async function GET(req: Request) {
             title: true,
             code: true,
             status: true,
+            maxTeamSize: true,
           },
         },
         members: {
@@ -156,6 +192,14 @@ export async function GET(req: Request) {
             },
           },
         },
+        ...(session?.user?.id
+          ? {
+              joinRequests: {
+                where: { userId: session.user.id },
+                select: { id: true, status: true },
+              },
+            }
+          : {}),
         _count: {
           select: {
             members: true,
@@ -168,7 +212,20 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, teams });
+    const isStaffOrAdmin = session?.user?.role === "admin" || session?.user?.role === "staff";
+
+    const formattedTeams = teams.map((team: any) => {
+      const isLeader = Boolean(session?.user?.id && team.leaderId === session.user.id);
+      const canSeeInvite = isLeader || isStaffOrAdmin;
+      const myReq = team.joinRequests?.[0];
+      return {
+        ...team,
+        inviteCode: canSeeInvite ? team.inviteCode : null,
+        myRequestStatus: myReq?.status || null,
+      };
+    });
+
+    return NextResponse.json({ success: true, teams: formattedTeams });
   } catch (error: any) {
     console.error("GET /api/teams error:", error);
     return NextResponse.json(

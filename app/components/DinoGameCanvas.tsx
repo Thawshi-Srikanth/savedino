@@ -49,6 +49,126 @@ interface Particle {
 const MAX_CHARGES = 3;
 const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 
+// Offscreen Sprite Cache for High-Performance 60fps Blitting
+const spriteCache: Record<string, HTMLCanvasElement> = {};
+
+function getMeteorSprite(
+  type: "small" | "medium" | "giant",
+  rad: number,
+  step: number
+): HTMLCanvasElement {
+  const key = `${type}_${rad}_${step}`;
+  if (spriteCache[key]) return spriteCache[key];
+
+  const size = (rad + step * 2) * 2;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const sCtx = c.getContext("2d");
+  if (!sCtx) return c;
+
+  const cx = size / 2;
+  const cy = size / 2;
+
+  // Draw 8-bit stepped pixel circles once onto offscreen canvas
+  const drawPixelCircle = (radius: number, color: string, offsetX = 0, offsetY = 0) => {
+    sCtx.fillStyle = color;
+    for (let dy = -radius; dy <= radius; dy += step) {
+      const width = Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
+      if (width > 0) {
+        sCtx.fillRect(cx + offsetX - width, cy + offsetY + dy, width * 2, step);
+      }
+    }
+  };
+
+  // A. Fiery Atmospheric Plasma Corona / Outer Burn
+  const fireColor = type === "giant" ? "#dc2626" : type === "small" ? "#f59e0b" : "#f97316";
+  drawPixelCircle(rad + step, fireColor);
+
+  // B. Bright Molten Corona Edge
+  drawPixelCircle(rad, type === "giant" ? "#f97316" : "#fde047");
+
+  // C. Dark Shadowed Rocky Crust (Dark base stone sphere)
+  drawPixelCircle(rad - step, "#292524");
+
+  // D. Mid Rock Body (Offset slightly top-left for 3D depth)
+  drawPixelCircle(
+    Math.max(step, rad - step * 2),
+    "#57534e",
+    -Math.floor(step * 0.5),
+    -Math.floor(step * 0.5)
+  );
+
+  // E. Lit Stone Highlight (Top-left crescent)
+  drawPixelCircle(Math.max(step, Math.floor(rad * 0.55)), "#78716c", -step, -step);
+
+  // F. Glowing Magma Veins & Heat Cracks
+  sCtx.fillStyle = "#f97316";
+  sCtx.fillRect(cx - step * 2, cy, step * 3, step);
+  sCtx.fillRect(cx, cy - step * 2, step, step * 3);
+  sCtx.fillRect(cx + step, cy + step, step * 2, step);
+
+  sCtx.fillStyle = "#fde047";
+  sCtx.fillRect(cx - step, cy, step, step);
+  sCtx.fillRect(cx, cy - step, step, step);
+
+  // G. Rotating Detailed Pixel Craters
+  if (type === "giant") {
+    sCtx.fillStyle = "#a8a29e";
+    sCtx.fillRect(cx - step * 4, cy - step * 3, step * 4, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step * 3, cy - step * 2, step * 3, step * 2);
+    sCtx.fillRect(cx - step * 4, cy - step, step * 5, step);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx - step * 2, cy - step, step * 2, step);
+
+    sCtx.fillStyle = "#78716c";
+    sCtx.fillRect(cx + step * 2, cy - step * 2, step * 2, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx + step * 2, cy - step * 2, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx + step * 2 + Math.floor(step * 0.5), cy, step, step);
+
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step * 2, cy + step * 2, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx - Math.floor(step * 1.5), cy + Math.floor(step * 2.5), step, step);
+  } else if (type === "medium") {
+    sCtx.fillStyle = "#78716c";
+    sCtx.fillRect(cx - step * 2, cy - step * 2, step * 2, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step * 2, cy - step * 2, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx - Math.floor(step * 1.5), cy, step, step);
+
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx + step, cy + step, step * 2, step * 2);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(
+      cx + step + Math.floor(step * 0.5),
+      cy + step + Math.floor(step * 0.5),
+      step,
+      step
+    );
+  } else {
+    sCtx.fillStyle = "#78716c";
+    sCtx.fillRect(cx - step, cy - step, step * 2, step);
+    sCtx.fillStyle = "#1c1917";
+    sCtx.fillRect(cx - step, cy, step * 2, step);
+    sCtx.fillStyle = "#0c0a09";
+    sCtx.fillRect(cx, cy, step, step);
+  }
+
+  // H. Specular Glint Pixels
+  sCtx.fillStyle = "#e7e5e4";
+  const glintDist = Math.floor(rad * 0.5);
+  sCtx.fillRect(cx - glintDist, cy - glintDist, step * 2, step);
+  sCtx.fillRect(cx - glintDist - step, cy - glintDist + step, step, step);
+
+  spriteCache[key] = c;
+  return c;
+}
+
 export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   onScoreUpdate,
   onNightModeChange,
@@ -73,9 +193,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
     if (nightModeOverride !== undefined && nightModeOverride !== null) {
       setIsNight(nightModeOverride);
       isNightRef.current = nightModeOverride;
-      onNightModeChange?.(nightModeOverride);
     }
-  }, [nightModeOverride, onNightModeChange]);
+  }, [nightModeOverride]);
 
   // Load official Chromium sprite sheet
   useEffect(() => {
@@ -188,9 +307,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       setScore(0);
       setMeteorsDestroyed(0);
       onScoreUpdate?.(0, s.highScore, 0);
-      isNightRef.current = false;
-      setIsNight(false);
-      onNightModeChange?.(false);
+      const initialNight = nightModeOverrideRef.current ?? false;
+      isNightRef.current = initialNight;
+      setIsNight(initialNight);
       audioSynth.playButtonClick();
       audioSynth.startMusic();
     }
@@ -225,9 +344,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       setScore(0);
       setMeteorsDestroyed(0);
       onScoreUpdate?.(0, s.highScore, 0);
-      isNightRef.current = false;
-      setIsNight(false);
-      onNightModeChange?.(false);
+      const initialNight = nightModeOverrideRef.current ?? false;
+      isNightRef.current = initialNight;
+      setIsNight(initialNight);
       audioSynth.playButtonClick();
       audioSynth.startMusic();
       return;
@@ -387,7 +506,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         s.score += 0.15;
         const currentScoreInt = Math.floor(s.score);
 
-        if (currentScoreInt > 0 && currentScoreInt % 100 === 0 && Math.floor(s.score - 0.15) % 100 !== 0) {
+        if (
+          currentScoreInt > 0 &&
+          currentScoreInt % 100 === 0 &&
+          Math.floor(s.score - 0.15) % 100 !== 0
+        ) {
           audioSynth.playScore();
         }
 
@@ -554,7 +677,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
               s.meteorsDestroyed++;
               setMeteorsDestroyed(s.meteorsDestroyed);
-              
+
               const pts = m.type === "small" ? 50 : m.type === "giant" ? 30 : 40;
               s.score += pts;
               s.screenShake = m.type === "giant" ? 6 : 3.5;
@@ -571,7 +694,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
                   vx: Math.cos(pAngle) * pSpeed,
                   vy: Math.sin(pAngle) * pSpeed,
                   size: Math.random() * (m.type === "giant" ? 5 : 3.5) + 2,
-                  color: Math.random() > 0.4 ? "#facc15" : (Math.random() > 0.5 ? "#f97316" : "#ef4444"),
+                  color:
+                    Math.random() > 0.4 ? "#facc15" : Math.random() > 0.5 ? "#f97316" : "#ef4444",
                   life: 20,
                   maxLife: 20,
                 });
@@ -718,14 +842,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         ctx.translate(shakeX, shakeY);
       }
 
-      const calculatedNight = s.gameState === "RUNNING" && Math.floor(s.score / 700) % 2 === 1;
-      const night = nightModeOverrideRef.current !== null ? nightModeOverrideRef.current : calculatedNight;
+      // Consistently respect the active theme without periodic score-based flickering
+      const night = nightModeOverrideRef.current ?? isNightRef.current ?? false;
       if (isNightRef.current !== night) {
         isNightRef.current = night;
         setIsNight(night);
-        if (onNightModeChange) {
-          onNightModeChange(night);
-        }
       }
 
       // Transparent Canvas Clear (Lets the smooth 700ms page background transition show through directly)
@@ -780,79 +901,86 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
       ctx.globalAlpha = 1.0;
 
       // ----------------------------------------------------
-      // DRAW PIXELATED EXPANDING PLASMA BALL (8-BIT RETRO)
+      // DRAW PIXELATED EXPANDING PLASMA BALL (8-BIT RETRO) - FAST ARCS
       // ----------------------------------------------------
       s.balls.forEach((b) => {
         ctx.save();
         const bx = Math.floor(b.x);
         const by = Math.floor(b.y);
         const r = Math.floor(b.radius);
-        const pSize = Math.max(2, Math.floor(r / 7)); // Grid pixel block step
+        const pSize = Math.max(2, Math.floor(r / 7));
 
-        // Helper to draw stepped 8-bit pixel circle
-        const fillPixelCircle = (cx: number, cy: number, radius: number, step: number, color: string) => {
-          ctx.fillStyle = color;
-          for (let dy = -radius; dy <= radius; dy += step) {
-            const dx = Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
-            if (dx > 0) {
-              ctx.fillRect(cx - dx, cy + dy, dx * 2, step);
-            }
-          }
-        };
+        // 1. Plasma Outer Corona
+        ctx.fillStyle = "#0284c7";
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fill();
 
-        // 1. Outer Electric Blue/Cyan Plasma Corona (Blends seamlessly with background)
-        fillPixelCircle(bx, by, r, pSize, "#0284c7");
-
-        // 2. Bright Electric Cyan Pixel Ring
-        fillPixelCircle(bx, by, Math.floor(r * 0.78), pSize, "#00ffff");
+        // 2. Bright Cyan Ring
+        ctx.fillStyle = "#00ffff";
+        ctx.beginPath();
+        ctx.arc(bx, by, Math.floor(r * 0.78), 0, Math.PI * 2);
+        ctx.fill();
 
         // 3. Bright Cyan/White Mid Core
-        fillPixelCircle(bx, by, Math.floor(r * 0.52), pSize, "#e0f2fe");
+        ctx.fillStyle = "#e0f2fe";
+        ctx.beginPath();
+        ctx.arc(bx, by, Math.floor(r * 0.52), 0, Math.PI * 2);
+        ctx.fill();
 
-        // 4. Blinding White Pure Energy Center
-        fillPixelCircle(bx + Math.floor(r * 0.12), by, Math.floor(r * 0.32), pSize, "#ffffff");
-
-        // 5. White Pixel Highlights (Top-Left Glints)
+        // 4. Pure White Energy Center
         ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(bx + Math.floor(r * 0.12), by, Math.floor(r * 0.32), 0, Math.PI * 2);
+        ctx.fill();
+
+        // 5. Pixel Sparks & Leading Edge Highlights
         const hx = bx - Math.floor(r * 0.35);
         const hy = by - Math.floor(r * 0.35);
         ctx.fillRect(hx, hy, pSize * 2, pSize * 2);
-
-        // 6. Leading Pixel Energy Sparks on Front Edge
-        ctx.fillStyle = "#ffffff";
         ctx.fillRect(bx + r - pSize, by - Math.floor(r * 0.35), pSize, pSize * 2);
         ctx.fillRect(bx + r - pSize, by + Math.floor(r * 0.2), pSize, pSize * 2);
-
         ctx.restore();
       });
 
-      // Draw Varied Asteroids
+      // ----------------------------------------------------
+      // DRAW 8-BIT PIXEL ART BALL ASTEROIDS (CACHED SPRITES + GPU BLIT)
+      // ----------------------------------------------------
       s.meteors.forEach((m) => {
+        const cx = Math.floor(m.x + m.radius);
+        const cy = Math.floor(m.y + m.radius);
+        const rad = Math.floor(m.radius);
+        const step = Math.max(2, Math.floor(rad / 6));
+
+        // 1. Draw Trailing Flame Tail
         ctx.save();
-        ctx.translate(m.x + m.radius, m.y + m.radius);
-        ctx.rotate(m.rotation);
+        const angle = Math.atan2(m.vy, m.vx);
+        const tailColor =
+          m.type === "giant" ? "#ef4444" : m.type === "small" ? "#f59e0b" : "#f97316";
 
-        // Halo
-        ctx.fillStyle = m.type === "giant" ? "#dc2626" : m.type === "small" ? "#f59e0b" : "#f97316";
-        ctx.shadowColor = "#ef4444";
-        ctx.shadowBlur = m.type === "giant" ? 14 : 8;
-        ctx.fillRect(-m.radius, -m.radius, m.size, m.size);
-
-        // Rocky core
-        ctx.fillStyle = "#57534e";
-        ctx.shadowBlur = 0;
-        ctx.fillRect(-m.radius + 2, -m.radius + 2, m.size - 4, m.size - 4);
-
-        // Crater dots
-        ctx.fillStyle = "#292524";
-        ctx.fillRect(-m.radius + 4, -m.radius + 4, m.type === "giant" ? 5 : 3, m.type === "giant" ? 5 : 3);
-        if (m.type === "giant") {
-          ctx.fillRect(-m.radius + m.size - 10, -m.radius + 8, 4, 4);
-          ctx.fillRect(-m.radius + 8, -m.radius + m.size - 10, 4, 4);
-        } else {
-          ctx.fillRect(-m.radius + m.size - 7, -m.radius + 6, 2, 2);
+        ctx.fillStyle = tailColor;
+        for (let t = 1; t <= 3; t++) {
+          const tDist = rad + t * (step * 1.5);
+          const tx = cx - Math.cos(angle) * tDist + Math.sin(s.frameCount * 0.4 + t) * step;
+          const ty = cy - Math.sin(angle) * tDist + Math.cos(s.frameCount * 0.4 + t) * step;
+          const tSize = Math.max(step, step * (4 - t));
+          ctx.fillRect(Math.floor(tx - tSize / 2), Math.floor(ty - tSize / 2), tSize, tSize);
         }
 
+        // Inner Yellow Flame Core in Tail
+        ctx.fillStyle = "#fde047";
+        const txCore = cx - Math.cos(angle) * (rad + step);
+        const tyCore = cy - Math.sin(angle) * (rad + step);
+        ctx.fillRect(Math.floor(txCore - step), Math.floor(tyCore - step), step * 2, step * 2);
+        ctx.restore();
+
+        // 2. Draw Cached High-Res Pixel Sprite with zero per-frame square root calculations
+        const sprite = getMeteorSprite(m.type, rad, step);
+        const half = sprite.width / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(m.rotation);
+        ctx.drawImage(sprite, -half, -half);
         ctx.restore();
       });
 
@@ -884,8 +1012,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
         // 8-bit Pixel Muzzle Blast at Dino's Snout/Mouth
         if (s.dino.fireGlowTimer > 0) {
-          const mx = Math.floor(s.dino.x + (s.dino.isShootingCrouch && !s.dino.isJumping ? 52 : 38));
-          const my = Math.floor(s.dino.isShootingCrouch && !s.dino.isJumping ? s.dino.y + 12 : s.dino.y + 14);
+          const mx = Math.floor(
+            s.dino.x + (s.dino.isShootingCrouch && !s.dino.isJumping ? 52 : 38)
+          );
+          const my = Math.floor(
+            s.dino.isShootingCrouch && !s.dino.isJumping ? s.dino.y + 12 : s.dino.y + 14
+          );
 
           // 1. Electric Cyan Pixel Blast (#00ffff - pure glowing energy)
           ctx.fillStyle = "#00ffff";
@@ -910,9 +1042,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         }
       }
 
-
       // Start Screen if IDLE
       if (s.gameState === "IDLE") {
+        ctx.fillStyle = mainColor;
         ctx.textAlign = "center";
         ctx.font = '11px "Press Start 2P", monospace';
         const blink = Math.floor(s.frameCount / 30) % 2 === 0;
@@ -925,6 +1057,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
       // Game Over Screen if GAMEOVER
       if (s.gameState === "GAMEOVER") {
+        ctx.fillStyle = mainColor;
         ctx.textAlign = "center";
         ctx.font = '14px "Press Start 2P", monospace';
         ctx.fillText("G A M E   O V E R", CANVAS_WIDTH / 2, 60);
@@ -956,9 +1089,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   return (
     <div className="w-full flex flex-col items-center select-none gap-3">
       {/* HUD Header Bar: Seamlessly blended with the background (no container box) */}
-      <div className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 ${
-        isNight ? "text-[#e8eaed]" : "text-[#535353]"
-      }`}>
+      <div
+        className={`w-full max-w-[600px] flex items-center justify-between px-1.5 py-1 ${
+          isNight ? "text-[#e8eaed]" : "text-[#535353]"
+        }`}
+      >
         {/* Left: 3 Circular Plasma Orbs + Blasted Counter */}
         <div className="flex items-center gap-3">
           {/* 8-bit Pixel Plasma Orbs */}
@@ -972,13 +1107,15 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
                 <div
                   key={idx}
                   className="w-5 h-5 flex items-center justify-center relative select-none"
-                  title={isFilled ? "Plasma Ready" : isCurrentlyRecharging ? "Recharging Plasma..." : "Depleted"}
+                  title={
+                    isFilled
+                      ? "Plasma Ready"
+                      : isCurrentlyRecharging
+                        ? "Recharging Plasma..."
+                        : "Depleted"
+                  }
                 >
-                  <svg
-                    viewBox="0 0 14 14"
-                    className="w-full h-full"
-                    shapeRendering="crispEdges"
-                  >
+                  <svg viewBox="0 0 14 14" className="w-full h-full" shapeRendering="crispEdges">
                     <defs>
                       <clipPath id={`recharge-clip-${idx}`}>
                         <rect x="0" y={clipY} width="14" height="14" />
@@ -1007,11 +1144,20 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
                       /* Recharging: Dark Cavity + Pixel Rising Plasma */
                       <>
                         {/* Background Empty Cavity */}
-                        <path d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z" fill={isNight ? "#3c4043" : "#d1d5db"} />
+                        <path
+                          d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z"
+                          fill={isNight ? "#3c4043" : "#d1d5db"}
+                        />
                         {/* Rising Recharge Liquid */}
                         <g clipPath={`url(#recharge-clip-${idx})`}>
-                          <path d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z" fill="#f97316" />
-                          <path d="M5 3h4v1h2v2h1v2h-1v2h-2v1H5v-1H3V8H2V6h1V4h2V3z" fill="#fde047" />
+                          <path
+                            d="M4 2h6v1h2v2h1v4h-1v2h-2v1H4v-1H2V9H1V5h1V3h2V2z"
+                            fill="#f97316"
+                          />
+                          <path
+                            d="M5 3h4v1h2v2h1v2h-1v2h-2v1H5v-1H3V8H2V6h1V4h2V3z"
+                            fill="#fde047"
+                          />
                           <rect x="4" y="3" width="2" height="2" fill="#ffffff" />
                         </g>
                       </>
@@ -1029,15 +1175,21 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           </div>
 
           {/* Asteroid Destroyed Count (Clean & shortened on mobile) */}
-          <div className={`text-[10px] font-pixel tracking-wide ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
+          <div
+            className={`text-[10px] font-pixel tracking-wide ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
+          >
             <span className="hidden sm:inline">BLASTED: </span>
             <span className="font-bold text-[#0284c7]">×{meteorsDestroyed}</span>
           </div>
         </div>
 
         {/* Right: Scores (HI 00000  00000) */}
-        <div className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}>
-          <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span> {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;{Math.floor(score).toString().padStart(5, "0")}
+        <div
+          className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
+        >
+          <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span>{" "}
+          {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;
+          {Math.floor(score).toString().padStart(5, "0")}
         </div>
       </div>
 
@@ -1055,56 +1207,37 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         />
       </div>
 
-      {/* Controls Hint with Pixel Keyboard Keycap Sprites (Helper contents) */}
-      <div className={`w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-1.5 px-2 mt-1 text-[11px] font-mono ${
-        isNight ? "text-[#9aa0a6]" : "text-[#535353]"
-      }`}>
+      {/* Controls Bar with Clean Theme-Aware Keycaps */}
+      <div className="w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-2 px-2 mt-1 text-xs font-mono text-muted-foreground">
         <div className="flex items-center gap-3">
-          {/* SPACE sprite + Laser */}
+          {/* Spacebar Keycap */}
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block flex-shrink-0"
-              style={{
-                width: "32px",
-                height: "16px",
-                backgroundImage: "url('/Keyboard-Extras.png')",
-                backgroundPosition: isNight ? "-64px -96px" : "-64px -32px",
-                backgroundRepeat: "no-repeat",
-                imageRendering: "pixelated",
-              }}
-              title="SPACEBAR: Laser"
-            />
-            <span className="font-pixel text-[10px]">: Laser</span>
+            <kbd className="px-2 py-0.5 text-[10px] font-mono font-bold bg-muted text-foreground border border-border rounded shadow-arcade-xs select-none">
+              SPACE
+            </kbd>
+            <span className="text-[11px] font-medium text-foreground">Laser</span>
           </div>
 
-          <span className="opacity-40">|</span>
+          <span className="text-border">&bull;</span>
 
-          {/* UP ARROW sprite + Jump */}
+          {/* Up Arrow Keycap */}
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block flex-shrink-0"
-              style={{
-                width: "16px",
-                height: "16px",
-                backgroundImage: "url('/Keyboard-Letter.png')",
-                backgroundPosition: isNight ? "0px -112px" : "0px 0px",
-                backgroundRepeat: "no-repeat",
-                imageRendering: "pixelated",
-              }}
-              title="UP ARROW: Jump"
-            />
-            <span className="font-pixel text-[10px]">: Jump</span>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-muted text-foreground border border-border rounded shadow-arcade-xs select-none">
+              &uarr; UP
+            </kbd>
+            <span className="text-[11px] font-medium text-foreground">Jump</span>
           </div>
         </div>
 
-        <span className="text-[10px] font-mono opacity-75">
-          <span className="sm:hidden">Tap left Jump, right Shoot • </span>Laser expands in flight
+        <span className="text-[11px] text-muted-foreground font-sans">
+          <span className="sm:hidden">Tap left Jump, right Shoot &bull; </span>Laser expands in
+          flight
         </span>
       </div>
 
-      {/* Dedicated Touch Arcade Controls at Bottom (Hidden on desktop / wide screens, visible on mobile) */}
-      <div className="w-full max-w-[600px] flex sm:hidden items-center justify-between gap-3 px-1 mt-3 z-30 relative select-none">
-        {/* JUMP Touch Pad (White 3D PostHog Button) */}
+      {/* Dedicated Touch Arcade Controls at Bottom (Visible on mobile) */}
+      <div className="w-full max-w-[600px] flex sm:hidden items-center justify-between gap-3 px-1 mt-2 z-30 relative select-none">
+        {/* JUMP Touch Pad */}
         <Button
           type="button"
           variant="outline"
@@ -1113,12 +1246,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             e.stopPropagation();
             jump();
           }}
-          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
+          className="flex-1 py-3.5 h-11 font-sans text-xs uppercase tracking-wider font-bold cursor-pointer select-none shadow-arcade active:translate-y-0.5"
         >
           JUMP
         </Button>
 
-        {/* LASER BLAST Touch Pad (Purple 3D PostHog Button) */}
+        {/* LASER BLAST Touch Pad */}
         <Button
           type="button"
           variant={laserCharges > 0 ? "default" : "secondary"}
@@ -1128,7 +1261,9 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             e.stopPropagation();
             fireLaser();
           }}
-          className="flex-1 py-4 h-12 font-pixel text-[11px] tracking-wider uppercase font-bold cursor-pointer select-none"
+          className={`flex-1 py-3.5 h-11 font-sans text-xs uppercase tracking-wider font-bold cursor-pointer select-none ${
+            laserCharges > 0 ? "shadow-arcade-primary" : "shadow-arcade"
+          } active:translate-y-0.5`}
         >
           BLAST ({laserCharges})
         </Button>

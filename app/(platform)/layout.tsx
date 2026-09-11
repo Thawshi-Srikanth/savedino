@@ -6,15 +6,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Sun, Moon, LogOut, User, Menu, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
+import { Sun, Moon, LogOut, User, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
 import { Logo } from "@/components/Logo";
+
+import { PixelAvatar } from "@/components/pixel-avatar";
+import { ProfileOnboardingDialog } from "@/components/profile-onboarding-dialog";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   // Unified Next-Themes Theme State
@@ -39,8 +40,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  // Dedicated Full-Screen Layout for Login, Register & Verify (No Navbar)
-  if (pathname === "/login" || pathname === "/register" || pathname === "/verify") {
+  // Dedicated Full-Screen Layout for Login, Register, Verify, Onboarding & Create (No Navbar)
+  if (
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/verify" ||
+    pathname === "/onboarding" ||
+    pathname === "/create"
+  ) {
     return (
       <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans select-none">
         {children}
@@ -51,16 +58,22 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   // Navigation Items
   const navItems = [
     { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    { title: "Teams", url: "/teams", icon: Users, active: pathname === "/teams" || pathname.startsWith("/team/") },
+    {
+      title: "Teams",
+      url: "/teams",
+      icon: Users,
+      active: pathname === "/teams" || pathname.startsWith("/team/"),
+    },
   ];
 
   // @ts-ignore
-  if (session?.user?.role === "admin") {
+  const userRole = session?.user?.role;
+  if (userRole === "admin" || userRole === "staff") {
     navItems.push({
       title: "Admin Console",
       url: "/admin",
       icon: ShieldAlert,
-      active: pathname === "/admin",
+      active: pathname === "/admin" || pathname.startsWith("/admin/"),
     });
   }
 
@@ -69,10 +82,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
-          
           {/* SaveDino Branding Logo */}
-          <div className="flex items-center gap-4">
-            <Logo href="/" size="md" />
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <div className="block sm:hidden">
+              <Logo href="/" size="sm" />
+            </div>
+            <div className="hidden sm:block">
+              <Logo href="/" size="md" />
+            </div>
 
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
@@ -81,7 +98,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <Button
                     size="sm"
                     variant={item.active ? "default" : "outline"}
-                    className="h-9 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    className="h-9 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-arcade-sm active:translate-y-0.5 rounded-xl"
                   >
                     <item.icon className="size-3.5" />
                     <span>{item.title}</span>
@@ -98,7 +115,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               variant="outline"
               size="icon"
               onClick={handleToggleTheme}
-              className="h-9 w-9 rounded-md cursor-pointer"
+              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
             >
               {isNight ? (
@@ -110,16 +127,27 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
             {session?.user ? (
               <div className="flex items-center gap-2">
-                {/* Logged-In User Badge with 3D PostHog Shadow & Uniform h-9 Height */}
-                <div className="h-9 flex items-center gap-1.5 px-3.5 border border-border rounded-md text-xs font-medium bg-card shadow-[0_3px_0_0_rgba(0,0,0,0.15)] dark:shadow-[0_3px_0_0_rgba(255,255,255,0.08)]">
-                  <User className="size-3.5 text-[#8b5cf6]" />
-                  <span className="font-bold">{session.user.name}</span>
-                </div>
+                {/* Logged-In User Profile Link with Seed Pixel Avatar */}
+                <Link href="/profile">
+                  <Button
+                    size="sm"
+                    variant={pathname === "/profile" ? "default" : "outline"}
+                    className="h-9 px-2.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
+                    title="Profile & Studio"
+                  >
+                    <PixelAvatar
+                      seed={session.user.image || session.user.name || session.user.id}
+                      size={22}
+                      showBorder={false}
+                    />
+                    <span className="font-bold max-w-[120px] truncate">{session.user.name}</span>
+                  </Button>
+                </Link>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
-                  className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer"
+                  className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer rounded-xl border-border shadow-arcade-sm active:translate-y-0.5"
                   title="Sign Out"
                 >
                   <LogOut className="size-3.5" />
@@ -128,23 +156,36 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             ) : (
               <div className="flex items-center gap-2 text-xs">
                 <Link href="/login">
-                  <Button size="sm" variant="outline" className="h-9 px-3.5 text-xs font-bold">Sign In</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    Sign In
+                  </Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" variant="default" className="h-9 px-3.5 text-xs font-bold">Register</Button>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
+                  >
+                    Join
+                  </Button>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile Controls */}
+          {/* Mobile Right Controls: Theme Toggle & Auth */}
           <div className="flex md:hidden items-center gap-2">
             <Button
               variant="outline"
               size="icon"
               onClick={handleToggleTheme}
-              className="h-9 w-9 rounded-md cursor-pointer"
+              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
               title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+              aria-label="Toggle theme"
             >
               {isNight ? (
                 <Sun className="size-4 text-amber-400" />
@@ -153,108 +194,189 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               )}
             </Button>
 
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9">
-                  <Menu className="size-4" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-card text-card-foreground border-r border-border">
-                <div>
-                  <SheetHeader className="p-4 border-b border-border text-left">
-                    <SheetTitle className="flex items-center">
-                      <Logo href="/" size="sm" />
-                    </SheetTitle>
-                  </SheetHeader>
-
-                  <div className="p-4 space-y-4">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      NAVIGATION
-                    </div>
-                    <nav className="space-y-2">
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.title}
-                          href={item.url}
-                          onClick={() => setMobileOpen(false)}
-                          className={`flex items-center gap-2 text-xs px-3.5 py-2 rounded-md font-semibold transition-all ${
-                            item.active
-                              ? "bg-[#8b5cf6] text-white font-bold"
-                              : "text-foreground hover:bg-muted"
-                          }`}
-                        >
-                          <item.icon className="size-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      ))}
-                    </nav>
-                  </div>
-                </div>
-
-                <div className="p-4 border-t border-border space-y-3">
-                  {/* Mobile Theme Toggle */}
+            {session?.user ? (
+              <div className="flex items-center gap-1.5">
+                <Link href="/profile">
                   <Button
-                    variant="outline"
+                    variant={pathname === "/profile" ? "default" : "outline"}
                     size="sm"
-                    onClick={handleToggleTheme}
-                    className="w-full justify-between text-xs font-bold"
+                    className="h-9 px-2 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-1.5"
+                    title="Profile"
                   >
-                    <span className="flex items-center gap-2">
-                      {isNight ? <Sun className="size-4 text-amber-400" /> : <Moon className="size-4 text-[#8b5cf6]" />}
-                      <span>{isNight ? "Day Mode" : "Night Mode"}</span>
+                    <PixelAvatar
+                      seed={session.user.image || session.user.name || session.user.id}
+                      size={20}
+                      showBorder={false}
+                    />
+                    <span className="max-w-[70px] truncate">
+                      {session.user.name?.split(" ")[0]}
                     </span>
-                    <span className="text-[10px] font-mono text-muted-foreground uppercase">{isNight ? "Dark" : "Light"}</span>
                   </Button>
-
-                  {session?.user ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setMobileOpen(false);
-                        signOut({ fetchOptions: { onSuccess: () => router.push("/") } });
-                      }}
-                      className="w-full justify-start text-xs text-destructive hover:text-destructive"
-                    >
-                      <LogOut className="size-4 mr-2" />
-                      Sign Out ({session.user.name})
-                    </Button>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Link href="/login" onClick={() => setMobileOpen(false)}>
-                        <Button variant="outline" size="sm" className="w-full text-xs font-bold">Sign In</Button>
-                      </Link>
-                      <Link href="/register" onClick={() => setMobileOpen(false)}>
-                        <Button size="sm" className="w-full text-xs font-bold">Register</Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+                  className="h-9 w-9 p-0 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive border-border shadow-arcade-sm active:translate-y-0.5"
+                  title="Sign Out"
+                >
+                  <LogOut className="size-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <Link href="/login">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-2.5 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-9 px-2.5 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
+                  >
+                    Join
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
-
         </div>
       </header>
 
-      {/* Main Content Body */}
-      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-        {children}
+      {/* Main Content Body (With pb-24 on mobile so bottom bar never obscures content) */}
+      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 flex flex-col justify-between">
+        <div className="flex-1">{children}</div>
+
+        {/* Platform Bottom Footer Note */}
+        <footer className="w-full pt-8 mt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-sans text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-foreground">SaveDino</span>
+            <span className="opacity-40">&bull;</span>
+            <span>NASA &amp; IASC Asteroid Search Collaboration</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/credits"
+              className="hover:text-foreground transition-colors hover:underline"
+            >
+              Credits
+            </Link>
+            <span className="opacity-40">|</span>
+            <Link
+              href="/privacy"
+              className="hover:text-foreground transition-colors hover:underline"
+            >
+              Privacy Policy
+            </Link>
+            <span className="opacity-40">|</span>
+            <Link href="/terms" className="hover:text-foreground transition-colors hover:underline">
+              Terms &amp; Conditions
+            </Link>
+            <span className="opacity-40">|</span>
+            <a
+              href="https://sedssl.org"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-foreground transition-colors hover:underline"
+            >
+              SEDS Sri Lanka
+            </a>
+          </div>
+        </footer>
       </main>
 
-      {/* Global Floating Arcade Game Square Icon Button (PostHog Yellow-Orange) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Profile Onboarding Modal for Incomplete Magic-Link Profiles */}
+      <ProfileOnboardingDialog />
+
+      {/* Desktop Floating Arcade Game Button (Hidden on mobile since it is inside the bottom bar) */}
+      <div className="hidden md:block fixed bottom-6 right-6 z-50">
         <Link href="/">
           <Button
             size="icon"
-            className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-[0_3.5px_0_0_#b45309] active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
+            className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-arcade-amber-lg active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
             title="Play SaveDino Arcade Game"
           >
             <Gamepad2 className="size-6 text-[#0f172a]" />
           </Button>
         </Link>
       </div>
+
+      {/* App-Style Mobile Full-Width Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 dark:bg-[#121315]/95 backdrop-blur-md border-t border-border px-3 py-2 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+        <div className="flex items-center justify-center gap-2 max-w-md mx-auto">
+          {/* 1. Arcade / Game (First) */}
+          <Link
+            href="/"
+            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              pathname === "/"
+                ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-arcade-amber-lg active:translate-y-0.5"
+                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+            }`}
+            title="Play Retro Arcade Game"
+            aria-label="Arcade Game"
+          >
+            <Gamepad2 className="size-4.5 shrink-0" />
+            {pathname === "/" && <span>Arcade</span>}
+          </Link>
+
+          {/* 2. Campaigns (Second) */}
+          <Link
+            href="/campaigns"
+            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              pathname === "/campaigns"
+                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+            }`}
+            title="Observation Campaigns"
+            aria-label="Campaigns"
+          >
+            <Telescope className="size-4.5 shrink-0" />
+            {pathname === "/campaigns" && <span>Campaigns</span>}
+          </Link>
+
+          {/* 3. Teams (Third) */}
+          <Link
+            href="/teams"
+            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              pathname === "/teams" || pathname.startsWith("/team/")
+                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+            }`}
+            title="Citizen Teams"
+            aria-label="Citizen Teams"
+          >
+            <Users className="size-4.5 shrink-0" />
+            {(pathname === "/teams" || pathname.startsWith("/team/")) && <span>Teams</span>}
+          </Link>
+
+          {/* 4. Profile (Fourth - if signed in) */}
+          {session?.user && (
+            <Link
+              href="/profile"
+              className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                pathname === "/profile"
+                  ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                  : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+              }`}
+              title="User Profile & Studio"
+              aria-label="Profile"
+            >
+              <PixelAvatar
+                seed={session.user.image || session.user.name || session.user.id}
+                size={18}
+                showBorder={false}
+              />
+              {pathname === "/profile" && <span>Profile</span>}
+            </Link>
+          )}
+        </div>
+      </nav>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
+import { DinoLoading } from "@/components/dino-loading";
 
 function LoginForm() {
   const router = useRouter();
@@ -21,11 +22,14 @@ function LoginForm() {
 
   // If already authenticated, redirect to destination
   useEffect(() => {
-    authClient.getSession().then((res) => {
-      if (res?.data?.session) {
-        router.push(redirectTo);
-      }
-    }).catch(() => {});
+    authClient
+      .getSession()
+      .then((res) => {
+        if (res?.data?.session) {
+          router.push(redirectTo);
+        }
+      })
+      .catch(() => {});
   }, [redirectTo, router]);
 
   // Handle URL errors (e.g. expired tokens)
@@ -53,7 +57,8 @@ function LoginForm() {
       });
 
       if (res.error) {
-        const msg = res.error.message || "Failed to send link. Please check your email and try again.";
+        const msg =
+          res.error.message || "Failed to send link. Please check your email and try again.";
         toast.error(msg);
       } else {
         toast.success("Sign-in link sent! Check your inbox.");
@@ -68,7 +73,6 @@ function LoginForm() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none bg-background text-foreground">
@@ -93,7 +97,7 @@ function LoginForm() {
         </Link>
       </div>
 
-        {/* Main Centered Auth Section */}
+      {/* Main Centered Auth Section */}
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center">
@@ -104,10 +108,10 @@ function LoginForm() {
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="text-center space-y-1.5">
             <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-              Sign in
+              Sign in to SaveDino
             </h1>
             <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-              Enter your email address to receive a sign-in link.
+              No account creation needed. Enter your email to receive an instant access link.
             </p>
           </div>
 
@@ -143,31 +147,30 @@ function LoginForm() {
                 </>
               ) : (
                 <>
-                  <span>Send Login Link</span>
+                  <span>Send Sign-in Link</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </Button>
           </form>
 
-          <div className="text-center text-xs font-sans text-muted-foreground pt-2 border-t border-border">
-            No password needed. We&apos;ll email you a secure link to sign in.
+          <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-1.5">
+            <p className="font-semibold text-foreground">
+              No separate sign-up or password required.
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              New here?{" "}
+              <Link href="/register" className="font-semibold text-primary hover:underline">
+                Create an account
+              </Link>
+            </p>
           </div>
-        </div>
-
-        {/* Bottom Navigation */}
-        <div className="text-center text-xs font-sans text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
-            <span>Create account</span>
-            <span>&rarr;</span>
-          </Link>
         </div>
       </div>
 
       {/* Bottom Footer */}
       <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
-        SaveDino — NASA &amp; IASC Asteroid Search Collaboration
+        SaveDino: NASA &amp; IASC Asteroid Search Collaboration
       </div>
     </div>
   );
@@ -175,13 +178,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<DinoLoading size="lg" text="Loading..." fullScreen />}>
       <LoginForm />
     </Suspense>
   );

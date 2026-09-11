@@ -56,7 +56,7 @@ export async function checkUserEventConcurrency(
       return {
         canEnroll: false,
         conflictingEventTitle: existingEvent.title,
-        reason: `You are already participating in '${existingEvent.title}' which runs concurrently from ${existingEvent.startDate.toLocaleDateString()} to ${existingEvent.endDate.toLocaleDateString()}. Multiple simultaneous event participation is not allowed.`,
+        reason: `You are already participating in '${existingEvent.title}' which runs concurrently from ${existingEvent.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} to ${existingEvent.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}. Multiple simultaneous event participation is not allowed.`,
       };
     }
   }
@@ -64,18 +64,9 @@ export async function checkUserEventConcurrency(
   return { canEnroll: true };
 }
 
-/**
- * Generates an uppercase 6-character unique alphanumeric invite code (e.g. AST-8492)
- */
-export function generateInviteCode(): string {
-  const randomChars = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `AST-${randomChars}`;
-}
-
-/**
- * Validates team status based on member count
- */
-export function calculateTeamStatus(memberCount: number): "FORMING" | "ACTIVE" {
-  if (memberCount < 2) return "FORMING";
-  return "ACTIVE";
-}
+export {
+  generateInviteCode,
+  calculateTeamStatus,
+  isRegistrationClosed,
+  isSubmissionClosed,
+} from "./campaign-utils";

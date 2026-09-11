@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
+import { DinoLoading } from "@/components/dino-loading";
 
 function VerifyContent() {
   const router = useRouter();
@@ -41,7 +42,25 @@ function VerifyContent() {
           setVerifying(false);
         } else {
           toast.success("Authenticated successfully!");
-          router.push(redirectTo);
+          const profileRes = await fetch("/api/user/profile");
+          const profileData = await profileRes.json();
+          if (profileData.success && profileData.user) {
+            const u = profileData.user;
+            const isComplete =
+              u.name &&
+              u.name.trim().length > 0 &&
+              !u.name.includes("@") &&
+              u.name.toLowerCase() !== u.email?.toLowerCase() &&
+              u.whatsapp &&
+              u.whatsapp.trim().length > 0;
+
+            if (isComplete) {
+              sessionStorage.setItem("savedino_profile_completed", "true");
+              window.location.href = redirectTo;
+              return;
+            }
+          }
+          window.location.href = `/onboarding?redirectTo=${encodeURIComponent(redirectTo)}`;
         }
       } catch (err: any) {
         const msg = err.message || "Failed to verify link. Please request a new one.";
@@ -56,12 +75,29 @@ function VerifyContent() {
   // If already authenticated and not verifying token, forward to destination
   useEffect(() => {
     if (token) return;
-    authClient.getSession().then((res) => {
-      if (res?.data?.session) {
-        router.push(redirectTo);
-      }
-    }).catch(() => {});
-  }, [token, redirectTo, router]);
+    fetch("/api/user/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.user) {
+          const u = data.user;
+          const isComplete =
+            u.name &&
+            u.name.trim().length > 0 &&
+            !u.name.includes("@") &&
+            u.name.toLowerCase() !== u.email?.toLowerCase() &&
+            u.whatsapp &&
+            u.whatsapp.trim().length > 0;
+
+          if (isComplete) {
+            sessionStorage.setItem("savedino_profile_completed", "true");
+            window.location.href = redirectTo;
+          } else {
+            window.location.href = `/onboarding?redirectTo=${encodeURIComponent(redirectTo)}`;
+          }
+        }
+      })
+      .catch(() => {});
+  }, [token, redirectTo]);
 
   // Handle URL errors
   useEffect(() => {
@@ -92,9 +128,28 @@ function VerifyContent() {
     const checkSession = async () => {
       try {
         const res = await authClient.getSession();
-        if (res?.data?.session && isSubscribed) {
+        const user = res?.data?.user as any;
+        if (user && isSubscribed) {
           toast.success("Signed in successfully!");
-          router.push(redirectTo);
+          const profileRes = await fetch("/api/user/profile");
+          const profileData = await profileRes.json();
+          if (profileData.success && profileData.user) {
+            const u = profileData.user;
+            const isComplete =
+              u.name &&
+              u.name.trim().length > 0 &&
+              !u.name.includes("@") &&
+              u.name.toLowerCase() !== u.email?.toLowerCase() &&
+              u.whatsapp &&
+              u.whatsapp.trim().length > 0;
+
+            if (isComplete) {
+              sessionStorage.setItem("savedino_profile_completed", "true");
+              window.location.href = redirectTo;
+              return;
+            }
+          }
+          window.location.href = `/onboarding?redirectTo=${encodeURIComponent(redirectTo)}`;
         }
       } catch {
         // Ignore polling errors
@@ -146,13 +201,17 @@ function VerifyContent() {
     }
   };
 
-
   const getEmailProviderInfo = (emailAddress: string) => {
     const domain = emailAddress.split("@")[1]?.toLowerCase() || "";
     if (domain.includes("gmail") || domain.includes("google")) {
       return { name: "Gmail", url: "https://mail.google.com" };
     }
-    if (domain.includes("outlook") || domain.includes("hotmail") || domain.includes("live") || domain.includes("microsoft")) {
+    if (
+      domain.includes("outlook") ||
+      domain.includes("hotmail") ||
+      domain.includes("live") ||
+      domain.includes("microsoft")
+    ) {
       return { name: "Outlook", url: "https://outlook.live.com" };
     }
     if (domain.includes("yahoo")) {
@@ -190,107 +249,97 @@ function VerifyContent() {
       </div>
 
       {/* Main Centered Verification Section */}
-      <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
-        {/* Brand Logo */}
-        <div className="flex flex-col items-center justify-center">
-          <Logo href="/" size="lg" />
+      {verifying ? (
+        <div className="w-full max-w-md mx-auto my-auto py-12 flex flex-col items-center justify-center text-center space-y-4">
+          <Logo href="/" size="lg" className="mb-2" />
+          <DinoLoading size="lg" text="Authenticating..." />
+          <div className="space-y-1">
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+              Authenticating...
+            </h1>
+            <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
+              Verifying your sign-in link and preparing your workspace.
+            </p>
+          </div>
         </div>
+      ) : (
+        <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
+          {/* Brand Logo */}
+          <div className="flex flex-col items-center justify-center">
+            <Logo href="/" size="lg" />
+          </div>
 
-        {/* Consistent Theme Verification Card */}
-        <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
-          {verifying ? (
-            <div className="text-center space-y-4 py-4">
-              <RefreshCw className="w-8 h-8 animate-spin mx-auto text-primary" />
-              <div className="space-y-1">
-                <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-                  Authenticating...
-                </h1>
-                <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-                  Verifying your sign-in link and preparing your workspace.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="text-center space-y-1.5">
-                <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-                  Check your email
-                </h1>
-                <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-                  {email ? (
-                    <>
-                      We sent a sign-in link to{" "}
-                      <span className="font-semibold text-foreground">{email}</span>
-                    </>
-                  ) : (
-                    "We sent a sign-in link to your email address."
-                  )}
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-1">
-                {emailProvider ? (
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
-                    onClick={() => window.open(emailProvider.url, "_blank")}
-                  >
-                    <span>Open {emailProvider.name}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : null}
-
+          {/* Consistent Theme Verification Card */}
+          <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
+            <div className="text-center space-y-1.5">
+              <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+                Check your email
+              </h1>
+              <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
                 {email ? (
-                  <Button
-                    type="button"
-                    variant={emailProvider ? "outline" : "default"}
-                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
-                    disabled={loading || cooldown > 0}
-                    onClick={handleResendLink}
-                  >
-                    <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                    <span>{cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Link"}</span>
-                  </Button>
+                  <>
+                    We sent a sign-in link to{" "}
+                    <span className="font-semibold text-foreground">{email}</span>
+                  </>
                 ) : (
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
-                    onClick={() => router.push("/login")}
-                  >
-                    <span>Back to Sign In</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  "We sent a sign-in link to your email address."
                 )}
-              </div>
+              </p>
+            </div>
 
-              <div className="text-center pt-2 border-t border-border">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
+            <div className="space-y-3 pt-1">
+              {emailProvider ? (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                  onClick={() => window.open(emailProvider.url, "_blank")}
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Use a different email</span>
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
+                  <span>Open {emailProvider.name}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : null}
 
-        {/* Bottom Navigation */}
-        <div className="text-center text-xs font-sans text-muted-foreground">
-          Need an account?{" "}
-          <Link href="/register" className="font-bold text-foreground hover:underline inline-flex items-center gap-1">
-            <span>Create account</span>
-            <span>&rarr;</span>
-          </Link>
+              {email ? (
+                <Button
+                  type="button"
+                  variant={emailProvider ? "outline" : "default"}
+                  className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                  disabled={loading || cooldown > 0}
+                  onClick={handleResendLink}
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  <span>{cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Link"}</span>
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full h-11 font-sans text-xs uppercase tracking-wider font-bold gap-2"
+                  onClick={() => router.push("/login")}
+                >
+                  <span>Back to Sign In</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className="text-center pt-2 border-t border-border">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Use a different email</span>
+              </Link>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Footer */}
       <div className="w-full text-center text-[10px] font-mono text-muted-foreground opacity-50 py-2">
-        SaveDino — NASA &amp; IASC Asteroid Search Collaboration
+        SaveDino: NASA &amp; IASC Asteroid Search Collaboration
       </div>
     </div>
   );
@@ -298,13 +347,7 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-muted-foreground">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<DinoLoading size="lg" text="Loading..." fullScreen />}>
       <VerifyContent />
     </Suspense>
   );

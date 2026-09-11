@@ -45,6 +45,18 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.625rem;
   --radius-xl: 0.75rem;
+
+  --shadow-arcade-xs: 0 1px 0 0 var(--shadow-arcade-border);
+  --shadow-arcade-sm: 0 2px 0 0 var(--shadow-arcade-border);
+  --shadow-arcade: 0 3px 0 0 var(--shadow-arcade-border);
+  --shadow-arcade-lg: 0 4px 0 0 var(--shadow-arcade-border);
+  --shadow-arcade-primary: 0 2px 0 0 var(--shadow-arcade-primary);
+  --shadow-arcade-primary-lg: 0 3px 0 0 var(--shadow-arcade-primary);
+  --shadow-arcade-emerald: 0 2px 0 0 var(--shadow-arcade-emerald);
+  --shadow-arcade-emerald-lg: 0 3px 0 0 var(--shadow-arcade-emerald);
+  --shadow-arcade-amber: 0 2px 0 0 var(--shadow-arcade-amber);
+  --shadow-arcade-amber-lg: 0 3px 0 0 var(--shadow-arcade-amber);
+  --shadow-arcade-destructive: 0 2px 0 0 var(--shadow-arcade-destructive);
 }
 
 :root {
@@ -74,6 +86,13 @@
   --border: #e2e8f0; /* Clean Slate Border */
   --input: #e2e8f0;
   --ring: #8b5cf6;
+
+  /* Tactile 3D Shadows in Light Mode */
+  --shadow-arcade-border: #cbd5e1;
+  --shadow-arcade-primary: #6d28d9;
+  --shadow-arcade-emerald: #059669;
+  --shadow-arcade-amber: #b45309;
+  --shadow-arcade-destructive: #b91c1c;
 
   --sidebar: #f8fafc;
   --sidebar-foreground: #0f172a;
@@ -108,6 +127,13 @@
   --border: #38393e; /* Greyish Dark Border */
   --input: #38393e;
   --ring: #8b5cf6;
+
+  /* Tactile 3D Shadows in Dark Mode: Clean Dark Grey tone matching Greyish Black Dark Theme */
+  --shadow-arcade-border: #27282d; /* Cohesive Charcoal Grey Shadow */
+  --shadow-arcade-primary: #5b21b6; /* Rich Deep Violet Shadow */
+  --shadow-arcade-emerald: #065f46;
+  --shadow-arcade-amber: #854d0e;
+  --shadow-arcade-destructive: #991b1b;
 
   --sidebar: #121315;
   --sidebar-foreground: #f3f4f6;
@@ -206,3 +232,52 @@ body,
   display: none !important;
 }
 
+/* =========================================================================
+   Tactile 3D Arcade Shadow System (Centralized Theme-Aware Shadow Utility Classes)
+   ========================================================================= */
+.shadow-arcade-xs {
+  box-shadow: 0 1px 0 0 var(--shadow-arcade-border) !important;
+}
+
+.shadow-arcade-sm,
+.shadow-arcade-2 {
+  box-shadow: 0 2px 0 0 var(--shadow-arcade-border) !important;
+}
+
+.shadow-arcade,
+.shadow-arcade-3 {
+  box-shadow: 0 3px 0 0 var(--shadow-arcade-border) !important;
+}
+
+.shadow-arcade-lg,
+.shadow-arcade-4 {
+  box-shadow: 0 4px 0 0 var(--shadow-arcade-border) !important;
+}
+
+.shadow-arcade-primary {
+  box-shadow: 0 2px 0 0 var(--shadow-arcade-primary) !important;
+}
+
+.shadow-arcade-primary-lg {
+  box-shadow: 0 3px 0 0 var(--shadow-arcade-primary) !important;
+}
+
+.shadow-arcade-emerald {
+  box-shadow: 0 2px 0 0 var(--shadow-arcade-emerald) !important;
+}
+
+.shadow-arcade-emerald-lg {
+  box-shadow: 0 3px 0 0 var(--shadow-arcade-emerald) !important;
+}
+
+.shadow-arcade-amber {
+  box-shadow: 0 2px 0 0 var(--shadow-arcade-amber) !important;
+}
+
+.shadow-arcade-amber-lg {
+  box-shadow: 0 3px 0 0 var(--shadow-arcade-amber) !important;
+}
+
+.shadow-arcade-destructive {
+  box-shadow: 0 2px 0 0 var(--shadow-arcade-destructive) !important;
+}

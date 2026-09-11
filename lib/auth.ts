@@ -6,7 +6,8 @@ import { sendMagicLinkEmail } from "./email";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  baseURL:
+    process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -20,19 +21,23 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (user) => {
+        before: async (user, context) => {
           // Automatic First Account Admin Provisioning:
           // If no accounts exist in the database, automatically assign admin role to the first user.
           const userCount = await prisma.user.count();
-          if (userCount === 0) {
-            return {
-              data: {
-                ...user,
-                role: "admin",
-              },
-            };
-          }
-          return { data: user };
+          const role = userCount === 0 ? "admin" : user.role || "user";
+          const metadata = (context as any)?.metadata || {};
+
+          return {
+            data: {
+              ...user,
+              role,
+              institution: user.institution || metadata.institution || null,
+              country: user.country || metadata.country || "Sri Lanka",
+              whatsapp: (user as any).whatsapp || metadata.whatsapp || null,
+              image: user.image || `Astro-Dino-${Math.floor(100 + Math.random() * 900)}`,
+            },
+          };
         },
       },
     },
@@ -55,7 +60,11 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      whatsapp: {
+        type: "string",
+        required: false,
+      },
     },
   },
 });
-
+// Auth configuration reloaded

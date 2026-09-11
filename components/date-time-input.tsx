@@ -27,7 +27,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          "h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-xs font-mono text-foreground shadow-[0_2px_0_0_rgba(0,0,0,0.06)] dark:shadow-[0_2px_0_0_rgba(255,255,255,0.06)] transition-all cursor-pointer",
+          "h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-xs font-mono text-foreground shadow-arcade transition-all cursor-pointer",
           "hover:border-[#8b5cf6]/60 focus:border-[#8b5cf6] focus:outline-hidden focus:ring-2 focus:ring-[#8b5cf6]/30",
           "disabled:cursor-not-allowed disabled:opacity-50"
         )}

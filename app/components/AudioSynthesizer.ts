@@ -13,7 +13,9 @@ class AudioSynthesizer {
 
   private initCtx() {
     if (!this.ctx && typeof window !== "undefined") {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
@@ -27,7 +29,7 @@ class AudioSynthesizer {
     if (!this.bgMusic && typeof window !== "undefined") {
       this.bgMusic = new Audio("/themesong.mp3");
       this.bgMusic.loop = true;
-      this.bgMusic.volume = 0.10;
+      this.bgMusic.volume = 0.1;
     }
   }
 
@@ -37,11 +39,14 @@ class AudioSynthesizer {
     }
     this.initMusic();
     if (this.bgMusic && !this.muted) {
-      this.bgMusic.play().then(() => {
-        this.isMusicPlaying = true;
-      }).catch(() => {
-        // Autoplay policy: will trigger on next click
-      });
+      this.bgMusic
+        .play()
+        .then(() => {
+          this.isMusicPlaying = true;
+        })
+        .catch(() => {
+          // Autoplay policy: will trigger on next click
+        });
     }
   }
 
@@ -116,7 +121,7 @@ class AudioSynthesizer {
       osc.stop(start + duration);
     };
 
-    playTone(784, now, 0.08);        // G5
+    playTone(784, now, 0.08); // G5
     playTone(1046.5, now + 0.09, 0.14); // C6
   }
 
@@ -127,7 +132,7 @@ class AudioSynthesizer {
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
-    
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = "sawtooth";
@@ -199,7 +204,7 @@ class AudioSynthesizer {
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
-    
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = "sine";

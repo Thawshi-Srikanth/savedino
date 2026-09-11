@@ -32,6 +32,7 @@ export type TeamMinAggregateOutputType = {
   status: $Enums.TeamStatus | null
   isRecruiting: boolean | null
   recruitmentNotes: string | null
+  disqualificationReason: string | null
   leaderId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -45,6 +46,7 @@ export type TeamMaxAggregateOutputType = {
   status: $Enums.TeamStatus | null
   isRecruiting: boolean | null
   recruitmentNotes: string | null
+  disqualificationReason: string | null
   leaderId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -58,6 +60,7 @@ export type TeamCountAggregateOutputType = {
   status: number
   isRecruiting: number
   recruitmentNotes: number
+  disqualificationReason: number
   leaderId: number
   createdAt: number
   updatedAt: number
@@ -73,6 +76,7 @@ export type TeamMinAggregateInputType = {
   status?: true
   isRecruiting?: true
   recruitmentNotes?: true
+  disqualificationReason?: true
   leaderId?: true
   createdAt?: true
   updatedAt?: true
@@ -86,6 +90,7 @@ export type TeamMaxAggregateInputType = {
   status?: true
   isRecruiting?: true
   recruitmentNotes?: true
+  disqualificationReason?: true
   leaderId?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +104,7 @@ export type TeamCountAggregateInputType = {
   status?: true
   isRecruiting?: true
   recruitmentNotes?: true
+  disqualificationReason?: true
   leaderId?: true
   createdAt?: true
   updatedAt?: true
@@ -185,6 +191,7 @@ export type TeamGroupByOutputType = {
   status: $Enums.TeamStatus
   isRecruiting: boolean
   recruitmentNotes: string | null
+  disqualificationReason: string | null
   leaderId: string
   createdAt: Date
   updatedAt: Date
@@ -219,6 +226,7 @@ export type TeamWhereInput = {
   status?: Prisma.EnumTeamStatusFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
+  disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
   createdAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Team"> | Date | string
@@ -236,6 +244,7 @@ export type TeamOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  disqualificationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -256,6 +265,7 @@ export type TeamWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumTeamStatusFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
+  disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
   createdAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Team"> | Date | string
@@ -273,6 +283,7 @@ export type TeamOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  disqualificationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -292,6 +303,7 @@ export type TeamScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumTeamStatusWithAggregatesFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolWithAggregatesFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
+  disqualificationReason?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
   leaderId?: Prisma.StringWithAggregatesFilter<"Team"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Team"> | Date | string
@@ -304,6 +316,7 @@ export type TeamCreateInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -321,6 +334,7 @@ export type TeamUncheckedCreateInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -336,6 +350,7 @@ export type TeamUpdateInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -353,6 +368,7 @@ export type TeamUncheckedUpdateInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -369,6 +385,7 @@ export type TeamCreateManyInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -381,6 +398,7 @@ export type TeamUpdateManyMutationInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -394,6 +412,7 @@ export type TeamUncheckedUpdateManyInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -417,6 +436,7 @@ export type TeamCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrder
+  disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -430,6 +450,7 @@ export type TeamMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrder
+  disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -443,6 +464,7 @@ export type TeamMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrder
+  disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -555,6 +577,7 @@ export type TeamCreateWithoutEventInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -570,6 +593,7 @@ export type TeamUncheckedCreateWithoutEventInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -615,6 +639,7 @@ export type TeamScalarWhereInput = {
   status?: Prisma.EnumTeamStatusFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
+  disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
   createdAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Team"> | Date | string
@@ -627,6 +652,7 @@ export type TeamCreateWithoutMembersInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -643,6 +669,7 @@ export type TeamUncheckedCreateWithoutMembersInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -673,6 +700,7 @@ export type TeamUpdateWithoutMembersInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -689,6 +717,7 @@ export type TeamUncheckedUpdateWithoutMembersInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -703,6 +732,7 @@ export type TeamCreateWithoutJoinRequestsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -719,6 +749,7 @@ export type TeamUncheckedCreateWithoutJoinRequestsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -749,6 +780,7 @@ export type TeamUpdateWithoutJoinRequestsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -765,6 +797,7 @@ export type TeamUncheckedUpdateWithoutJoinRequestsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -779,6 +812,7 @@ export type TeamCreateWithoutImageSetsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -795,6 +829,7 @@ export type TeamUncheckedCreateWithoutImageSetsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -825,6 +860,7 @@ export type TeamUpdateWithoutImageSetsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -841,6 +877,7 @@ export type TeamUncheckedUpdateWithoutImageSetsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -855,6 +892,7 @@ export type TeamCreateManyEventInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  disqualificationReason?: string | null
   leaderId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -867,6 +905,7 @@ export type TeamUpdateWithoutEventInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -882,6 +921,7 @@ export type TeamUncheckedUpdateWithoutEventInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -897,6 +937,7 @@ export type TeamUncheckedUpdateManyWithoutEventInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -959,6 +1000,7 @@ export type TeamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  disqualificationReason?: boolean
   leaderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -977,6 +1019,7 @@ export type TeamSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  disqualificationReason?: boolean
   leaderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -991,6 +1034,7 @@ export type TeamSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  disqualificationReason?: boolean
   leaderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1005,12 +1049,13 @@ export type TeamSelectScalar = {
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  disqualificationReason?: boolean
   leaderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TeamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "inviteCode" | "status" | "isRecruiting" | "recruitmentNotes" | "leaderId" | "createdAt" | "updatedAt", ExtArgs["result"]["team"]>
+export type TeamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "inviteCode" | "status" | "isRecruiting" | "recruitmentNotes" | "disqualificationReason" | "leaderId" | "createdAt" | "updatedAt", ExtArgs["result"]["team"]>
 export type TeamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   members?: boolean | Prisma.Team$membersArgs<ExtArgs>
@@ -1041,6 +1086,7 @@ export type $TeamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     status: $Enums.TeamStatus
     isRecruiting: boolean
     recruitmentNotes: string | null
+    disqualificationReason: string | null
     leaderId: string
     createdAt: Date
     updatedAt: Date
@@ -1478,6 +1524,7 @@ export interface TeamFieldRefs {
   readonly status: Prisma.FieldRef<"Team", 'TeamStatus'>
   readonly isRecruiting: Prisma.FieldRef<"Team", 'Boolean'>
   readonly recruitmentNotes: Prisma.FieldRef<"Team", 'String'>
+  readonly disqualificationReason: Prisma.FieldRef<"Team", 'String'>
   readonly leaderId: Prisma.FieldRef<"Team", 'String'>
   readonly createdAt: Prisma.FieldRef<"Team", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Team", 'DateTime'>

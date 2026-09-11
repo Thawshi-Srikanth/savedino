@@ -33,6 +33,7 @@ export type UserMinAggregateOutputType = {
   role: string | null
   institution: string | null
   country: string | null
+  whatsapp: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +47,7 @@ export type UserMaxAggregateOutputType = {
   role: string | null
   institution: string | null
   country: string | null
+  whatsapp: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +61,7 @@ export type UserCountAggregateOutputType = {
   role: number
   institution: number
   country: number
+  whatsapp: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,6 +77,7 @@ export type UserMinAggregateInputType = {
   role?: true
   institution?: true
   country?: true
+  whatsapp?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +91,7 @@ export type UserMaxAggregateInputType = {
   role?: true
   institution?: true
   country?: true
+  whatsapp?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +105,7 @@ export type UserCountAggregateInputType = {
   role?: true
   institution?: true
   country?: true
+  whatsapp?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -186,6 +192,7 @@ export type UserGroupByOutputType = {
   role: string
   institution: string | null
   country: string | null
+  whatsapp: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -220,6 +227,7 @@ export type UserWhereInput = {
   role?: Prisma.StringFilter<"User"> | string
   institution?: Prisma.StringNullableFilter<"User"> | string | null
   country?: Prisma.StringNullableFilter<"User"> | string | null
+  whatsapp?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
@@ -238,6 +246,7 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   institution?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsapp?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
@@ -259,6 +268,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.StringFilter<"User"> | string
   institution?: Prisma.StringNullableFilter<"User"> | string | null
   country?: Prisma.StringNullableFilter<"User"> | string | null
+  whatsapp?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
@@ -277,6 +287,7 @@ export type UserOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   institution?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsapp?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -296,6 +307,7 @@ export type UserScalarWhereWithAggregatesInput = {
   role?: Prisma.StringWithAggregatesFilter<"User"> | string
   institution?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   country?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  whatsapp?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -309,6 +321,7 @@ export type UserCreateInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -327,6 +340,7 @@ export type UserUncheckedCreateInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -345,6 +359,7 @@ export type UserUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -363,6 +378,7 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -381,6 +397,7 @@ export type UserCreateManyInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -394,6 +411,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -407,6 +425,7 @@ export type UserUncheckedUpdateManyInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -420,6 +439,7 @@ export type UserCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   institution?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  whatsapp?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,6 +453,7 @@ export type UserMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   institution?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  whatsapp?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -446,6 +467,7 @@ export type UserMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   institution?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  whatsapp?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -557,6 +579,7 @@ export type UserCreateWithoutSessionsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -574,6 +597,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -607,6 +631,7 @@ export type UserUpdateWithoutSessionsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -624,6 +649,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -641,6 +667,7 @@ export type UserCreateWithoutAccountsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -658,6 +685,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -691,6 +719,7 @@ export type UserUpdateWithoutAccountsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -708,6 +737,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -725,6 +755,7 @@ export type UserCreateWithoutTeamMembersInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -742,6 +773,7 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -775,6 +807,7 @@ export type UserUpdateWithoutTeamMembersInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -792,6 +825,7 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -809,6 +843,7 @@ export type UserCreateWithoutJoinRequestsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -826,6 +861,7 @@ export type UserUncheckedCreateWithoutJoinRequestsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -859,6 +895,7 @@ export type UserUpdateWithoutJoinRequestsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -876,6 +913,7 @@ export type UserUncheckedUpdateWithoutJoinRequestsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -893,6 +931,7 @@ export type UserCreateWithoutClaimedSetsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -910,6 +949,7 @@ export type UserUncheckedCreateWithoutClaimedSetsInput = {
   role?: string
   institution?: string | null
   country?: string | null
+  whatsapp?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -943,6 +983,7 @@ export type UserUpdateWithoutClaimedSetsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -960,6 +1001,7 @@ export type UserUncheckedUpdateWithoutClaimedSetsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1044,6 +1086,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   institution?: boolean
   country?: boolean
+  whatsapp?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -1063,6 +1106,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   institution?: boolean
   country?: boolean
+  whatsapp?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1076,6 +1120,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   institution?: boolean
   country?: boolean
+  whatsapp?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1089,11 +1134,12 @@ export type UserSelectScalar = {
   role?: boolean
   institution?: boolean
   country?: boolean
+  whatsapp?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "role" | "institution" | "country" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "role" | "institution" | "country" | "whatsapp" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1123,6 +1169,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: string
     institution: string | null
     country: string | null
+    whatsapp: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1561,6 +1608,7 @@ export interface UserFieldRefs {
   readonly role: Prisma.FieldRef<"User", 'String'>
   readonly institution: Prisma.FieldRef<"User", 'String'>
   readonly country: Prisma.FieldRef<"User", 'String'>
+  readonly whatsapp: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

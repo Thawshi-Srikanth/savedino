@@ -87,6 +87,7 @@ export const UserScalarFieldEnum = {
   role: 'role',
   institution: 'institution',
   country: 'country',
+  whatsapp: 'whatsapp',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -154,6 +155,7 @@ export const EventScalarFieldEnum = {
   endDate: 'endDate',
   submissionStart: 'submissionStart',
   submissionEnd: 'submissionEnd',
+  maxTeamSize: 'maxTeamSize',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -170,6 +172,7 @@ export const TeamScalarFieldEnum = {
   status: 'status',
   isRecruiting: 'isRecruiting',
   recruitmentNotes: 'recruitmentNotes',
+  disqualificationReason: 'disqualificationReason',
   leaderId: 'leaderId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
