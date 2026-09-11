@@ -261,11 +261,17 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             <span>NASA &amp; IASC Asteroid Search Collaboration</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/credits" className="hover:text-foreground transition-colors hover:underline">
+            <Link
+              href="/credits"
+              className="hover:text-foreground transition-colors hover:underline"
+            >
               Credits
             </Link>
             <span className="opacity-40">|</span>
-            <Link href="/privacy" className="hover:text-foreground transition-colors hover:underline">
+            <Link
+              href="/privacy"
+              className="hover:text-foreground transition-colors hover:underline"
+            >
               Privacy Policy
             </Link>
             <span className="opacity-40">|</span>

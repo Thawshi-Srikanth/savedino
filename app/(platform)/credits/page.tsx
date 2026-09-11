@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  ExternalLink,
-  Globe,
-  Code2,
-  GitCommit,
-} from "lucide-react";
+import { ExternalLink, Globe, Code2, GitCommit } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Contributor {
@@ -55,14 +50,18 @@ export default function CreditsPage() {
                     login: u.login || c.login,
                     name: u.name || c.login,
                     avatar_url: u.avatar_url || c.avatar_url,
-                    bio: u.bio || (u.login === "Thawshi-Srikanth" ? DEFAULT_CONTRIBUTORS[0].bio : "Open Source Contributor"),
+                    bio:
+                      u.bio ||
+                      (u.login === "Thawshi-Srikanth"
+                        ? DEFAULT_CONTRIBUTORS[0].bio
+                        : "Open Source Contributor"),
                     blog: u.blog
                       ? u.blog.startsWith("http")
                         ? u.blog
                         : `https://${u.blog}`
                       : u.login === "Thawshi-Srikanth"
-                      ? DEFAULT_CONTRIBUTORS[0].blog
-                      : "",
+                        ? DEFAULT_CONTRIBUTORS[0].blog
+                        : "",
                     html_url: u.html_url || c.html_url,
                     contributions: c.contributions,
                     role: u.login === "Thawshi-Srikanth" ? "Lead Developer" : "Contributor",
@@ -75,7 +74,10 @@ export default function CreditsPage() {
                 login: c.login,
                 name: c.login === "Thawshi-Srikanth" ? DEFAULT_CONTRIBUTORS[0].name : c.login,
                 avatar_url: c.avatar_url,
-                bio: c.login === "Thawshi-Srikanth" ? DEFAULT_CONTRIBUTORS[0].bio : "Open Source Contributor",
+                bio:
+                  c.login === "Thawshi-Srikanth"
+                    ? DEFAULT_CONTRIBUTORS[0].bio
+                    : "Open Source Contributor",
                 blog: c.login === "Thawshi-Srikanth" ? DEFAULT_CONTRIBUTORS[0].blog : "",
                 html_url: c.html_url,
                 contributions: c.contributions,
@@ -121,8 +123,8 @@ export default function CreditsPage() {
               Students for the Exploration and Development of Space (SEDS Sri Lanka)
             </a>
             . Our mission is to democratize asteroid discovery and planetary defense, allowing
-            students, researchers, and astronomy enthusiasts to analyze real sky survey data captured
-            by major astronomical observatories.
+            students, researchers, and astronomy enthusiasts to analyze real sky survey data
+            captured by major astronomical observatories.
           </p>
         </section>
 
@@ -159,19 +161,13 @@ export default function CreditsPage() {
                   {/* Profile Avatar */}
                   <div className="relative size-16 sm:size-20 rounded-2xl overflow-hidden border border-border shrink-0 bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={c.avatar_url}
-                      alt={c.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={c.avatar_url} alt={c.name} className="w-full h-full object-cover" />
                   </div>
 
                   {/* Contributor Info */}
                   <div className="flex-1 space-y-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base sm:text-lg font-bold text-foreground">
-                        {c.name}
-                      </h3>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground">{c.name}</h3>
                       {c.role && (
                         <Badge variant="outline" className="text-[10px] font-mono">
                           {c.role}
@@ -184,9 +180,7 @@ export default function CreditsPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs font-mono text-primary">
-                      @{c.login}
-                    </p>
+                    <p className="text-xs font-mono text-primary">@{c.login}</p>
                     {c.bio && (
                       <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed pt-1">
                         {c.bio}
@@ -250,7 +244,8 @@ export default function CreditsPage() {
                 </a>
                 :
               </strong>{" "}
-              Platform design, campaign hosting, student mentorship, and national astronomy outreach.
+              Platform design, campaign hosting, student mentorship, and national astronomy
+              outreach.
             </li>
             <li>
               <strong className="text-foreground">
@@ -334,23 +329,24 @@ export default function CreditsPage() {
             </li>
             <li>
               <strong className="text-foreground">Better Auth:</strong> Type-safe authentication
-              engine supporting passwordless email magic link verification and sessions (MIT License).
+              engine supporting passwordless email magic link verification and sessions (MIT
+              License).
             </li>
             <li>
               <strong className="text-foreground">Radix UI:</strong> Accessible, unstyled UI
               component primitives for dialogs, sheets, tooltips, and menus (MIT License).
             </li>
             <li>
-              <strong className="text-foreground">Lucide Icons:</strong> Monotone, crisp vector icons
-              powering navigation and status indicators (ISC License).
+              <strong className="text-foreground">Lucide Icons:</strong> Monotone, crisp vector
+              icons powering navigation and status indicators (ISC License).
             </li>
             <li>
               <strong className="text-foreground">Bun:</strong> High-performance JavaScript runtime,
               bundler, and package manager (MIT License).
             </li>
             <li>
-              <strong className="text-foreground">Prisma ORM:</strong> Next-generation TypeScript ORM
-              for database modeling and migrations (Apache 2.0).
+              <strong className="text-foreground">Prisma ORM:</strong> Next-generation TypeScript
+              ORM for database modeling and migrations (Apache 2.0).
             </li>
             <li>
               <strong className="text-foreground">Sonner:</strong> Toast notification component for
@@ -367,14 +363,14 @@ export default function CreditsPage() {
           <ul className="list-disc list-inside space-y-2 pl-2">
             <li>
               <strong className="text-foreground">Web Audio Synthesizer:</strong> Procedural 8-bit
-              retro chiptune music and sound effects synthesized directly in code using the Web Audio
-              API without external media assets.
+              retro chiptune music and sound effects synthesized directly in code using the Web
+              Audio API without external media assets.
             </li>
             <li>
               <strong className="text-foreground">Typography (Google Fonts):</strong>{" "}
-              <em>Press Start 2P</em> (Arcade HUD &amp; Titles), <em>Space Mono</em> (Technical
-              data &amp; IDs), and <em>Inter</em> (Platform UI &amp; Documents), licensed under Open
-              Font License / Apache 2.0.
+              <em>Press Start 2P</em> (Arcade HUD &amp; Titles), <em>Space Mono</em> (Technical data
+              &amp; IDs), and <em>Inter</em> (Platform UI &amp; Documents), licensed under Open Font
+              License / Apache 2.0.
             </li>
           </ul>
         </section>

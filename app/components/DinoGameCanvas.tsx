@@ -52,7 +52,11 @@ const RECHARGE_FRAMES_PER_CHARGE = 40; // ~0.65s per charge
 // Offscreen Sprite Cache for High-Performance 60fps Blitting
 const spriteCache: Record<string, HTMLCanvasElement> = {};
 
-function getMeteorSprite(type: "small" | "medium" | "giant", rad: number, step: number): HTMLCanvasElement {
+function getMeteorSprite(
+  type: "small" | "medium" | "giant",
+  rad: number,
+  step: number
+): HTMLCanvasElement {
   const key = `${type}_${rad}_${step}`;
   if (spriteCache[key]) return spriteCache[key];
 
@@ -70,8 +74,7 @@ function getMeteorSprite(type: "small" | "medium" | "giant", rad: number, step: 
   const drawPixelCircle = (radius: number, color: string, offsetX = 0, offsetY = 0) => {
     sCtx.fillStyle = color;
     for (let dy = -radius; dy <= radius; dy += step) {
-      const width =
-        Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
+      const width = Math.floor(Math.sqrt(Math.max(0, radius * radius - dy * dy)) / step) * step;
       if (width > 0) {
         sCtx.fillRect(cx + offsetX - width, cy + offsetY + dy, width * 2, step);
       }
@@ -79,8 +82,7 @@ function getMeteorSprite(type: "small" | "medium" | "giant", rad: number, step: 
   };
 
   // A. Fiery Atmospheric Plasma Corona / Outer Burn
-  const fireColor =
-    type === "giant" ? "#dc2626" : type === "small" ? "#f59e0b" : "#f97316";
+  const fireColor = type === "giant" ? "#dc2626" : type === "small" ? "#f59e0b" : "#f97316";
   drawPixelCircle(rad + step, fireColor);
 
   // B. Bright Molten Corona Edge
@@ -142,7 +144,12 @@ function getMeteorSprite(type: "small" | "medium" | "giant", rad: number, step: 
     sCtx.fillStyle = "#1c1917";
     sCtx.fillRect(cx + step, cy + step, step * 2, step * 2);
     sCtx.fillStyle = "#0c0a09";
-    sCtx.fillRect(cx + step + Math.floor(step * 0.5), cy + step + Math.floor(step * 0.5), step, step);
+    sCtx.fillRect(
+      cx + step + Math.floor(step * 0.5),
+      cy + step + Math.floor(step * 0.5),
+      step,
+      step
+    );
   } else {
     sCtx.fillStyle = "#78716c";
     sCtx.fillRect(cx - step, cy - step, step * 2, step);

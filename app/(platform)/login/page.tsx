@@ -155,7 +155,9 @@ function LoginForm() {
           </form>
 
           <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-1.5">
-            <p className="font-semibold text-foreground">No separate sign-up or password required.</p>
+            <p className="font-semibold text-foreground">
+              No separate sign-up or password required.
+            </p>
             <p className="text-[11px] text-muted-foreground">
               New here?{" "}
               <Link href="/register" className="font-semibold text-primary hover:underline">

@@ -204,7 +204,9 @@ export function MatchmakingTab({
           <div className="py-16 text-center text-xs text-muted-foreground space-y-1">
             <Search className="size-8 mx-auto text-muted-foreground/30 mb-1" />
             <div className="font-semibold text-sm text-foreground">
-              {unassignedSoloUsers.length > 0 ? "Staff & Admin members are hidden" : "No matching researchers"}
+              {unassignedSoloUsers.length > 0
+                ? "Staff & Admin members are hidden"
+                : "No matching researchers"}
             </div>
             <p>
               {unassignedSoloUsers.length > 0

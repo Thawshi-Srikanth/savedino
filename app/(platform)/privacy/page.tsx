@@ -3,9 +3,16 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - SaveDino",
+  title: "Privacy Policy | Citizen Science Data Protection",
   description:
-    "Privacy standards, transactional email policies, and scientific data handling for SaveDino citizen scientists.",
+    "Privacy standards, transactional email policies, and scientific data handling for SaveDino citizen scientists participating in astronomical campaigns.",
+  openGraph: {
+    title: "Privacy Policy | SaveDino Asteroid Search",
+    description:
+      "Privacy standards and scientific data protection for SaveDino citizen scientists.",
+    url: "/privacy",
+    images: ["/opengraph-image.png"],
+  },
 };
 
 export default function PrivacyPolicyPage() {

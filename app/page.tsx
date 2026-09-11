@@ -192,259 +192,260 @@ export default function Home() {
           isNight ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
         }`}
       >
-      {/* Header */}
-      <Header
-        onOpenHelp={() => setIsHelpOpen(true)}
-        isMuted={isMuted}
-        onToggleMute={handleToggleMute}
-        isNight={isNight}
-        onToggleTheme={handleToggleTheme}
-      />
-
-      {/* Main Game Stage */}
-      <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
-        <DinoGameCanvas
-          onScoreUpdate={handleScoreUpdate}
-          nightModeOverride={mounted ? isNight : null}
+        {/* Header */}
+        <Header
+          onOpenHelp={() => setIsHelpOpen(true)}
+          isMuted={isMuted}
+          onToggleMute={handleToggleMute}
+          isNight={isNight}
+          onToggleTheme={handleToggleTheme}
         />
 
-        {/* Campaign Status Section (Coming Soon in Demo Mode vs Explore in Live Mode) */}
-        {process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? (
-          <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-2 px-0">
-            <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
-              Coming Soon
-            </h2>
+        {/* Main Game Stage */}
+        <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
+          <DinoGameCanvas
+            onScoreUpdate={handleScoreUpdate}
+            nightModeOverride={mounted ? isNight : null}
+          />
 
-            <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-              Get ready for the SaveDino Asteroid Search Challenge! Team up with your squad to spot
-              real asteroids, submit discovery reports, and compete on the global leaderboard.
-            </p>
+          {/* Campaign Status Section (Coming Soon in Demo Mode vs Explore in Live Mode) */}
+          {process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? (
+            <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-2 px-0">
+              <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
+                Coming Soon
+              </h2>
 
-            <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
-              <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Form a squad with friends or join an open discovery team</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Inspect telescope survey image sets to hunt for moving asteroids</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Earn points, climb the leaderboard, and unlock discovery badges</span>
-              </li>
-            </ul>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+                Get ready for the SaveDino Asteroid Search Challenge! Team up with your squad to
+                spot real asteroids, submit discovery reports, and compete on the global
+                leaderboard.
+              </p>
 
-            {/* Notify Me Action (Hidden once subscribed) */}
-            {!isSubscribed && (
-              <div className="pt-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => setIsNotifyModalOpen(true)}
-                  className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
-                >
-                  <Bell className="size-3.5" />
-                  <span>Notify Me</span>
-                </Button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-2 px-0">
-            <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
-              Join an Asteroid Hunt
-            </h2>
+              <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
+                <li className="flex items-center gap-2">
+                  <Check className="size-3.5 text-[#10b981] shrink-0" />
+                  <span>Form a squad with friends or join an open discovery team</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="size-3.5 text-[#10b981] shrink-0" />
+                  <span>Inspect telescope survey image sets to hunt for moving asteroids</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="size-3.5 text-[#10b981] shrink-0" />
+                  <span>Earn points, climb the leaderboard, and unlock discovery badges</span>
+                </li>
+              </ul>
 
-            <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-              Team up with a research squad to analyze real telescope images and hunt for
-              undiscovered asteroids.
-            </p>
-
-            <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
-              <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Browse open asteroid search campaigns</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Join an existing team or create your own squad</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-[#10b981] shrink-0" />
-                <span>Inspect telescope surveys and report asteroid sightings</span>
-              </li>
-            </ul>
-
-            <div className="pt-2 flex flex-wrap items-center gap-2.5">
-              {isAuthenticated ? (
-                <>
-                  <Link href="/campaigns">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
-                    >
-                      <LayoutDashboard className="size-3.5" />
-                      <span>Open Dashboard</span>
-                    </Button>
-                  </Link>
-                  {userHasSquads ? (
-                    <Link href="/profile?tab=teams">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
-                      >
-                        <Users className="size-3.5 text-[#10b981]" />
-                        <span>My Squads</span>
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Link href="/teams">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
-                      >
-                        <Users className="size-3.5 text-[#10b981]" />
-                        <span>Squad Directory</span>
-                      </Button>
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Link href="/campaigns">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
-                    >
-                      <Telescope className="size-3.5" />
-                      <span>Explore Campaigns</span>
-                    </Button>
-                  </Link>
-                  <Link href="/login">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
-                    >
-                      <LogIn className="size-3.5 text-primary" />
-                      <span>Sign In / Join</span>
-                    </Button>
-                  </Link>
-                </>
+              {/* Notify Me Action (Hidden once subscribed) */}
+              {!isSubscribed && (
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setIsNotifyModalOpen(true)}
+                    className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
+                  >
+                    <Bell className="size-3.5" />
+                    <span>Notify Me</span>
+                  </Button>
+                </div>
               )}
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="w-full mt-4 sm:mt-4 text-left select-text space-y-2 px-0">
+              <h2 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
+                Join an Asteroid Hunt
+              </h2>
 
-      {/* Footer Note */}
-      <footer className="w-full max-w-[600px] flex items-center justify-between pt-2 pb-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0">
-        <div className="flex items-center gap-1.5 truncate">
-          <span className="font-bold text-foreground">SaveDino</span>
-          <span className="opacity-40">&bull;</span>
-          <span className="opacity-75 hidden sm:inline">SEDS Sri Lanka</span>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <Link
-            href="/credits"
-            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
-          >
-            Credits
-          </Link>
-          <span className="opacity-40">|</span>
-          <Link
-            href="/privacy"
-            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
-          >
-            Privacy
-          </Link>
-          <span className="opacity-40">|</span>
-          <Link
-            href="/terms"
-            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
-          >
-            Terms
-          </Link>
-        </div>
-      </footer>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+                Team up with a research squad to analyze real telescope images and hunt for
+                undiscovered asteroids.
+              </p>
 
-      {/* Notify Me Popup Modal */}
-      <Dialog open={isNotifyModalOpen} onOpenChange={setIsNotifyModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-card border-border text-card-foreground font-sans shadow-2xl">
-          <DialogHeader className="space-y-1.5 text-left">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#8b5cf6]/10 text-[#8b5cf6] dark:bg-[#8b5cf6]/20 shrink-0">
-                <Bell className="size-4" />
-              </div>
-              <div>
-                <DialogTitle className="text-base font-bold font-sans">Get Notified</DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground font-sans">
-                  Be the first to know when registrations open for the upcoming Asteroid Search
-                  Challenge.
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
+              <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
+                <li className="flex items-center gap-2">
+                  <Check className="size-3.5 text-[#10b981] shrink-0" />
+                  <span>Browse open asteroid search campaigns</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="size-3.5 text-[#10b981] shrink-0" />
+                  <span>Join an existing team or create your own squad</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="size-3.5 text-[#10b981] shrink-0" />
+                  <span>Inspect telescope surveys and report asteroid sightings</span>
+                </li>
+              </ul>
 
-          <form onSubmit={handleSubscribe} className="space-y-4 pt-2">
-            <div className="space-y-1.5">
-              <label htmlFor="subscribe-email" className="text-xs font-medium text-foreground">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="subscribe-email"
-                  type="email"
-                  required
-                  autoFocus
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubscribing}
-                  className="h-9 text-xs pl-8 bg-background border-border font-sans placeholder:text-muted-foreground/70"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsNotifyModalOpen(false)}
-                className="h-9 text-xs font-medium cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={isSubscribing || !email.trim()}
-                className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
-              >
-                {isSubscribing ? (
-                  <span>Subscribing...</span>
+              <div className="pt-2 flex flex-wrap items-center gap-2.5">
+                {isAuthenticated ? (
+                  <>
+                    <Link href="/campaigns">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
+                      >
+                        <LayoutDashboard className="size-3.5" />
+                        <span>Open Dashboard</span>
+                      </Button>
+                    </Link>
+                    {userHasSquads ? (
+                      <Link href="/profile?tab=teams">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                        >
+                          <Users className="size-3.5 text-[#10b981]" />
+                          <span>My Squads</span>
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link href="/teams">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                        >
+                          <Users className="size-3.5 text-[#10b981]" />
+                          <span>Squad Directory</span>
+                        </Button>
+                      </Link>
+                    )}
+                  </>
                 ) : (
                   <>
-                    <Bell className="size-3.5" />
-                    <span>Subscribe</span>
+                    <Link href="/campaigns">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
+                      >
+                        <Telescope className="size-3.5" />
+                        <span>Explore Campaigns</span>
+                      </Button>
+                    </Link>
+                    <Link href="/login">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                      >
+                        <LogIn className="size-3.5 text-primary" />
+                        <span>Sign In / Join</span>
+                      </Button>
+                    </Link>
                   </>
                 )}
-              </Button>
+              </div>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          )}
+        </div>
 
-      {/* Help Modal */}
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
-    </main>
-  </ArcadeTabGuard>
+        {/* Footer Note */}
+        <footer className="w-full max-w-[600px] flex items-center justify-between pt-2 pb-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0">
+          <div className="flex items-center gap-1.5 truncate">
+            <span className="font-bold text-foreground">SaveDino</span>
+            <span className="opacity-40">&bull;</span>
+            <span className="opacity-75 hidden sm:inline">SEDS Sri Lanka</span>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link
+              href="/credits"
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Credits
+            </Link>
+            <span className="opacity-40">|</span>
+            <Link
+              href="/privacy"
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Privacy
+            </Link>
+            <span className="opacity-40">|</span>
+            <Link
+              href="/terms"
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Terms
+            </Link>
+          </div>
+        </footer>
+
+        {/* Notify Me Popup Modal */}
+        <Dialog open={isNotifyModalOpen} onOpenChange={setIsNotifyModalOpen}>
+          <DialogContent className="sm:max-w-[425px] bg-card border-border text-card-foreground font-sans shadow-2xl">
+            <DialogHeader className="space-y-1.5 text-left">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#8b5cf6]/10 text-[#8b5cf6] dark:bg-[#8b5cf6]/20 shrink-0">
+                  <Bell className="size-4" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-bold font-sans">Get Notified</DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground font-sans">
+                    Be the first to know when registrations open for the upcoming Asteroid Search
+                    Challenge.
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <form onSubmit={handleSubscribe} className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <label htmlFor="subscribe-email" className="text-xs font-medium text-foreground">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="subscribe-email"
+                    type="email"
+                    required
+                    autoFocus
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isSubscribing}
+                    className="h-9 text-xs pl-8 bg-background border-border font-sans placeholder:text-muted-foreground/70"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsNotifyModalOpen(false)}
+                  className="h-9 text-xs font-medium cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={isSubscribing || !email.trim()}
+                  className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
+                >
+                  {isSubscribing ? (
+                    <span>Subscribing...</span>
+                  ) : (
+                    <>
+                      <Bell className="size-3.5" />
+                      <span>Subscribe</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Help Modal */}
+        <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      </main>
+    </ArcadeTabGuard>
   );
 }

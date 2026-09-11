@@ -25,7 +25,10 @@ export function ProfileOnboardingDialog() {
     }
 
     // Fast-path: check if profile completion was already verified in this session
-    if (typeof window !== "undefined" && sessionStorage.getItem("savedino_profile_completed") === "true") {
+    if (
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("savedino_profile_completed") === "true"
+    ) {
       return;
     }
 

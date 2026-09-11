@@ -54,7 +54,8 @@ export function renderSignInEmail({ url, email }: SignInEmailParams): {
     </div>
   `;
 
-  const reasonText = "You've received this email because a sign-in link was requested for your account.";
+  const reasonText =
+    "You've received this email because a sign-in link was requested for your account.";
 
   const html = renderBaseEmailLayout({
     title: "Sign in to your SaveDino account - SEDS Sri Lanka",
@@ -73,12 +74,16 @@ export function renderSignInEmail({ url, email }: SignInEmailParams): {
     "This link will expire in 5 minutes and can only be used once.",
     "If you did not request this email, you can safely ignore it.",
     "",
-    email ? `This email was sent to ${email}` : "This email was sent to your registered email address",
+    email
+      ? `This email was sent to ${email}`
+      : "This email was sent to your registered email address",
     reasonText,
     "",
     "SaveDino - NASA & IASC Asteroid Search Collaboration",
     "SEDS Sri Lanka",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return { html, text };
 }

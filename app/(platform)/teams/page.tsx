@@ -28,12 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
 import { DinoLoading } from "@/components/dino-loading";
 import { useMinimumLoading } from "@/hooks/use-minimum-loading";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import {
   Search,
   User,
@@ -1054,7 +1049,10 @@ function TeamsContent() {
           </DialogHeader>
 
           <div className="space-y-2 py-3">
-            <label htmlFor="join-request-msg" className="block text-xs font-semibold text-foreground">
+            <label
+              htmlFor="join-request-msg"
+              className="block text-xs font-semibold text-foreground"
+            >
               Message to Squad Leader (Optional)
             </label>
             <Textarea

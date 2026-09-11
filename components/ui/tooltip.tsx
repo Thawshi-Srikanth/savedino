@@ -47,11 +47,7 @@ function Tooltip({
         isControlled,
       }}
     >
-      <TooltipPrimitive.Root
-        open={open}
-        onOpenChange={handleOpenChange}
-        {...props}
-      >
+      <TooltipPrimitive.Root open={open} onOpenChange={handleOpenChange} {...props}>
         {children}
       </TooltipPrimitive.Root>
     </TooltipContext.Provider>
@@ -71,13 +67,7 @@ const TooltipTrigger = React.forwardRef<
     }
   };
 
-  return (
-    <TooltipPrimitive.Trigger
-      ref={ref}
-      onClick={handleClick}
-      {...props}
-    />
-  );
+  return <TooltipPrimitive.Trigger ref={ref} onClick={handleClick} {...props} />;
 });
 TooltipTrigger.displayName = TooltipPrimitive.Trigger.displayName;
 

@@ -20,12 +20,11 @@ export function renderBaseEmailLayout({
 }: BaseEmailLayoutProps): string {
   const preview = previewText || title;
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.BETTER_AUTH_URL ||
-    "https://savedino.sedssl.org";
+    process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL || "https://savedino.sedssl.org";
 
   const darkLogoUrl = `${baseUrl}/email/email-logo-savedino-dark.png`;
-  const defaultReason = "You've received this email because you have an account or active research session on SaveDino.";
+  const defaultReason =
+    "You've received this email because you have an account or active research session on SaveDino.";
   const activeReason = reasonText || defaultReason;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

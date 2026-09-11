@@ -141,7 +141,8 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
                 Arcade is running in another tab
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                SaveDino Arcade is already active in a different browser tab. To avoid overlapping game sounds, only one arcade instance runs at a time.
+                SaveDino Arcade is already active in a different browser tab. To avoid overlapping
+                game sounds, only one arcade instance runs at a time.
               </p>
             </div>
 

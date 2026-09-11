@@ -78,7 +78,8 @@ export function renderTeamJoinRequestEmail({
     </div>
   `;
 
-  const reasonText = "You've received this email because you are the squad leader of a research team on SaveDino.";
+  const reasonText =
+    "You've received this email because you are the squad leader of a research team on SaveDino.";
 
   const html = renderBaseEmailLayout({
     title: `New Join Request for ${teamName} - SaveDino`,
@@ -98,12 +99,16 @@ export function renderTeamJoinRequestEmail({
     `Review and manage this request at:`,
     reviewUrl,
     "",
-    recipientEmail ? `This email was sent to ${recipientEmail}` : "This email was sent to your registered email address",
+    recipientEmail
+      ? `This email was sent to ${recipientEmail}`
+      : "This email was sent to your registered email address",
     reasonText,
     "",
     "SaveDino - NASA & IASC Asteroid Search Collaboration",
     "SEDS Sri Lanka",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return { html, text };
 }
@@ -175,7 +180,8 @@ export function renderTeamRequestAcceptedEmail({
     </div>
   `;
 
-  const reasonText = "You've received this email because your request to join a research squad on SaveDino was approved.";
+  const reasonText =
+    "You've received this email because your request to join a research squad on SaveDino was approved.";
 
   const html = renderBaseEmailLayout({
     title: `You have joined ${teamName} - SaveDino`,
@@ -194,12 +200,16 @@ export function renderTeamRequestAcceptedEmail({
     `Open your squad workspace:`,
     workspaceUrl,
     "",
-    recipientEmail ? `This email was sent to ${recipientEmail}` : "This email was sent to your registered email address",
+    recipientEmail
+      ? `This email was sent to ${recipientEmail}`
+      : "This email was sent to your registered email address",
     reasonText,
     "",
     "SaveDino - NASA & IASC Asteroid Search Collaboration",
     "SEDS Sri Lanka",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return { html, text };
 }
@@ -277,12 +287,16 @@ export function renderTeamRequestRejectedEmail({
     `Explore other open squads or create a squad:`,
     exploreTeamsUrl,
     "",
-    recipientEmail ? `This email was sent to ${recipientEmail}` : "This email was sent to your registered email address",
+    recipientEmail
+      ? `This email was sent to ${recipientEmail}`
+      : "This email was sent to your registered email address",
     reasonText,
     "",
     "SaveDino - NASA & IASC Asteroid Search Collaboration",
     "SEDS Sri Lanka",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return { html, text };
 }
@@ -353,7 +367,8 @@ export function renderTeamInvitationEmail({
     </div>
   `;
 
-  const reasonText = "You've received this email because a squad leader invited you to join their research squad on SaveDino.";
+  const reasonText =
+    "You've received this email because a squad leader invited you to join their research squad on SaveDino.";
 
   const html = renderBaseEmailLayout({
     title: `Invitation to join ${teamName} - SaveDino`,
@@ -373,12 +388,16 @@ export function renderTeamInvitationEmail({
     `Join directly at:`,
     joinUrl,
     "",
-    recipientEmail ? `This email was sent to ${recipientEmail}` : "This email was sent to your registered email address",
+    recipientEmail
+      ? `This email was sent to ${recipientEmail}`
+      : "This email was sent to your registered email address",
     reasonText,
     "",
     "SaveDino - NASA & IASC Asteroid Search Collaboration",
     "SEDS Sri Lanka",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return { html, text };
 }

@@ -39,9 +39,10 @@ export function getCountryFlag(countryCode: string): string {
 }
 
 // Cache region names formatter
-const regionNames = typeof Intl !== "undefined" && Intl.DisplayNames
-  ? new Intl.DisplayNames(["en"], { type: "region" })
-  : null;
+const regionNames =
+  typeof Intl !== "undefined" && Intl.DisplayNames
+    ? new Intl.DisplayNames(["en"], { type: "region" })
+    : null;
 
 export function getCountryName(countryCode: string): string {
   try {
@@ -55,19 +56,19 @@ export function getCountryName(countryCode: string): string {
 const COUNTRY_NAME_TO_CODE: Record<string, CountryCode> = {
   "sri lanka": "LK",
   "united states": "US",
-  "usa": "US",
+  usa: "US",
   "united kingdom": "GB",
-  "uk": "GB",
-  "india": "IN",
-  "australia": "AU",
-  "canada": "CA",
-  "germany": "DE",
-  "japan": "JP",
-  "france": "FR",
-  "singapore": "SG",
-  "malaysia": "MY",
+  uk: "GB",
+  india: "IN",
+  australia: "AU",
+  canada: "CA",
+  germany: "DE",
+  japan: "JP",
+  france: "FR",
+  singapore: "SG",
+  malaysia: "MY",
   "united arab emirates": "AE",
-  "uae": "AE",
+  uae: "AE",
   "saudi arabia": "SA",
   "new zealand": "NZ",
 };

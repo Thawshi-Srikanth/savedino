@@ -167,8 +167,8 @@ function OnboardingForm() {
               Complete your profile
             </h1>
             <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-              Enter your details to finalize your citizen scientist profile before joining
-              campaigns and squads.
+              Enter your details to finalize your citizen scientist profile before joining campaigns
+              and squads.
             </p>
           </div>
 

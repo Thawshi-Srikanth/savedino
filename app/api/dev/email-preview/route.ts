@@ -97,9 +97,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") || "signin";
   const recipientEmail = searchParams.get("email") || "citizen@example.com";
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.BETTER_AUTH_URL ||
-    "https://savedino.sedssl.org";
+    process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL || "https://savedino.sedssl.org";
 
   const template = getTemplateData(type, baseUrl, recipientEmail);
 
@@ -113,10 +111,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const defaultFrom =
-    type === "signin"
-      ? EMAIL_SENDERS.auth
-      : EMAIL_SENDERS.squads;
+  const defaultFrom = type === "signin" ? EMAIL_SENDERS.auth : EMAIL_SENDERS.squads;
 
   const fullStudioHtml = `<!DOCTYPE html>
 <html lang="en">

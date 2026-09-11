@@ -258,8 +258,7 @@ export function PhoneInput({
     }, 100);
   };
 
-  const activePlaceholder =
-    placeholder || COUNTRY_PLACEHOLDERS[selectedCountry] || "123 456 7890";
+  const activePlaceholder = placeholder || COUNTRY_PLACEHOLDERS[selectedCountry] || "123 456 7890";
 
   return (
     <div className={cn("space-y-1.5", className)}>
@@ -365,9 +364,7 @@ export function PhoneInput({
       </div>
 
       {error && (
-        <p className="text-[11px] font-sans text-destructive animate-in fade-in-50">
-          {error}
-        </p>
+        <p className="text-[11px] font-sans text-destructive animate-in fade-in-50">{error}</p>
       )}
     </div>
   );

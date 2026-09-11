@@ -304,7 +304,9 @@ export async function subscribeToNewsletter(email: string) {
   // 2. Backup: Brevo Contacts API
   if (isBrevoConfigured && brevoApiKey) {
     try {
-      const listId = process.env.BREVO_LIST_ID ? [parseInt(process.env.BREVO_LIST_ID, 10)] : undefined;
+      const listId = process.env.BREVO_LIST_ID
+        ? [parseInt(process.env.BREVO_LIST_ID, 10)]
+        : undefined;
       const response = await fetch("https://api.brevo.com/v3/contacts", {
         method: "POST",
         headers: {

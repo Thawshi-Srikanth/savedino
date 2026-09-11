@@ -20,12 +20,7 @@ import {
 import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
 import { DinoLoading } from "@/components/dino-loading";
 import { useMinimumLoading } from "@/hooks/use-minimum-loading";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import {
   Telescope,
   PlusCircle,
