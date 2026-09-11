@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { generateInviteCode } from "@/lib/campaign-engine";
+import { maskEmail } from "@/lib/mask-email";
 
 export const dynamic = "force-dynamic";
 
@@ -78,8 +79,22 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     }
 
     const canSeeInviteCode = isLeader || isStaffOrAdmin;
+    const canSeeFullEmails = isLeader || isStaffOrAdmin;
+
+    const sanitizedMembers = team.members.map((m) => {
+      const isSelf = m.userId === session.user.id;
+      return {
+        ...m,
+        user: {
+          ...m.user,
+          email: canSeeFullEmails || isSelf ? m.user.email : maskEmail(m.user.email),
+        },
+      };
+    });
+
     const sanitizedTeam = {
       ...team,
+      members: sanitizedMembers,
       inviteCode: canSeeInviteCode ? team.inviteCode : null,
     };
 

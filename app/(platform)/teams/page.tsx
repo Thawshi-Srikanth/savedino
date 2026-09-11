@@ -1042,22 +1042,23 @@ function TeamsContent() {
 
       {/* 3. JOIN REQUEST MODAL */}
       <Dialog open={!!requestTeam} onOpenChange={(open) => !open && setRequestTeam(null)}>
-        <DialogContent className="sm:max-w-md bg-card border-border font-sans">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md bg-card border-border font-sans p-6">
+          <DialogHeader className="space-y-1.5 pb-2">
             <DialogTitle className="font-bold text-base text-foreground">
               Join Request: {requestTeam?.name}
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
               Send a request to join campaign squad{" "}
               <strong className="text-foreground font-mono">{requestTeam?.event?.code}</strong>.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-2">
-            <label className="text-xs font-semibold text-foreground">
+          <div className="space-y-2 py-3">
+            <label htmlFor="join-request-msg" className="block text-xs font-semibold text-foreground">
               Message to Squad Leader (Optional)
             </label>
             <Textarea
+              id="join-request-msg"
               placeholder="Hi! I am active daily and ready to analyze image sets with your team."
               value={requestMsg}
               onChange={(e) => setRequestMsg(e.target.value)}
@@ -1066,7 +1067,7 @@ function TeamsContent() {
             />
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
             <Button
               variant="outline"
               size="sm"

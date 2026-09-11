@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendTeamJoinRequestEmail } from "@/lib/email";
+import { maskEmail } from "@/lib/mask-email";
 
 export const dynamic = "force-dynamic";
 
@@ -89,10 +90,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       });
     }
 
+    const canSeeFullEmails = isLeader || isStaffOrAdmin;
+
     const requestsWithConflictInfo = team.joinRequests.map((req) => {
       const activeMem = membershipMap.get(req.userId);
+      const isSelf = req.userId === session.user.id;
       return {
         ...req,
+        user: {
+          ...req.user,
+          email: canSeeFullEmails || isSelf ? req.user.email : maskEmail(req.user.email),
+        },
         alreadyJoinedSquad: activeMem
           ? {
               teamId: activeMem.teamId,
