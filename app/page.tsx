@@ -16,7 +16,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Check, Mail, Bell } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import { Check, Mail, Bell, LayoutDashboard, LogIn, Users } from "lucide-react";
 import { toast } from "sonner";
 
 // Dynamically import DinoGameCanvas with SSR disabled
@@ -44,6 +45,9 @@ const DinoGameCanvas = dynamic(
 );
 
 export default function Home() {
+  const { data: session } = useSession();
+  const isAuthenticated = Boolean(session?.user?.id);
+
   const [mounted, setMounted] = useState<boolean>(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState<boolean>(false);
@@ -248,16 +252,53 @@ export default function Home() {
               </li>
             </ul>
 
-            <div className="pt-2 flex items-center gap-3">
-              <Link href="/campaigns">
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="text-xs font-bold shadow-arcade-primary cursor-pointer"
-                >
-                  <span>Explore Campaigns &gt;</span>
-                </Button>
-              </Link>
+            <div className="pt-2 flex flex-wrap items-center gap-2.5">
+              {isAuthenticated ? (
+                <>
+                  <Link href="/campaigns">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
+                    >
+                      <LayoutDashboard className="size-3.5" />
+                      <span>Open Dashboard</span>
+                    </Button>
+                  </Link>
+                  <Link href="/teams">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                    >
+                      <Users className="size-3.5 text-[#10b981]" />
+                      <span>Squads</span>
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/campaigns">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="text-xs font-bold shadow-arcade-primary cursor-pointer"
+                    >
+                      <span>Explore Campaigns &gt;</span>
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                    >
+                      <LogIn className="size-3.5 text-primary" />
+                      <span>Sign In / Join</span>
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

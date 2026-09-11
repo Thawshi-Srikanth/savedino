@@ -158,10 +158,19 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Link href="/login">
                   <Button
                     size="sm"
+                    variant="outline"
+                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button
+                    size="sm"
                     variant="default"
                     className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
                   >
-                    Sign In
+                    Join
                   </Button>
                 </Link>
               </div>
@@ -215,15 +224,26 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 </Button>
               </div>
             ) : (
-              <Link href="/login">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-9 px-3 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5"
-                >
-                  Sign In
-                </Button>
-              </Link>
+              <div className="flex items-center gap-1.5">
+                <Link href="/login">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-2.5 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-9 px-2.5 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
+                  >
+                    Join
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

@@ -692,15 +692,26 @@ export default function CampaignsPage() {
           </TooltipProvider>
         </div>
 
-        {/* Global Join with Code Button (Hidden on Mobile) */}
-        <Button
-          onClick={() => handleOpenJoinModal()}
-          variant="outline"
-          className="hidden sm:inline-flex h-9 px-3.5 text-xs font-bold gap-2 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl shrink-0"
-        >
-          <KeyRound className="size-3.5 text-primary" />
-          <span>Join with Code</span>
-        </Button>
+        {/* Global Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Link href="/teams">
+            <Button
+              variant="outline"
+              className="hidden sm:inline-flex h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer border-border hover:bg-muted shadow-arcade active:translate-y-0.5 rounded-xl"
+            >
+              <Users className="size-3.5 text-[#10b981]" />
+              <span>Squad Directory</span>
+            </Button>
+          </Link>
+          <Button
+            onClick={() => handleOpenJoinModal()}
+            variant="default"
+            className="inline-flex h-9 px-3.5 text-xs font-bold gap-1.5 cursor-pointer shadow-arcade-primary active:translate-y-0.5 rounded-xl"
+          >
+            <KeyRound className="size-3.5 text-white" />
+            <span>Join with Code</span>
+          </Button>
+        </div>
       </div>
 
       {/* 2. MAIN LAYOUT: SIDEBAR FILTER + CAMPAIGN CONTENT */}

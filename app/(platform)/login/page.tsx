@@ -154,10 +154,13 @@ function LoginForm() {
             </Button>
           </form>
 
-          <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-0.5">
+          <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-1.5">
             <p className="font-semibold text-foreground">No separate sign-up or password required.</p>
             <p className="text-[11px] text-muted-foreground">
-              First time? Entering your email sets up your citizen scientist account automatically.
+              New here?{" "}
+              <Link href="/register" className="font-semibold text-primary hover:underline">
+                Create an account
+              </Link>
             </p>
           </div>
         </div>
