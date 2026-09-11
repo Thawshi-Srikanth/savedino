@@ -188,10 +188,6 @@ export async function GET(req: Request) {
       ];
     }
 
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
     const teams = await prisma.team.findMany({
       where,
       include: {

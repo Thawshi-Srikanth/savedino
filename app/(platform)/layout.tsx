@@ -11,12 +11,14 @@ import { Logo } from "@/components/Logo";
 
 import { PixelAvatar } from "@/components/pixel-avatar";
 import { ProfileOnboardingDialog } from "@/components/profile-onboarding-dialog";
+import { DinoLoading } from "@/components/dino-loading";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Unified Next-Themes Theme State
   const { resolvedTheme, setTheme } = useTheme();
@@ -24,6 +26,16 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      window.location.href = "/";
+    } catch (error) {
+      window.location.href = "/";
+    }
+  };
 
   // Sync night-mode class for backwards-compatibility
   useEffect(() => {
@@ -39,6 +51,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   const handleToggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
+
+  // Full-screen loading when signing out
+  if (isSigningOut) {
+    return <DinoLoading size="lg" text="Signing out..." fullScreen />;
+  }
 
   // Dedicated Full-Screen Layout for Login, Register, Verify, Onboarding & Create (No Navbar)
   if (
@@ -146,7 +163,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+                  onClick={handleSignOut}
                   className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer rounded-xl border-border shadow-arcade-sm active:translate-y-0.5"
                   title="Sign Out"
                 >
@@ -216,7 +233,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+                  onClick={handleSignOut}
                   className="h-9 w-9 p-0 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive border-border shadow-arcade-sm active:translate-y-0.5"
                   title="Sign Out"
                 >
