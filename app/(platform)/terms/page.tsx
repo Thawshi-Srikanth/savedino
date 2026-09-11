@@ -261,7 +261,7 @@ export default function TermsPage() {
               prefetch={false}
               className="hover:text-foreground underline underline-offset-4"
             >
-              Privacy Policy
+              Privacy
             </Link>
           </div>
         </div>

@@ -291,7 +291,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               prefetch={false}
               className="hover:text-foreground transition-colors hover:underline"
             >
-              Privacy Policy
+              Privacy
             </Link>
             <span className="opacity-40">|</span>
             <Link
@@ -299,7 +299,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               prefetch={false}
               className="hover:text-foreground transition-colors hover:underline"
             >
-              Terms &amp; Conditions
+              Terms
             </Link>
             <span className="opacity-40">|</span>
             <a
