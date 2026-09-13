@@ -683,7 +683,7 @@ export async function POST(request: NextRequest) {
 
     const result = await sendEmailInternal({
       to: targetTo,
-      subject: `[TEST] ${template.subject}`,
+      subject: template.subject,
       html: template.html,
       text: template.text,
       from: from ? from.trim() : undefined,
