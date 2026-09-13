@@ -102,15 +102,16 @@ model Event {
   title              String
   code               String      @unique // e.g. "AST-2026-A"
   description        String?
-  regStart           DateTime
-  regEnd             DateTime
-  teamFormationStart DateTime
-  teamFormationEnd   DateTime
-  startDate          DateTime
-  endDate            DateTime
-  submissionStart    DateTime
-  submissionEnd      DateTime
-  maxTeamSize        Int         @default(6)
+  regStart           DateTime?
+  regEnd             DateTime?
+  teamFormationStart DateTime?
+  teamFormationEnd   DateTime?
+  startDate          DateTime?
+  endDate            DateTime?
+  submissionStart    DateTime?
+  submissionEnd      DateTime?
+  maxTeamSize        Int?        // Null = unlimited squad size
+  maxTeams           Int?        // Null = unlimited teams in campaign
   status             EventStatus @default(UPCOMING)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt

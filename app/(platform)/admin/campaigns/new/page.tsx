@@ -32,7 +32,8 @@ export default function CreateCampaignPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newCode, setNewCode] = useState("");
   const [newDesc, setNewDesc] = useState("");
-  const [newMaxTeamSize, setNewMaxTeamSize] = useState<number>(6);
+  const [newMaxTeams, setNewMaxTeams] = useState<string>("");
+  const [newMaxTeamSize, setNewMaxTeamSize] = useState<string>("6");
   const [newRegStart, setNewRegStart] = useState("");
   const [newRegEnd, setNewRegEnd] = useState("");
   const [newTeamStart, setNewTeamStart] = useState("");
@@ -58,15 +59,16 @@ export default function CreateCampaignPage() {
           title: newTitle,
           code: newCode.toUpperCase(),
           description: newDesc,
-          maxTeamSize: newMaxTeamSize,
-          regStart: newRegStart,
-          regEnd: newRegEnd,
-          teamFormationStart: newTeamStart,
-          teamFormationEnd: newTeamEnd,
-          startDate: newStart,
-          endDate: newEnd,
-          submissionStart: newSubStart,
-          submissionEnd: newSubEnd,
+          maxTeams: newMaxTeams ? parseInt(newMaxTeams) : null,
+          maxTeamSize: newMaxTeamSize ? parseInt(newMaxTeamSize) : null,
+          regStart: newRegStart || null,
+          regEnd: newRegEnd || null,
+          teamFormationStart: newTeamStart || null,
+          teamFormationEnd: newTeamEnd || null,
+          startDate: newStart || null,
+          endDate: newEnd || null,
+          submissionStart: newSubStart || null,
+          submissionEnd: newSubEnd || null,
         }),
       });
 
@@ -164,8 +166,8 @@ export default function CreateCampaignPage() {
                 guidelines.
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-1">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-2">
                   <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-foreground">
                     Campaign Title *
                   </label>
@@ -187,25 +189,42 @@ export default function CreateCampaignPage() {
                     placeholder="AST-2026-A"
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value.toUpperCase())}
-                    className="h-10 text-xs font-mono"
+                    className="h-10 text-xs font-mono font-bold"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-foreground">
-                    Max Members Per Squad *
+                    Max Squads
                   </label>
                   <Input
                     type="number"
-                    min={2}
-                    max={30}
-                    required
-                    value={newMaxTeamSize}
-                    onChange={(e) =>
-                      setNewMaxTeamSize(Math.max(2, Math.min(30, parseInt(e.target.value) || 6)))
-                    }
+                    min={1}
+                    placeholder="Unlimited (blank)"
+                    value={newMaxTeams}
+                    onChange={(e) => setNewMaxTeams(e.target.value)}
                     className="h-10 text-xs font-mono"
                   />
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                    Leave blank for unlimited
+                  </span>
+                </div>
+
+                <div className="md:col-span-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-foreground">
+                    Max Members Per Squad
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="Unlimited (blank)"
+                    value={newMaxTeamSize}
+                    onChange={(e) => setNewMaxTeamSize(e.target.value)}
+                    className="h-10 text-xs font-mono"
+                  />
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                    Leave blank for unlimited
+                  </span>
                 </div>
               </div>
 
@@ -238,13 +257,13 @@ export default function CreateCampaignPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Registration Start *
+                        Registration Start
                       </label>
                       <DateTimeInput value={newRegStart} onChange={setNewRegStart} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Registration End *
+                        Registration End
                       </label>
                       <DateTimeInput value={newRegEnd} onChange={setNewRegEnd} />
                     </div>
@@ -258,13 +277,13 @@ export default function CreateCampaignPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Team Formation Start *
+                        Team Formation Start
                       </label>
                       <DateTimeInput value={newTeamStart} onChange={setNewTeamStart} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Team Formation End *
+                        Team Formation End
                       </label>
                       <DateTimeInput value={newTeamEnd} onChange={setNewTeamEnd} />
                     </div>
@@ -275,26 +294,35 @@ export default function CreateCampaignPage() {
 
             {/* TAB 3: EXECUTION & MPC SUBMISSION SCHEDULE */}
             <TabsContent value="schedule" className="space-y-6 text-xs mt-0">
-              <div className="p-3.5 rounded-lg border border-border bg-muted/30 text-muted-foreground text-xs font-mono">
-                Set campaign observation dates and Minor Planet Center (MPC) candidate submission
-                windows.
+              <div className="p-3.5 rounded-lg border border-amber-500/20 bg-amber-500/5 text-muted-foreground text-xs font-mono space-y-1">
+                <span className="font-bold text-amber-500 block">
+                  Optional / Flexible Scheduling
+                </span>
+                <span>
+                  Observation and MPC submission dates can be left blank. Any unscheduled dates will
+                  be automatically marked as <strong>TBA (To Be Announced)</strong> on the platform
+                  and announced later.
+                </span>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-foreground mb-3">
-                    Campaign Observation Schedule
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-foreground mb-3 flex items-center justify-between">
+                    <span>Campaign Observation Schedule</span>
+                    <span className="text-[10px] font-normal text-muted-foreground font-mono">
+                      Optional / TBA if blank
+                    </span>
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Campaign Start Date *
+                        Campaign Start Date
                       </label>
                       <DateTimeInput value={newStart} onChange={setNewStart} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Campaign End Date *
+                        Campaign End Date
                       </label>
                       <DateTimeInput value={newEnd} onChange={setNewEnd} />
                     </div>
@@ -302,19 +330,22 @@ export default function CreateCampaignPage() {
                 </div>
 
                 <div className="pt-4 border-t border-border">
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-foreground mb-3">
-                    MPC Candidate Submission Window
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-foreground mb-3 flex items-center justify-between">
+                    <span>MPC Candidate Submission Window</span>
+                    <span className="text-[10px] font-normal text-muted-foreground font-mono">
+                      Optional / TBA if blank
+                    </span>
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Submission Window Start *
+                        Submission Window Start
                       </label>
                       <DateTimeInput value={newSubStart} onChange={setNewSubStart} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">
-                        Submission Window End *
+                        Submission Window End
                       </label>
                       <DateTimeInput value={newSubEnd} onChange={setNewSubEnd} />
                     </div>
@@ -339,7 +370,7 @@ export default function CreateCampaignPage() {
                   {newDesc || "No description provided."}
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-border font-mono text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-3 border-t border-border font-mono text-xs">
                   <div className="p-3 bg-card rounded-lg border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px] uppercase font-bold">
                       Student Registration
@@ -351,7 +382,7 @@ export default function CreateCampaignPage() {
                             day: "numeric",
                             year: "numeric",
                           })
-                        : "-"}{" "}
+                        : "TBA"}{" "}
                       →{" "}
                       {newRegEnd
                         ? new Date(newRegEnd).toLocaleDateString("en-US", {
@@ -359,7 +390,7 @@ export default function CreateCampaignPage() {
                             day: "numeric",
                             year: "numeric",
                           })
-                        : "-"}
+                        : "TBA"}
                     </span>
                   </div>
 
@@ -374,7 +405,7 @@ export default function CreateCampaignPage() {
                             day: "numeric",
                             year: "numeric",
                           })
-                        : "-"}{" "}
+                        : "TBA"}{" "}
                       →{" "}
                       {newEnd
                         ? new Date(newEnd).toLocaleDateString("en-US", {
@@ -382,7 +413,16 @@ export default function CreateCampaignPage() {
                             day: "numeric",
                             year: "numeric",
                           })
-                        : "-"}
+                        : "TBA"}
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-card rounded-lg border border-border space-y-1">
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                      Max Squads
+                    </span>
+                    <span className="font-bold text-foreground">
+                      {newMaxTeams ? `${newMaxTeams} Squads` : "Unlimited Squads"}
                     </span>
                   </div>
 
@@ -391,7 +431,7 @@ export default function CreateCampaignPage() {
                       Max Squad Size
                     </span>
                     <span className="font-bold text-foreground">
-                      {newMaxTeamSize} Members / Squad
+                      {newMaxTeamSize ? `${newMaxTeamSize} Members / Squad` : "Unlimited Members"}
                     </span>
                   </div>
                 </div>

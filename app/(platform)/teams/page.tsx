@@ -7,6 +7,7 @@ import { useSession } from "@/lib/auth-client";
 import { isOrganizer, canParticipateInTeams } from "@/lib/rbac";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -60,7 +61,8 @@ interface TeamEvent {
   title: string;
   code: string;
   status: string;
-  maxTeamSize?: number;
+  maxTeamSize?: number | null;
+  maxTeams?: number | null;
 }
 
 interface Team {
@@ -748,9 +750,9 @@ function TeamsContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {displayedTeams.map((team) => {
                   const memberCount = team.members?.length || 0;
-                  const maxCap = team.event?.maxTeamSize || 6;
-                  const openSlots = Math.max(0, maxCap - memberCount);
-                  const isFull = memberCount >= maxCap;
+                  const maxCap = team.event?.maxTeamSize;
+                  const isFull = maxCap && maxCap > 0 ? memberCount >= maxCap : false;
+                  const openSlots = maxCap && maxCap > 0 ? Math.max(0, maxCap - memberCount) : null;
 
                   const isUserMember = session?.user?.id
                     ? team.members?.some((m) => m.user?.id === session.user.id)
@@ -763,47 +765,41 @@ function TeamsContent() {
                     >
                       <div className="space-y-2.5">
                         {/* Top: Campaign Code */}
-                        <div>
-                          <span className="text-xs font-mono font-bold text-primary truncate">
-                            {team.event?.code || "CAMPAIGN"}
+                        <div className="flex items-center justify-between">
+                          <Badge
+                            variant="secondary"
+                            className="font-mono text-[10px] uppercase font-bold"
+                          >
+                            {team.event?.code || "AST-EVENT"}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            Created {new Date(team.createdAt).toLocaleDateString()}
                           </span>
                         </div>
 
-                        {/* Squad Name */}
-                        <h3 className="font-sans font-bold text-sm text-foreground leading-snug truncate">
-                          {team.name}
-                        </h3>
-
-                        {/* Member Slots / Multiplier Capacity Display */}
-                        {maxCap <= 6 ? (
-                          <div className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-1.5">
-                              {Array.from({ length: maxCap }).map((_, i) => {
-                                const isFilled = i < memberCount;
-                                return (
-                                  <div
-                                    key={i}
-                                    className={`size-6 rounded flex items-center justify-center transition-colors ${
-                                      isFilled
-                                        ? "bg-[#8b5cf6] text-white shadow-xs"
-                                        : "bg-muted/50 text-muted-foreground/30 border border-border/70 border-dashed"
-                                    }`}
-                                    title={
-                                      isFilled
-                                        ? `Member slot ${i + 1} (Filled)`
-                                        : `Slot ${i + 1} (Available)`
-                                    }
-                                  >
-                                    <User className="size-3.5" />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            <span className="font-mono text-[11px] text-muted-foreground">
-                              <strong className="text-foreground">{memberCount}</strong>/{maxCap}
+                        {/* Title & Leader */}
+                        <div>
+                          <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                            <span className="truncate">{team.name}</span>
+                            {team.status === "DISQUALIFIED" && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-destructive/20 text-destructive border border-destructive/30">
+                                Disabled
+                              </span>
+                            )}
+                          </h3>
+                          <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
+                            <span>Leader:</span>
+                            <span className="font-medium text-foreground">
+                              {team.members?.find((m) => m.role === "LEADER" || m.role === "leader")
+                                ?.user?.name ||
+                                team.members?.[0]?.user?.name ||
+                                "Unknown"}
                             </span>
                           </div>
-                        ) : (
+                        </div>
+
+                        {/* Status / Recruiting Pill */}
+                        {team.status !== "DISQUALIFIED" && (
                           <div className="flex items-center justify-between py-1">
                             <div className="flex items-center gap-3">
                               {/* Filled Member Box + Multiplier */}
@@ -820,16 +816,20 @@ function TeamsContent() {
                               </div>
 
                               {/* Available Empty Slot Box + Multiplier */}
-                              {openSlots > 0 ? (
+                              {!isFull ? (
                                 <div
                                   className="flex items-center gap-1.5"
-                                  title={`${openSlots} slots remaining`}
+                                  title={
+                                    openSlots !== null
+                                      ? `${openSlots} slots remaining`
+                                      : "Unlimited slots"
+                                  }
                                 >
                                   <div className="size-6 rounded flex items-center justify-center bg-muted/50 text-muted-foreground/40 border border-border/70 border-dashed">
                                     <User className="size-3.5" />
                                   </div>
                                   <span className="font-mono text-xs text-muted-foreground">
-                                    x{openSlots} open
+                                    {openSlots !== null ? `x${openSlots} open` : "Unlimited"}
                                   </span>
                                 </div>
                               ) : (
@@ -840,7 +840,8 @@ function TeamsContent() {
                             </div>
 
                             <span className="font-mono text-[11px] text-muted-foreground">
-                              <strong className="text-foreground">{memberCount}</strong>/{maxCap}
+                              <strong className="text-foreground">{memberCount}</strong>/
+                              {maxCap ? `${maxCap}` : "∞"}
                             </span>
                           </div>
                         )}

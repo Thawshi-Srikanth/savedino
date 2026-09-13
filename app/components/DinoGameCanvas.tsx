@@ -127,11 +127,7 @@ function getMeteorSprite(
   if (spriteCache[key]) return spriteCache[key];
 
   const grid =
-    type === "giant"
-      ? GIANT_ASTEROID
-      : type === "medium"
-        ? MEDIUM_ASTEROID
-        : SMALL_ASTEROID;
+    type === "giant" ? GIANT_ASTEROID : type === "medium" ? MEDIUM_ASTEROID : SMALL_ASTEROID;
 
   const rows = grid.length;
   const cols = grid[0].length;
@@ -627,9 +623,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         const baseInterval = Math.max(68, 128 - Math.floor(s.score / 40) * 4);
         if (s.meteorSpawnTimer >= baseInterval) {
           // Check if any existing meteor is within 130px of spawn entry zone
-          const isSpawnZoneOccupied = s.meteors.some(
-            (m) => m.x > CANVAS_WIDTH - 130
-          );
+          const isSpawnZoneOccupied = s.meteors.some((m) => m.x > CANVAS_WIDTH - 130);
 
           if (!isSpawnZoneOccupied) {
             // Add randomized jitter to timer so spawns feel organic with breathing room
@@ -1046,7 +1040,12 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         ctx.fillRect(Math.floor(txCore - step), Math.floor(tyCore - step), step * 2, step * 2);
 
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(Math.floor(txCore - Math.floor(step * 0.5)), Math.floor(tyCore - Math.floor(step * 0.5)), step, step);
+        ctx.fillRect(
+          Math.floor(txCore - Math.floor(step * 0.5)),
+          Math.floor(tyCore - Math.floor(step * 0.5)),
+          step,
+          step
+        );
         ctx.restore();
 
         // 2. Draw Cached High-Res Pixel Sprite with zero per-frame square root calculations
@@ -1305,7 +1304,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         </div>
 
         <span className="text-[11px] text-muted-foreground font-sans">
-          <span className="sm:hidden">Tap left Jump / Dbl-Jump, right Shoot &bull; </span>Laser expands in flight
+          <span className="sm:hidden">Tap left Jump / Dbl-Jump, right Shoot &bull; </span>Laser
+          expands in flight
         </span>
       </div>
 

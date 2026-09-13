@@ -57,9 +57,9 @@ export function AssignUserModal({
             >
               <option value="">-- Choose a Squad --</option>
               {teams
-                .filter((t) => t.members.length < (t.event?.maxTeamSize || 6))
+                .filter((t) => !t.event?.maxTeamSize || t.members.length < t.event.maxTeamSize)
                 .map((t) => {
-                  const maxCap = t.event?.maxTeamSize || 6;
+                  const maxCap = t.event?.maxTeamSize ? `${t.event.maxTeamSize}` : "∞";
                   return (
                     <option key={t.id} value={t.id}>
                       {t.name} ({t.event?.code || "AST"}) &bull; {t.members.length}/{maxCap} Members

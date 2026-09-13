@@ -86,16 +86,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Check if team is full based on campaign maxTeamSize
-    const maxLimit = team.event?.maxTeamSize || 6;
-    if (team.members.length >= maxLimit) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `This squad has already reached the maximum limit of ${maxLimit} members for this campaign.`,
-        },
-        { status: 400 }
-      );
+    // 3. Check if team is full based on campaign maxTeamSize (if configured)
+    if (team.event?.maxTeamSize && team.event.maxTeamSize > 0) {
+      if (team.members.length >= team.event.maxTeamSize) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `This squad has already reached the maximum limit of ${team.event.maxTeamSize} members for this campaign.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // 3. Check if user is already in this team

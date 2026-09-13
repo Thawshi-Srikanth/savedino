@@ -132,14 +132,15 @@ interface TeamData {
     id: string;
     title: string;
     code: string;
-    regStart?: string;
-    regEnd?: string;
-    teamFormationStart?: string;
-    teamFormationEnd?: string;
-    startDate: string;
-    endDate: string;
+    regStart?: string | null;
+    regEnd?: string | null;
+    teamFormationStart?: string | null;
+    teamFormationEnd?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
     status: string;
-    maxTeamSize?: number;
+    maxTeamSize?: number | null;
+    maxTeams?: number | null;
   };
   members: TeamMember[];
 }
@@ -730,7 +731,8 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                 </Badge>
               ) : (
                 <Badge className="bg-slate-700 text-white font-bold text-[10px] border-0 shadow-arcade">
-                  {memberCount}/{team?.event?.maxTeamSize || 6} Members
+                  {memberCount}/{team?.event?.maxTeamSize ? `${team.event.maxTeamSize}` : "∞"}{" "}
+                  Members
                 </Badge>
               )}
 
@@ -804,7 +806,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
               Squad Roster
             </span>
             <span className="text-sm font-bold text-foreground">
-              {memberCount} / {team?.event?.maxTeamSize || 6} Members
+              {memberCount} / {team?.event?.maxTeamSize ? `${team.event.maxTeamSize}` : "∞"} Members
             </span>
           </div>
           <div className="p-3 rounded-xl bg-background border border-border">
@@ -884,7 +886,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                       : "text-muted-foreground bg-muted"
                   }`}
                 >
-                  {memberCount}/{team?.event?.maxTeamSize || 6}
+                  {memberCount}/{team?.event?.maxTeamSize ? `${team.event.maxTeamSize}` : "∞"}
                 </Badge>
               </TabsTrigger>
 
@@ -1382,13 +1384,17 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
 
               {/* Roster Capacity Indicator */}
               {(() => {
-                const maxCapacity = team?.event?.maxTeamSize || 6;
-                const isFull = memberCount >= maxCapacity;
-                const openSlots = Math.max(0, maxCapacity - memberCount);
+                const maxCapacity = team?.event?.maxTeamSize;
+                const isFull = maxCapacity && maxCapacity > 0 ? memberCount >= maxCapacity : false;
+                const openSlots =
+                  maxCapacity && maxCapacity > 0 ? Math.max(0, maxCapacity - memberCount) : null;
                 return (
                   <div className="flex items-center gap-2.5">
                     <span className="text-xs font-mono font-bold text-foreground">
-                      {memberCount} of {maxCapacity} Slots Filled
+                      {memberCount}{" "}
+                      {maxCapacity
+                        ? `of ${maxCapacity} Slots Filled`
+                        : "Members Joined (Unlimited Capacity)"}
                     </span>
                     <Badge
                       className={
@@ -1399,7 +1405,9 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                     >
                       {isFull
                         ? "Full Roster"
-                        : `${openSlots} Slot${openSlots === 1 ? "" : "s"} Open`}
+                        : openSlots !== null
+                          ? `${openSlots} Slot${openSlots === 1 ? "" : "s"} Open`
+                          : "Unlimited"}
                     </Badge>
                   </div>
                 );
@@ -1491,7 +1499,8 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
 
               {/* Empty Slots Fillers */}
               {(() => {
-                const maxCapacity = team?.event?.maxTeamSize || 6;
+                const maxCapacity = team?.event?.maxTeamSize;
+                if (!maxCapacity || maxCapacity <= 0) return null;
                 const openSlots = Math.max(0, maxCapacity - memberCount);
                 if (openSlots <= 0) return null;
 
@@ -1704,8 +1713,9 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                   {paginatedRequests.map((req) => {
                     const hasJoinedOtherSquad =
                       req.alreadyJoinedSquad && !req.alreadyJoinedSquad.isThisTeam;
-                    const maxCapacity = team?.event?.maxTeamSize || 6;
-                    const isFull = memberCount >= maxCapacity;
+                    const maxCapacity = team?.event?.maxTeamSize;
+                    const isFull =
+                      maxCapacity && maxCapacity > 0 ? memberCount >= maxCapacity : false;
                     const isSquadDisabled = team?.status === "DISQUALIFIED";
                     const isPending = req.status === "PENDING";
                     const isProcessing = processingRequestId === req.id;

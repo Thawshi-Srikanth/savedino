@@ -464,8 +464,9 @@ export function TeamsTab({
                     t.members.find(
                       (m) => m.role === "LEADER" || m.role === "leader" || m.userId === t.leaderId
                     ) || t.members[0];
-                  const maxTeamSize = t.event?.maxTeamSize || 6;
-                  const isFull = t.members.length >= maxTeamSize;
+                  const maxTeamSize = t.event?.maxTeamSize;
+                  const isFull =
+                    maxTeamSize && maxTeamSize > 0 ? t.members.length >= maxTeamSize : false;
                   const isDisqualified = t.status === "DISQUALIFIED";
 
                   return (
@@ -595,12 +596,18 @@ export function TeamsTab({
                               </span>
                             ) : (
                               <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#10b981] text-white shadow-xs">
-                                {t.members.length}/{maxTeamSize}
+                                {t.members.length}/{maxTeamSize || "∞"}
                               </span>
                             )}
-                            <span className="text-[11px] text-muted-foreground font-mono">
-                              ({Math.max(0, maxTeamSize - t.members.length)} open)
-                            </span>
+                            {maxTeamSize && maxTeamSize > 0 ? (
+                              <span className="text-[11px] text-muted-foreground font-mono">
+                                ({Math.max(0, maxTeamSize - t.members.length)} open)
+                              </span>
+                            ) : (
+                              <span className="text-[11px] text-muted-foreground font-mono">
+                                (Unlimited)
+                              </span>
+                            )}
                           </div>
 
                           <div className="flex flex-wrap gap-1 max-w-full">

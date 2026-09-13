@@ -477,10 +477,10 @@ export function CampaignsTab({
                     <TableCell className="py-2.5 px-3 w-[12%] whitespace-nowrap overflow-hidden">
                       <div className="space-y-0.5">
                         <div className="font-mono text-xs font-bold text-foreground">
-                          {ev._count?.teams || 0} squads
+                          {ev._count?.teams || 0} / {ev.maxTeams ? `${ev.maxTeams}` : "∞"} squads
                         </div>
                         <div className="font-mono text-[10px] text-muted-foreground">
-                          Max: {ev.maxTeamSize || 6}/squad
+                          {ev.maxTeamSize ? `Max: ${ev.maxTeamSize}/squad` : "Unlimited size"}
                         </div>
                       </div>
                     </TableCell>
@@ -491,8 +491,13 @@ export function CampaignsTab({
                         <div className="flex items-center gap-1.5 truncate">
                           <Calendar className="size-3 text-muted-foreground shrink-0" />
                           <span className="text-foreground/90 truncate">
-                            {new Date(ev.startDate).toLocaleDateString()} &ndash;{" "}
-                            {new Date(ev.endDate).toLocaleDateString()}
+                            {ev.startDate && ev.endDate ? (
+                              `${new Date(ev.startDate).toLocaleDateString()} \u2013 ${new Date(ev.endDate).toLocaleDateString()}`
+                            ) : (
+                              <span className="text-amber-500 font-semibold">
+                                TBA (Unscheduled)
+                              </span>
+                            )}
                           </span>
                         </div>
                         {ev.submissionEnd && (

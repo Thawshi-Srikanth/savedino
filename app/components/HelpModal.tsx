@@ -87,7 +87,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                   TOUCH CONTROLS (MOBILE)
                 </span>
                 <span className="text-[11px] text-muted-foreground font-sans">
-                  Tap JUMP button (tap again in air for Double Jump) and BLAST button, or tap left/right canvas sides.
+                  Tap JUMP button (tap again in air for Double Jump) and BLAST button, or tap
+                  left/right canvas sides.
                 </span>
               </div>
             </div>

@@ -2,17 +2,18 @@ export interface EventData {
   id: string;
   title: string;
   code: string;
-  description?: string;
-  regStart?: string;
-  regEnd?: string;
-  teamFormationStart?: string;
-  teamFormationEnd?: string;
-  startDate: string;
-  endDate: string;
-  submissionStart?: string;
-  submissionEnd?: string;
+  description?: string | null;
+  regStart?: string | null;
+  regEnd?: string | null;
+  teamFormationStart?: string | null;
+  teamFormationEnd?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  submissionStart?: string | null;
+  submissionEnd?: string | null;
   status: string;
-  maxTeamSize?: number;
+  maxTeamSize?: number | null;
+  maxTeams?: number | null;
   _count?: {
     teams: number;
     imageSets?: number;
@@ -32,7 +33,8 @@ export interface TeamData {
   event: {
     title: string;
     code: string;
-    maxTeamSize?: number;
+    maxTeamSize?: number | null;
+    maxTeams?: number | null;
   };
   members: Array<{
     id: string;
@@ -77,7 +79,7 @@ export interface UserData {
   }>;
 }
 
-export const toLocalInput = (dateStr?: string) => {
+export const toLocalInput = (dateStr?: string | null) => {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "";

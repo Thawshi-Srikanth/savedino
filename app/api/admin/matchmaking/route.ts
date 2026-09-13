@@ -133,15 +133,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const maxLimit = team.event?.maxTeamSize || 6;
-    if (team.members.length >= maxLimit) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Squad is already full (max ${maxLimit} members for this campaign).`,
-        },
-        { status: 400 }
-      );
+    if (team.event?.maxTeamSize && team.event.maxTeamSize > 0) {
+      if (team.members.length >= team.event.maxTeamSize) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Squad is already full (max ${team.event.maxTeamSize} members for this campaign).`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Check concurrency

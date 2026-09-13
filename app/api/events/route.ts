@@ -74,26 +74,37 @@ export async function POST(req: Request) {
       submissionStart,
       submissionEnd,
       maxTeamSize,
+      maxTeams,
     } = body;
 
-    const sDate = startDate ? new Date(startDate) : new Date();
-    const eDate = endDate ? new Date(endDate) : new Date(Date.now() + 30 * 86400000);
-    const teamSize = maxTeamSize ? Math.max(2, Math.min(30, Number(maxTeamSize))) : 6;
+    const parsedMaxTeamSize =
+      maxTeamSize !== undefined &&
+      maxTeamSize !== null &&
+      maxTeamSize !== "" &&
+      Number(maxTeamSize) > 0
+        ? Math.max(1, Number(maxTeamSize))
+        : null;
+
+    const parsedMaxTeams =
+      maxTeams !== undefined && maxTeams !== null && maxTeams !== "" && Number(maxTeams) > 0
+        ? Math.max(1, Number(maxTeams))
+        : null;
 
     const newEvent = await prisma.event.create({
       data: {
-        title,
+        title: title.trim(),
         code: code.toUpperCase().trim(),
-        description,
-        regStart: regStart ? new Date(regStart) : sDate,
-        regEnd: regEnd ? new Date(regEnd) : eDate,
-        teamFormationStart: teamFormationStart ? new Date(teamFormationStart) : sDate,
-        teamFormationEnd: teamFormationEnd ? new Date(teamFormationEnd) : eDate,
-        startDate: sDate,
-        endDate: eDate,
-        submissionStart: submissionStart ? new Date(submissionStart) : sDate,
-        submissionEnd: submissionEnd ? new Date(submissionEnd) : eDate,
-        maxTeamSize: teamSize,
+        description: description?.trim() || null,
+        regStart: regStart ? new Date(regStart) : null,
+        regEnd: regEnd ? new Date(regEnd) : null,
+        teamFormationStart: teamFormationStart ? new Date(teamFormationStart) : null,
+        teamFormationEnd: teamFormationEnd ? new Date(teamFormationEnd) : null,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        submissionStart: submissionStart ? new Date(submissionStart) : null,
+        submissionEnd: submissionEnd ? new Date(submissionEnd) : null,
+        maxTeamSize: parsedMaxTeamSize,
+        maxTeams: parsedMaxTeams,
         status: "ACTIVE",
       },
     });

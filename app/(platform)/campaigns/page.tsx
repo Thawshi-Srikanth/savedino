@@ -59,7 +59,8 @@ interface EventItem {
   submissionStart: string;
   submissionEnd: string;
   status: string;
-  maxTeamSize?: number;
+  maxTeamSize?: number | null;
+  maxTeams?: number | null;
   _count?: {
     teams: number;
   };
@@ -170,6 +171,22 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
   // 4. Registration or Team Setup (Active & Open)
   const regStage = stages.find((s) => s.name === "Registration");
   const teamStage = stages.find((s) => s.name === "Team Setup");
+  const isCapacityFull = Boolean(
+    ev.maxTeams && ev.maxTeams > 0 && (ev._count?.teams || 0) >= ev.maxTeams
+  );
+
+  if (isCapacityFull) {
+    return {
+      isModal: false,
+      isClosed: true,
+      label: "Campaign Full",
+      href: `/campaigns/${ev.id}`,
+      icon: Clock,
+      className:
+        "bg-muted text-muted-foreground border border-border opacity-80 cursor-not-allowed shadow-arcade-sm",
+    };
+  }
+
   if (
     (regStage?.status === "ACTIVE" || teamStage?.status === "ACTIVE" || ev.status === "ACTIVE") &&
     !isRegClosed
@@ -816,13 +833,36 @@ export default function CampaignsPage() {
                           </p>
                         </div>
 
-                        {/* Team Count */}
+                        {/* Team Count & Capacity */}
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/40 shrink-0 self-start shadow-arcade">
                           <Users className="size-3.5 text-primary" />
                           <span className="text-xs font-mono font-bold text-foreground">
                             {currentActiveEvent._count?.teams || 0}
+                            {currentActiveEvent.maxTeams
+                              ? ` / ${currentActiveEvent.maxTeams}`
+                              : " (∞)"}
                           </span>
-                          <span className="text-[11px] text-muted-foreground">Teams</span>
+                          <span className="text-[11px] text-muted-foreground">Squads</span>
+                          {currentActiveEvent.maxTeams &&
+                          (currentActiveEvent._count?.teams || 0) >= currentActiveEvent.maxTeams ? (
+                            <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[10px] px-1.5 py-0 font-mono font-bold">
+                              Full
+                            </Badge>
+                          ) : currentActiveEvent.maxTeams ? (
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              (
+                              {Math.max(
+                                0,
+                                currentActiveEvent.maxTeams -
+                                  (currentActiveEvent._count?.teams || 0)
+                              )}{" "}
+                              open)
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              (Unlimited)
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -1045,12 +1085,37 @@ export default function CampaignsPage() {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                          <Users className="size-3.5 text-primary" />
-                          <span className="font-mono font-bold text-foreground">
-                            {ev._count?.teams || 0}
-                          </span>
-                          <span>Teams</span>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium flex-wrap justify-end">
+                          <div className="flex items-center gap-1.5">
+                            <Users className="size-3.5 text-primary" />
+                            <span className="font-mono font-bold text-foreground">
+                              {ev._count?.teams || 0}
+                              {ev.maxTeams ? ` / ${ev.maxTeams}` : " (∞)"}
+                            </span>
+                            <span>Squads</span>
+                          </div>
+                          {ev.maxTeams && (ev._count?.teams || 0) >= ev.maxTeams ? (
+                            <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[10px] px-1.5 py-0 font-mono font-bold">
+                              Full
+                            </Badge>
+                          ) : ev.maxTeams ? (
+                            <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded border border-border">
+                              {Math.max(0, ev.maxTeams - (ev._count?.teams || 0))} open
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded border border-border">
+                              Unlimited
+                            </span>
+                          )}
+                          {ev.maxTeamSize && ev.maxTeamSize > 0 ? (
+                            <span className="text-[10px] text-muted-foreground font-mono bg-muted/60 px-1.5 py-0.5 rounded border border-border/60">
+                              Max {ev.maxTeamSize}/squad
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground font-mono bg-muted/60 px-1.5 py-0.5 rounded border border-border/60">
+                              ∞ members
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -1261,7 +1326,11 @@ export default function CampaignsPage() {
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Teams allow 2 to {selectedEventForTeam?.maxTeamSize || 6} members.</span>
+                <span>
+                  {selectedEventForTeam?.maxTeamSize
+                    ? `Teams allow 2 to ${selectedEventForTeam.maxTeamSize} members.`
+                    : "Teams allow flexible / unlimited members."}
+                </span>
               </div>
             </div>
 

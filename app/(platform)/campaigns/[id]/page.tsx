@@ -17,6 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -51,17 +52,18 @@ interface EventDetail {
   id: string;
   title: string;
   code: string;
-  description: string;
-  regStart: string;
-  regEnd: string;
-  teamFormationStart: string;
-  teamFormationEnd: string;
-  startDate: string;
-  endDate: string;
-  submissionStart: string;
-  submissionEnd: string;
+  description?: string | null;
+  regStart?: string | null;
+  regEnd?: string | null;
+  teamFormationStart?: string | null;
+  teamFormationEnd?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  submissionStart?: string | null;
+  submissionEnd?: string | null;
   status: string;
-  maxTeamSize?: number;
+  maxTeamSize?: number | null;
+  maxTeams?: number | null;
   teams: Array<{
     id: string;
     name: string;
@@ -73,7 +75,7 @@ interface EventDetail {
   };
 }
 
-function formatStageDate(dateStr?: string) {
+function formatStageDate(dateStr?: string | null) {
   if (!dateStr) return "TBA";
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return "TBA";
@@ -84,7 +86,7 @@ function formatStageDate(dateStr?: string) {
   });
 }
 
-function getDurationDays(startStr?: string, endStr?: string) {
+function getDurationDays(startStr?: string | null, endStr?: string | null) {
   if (!startStr || !endStr) return null;
   const start = new Date(startStr).getTime();
   const end = new Date(endStr).getTime();
@@ -117,8 +119,8 @@ function getHumanizedCountdown(targetDateMs: number, now: number): string {
 }
 
 function getRegistrationDeadlineInfo(
-  regEndStr?: string,
-  startDateStr?: string,
+  regEndStr?: string | null,
+  startDateStr?: string | null,
   nowMs: number = Date.now()
 ) {
   const targetStr = regEndStr || startDateStr;
@@ -166,7 +168,11 @@ function getRegistrationDeadlineInfo(
   };
 }
 
-function getStageTimelineData(startStr?: string, endStr?: string, now: number = Date.now()) {
+function getStageTimelineData(
+  startStr?: string | null,
+  endStr?: string | null,
+  now: number = Date.now()
+) {
   if (!startStr || !endStr) {
     return { status: "UPCOMING" as const, progress: 0, countdownText: null, start: 0, end: 0 };
   }
@@ -380,7 +386,9 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     {
       stage: "Stage 2",
       name: "Team Formation",
-      description: "Create a team of 2 to 6 members or join with an invite code.",
+      description: event.maxTeamSize
+        ? `Create a team of 2 to ${event.maxTeamSize} members or join with an invite code.`
+        : "Create a team with flexible / unlimited members or join with an invite code.",
       start: event.teamFormationStart || event.regStart,
       end: event.teamFormationEnd || event.startDate,
     },
@@ -429,6 +437,24 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
         {/* Theme Status Pill with 3D Shadow */}
         <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted border border-border font-mono text-xs text-muted-foreground shadow-arcade-sm">
+            <Users className="size-3.5 text-primary" />
+            <strong className="text-foreground">{squadCount}</strong>
+            <span>/</span>
+            <span>{event.maxTeams || "∞"} Squads</span>
+            {event.maxTeams && squadCount >= event.maxTeams ? (
+              <span className="text-destructive font-bold text-[10px] ml-1">FULL</span>
+            ) : event.maxTeams ? (
+              <span className="text-[#10b981] font-bold text-[10px] ml-1">
+                ({Math.max(0, event.maxTeams - squadCount)} open)
+              </span>
+            ) : (
+              <span className="text-muted-foreground font-medium text-[10px] ml-1">
+                (Unlimited)
+              </span>
+            )}
+          </div>
+
           {event.status === "ACTIVE" ? (
             <Badge className="bg-[#10b981] hover:bg-[#059669] text-white border-0 font-sans font-bold text-xs px-2.5 py-1 gap-1.5 shadow-arcade-emerald rounded-lg">
               <span className="size-1.5 rounded-full bg-white" />
@@ -470,15 +496,28 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 </strong>
               </div>
 
-              <div className="inline-flex items-center gap-1.5">
-                <span className="text-muted-foreground">Teams:</span>
-                <strong className="text-foreground">{squadCount} registered</strong>
+              <div className="inline-flex items-center gap-1.5 flex-wrap">
+                <span className="text-muted-foreground">Squads:</span>
+                <strong className="text-foreground font-mono">
+                  {squadCount} / {event.maxTeams || "∞"}
+                </strong>
+                {event.maxTeams && squadCount >= event.maxTeams ? (
+                  <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[10px] px-1.5 py-0 font-mono font-bold">
+                    Full
+                  </Badge>
+                ) : event.maxTeams ? (
+                  <span className="text-xs text-muted-foreground font-mono">
+                    ({Math.max(0, event.maxTeams - squadCount)} open)
+                  </span>
+                ) : (
+                  <span className="text-xs text-muted-foreground font-mono">(Unlimited)</span>
+                )}
                 <Link
                   href={`/teams?eventId=${event.id}`}
                   prefetch={false}
-                  className="text-primary font-sans hover:underline font-semibold"
+                  className="text-primary font-sans hover:underline font-semibold text-xs ml-1"
                 >
-                  (view teams)
+                  (view squads)
                 </Link>
               </div>
             </div>
@@ -905,6 +944,18 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                               <Clock className="size-4" />
                               <span>Registration Closed</span>
                             </Button>
+                          ) : event.maxTeams &&
+                            event.maxTeams > 0 &&
+                            squadCount >= event.maxTeams ? (
+                            <Button
+                              disabled
+                              className="w-full h-11 text-xs font-sans font-bold gap-2 opacity-80 bg-white/20 text-white border border-white/30 rounded-xl cursor-not-allowed"
+                            >
+                              <Users className="size-4" />
+                              <span>
+                                Campaign Full ({squadCount}/{event.maxTeams} Teams)
+                              </span>
+                            </Button>
                           ) : (
                             <>
                               <Button
@@ -990,7 +1041,19 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                       <>
                         <div className="flex items-center gap-2">
                           <CheckCircle2 className="size-3.5 text-white shrink-0" />
-                          <span>2 to 6 members per team</span>
+                          <span>
+                            {event.maxTeamSize && event.maxTeamSize > 0
+                              ? `2 to ${event.maxTeamSize} members per squad`
+                              : "Flexible / unlimited members per squad"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>
+                            {event.maxTeams && event.maxTeams > 0
+                              ? `Up to ${event.maxTeams} squads allowed (${Math.max(0, event.maxTeams - squadCount)} slots open)`
+                              : "Unlimited squads can participate"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <CheckCircle2 className="size-3.5 text-white shrink-0" />
@@ -1000,6 +1063,72 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                     )}
                   </div>
                 </div>
+
+                {/* 3. Campaign Capacity & Squad Allocation Card */}
+                <Card className="p-4 bg-card border-border shadow-arcade space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="size-4 text-primary" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                        Squad Allocation
+                      </span>
+                    </div>
+                    {event.maxTeams && squadCount >= event.maxTeams ? (
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[10px] px-2 py-0.5 font-mono font-bold">
+                        Full
+                      </Badge>
+                    ) : event.maxTeams ? (
+                      <Badge className="bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 text-[10px] px-2 py-0.5 font-mono font-bold">
+                        {Math.max(0, event.maxTeams - squadCount)} Open
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-primary/10 text-primary border border-primary/20 text-[10px] px-2 py-0.5 font-mono font-bold">
+                        Unlimited
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Registered Squads</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {squadCount} / {event.maxTeams || "∞"}
+                      </span>
+                    </div>
+
+                    {event.maxTeams && event.maxTeams > 0 ? (
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden border border-border">
+                        <div
+                          className={`h-full transition-all rounded-full ${
+                            squadCount >= event.maxTeams ? "bg-destructive" : "bg-[#8b5cf6]"
+                          }`}
+                          style={{
+                            width: `${Math.min(100, Math.round((squadCount / event.maxTeams) * 100))}%`,
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="pt-2 border-t border-border grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 rounded-lg bg-muted/40 border border-border space-y-0.5">
+                      <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                        Max Squads
+                      </div>
+                      <div className="font-mono font-bold text-foreground truncate">
+                        {event.maxTeams ? `${event.maxTeams} squads` : "Unlimited (∞)"}
+                      </div>
+                    </div>
+                    <div className="p-2 rounded-lg bg-muted/40 border border-border space-y-0.5">
+                      <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                        Squad Size
+                      </div>
+                      <div className="font-mono font-bold text-foreground truncate">
+                        {event.maxTeamSize ? `Max ${event.maxTeamSize}/team` : "Unlimited (∞)"}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </>
             );
           })()}
@@ -1054,7 +1183,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
               </div>
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 className="size-3.5 text-[#10b981] shrink-0 mt-0.5" />
-                <span>Teams have 2 to {event.maxTeamSize || 6} members.</span>
+                <span>
+                  {event.maxTeamSize
+                    ? `Teams have 2 to ${event.maxTeamSize} members.`
+                    : "Teams have flexible / unlimited members."}
+                </span>
               </div>
             </div>
 

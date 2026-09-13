@@ -34,8 +34,10 @@ interface EditCampaignModalProps {
   setEditCampStatus: (val: string) => void;
   editCampDesc: string;
   setEditCampDesc: (val: string) => void;
-  editCampMaxTeamSize: number;
-  setEditCampMaxTeamSize: (val: number) => void;
+  editCampMaxTeams: string;
+  setEditCampMaxTeams: (val: string) => void;
+  editCampMaxTeamSize: string;
+  setEditCampMaxTeamSize: (val: string) => void;
   editCampRegStart: string;
   setEditCampRegStart: (val: string) => void;
   editCampRegEnd: string;
@@ -69,6 +71,8 @@ export function EditCampaignModal({
   setEditCampStatus,
   editCampDesc,
   setEditCampDesc,
+  editCampMaxTeams,
+  setEditCampMaxTeams,
   editCampMaxTeamSize,
   setEditCampMaxTeamSize,
   editCampRegStart,
@@ -144,8 +148,8 @@ export function EditCampaignModal({
                 />
               </div>
 
-              {/* Code, Status & Max Team Size */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Code, Status, Max Squads & Max Team Size */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground">Campaign Code</label>
                   <Input
@@ -173,18 +177,25 @@ export function EditCampaignModal({
                 </div>
 
                 <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Max Squads</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="Unlimited (blank)"
+                    value={editCampMaxTeams}
+                    onChange={(e) => setEditCampMaxTeams(e.target.value)}
+                    className="h-9 text-xs font-mono bg-background"
+                  />
+                </div>
+
+                <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground">Max Squad Size</label>
                   <Input
                     type="number"
-                    min={2}
-                    max={30}
-                    required
+                    min={1}
+                    placeholder="Unlimited (blank)"
                     value={editCampMaxTeamSize}
-                    onChange={(e) =>
-                      setEditCampMaxTeamSize(
-                        Math.max(2, Math.min(30, parseInt(e.target.value) || 6))
-                      )
-                    }
+                    onChange={(e) => setEditCampMaxTeamSize(e.target.value)}
                     className="h-9 text-xs font-mono bg-background"
                   />
                 </div>
@@ -204,6 +215,10 @@ export function EditCampaignModal({
             </div>
           ) : (
             <div className="space-y-3.5">
+              <div className="p-2.5 rounded-lg border border-amber-500/20 bg-amber-500/5 text-muted-foreground text-xs font-mono">
+                Milestone dates left blank will appear as <strong>TBA</strong> on the platform.
+              </div>
+
               {/* 1. Registration Window */}
               <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
                 <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
@@ -264,14 +279,13 @@ export function EditCampaignModal({
               <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
                 <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
                   <Telescope className="size-3.5 text-[#8b5cf6]" />
-                  <span>Stage 3: Telescope Image Search Window</span>
+                  <span>Stage 3: Telescope Image Search Window (TBA if blank)</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[11px] text-muted-foreground">Campaign Starts</label>
                     <Input
                       type="datetime-local"
-                      required
                       value={editCampStart}
                       onChange={(e) => setEditCampStart(e.target.value)}
                       className="h-8 text-xs bg-background font-mono"
@@ -281,7 +295,6 @@ export function EditCampaignModal({
                     <label className="text-[11px] text-muted-foreground">Campaign Ends</label>
                     <Input
                       type="datetime-local"
-                      required
                       value={editCampEnd}
                       onChange={(e) => setEditCampEnd(e.target.value)}
                       className="h-8 text-xs bg-background font-mono"

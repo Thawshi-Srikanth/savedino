@@ -137,7 +137,8 @@ export default function AdminDashboardPage() {
   const [editCampTitle, setEditCampTitle] = useState<string>("");
   const [editCampCode, setEditCampCode] = useState<string>("");
   const [editCampDesc, setEditCampDesc] = useState<string>("");
-  const [editCampMaxTeamSize, setEditCampMaxTeamSize] = useState<number>(6);
+  const [editCampMaxTeams, setEditCampMaxTeams] = useState<string>("");
+  const [editCampMaxTeamSize, setEditCampMaxTeamSize] = useState<string>("6");
   const [editCampStatus, setEditCampStatus] = useState<string>("ACTIVE");
   const [editCampRegStart, setEditCampRegStart] = useState<string>("");
   const [editCampRegEnd, setEditCampRegEnd] = useState<string>("");
@@ -265,11 +266,13 @@ export default function AdminDashboardPage() {
 
   // Derived Squad Stats
   const openSquadsCount = useMemo(
-    () => teams.filter((t) => t.members.length < (t.event?.maxTeamSize || 6)).length,
+    () =>
+      teams.filter((t) => !t.event?.maxTeamSize || t.members.length < t.event.maxTeamSize).length,
     [teams]
   );
   const fullSquadsCount = useMemo(
-    () => teams.filter((t) => t.members.length >= (t.event?.maxTeamSize || 6)).length,
+    () =>
+      teams.filter((t) => t.event?.maxTeamSize && t.members.length >= t.event.maxTeamSize).length,
     [teams]
   );
   const totalSquadMembers = useMemo(
@@ -279,7 +282,8 @@ export default function AdminDashboardPage() {
   const totalOpenSlots = useMemo(
     () =>
       teams.reduce(
-        (acc, t) => acc + Math.max(0, (t.event?.maxTeamSize || 6) - t.members.length),
+        (acc, t) =>
+          acc + (t.event?.maxTeamSize ? Math.max(0, t.event.maxTeamSize - t.members.length) : 0),
         0
       ),
     [teams]
@@ -299,11 +303,13 @@ export default function AdminDashboardPage() {
           (m) => m.user?.name?.toLowerCase().includes(q) || m.user?.email?.toLowerCase().includes(q)
         );
 
-      const maxTeamSize = t.event?.maxTeamSize || 6;
+      const maxTeamSize = t.event?.maxTeamSize;
+      const isFull = maxTeamSize && maxTeamSize > 0 ? t.members.length >= maxTeamSize : false;
+      const isOpen = !isFull;
       const matchesCapacity =
         teamCapacityFilter === "ALL" ||
-        (teamCapacityFilter === "OPEN" && t.members.length < maxTeamSize) ||
-        (teamCapacityFilter === "FULL" && t.members.length >= maxTeamSize);
+        (teamCapacityFilter === "OPEN" && isOpen) ||
+        (teamCapacityFilter === "FULL" && isFull);
 
       const matchesCampaign =
         teamCampaignFilter === "ALL" ||
@@ -718,7 +724,8 @@ export default function AdminDashboardPage() {
     setEditCampTitle(ev.title);
     setEditCampCode(ev.code);
     setEditCampDesc(ev.description || "");
-    setEditCampMaxTeamSize(ev.maxTeamSize || 6);
+    setEditCampMaxTeams(ev.maxTeams ? String(ev.maxTeams) : "");
+    setEditCampMaxTeamSize(ev.maxTeamSize ? String(ev.maxTeamSize) : "");
     setEditCampStatus(ev.status);
     setEditCampRegStart(toLocalInput(ev.regStart));
     setEditCampRegEnd(toLocalInput(ev.regEnd));
@@ -740,10 +747,11 @@ export default function AdminDashboardPage() {
         title: editCampTitle,
         code: editCampCode.trim().toUpperCase(),
         description: editCampDesc || null,
-        maxTeamSize: Number(editCampMaxTeamSize),
+        maxTeams: editCampMaxTeams ? parseInt(editCampMaxTeams) : null,
+        maxTeamSize: editCampMaxTeamSize ? parseInt(editCampMaxTeamSize) : null,
         status: editCampStatus,
-        startDate: new Date(editCampStart).toISOString(),
-        endDate: new Date(editCampEnd).toISOString(),
+        startDate: editCampStart ? new Date(editCampStart).toISOString() : null,
+        endDate: editCampEnd ? new Date(editCampEnd).toISOString() : null,
         regStart: editCampRegStart ? new Date(editCampRegStart).toISOString() : null,
         regEnd: editCampRegEnd ? new Date(editCampRegEnd).toISOString() : null,
         teamFormationStart: editCampTeamStart ? new Date(editCampTeamStart).toISOString() : null,
@@ -1037,6 +1045,8 @@ export default function AdminDashboardPage() {
           setEditCampStatus={setEditCampStatus}
           editCampDesc={editCampDesc}
           setEditCampDesc={setEditCampDesc}
+          editCampMaxTeams={editCampMaxTeams}
+          setEditCampMaxTeams={setEditCampMaxTeams}
           editCampMaxTeamSize={editCampMaxTeamSize}
           setEditCampMaxTeamSize={setEditCampMaxTeamSize}
           editCampRegStart={editCampRegStart}

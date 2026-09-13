@@ -67,19 +67,39 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Enforce Event Concurrency Rule
+    // 2. Check Campaign Max Teams Limit (if configured)
+    if (targetEvent.maxTeams && targetEvent.maxTeams > 0) {
+      const currentTeamsCount = await prisma.team.count({
+        where: {
+          eventId,
+          status: { not: "DISQUALIFIED" },
+        },
+      });
+
+      if (currentTeamsCount >= targetEvent.maxTeams) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `This campaign has reached its maximum capacity of ${targetEvent.maxTeams} teams.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. Enforce Event Concurrency Rule
     const concurrency = await checkUserEventConcurrency(session.user.id, eventId);
     if (!concurrency.canEnroll) {
       return NextResponse.json({ success: false, error: concurrency.reason }, { status: 409 });
     }
 
-    // 3. Generate unique invite code
+    // 4. Generate unique invite code
     let inviteCode = generateInviteCode();
     while (await prisma.team.findUnique({ where: { inviteCode } })) {
       inviteCode = generateInviteCode();
     }
 
-    // 3. Create Team & add leader as first member
+    // 5. Create Team & add leader as first member
     const newTeam = await prisma.team.create({
       data: {
         eventId,
@@ -198,6 +218,7 @@ export async function GET(req: Request) {
             code: true,
             status: true,
             maxTeamSize: true,
+            maxTeams: true,
           },
         },
         members: {

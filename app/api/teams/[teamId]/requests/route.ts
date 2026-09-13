@@ -198,12 +198,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       );
     }
 
-    const maxLimit = team.event?.maxTeamSize || 6;
-    if (team.members.length >= maxLimit) {
-      return NextResponse.json(
-        { success: false, error: `This squad is already at max capacity (${maxLimit} members).` },
-        { status: 400 }
-      );
+    if (team.event?.maxTeamSize && team.event.maxTeamSize > 0) {
+      if (team.members.length >= team.event.maxTeamSize) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `This squad is already at max capacity (${team.event.maxTeamSize} members).`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if user is already in this team

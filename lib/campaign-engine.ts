@@ -47,17 +47,24 @@ export async function checkUserEventConcurrency(
     }
 
     // Check for date range overlap:
-    // Overlap exists if (StartA <= EndB) and (EndA >= StartB)
-    const overlaps =
-      targetEvent.startDate <= existingEvent.endDate &&
-      targetEvent.endDate >= existingEvent.startDate;
+    // Overlap exists if both events have defined dates and (StartA <= EndB) and (EndA >= StartB)
+    if (
+      targetEvent.startDate &&
+      targetEvent.endDate &&
+      existingEvent.startDate &&
+      existingEvent.endDate
+    ) {
+      const overlaps =
+        targetEvent.startDate <= existingEvent.endDate &&
+        targetEvent.endDate >= existingEvent.startDate;
 
-    if (overlaps) {
-      return {
-        canEnroll: false,
-        conflictingEventTitle: existingEvent.title,
-        reason: `You are already participating in '${existingEvent.title}' which runs concurrently from ${existingEvent.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} to ${existingEvent.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}. Multiple simultaneous event participation is not allowed.`,
-      };
+      if (overlaps) {
+        return {
+          canEnroll: false,
+          conflictingEventTitle: existingEvent.title,
+          reason: `You are already participating in '${existingEvent.title}' which runs concurrently from ${existingEvent.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} to ${existingEvent.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}. Multiple simultaneous event participation is not allowed.`,
+        };
+      }
     }
   }
 

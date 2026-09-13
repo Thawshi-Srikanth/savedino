@@ -104,17 +104,38 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
     }
 
-    if (body.regStart) dataToUpdate.regStart = new Date(body.regStart);
-    if (body.regEnd) dataToUpdate.regEnd = new Date(body.regEnd);
-    if (body.teamFormationStart)
-      dataToUpdate.teamFormationStart = new Date(body.teamFormationStart);
-    if (body.teamFormationEnd) dataToUpdate.teamFormationEnd = new Date(body.teamFormationEnd);
-    if (body.startDate) dataToUpdate.startDate = new Date(body.startDate);
-    if (body.endDate) dataToUpdate.endDate = new Date(body.endDate);
-    if (body.submissionStart) dataToUpdate.submissionStart = new Date(body.submissionStart);
-    if (body.submissionEnd) dataToUpdate.submissionEnd = new Date(body.submissionEnd);
+    if (body.regStart !== undefined)
+      dataToUpdate.regStart = body.regStart ? new Date(body.regStart) : null;
+    if (body.regEnd !== undefined) dataToUpdate.regEnd = body.regEnd ? new Date(body.regEnd) : null;
+    if (body.teamFormationStart !== undefined)
+      dataToUpdate.teamFormationStart = body.teamFormationStart
+        ? new Date(body.teamFormationStart)
+        : null;
+    if (body.teamFormationEnd !== undefined)
+      dataToUpdate.teamFormationEnd = body.teamFormationEnd
+        ? new Date(body.teamFormationEnd)
+        : null;
+    if (body.startDate !== undefined)
+      dataToUpdate.startDate = body.startDate ? new Date(body.startDate) : null;
+    if (body.endDate !== undefined)
+      dataToUpdate.endDate = body.endDate ? new Date(body.endDate) : null;
+    if (body.submissionStart !== undefined)
+      dataToUpdate.submissionStart = body.submissionStart ? new Date(body.submissionStart) : null;
+    if (body.submissionEnd !== undefined)
+      dataToUpdate.submissionEnd = body.submissionEnd ? new Date(body.submissionEnd) : null;
+
     if (body.maxTeamSize !== undefined) {
-      dataToUpdate.maxTeamSize = Math.max(2, Math.min(30, Number(body.maxTeamSize)));
+      dataToUpdate.maxTeamSize =
+        body.maxTeamSize !== null && body.maxTeamSize !== "" && Number(body.maxTeamSize) > 0
+          ? Math.max(1, Number(body.maxTeamSize))
+          : null;
+    }
+
+    if (body.maxTeams !== undefined) {
+      dataToUpdate.maxTeams =
+        body.maxTeams !== null && body.maxTeams !== "" && Number(body.maxTeams) > 0
+          ? Math.max(1, Number(body.maxTeams))
+          : null;
     }
 
     const updatedEvent = await prisma.event.update({

@@ -39,9 +39,9 @@ export async function GET() {
       },
     });
 
-    // Filter out full teams based on campaign maxTeamSize
+    // Filter out full teams based on campaign maxTeamSize (if configured)
     const recruitingTeams = teams.filter(
-      (t: any) => t.members.length < (t.event?.maxTeamSize || 6)
+      (t: any) => !t.event?.maxTeamSize || t.members.length < t.event.maxTeamSize
     );
 
     return NextResponse.json({
