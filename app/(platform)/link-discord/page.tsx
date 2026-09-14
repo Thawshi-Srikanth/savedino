@@ -219,7 +219,9 @@ function LinkDiscordContent() {
           <div className="p-3.5 bg-muted/60 border border-border/60 rounded-xl text-xs text-muted-foreground">
             <p className="font-semibold text-foreground mb-1">How to get a new link:</p>
             <p>
-              Open Discord and type <code className="font-mono font-bold text-foreground">/link</code> in the server or Bot DM.
+              Open Discord and type{" "}
+              <code className="font-mono font-bold text-foreground">/link</code> in the server or
+              Bot DM.
             </p>
           </div>
 

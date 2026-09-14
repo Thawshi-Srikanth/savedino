@@ -383,7 +383,8 @@ export function EditCampaignModal({
           ) : (
             <div className="space-y-3.5">
               <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 text-muted-foreground text-xs leading-relaxed">
-                Configure Discord IDs for this specific campaign. Leave blank to disable automated Discord broadcasts for this campaign.
+                Configure Discord IDs for this specific campaign. Leave blank to disable automated
+                Discord broadcasts for this campaign.
               </div>
 
               {/* Campaign Role ID */}
@@ -414,7 +415,8 @@ export function EditCampaignModal({
                   className="h-9 text-xs font-mono bg-background"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Where the bot posts squad announcements and invite links when new teams are created.
+                  Where the bot posts squad announcements and invite links when new teams are
+                  created.
                 </p>
               </div>
 
@@ -444,9 +446,13 @@ export function EditCampaignModal({
                       </svg>
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-foreground">Discord Slash Command: /link</h4>
+                      <h4 className="text-xs font-bold text-foreground">
+                        Discord Slash Command: /link
+                      </h4>
                       <p className="text-[11px] text-muted-foreground">
-                        Allows students to type <code className="font-mono font-bold">/link</code> in Discord to receive a private 1-click link to connect their SaveDino profile.
+                        Allows students to type <code className="font-mono font-bold">/link</code>{" "}
+                        in Discord to receive a private 1-click link to connect their SaveDino
+                        profile.
                       </p>
                     </div>
                   </div>
@@ -461,7 +467,11 @@ export function EditCampaignModal({
                   className="h-8 text-xs font-bold rounded-lg border-[#5865F2]/40 text-[#5865F2] hover:bg-[#5865F2]/10 shadow-arcade-sm active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
                 >
                   <RefreshCw className={`size-3.5 ${registeringCommands ? "animate-spin" : ""}`} />
-                  <span>{registeringCommands ? "Registering with Discord..." : "Register /link Command in Discord"}</span>
+                  <span>
+                    {registeringCommands
+                      ? "Registering with Discord..."
+                      : "Register /link Command in Discord"}
+                  </span>
                 </Button>
               </div>
             </div>

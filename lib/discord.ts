@@ -5,7 +5,7 @@ import crypto from "crypto";
  * Uses Discord Standard REST API v10 with Bot Authorization Token.
  */
 
-const DISCORD_API_BASE = 'https://discord.com/api/v10';
+const DISCORD_API_BASE = "https://discord.com/api/v10";
 
 interface DiscordEmbedField {
   name: string;
@@ -38,10 +38,10 @@ export async function sendDiscordMessage(
 
   try {
     const res = await fetch(`${DISCORD_API_BASE}/channels/${channelId}/messages`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bot ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         content: content || undefined,
@@ -50,12 +50,12 @@ export async function sendDiscordMessage(
     });
 
     if (!res.ok) {
-      console.error('[Discord Bot] Error sending message:', await res.text());
+      console.error("[Discord Bot] Error sending message:", await res.text());
       return null;
     }
     return await res.json();
   } catch (error) {
-    console.error('[Discord Bot] Network error sending message:', error);
+    console.error("[Discord Bot] Network error sending message:", error);
     return null;
   }
 }
@@ -75,15 +75,18 @@ export async function createSquadThread(params: {
 
   try {
     // Sanitize thread name (max 100 chars, clean characters)
-    const threadName = `squad-${params.squadName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').slice(0, 80)}`;
+    const threadName = `squad-${params.squadName
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "-")
+      .slice(0, 80)}`;
 
     // Type 12 = GUILD_PRIVATE_THREAD, 11 = GUILD_PUBLIC_THREAD
     // Auto archive duration: 10080 minutes (7 days)
     const res = await fetch(`${DISCORD_API_BASE}/channels/${params.channelId}/threads`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bot ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         name: threadName,
@@ -96,13 +99,13 @@ export async function createSquadThread(params: {
     if (!res.ok) {
       // Fallback: If private threads require level permissions or fail, try public thread (type 11)
       const errText = await res.text();
-      console.warn('[Discord Bot] Private thread creation attempt:', errText);
+      console.warn("[Discord Bot] Private thread creation attempt:", errText);
 
       const fallbackRes = await fetch(`${DISCORD_API_BASE}/channels/${params.channelId}/threads`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bot ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: threadName,
@@ -112,7 +115,7 @@ export async function createSquadThread(params: {
       });
 
       if (!fallbackRes.ok) {
-        console.error('[Discord Bot] Thread creation failed:', await fallbackRes.text());
+        console.error("[Discord Bot] Thread creation failed:", await fallbackRes.text());
         return null;
       }
 
@@ -127,7 +130,7 @@ export async function createSquadThread(params: {
           title: `${params.squadName} • Squad Workspace`,
           description: `Private coordination thread for squad **${params.squadName}** (\`${params.teamCode}\`).\nUse this thread to share observations, coordinate analysis, and discuss candidates.`,
           color: 0x8b5cf6,
-          footer: { text: 'SaveDino Asteroid Search Campaign' },
+          footer: { text: "SaveDino Asteroid Search Campaign" },
         },
       ]);
 
@@ -149,7 +152,7 @@ export async function createSquadThread(params: {
         title: `${params.squadName} • Squad Workspace`,
         description: `Private coordination thread for squad **${params.squadName}** (\`${params.teamCode}\`).\nUse this thread to share observations, coordinate analysis, and discuss candidates.`,
         color: 0x8b5cf6,
-        footer: { text: 'SaveDino Asteroid Search Campaign' },
+        footer: { text: "SaveDino Asteroid Search Campaign" },
       },
     ]);
 
@@ -159,7 +162,7 @@ export async function createSquadThread(params: {
 
     return { threadId: threadData.id, threadUrl };
   } catch (error) {
-    console.error('[Discord Bot] Network error creating squad thread:', error);
+    console.error("[Discord Bot] Network error creating squad thread:", error);
     return null;
   }
 }
@@ -172,15 +175,18 @@ export async function addMemberToThread(threadId: string, discordUserId: string)
   if (!token || !threadId || !discordUserId) return false;
 
   try {
-    const res = await fetch(`${DISCORD_API_BASE}/channels/${threadId}/thread-members/${discordUserId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bot ${token}`,
-      },
-    });
+    const res = await fetch(
+      `${DISCORD_API_BASE}/channels/${threadId}/thread-members/${discordUserId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bot ${token}`,
+        },
+      }
+    );
     return res.ok || res.status === 204;
   } catch (error) {
-    console.error('[Discord Bot] Error adding member to thread:', error);
+    console.error("[Discord Bot] Error adding member to thread:", error);
     return false;
   }
 }
@@ -204,21 +210,21 @@ export async function assignDiscordRole(
     const res = await fetch(
       `${DISCORD_API_BASE}/guilds/${targetGuild}/members/${discordUserId}/roles/${roleId}`,
       {
-        method: 'PUT',
+        method: "PUT",
         headers: {
           Authorization: `Bot ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }
     );
 
     if (!res.ok && res.status !== 204) {
-      console.error('[Discord Bot] Error assigning role:', await res.text());
+      console.error("[Discord Bot] Error assigning role:", await res.text());
       return false;
     }
     return true;
   } catch (error) {
-    console.error('[Discord Bot] Network error assigning role:', error);
+    console.error("[Discord Bot] Network error assigning role:", error);
     return false;
   }
 }
@@ -239,29 +245,29 @@ export async function notifySquadCreated(params: {
 }) {
   if (!params.channelId) return;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://savedino.sedssl.org';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://savedino.sedssl.org";
   const joinUrl = `${appUrl}/teams/join?code=${params.inviteCode}`;
 
   const fields: DiscordEmbedField[] = [
-    { name: 'Squad Leader', value: params.leaderName, inline: true },
-    { name: 'Squad Code', value: `\`${params.inviteCode}\``, inline: true },
+    { name: "Squad Leader", value: params.leaderName, inline: true },
+    { name: "Squad Code", value: `\`${params.inviteCode}\``, inline: true },
     {
-      name: 'Status',
-      value: params.isRecruiting ? 'Recruiting Members' : 'Closed Squad',
+      name: "Status",
+      value: params.isRecruiting ? "Recruiting Members" : "Closed Squad",
       inline: true,
     },
   ];
 
   if (params.recruitmentNotes && params.isRecruiting) {
     fields.push({
-      name: 'Notes',
+      name: "Notes",
       value: params.recruitmentNotes,
       inline: false,
     });
   }
 
   fields.push({
-    name: 'Join Squad',
+    name: "Join Squad",
     value: `[Apply to join with code \`${params.inviteCode}\`](${joinUrl})`,
     inline: false,
   });
@@ -273,7 +279,7 @@ export async function notifySquadCreated(params: {
     color: 0x8b5cf6, // Electric Violet (#8b5cf6)
     fields,
     footer: {
-      text: 'SaveDino Citizen Science • SEDS Sri Lanka',
+      text: "SaveDino Citizen Science • SEDS Sri Lanka",
     },
     timestamp: new Date().toISOString(),
   };
@@ -298,12 +304,12 @@ export async function notifyAsteroidDiscovery(params: {
     description: `Squad **${params.teamName}** submitted verified discoveries for dataset **${params.setName}** in **${params.campaignTitle}**.`,
     color: 0x10b981, // Emerald Green (#10b981)
     fields: [
-      { name: 'Dataset', value: `\`${params.setName}\``, inline: true },
-      { name: 'Observations', value: `${params.candidateCount} Candidates`, inline: true },
-      { name: 'Squad', value: params.teamName, inline: true },
+      { name: "Dataset", value: `\`${params.setName}\``, inline: true },
+      { name: "Observations", value: `${params.candidateCount} Candidates`, inline: true },
+      { name: "Squad", value: params.teamName, inline: true },
     ],
     footer: {
-      text: 'SaveDino Asteroid Search Campaign • SEDS Sri Lanka',
+      text: "SaveDino Asteroid Search Campaign • SEDS Sri Lanka",
     },
     timestamp: new Date().toISOString(),
   };
@@ -356,13 +362,17 @@ export function generateDiscordLinkToken(discordUserId: string, username?: strin
   const expiresAt = Date.now() + 15 * 60 * 1000; // 15 mins validity
   const payload = `${discordUserId}:${username || ""}:${expiresAt}`;
   const hmac = crypto.createHmac("sha256", secret).update(payload).digest("hex");
-  return Buffer.from(JSON.stringify({ discordUserId, username, expiresAt, hmac })).toString("base64url");
+  return Buffer.from(JSON.stringify({ discordUserId, username, expiresAt, hmac })).toString(
+    "base64url"
+  );
 }
 
 /**
  * Validates the Discord link token
  */
-export function verifyDiscordLinkToken(token: string): { discordUserId: string; username?: string } | null {
+export function verifyDiscordLinkToken(
+  token: string
+): { discordUserId: string; username?: string } | null {
   try {
     const raw = Buffer.from(token, "base64url").toString("utf-8");
     const { discordUserId, username, expiresAt, hmac } = JSON.parse(raw);
@@ -399,7 +409,8 @@ export async function registerDiscordCommands(guildId?: string) {
 
   const commandData = {
     name: "link",
-    description: "Link your Discord account to SaveDino to unlock squad channels and campaign roles.",
+    description:
+      "Link your Discord account to SaveDino to unlock squad channels and campaign roles.",
     type: 1, // CHAT_INPUT
   };
 

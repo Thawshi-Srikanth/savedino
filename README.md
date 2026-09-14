@@ -111,6 +111,7 @@ BETTER_AUTH_SECRET="generate_a_random_32_character_secret_here"
 EMAIL_FROM="SaveDino <login@savedino.sedssl.org>"
 EMAIL_REPLY_TO="SEDS Sri Lanka <info@sedssl.org>"
 RESEND_API_KEY="re_your_resend_key"
+RESEND_SEGMENT_ID=""
 BREVO_API_KEY="your_brevo_key"
 ```
 

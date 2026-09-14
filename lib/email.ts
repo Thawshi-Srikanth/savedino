@@ -263,23 +263,58 @@ export async function sendTeamInvitationEmail(
  * Subscribes a user to the SaveDino newsletter segment / list
  */
 export async function subscribeToNewsletter(email: string) {
+  const targetSegmentId =
+    process.env.RESEND_SEGMENT_ID ||
+    process.env.RESEND_AUDIENCE_ID ||
+    "e6dab775-a4de-424f-84d6-6d3ed0029ed1";
+
   // 1. Primary: Resend Contacts
   if (resend) {
     try {
-      const { data, error } = await (resend.contacts as any).create({
+      const contactPayload: any = {
         email,
         unsubscribed: false,
-      });
+      };
+
+      if (targetSegmentId) {
+        contactPayload.segments = [{ id: targetSegmentId }];
+        contactPayload.audienceId = targetSegmentId;
+      }
+
+      const { data, error } = await (resend.contacts as any).create(contactPayload);
+
+      // If contact created, attempt to ensure segment association
+      if (data?.id && targetSegmentId && (resend.contacts as any)?.segments?.add) {
+        try {
+          await (resend.contacts as any).segments.add({
+            contactId: data.id,
+            segmentId: targetSegmentId,
+          });
+        } catch {
+          // Handled if already associated
+        }
+      }
 
       if (!error && data) {
-        return { success: true, provider: "resend", data };
+        return { success: true, provider: "resend", data, segmentId: targetSegmentId };
       }
 
       if (error) {
         console.warn("[Resend Contact Info]:", error.message);
+        // If contact already exists, try adding to segment directly
+        if (targetSegmentId && (resend.contacts as any)?.segments?.add) {
+          try {
+            await (resend.contacts as any).segments.add({
+              email,
+              segmentId: targetSegmentId,
+            });
+          } catch {
+            // Silently ignore if already present in segment
+          }
+        }
       }
 
-      return { success: true, provider: "resend", data };
+      return { success: true, provider: "resend", data, segmentId: targetSegmentId };
     } catch (err: any) {
       console.warn("[Resend Subscribe Warning]:", err.message);
     }
@@ -302,7 +337,7 @@ export async function subscribeToNewsletter(email: string) {
       });
 
       if (response.ok || response.status === 204) {
-        return { success: true, provider: "brevo" };
+        return { success: true, provider: "brevo", segmentId: targetSegmentId };
       }
     } catch (brevoErr: any) {
       console.warn("[Brevo Subscribe Warning]:", brevoErr?.message || brevoErr);
@@ -311,7 +346,7 @@ export async function subscribeToNewsletter(email: string) {
 
   // 3. Development / Simulation Fallback
   console.log("=================================================");
-  console.log(`[NEWSLETTER SUBSCRIBE (SIMULATED FOR ${email})]`);
+  console.log(`[NEWSLETTER SUBSCRIBE (SIMULATED FOR ${email}) -> Segment: ${targetSegmentId}]`);
   console.log("=================================================");
-  return { success: true, simulated: true };
+  return { success: true, simulated: true, segmentId: targetSegmentId };
 }

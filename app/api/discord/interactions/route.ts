@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import {
-  verifyDiscordSignature,
-  generateDiscordLinkToken,
-} from "@/lib/discord";
+import { verifyDiscordSignature, generateDiscordLinkToken } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
@@ -38,15 +35,11 @@ export async function POST(req: Request) {
       const proto = req.headers.get("x-forwarded-proto") || "https";
       const dynamicOrigin = host ? `${proto}://${host}` : null;
       const appUrl =
-        process.env.NEXT_PUBLIC_APP_URL ||
-        dynamicOrigin ||
-        "https://savedino.sedssl.org";
+        process.env.NEXT_PUBLIC_APP_URL || dynamicOrigin || "https://savedino.sedssl.org";
 
-      const discordUser =
-        interaction.member?.user || interaction.user;
+      const discordUser = interaction.member?.user || interaction.user;
       const discordUserId = discordUser?.id;
-      const discordUsername =
-        discordUser?.global_name || discordUser?.username || "Space Explorer";
+      const discordUsername = discordUser?.global_name || discordUser?.username || "Space Explorer";
 
       if (commandName === "link") {
         if (!discordUserId) {
@@ -104,10 +97,7 @@ export async function POST(req: Request) {
         }
 
         // Generate secure 15-minute one-time link token
-        const linkToken = generateDiscordLinkToken(
-          discordUserId,
-          discordUsername
-        );
+        const linkToken = generateDiscordLinkToken(discordUserId, discordUsername);
         const linkUrl = `${appUrl}/link-discord?token=${linkToken}`;
 
         return NextResponse.json({
@@ -118,7 +108,7 @@ export async function POST(req: Request) {
               {
                 title: "🔗 Link Your SaveDino Account",
                 description: `Click the button below to link your Discord account to SaveDino.\n\n✨ **What you'll unlock:**\n• Private **Squad Voice & Text Channels**\n• Official **Campaign & Participant Roles**\n• Real-time **Asteroid Discovery Alerts**\n\n*(This secure link is private to you and expires in 15 minutes)*`,
-                color: 0x5865F2, // Discord Blurple
+                color: 0x5865f2, // Discord Blurple
                 footer: {
                   text: "SaveDino Citizen Science • SEDS Sri Lanka",
                 },
@@ -154,9 +144,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unhandled interaction type" }, { status: 400 });
   } catch (error: any) {
     console.error("[Discord Interactions] Error handling webhook:", error);
-    return NextResponse.json(
-      { error: error.message || "Internal error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
   }
 }

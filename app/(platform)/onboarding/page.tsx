@@ -48,8 +48,7 @@ function OnboardingForm() {
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(!isForceDebug);
 
-  const discordInviteUrl =
-    process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg";
+  const discordInviteUrl = process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg";
 
   useEffect(() => {
     if (isForceDebug) {
@@ -205,8 +204,8 @@ function OnboardingForm() {
                   Complete your profile
                 </h1>
                 <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-                  Enter your details to finalize your citizen scientist profile before joining campaigns
-                  and squads.
+                  Enter your details to finalize your citizen scientist profile before joining
+                  campaigns and squads.
                 </p>
               </div>
 
@@ -316,7 +315,8 @@ function OnboardingForm() {
                   Join our Discord Server
                 </h1>
                 <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-                  Join the official community to chat with asteroid hunters and receive campaign updates.
+                  Join the official community to chat with asteroid hunters and receive campaign
+                  updates.
                 </p>
               </div>
 

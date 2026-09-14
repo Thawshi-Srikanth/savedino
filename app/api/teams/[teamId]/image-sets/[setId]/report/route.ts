@@ -118,14 +118,20 @@ export async function POST(
     });
 
     // Trigger Discord notification if candidates found and submitted
-    if (targetStatus === "SUBMITTED" && team?.event?.discordAlertsChannelId && parsed.totalObservations > 0) {
+    if (
+      targetStatus === "SUBMITTED" &&
+      team?.event?.discordAlertsChannelId &&
+      parsed.totalObservations > 0
+    ) {
       notifyAsteroidDiscovery({
         channelId: team.event.discordAlertsChannelId,
         campaignTitle: team.event.title,
         teamName: team.name,
         setName: currentSet.name,
         candidateCount: parsed.totalObservations,
-      }).catch((err) => console.error("[Discord Broadcast] Failed to notify asteroid discovery:", err));
+      }).catch((err) =>
+        console.error("[Discord Broadcast] Failed to notify asteroid discovery:", err)
+      );
     }
 
     return NextResponse.json({

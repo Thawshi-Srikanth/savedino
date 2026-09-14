@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import {
-  verifyDiscordLinkToken,
-  assignDiscordRole,
-  addMemberToThread,
-} from "@/lib/discord";
+import { verifyDiscordLinkToken, assignDiscordRole, addMemberToThread } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
@@ -29,10 +25,7 @@ export async function POST(req: Request) {
 
     const { token } = await req.json();
     if (!token) {
-      return NextResponse.json(
-        { success: false, error: "Missing link token." },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "Missing link token." }, { status: 400 });
     }
 
     // 1. Verify token validity and signature
@@ -41,7 +34,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "This link has expired or is invalid. Please type /link again in Discord to get a fresh link.",
+          error:
+            "This link has expired or is invalid. Please type /link again in Discord to get a fresh link.",
         },
         { status: 400 }
       );
@@ -97,14 +91,14 @@ export async function POST(req: Request) {
       if (!team) continue;
 
       if (team.event?.discordRoleId) {
-        await assignDiscordRole(discordUserId, team.event.discordRoleId).catch(
-          (e) => console.error("[Discord Link] Campaign role error:", e)
+        await assignDiscordRole(discordUserId, team.event.discordRoleId).catch((e) =>
+          console.error("[Discord Link] Campaign role error:", e)
         );
       }
 
       if (team.discordThreadId) {
-        await addMemberToThread(team.discordThreadId, discordUserId).catch(
-          (e) => console.error("[Discord Link] Squad thread error:", e)
+        await addMemberToThread(team.discordThreadId, discordUserId).catch((e) =>
+          console.error("[Discord Link] Squad thread error:", e)
         );
       }
     }
