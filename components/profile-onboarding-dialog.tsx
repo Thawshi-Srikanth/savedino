@@ -26,10 +26,7 @@ export function ProfileOnboardingDialog() {
 
     // Fast-path: check if profile completion was already verified in this session for this specific user
     const storageKey = `savedino_profile_completed_${session.user.id}`;
-    if (
-      typeof window !== "undefined" &&
-      sessionStorage.getItem(storageKey) === "true"
-    ) {
+    if (typeof window !== "undefined" && sessionStorage.getItem(storageKey) === "true") {
       return;
     }
 

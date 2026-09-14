@@ -11,6 +11,7 @@ import { Logo } from "@/components/Logo";
 
 import { PixelAvatar } from "@/components/pixel-avatar";
 import { ProfileOnboardingDialog } from "@/components/profile-onboarding-dialog";
+import { PlatformTourGuide, PlatformTourTriggerButton } from "@/components/platform-tour-guide";
 import { DinoLoading } from "@/components/dino-loading";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
@@ -77,7 +78,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   const navItems = isDemo
     ? []
     : [
-        { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
+        {
+          title: "Campaigns",
+          url: "/campaigns",
+          icon: Telescope,
+          active: pathname === "/campaigns",
+        },
         {
           title: "Teams",
           url: "/teams",
@@ -114,7 +120,18 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
               {navItems.map((item) => (
-                <Link key={item.title} href={item.url} prefetch={false}>
+                <Link
+                  key={item.title}
+                  href={item.url}
+                  prefetch={false}
+                  id={
+                    item.url === "/campaigns"
+                      ? "tour-desktop-campaigns"
+                      : item.url === "/teams"
+                        ? "tour-desktop-teams"
+                        : undefined
+                  }
+                >
                   <Button
                     size="sm"
                     variant={item.active ? "default" : "outline"}
@@ -130,6 +147,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
           {/* Desktop Right Controls: Uniform Height (h-9) Controls & Session */}
           <div className="hidden md:flex items-center gap-2.5">
+            {/* Platform Tour Guide Button */}
+            {!isDemo && <PlatformTourTriggerButton />}
+
             {/* Theme Switcher 3D Button */}
             <Button
               variant="outline"
@@ -148,7 +168,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             {session?.user ? (
               <div className="flex items-center gap-2">
                 {/* Logged-In User Profile Link with Seed Pixel Avatar */}
-                <Link href="/profile" prefetch={false}>
+                <Link href="/profile" prefetch={false} id="tour-desktop-profile">
                   <Button
                     size="sm"
                     variant={pathname === "/profile" ? "default" : "outline"}
@@ -348,11 +368,15 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       {/* Profile Onboarding Modal for Incomplete Profiles */}
       <ProfileOnboardingDialog />
 
+      {/* Interactive Platform Tour Guide */}
+      {!isDemo && <PlatformTourGuide />}
+
       {/* Desktop Floating Arcade Game Button (Hidden on mobile or in demo mode) */}
       {!isDemo && (
         <div className="hidden md:block fixed bottom-6 right-6 z-50">
           <Link href="/" prefetch={false}>
             <Button
+              id="tour-desktop-arcade"
               size="icon"
               className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-arcade-amber-lg active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
               title="Play SaveDino Arcade Game"
@@ -371,6 +395,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             <Link
               href="/"
               prefetch={false}
+              id="tour-mobile-arcade"
               className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 pathname === "/"
                   ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-arcade-amber-lg active:translate-y-0.5"
@@ -387,6 +412,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             <Link
               href="/campaigns"
               prefetch={false}
+              id="tour-mobile-campaigns"
               className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 pathname === "/campaigns"
                   ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
@@ -403,6 +429,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             <Link
               href="/teams"
               prefetch={false}
+              id="tour-mobile-teams"
               className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 pathname === "/teams" || pathname.startsWith("/team/")
                   ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
@@ -420,6 +447,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <Link
                 href="/profile"
                 prefetch={false}
+                id="tour-mobile-profile"
                 className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   pathname === "/profile"
                     ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
