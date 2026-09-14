@@ -64,7 +64,7 @@ export function PlatformTourGuide({
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // Auto-launch tour once for new users
+  // Auto-launch tour once for new users (stored permanently in database & localStorage)
   useEffect(() => {
     if (typeof isOpenOverride === "boolean") {
       setIsOpen(isOpenOverride);
@@ -74,14 +74,34 @@ export function PlatformTourGuide({
     if (!session?.user?.id) return;
 
     const storageKey = `savedino_tour_seen_${session.user.id}`;
-    const hasSeen = localStorage.getItem(storageKey);
+    const localSeen = localStorage.getItem(storageKey);
 
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 800);
-      return () => clearTimeout(timer);
-    }
+    if (localSeen === "true") return;
+
+    // Verify against database user state
+    fetch("/api/user/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.user) {
+          if (data.user.tourCompleted) {
+            localStorage.setItem(storageKey, "true");
+          } else {
+            const timer = setTimeout(() => {
+              setIsOpen(true);
+            }, 800);
+            return () => clearTimeout(timer);
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback to local storage if API is slow
+        if (!localSeen) {
+          const timer = setTimeout(() => {
+            setIsOpen(true);
+          }, 800);
+          return () => clearTimeout(timer);
+        }
+      });
   }, [session?.user?.id, isOpenOverride]);
 
   const updatePosition = useCallback(() => {
@@ -137,6 +157,13 @@ export function PlatformTourGuide({
   const handleClose = () => {
     if (session?.user?.id) {
       localStorage.setItem(`savedino_tour_seen_${session.user.id}`, "true");
+
+      // Save permanently to database user record
+      fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tourCompleted: true }),
+      }).catch((err) => console.error("Failed to save tour completion to db:", err));
     }
     setIsOpen(false);
     setCurrentStep(0);

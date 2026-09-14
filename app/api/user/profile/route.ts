@@ -35,6 +35,7 @@ export async function GET(req: Request) {
         institution: true,
         country: true,
         whatsapp: true,
+        tourCompleted: true,
         createdAt: true,
         accounts: {
           select: {
@@ -165,6 +166,7 @@ export async function GET(req: Request) {
         institution: user.institution,
         country: user.country,
         whatsapp: user.whatsapp,
+        tourCompleted: user.tourCompleted,
         createdAt: user.createdAt,
         discordConnected: isDiscordConnected,
         connectedProviders: user.accounts.map((a) => a.providerId),
@@ -247,11 +249,12 @@ export async function PATCH(req: Request) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: name.trim(),
+        name: name ? name.trim() : undefined,
         institution: institution !== undefined ? institution?.trim() || null : undefined,
         country: country !== undefined ? country?.trim() || null : undefined,
         whatsapp: formattedWhatsapp,
         image: image !== undefined ? image?.trim() || null : undefined,
+        tourCompleted: body.tourCompleted !== undefined ? Boolean(body.tourCompleted) : undefined,
       },
       select: {
         id: true,
@@ -262,6 +265,7 @@ export async function PATCH(req: Request) {
         institution: true,
         country: true,
         whatsapp: true,
+        tourCompleted: true,
         updatedAt: true,
       },
     });

@@ -88,6 +88,7 @@ export const UserScalarFieldEnum = {
   institution: 'institution',
   country: 'country',
   whatsapp: 'whatsapp',
+  tourCompleted: 'tourCompleted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
