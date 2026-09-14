@@ -148,6 +148,9 @@ export default function AdminDashboardPage() {
   const [editCampEnd, setEditCampEnd] = useState<string>("");
   const [editCampSubStart, setEditCampSubStart] = useState<string>("");
   const [editCampSubEnd, setEditCampSubEnd] = useState<string>("");
+  const [editCampDiscordRoleId, setEditCampDiscordRoleId] = useState<string>("");
+  const [editCampDiscordAlertsChannelId, setEditCampDiscordAlertsChannelId] = useState<string>("");
+  const [editCampDiscordSquadsChannelId, setEditCampDiscordSquadsChannelId] = useState<string>("");
   const [editCampTab, setEditCampTab] = useState<string>("overview");
   const [editCampLoading, setEditCampLoading] = useState<boolean>(false);
   const [deleteCampLoading, setDeleteCampLoading] = useState<boolean>(false);
@@ -735,6 +738,9 @@ export default function AdminDashboardPage() {
     setEditCampEnd(toLocalInput(ev.endDate));
     setEditCampSubStart(toLocalInput(ev.submissionStart));
     setEditCampSubEnd(toLocalInput(ev.submissionEnd));
+    setEditCampDiscordRoleId(ev.discordRoleId || "");
+    setEditCampDiscordAlertsChannelId(ev.discordAlertsChannelId || "");
+    setEditCampDiscordSquadsChannelId(ev.discordSquadsChannelId || "");
     setEditCampTab("overview");
   };
 
@@ -758,6 +764,9 @@ export default function AdminDashboardPage() {
         teamFormationEnd: editCampTeamEnd ? new Date(editCampTeamEnd).toISOString() : null,
         submissionStart: editCampSubStart ? new Date(editCampSubStart).toISOString() : null,
         submissionEnd: editCampSubEnd ? new Date(editCampSubEnd).toISOString() : null,
+        discordRoleId: editCampDiscordRoleId.trim() || null,
+        discordAlertsChannelId: editCampDiscordAlertsChannelId.trim() || null,
+        discordSquadsChannelId: editCampDiscordSquadsChannelId.trim() || null,
       };
 
       const res = await fetch(`/api/events/${editingCampaign.id}`, {
@@ -1065,6 +1074,12 @@ export default function AdminDashboardPage() {
           setEditCampSubStart={setEditCampSubStart}
           editCampSubEnd={editCampSubEnd}
           setEditCampSubEnd={setEditCampSubEnd}
+          editCampDiscordRoleId={editCampDiscordRoleId}
+          setEditCampDiscordRoleId={setEditCampDiscordRoleId}
+          editCampDiscordAlertsChannelId={editCampDiscordAlertsChannelId}
+          setEditCampDiscordAlertsChannelId={setEditCampDiscordAlertsChannelId}
+          editCampDiscordSquadsChannelId={editCampDiscordSquadsChannelId}
+          setEditCampDiscordSquadsChannelId={setEditCampDiscordSquadsChannelId}
           editCampLoading={editCampLoading}
           onSave={handleSaveCampaign}
         />

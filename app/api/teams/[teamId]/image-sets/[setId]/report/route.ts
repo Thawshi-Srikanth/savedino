@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { parseMpcReport } from "@/lib/mpc-parser";
 import { isSubmissionClosed } from "@/lib/campaign-engine";
+import { notifyAsteroidDiscovery } from "@/lib/discord";
 
 // POST /api/teams/[teamId]/image-sets/[setId]/report - Submit MPC Discovery Report
 export async function POST(
@@ -115,6 +116,17 @@ export async function POST(
         submittedAt: isLeader || isAdmin ? new Date() : null,
       },
     });
+
+    // Trigger Discord notification if candidates found and submitted
+    if (targetStatus === "SUBMITTED" && team?.event?.discordAlertsChannelId && parsed.totalObservations > 0) {
+      notifyAsteroidDiscovery({
+        channelId: team.event.discordAlertsChannelId,
+        campaignTitle: team.event.title,
+        teamName: team.name,
+        setName: currentSet.name,
+        candidateCount: parsed.totalObservations,
+      }).catch((err) => console.error("[Discord Broadcast] Failed to notify asteroid discovery:", err));
+    }
 
     return NextResponse.json({
       success: true,

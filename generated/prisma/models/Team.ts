@@ -34,6 +34,8 @@ export type TeamMinAggregateOutputType = {
   recruitmentNotes: string | null
   disqualificationReason: string | null
   leaderId: string | null
+  discordThreadId: string | null
+  discordThreadUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -48,6 +50,8 @@ export type TeamMaxAggregateOutputType = {
   recruitmentNotes: string | null
   disqualificationReason: string | null
   leaderId: string | null
+  discordThreadId: string | null
+  discordThreadUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,6 +66,8 @@ export type TeamCountAggregateOutputType = {
   recruitmentNotes: number
   disqualificationReason: number
   leaderId: number
+  discordThreadId: number
+  discordThreadUrl: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -78,6 +84,8 @@ export type TeamMinAggregateInputType = {
   recruitmentNotes?: true
   disqualificationReason?: true
   leaderId?: true
+  discordThreadId?: true
+  discordThreadUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -92,6 +100,8 @@ export type TeamMaxAggregateInputType = {
   recruitmentNotes?: true
   disqualificationReason?: true
   leaderId?: true
+  discordThreadId?: true
+  discordThreadUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +116,8 @@ export type TeamCountAggregateInputType = {
   recruitmentNotes?: true
   disqualificationReason?: true
   leaderId?: true
+  discordThreadId?: true
+  discordThreadUrl?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -193,6 +205,8 @@ export type TeamGroupByOutputType = {
   recruitmentNotes: string | null
   disqualificationReason: string | null
   leaderId: string
+  discordThreadId: string | null
+  discordThreadUrl: string | null
   createdAt: Date
   updatedAt: Date
   _count: TeamCountAggregateOutputType | null
@@ -228,6 +242,8 @@ export type TeamWhereInput = {
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
+  discordThreadId?: Prisma.StringNullableFilter<"Team"> | string | null
+  discordThreadUrl?: Prisma.StringNullableFilter<"Team"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
@@ -246,6 +262,8 @@ export type TeamOrderByWithRelationInput = {
   recruitmentNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   leaderId?: Prisma.SortOrder
+  discordThreadId?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordThreadUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   event?: Prisma.EventOrderByWithRelationInput
@@ -267,6 +285,8 @@ export type TeamWhereUniqueInput = Prisma.AtLeast<{
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
+  discordThreadId?: Prisma.StringNullableFilter<"Team"> | string | null
+  discordThreadUrl?: Prisma.StringNullableFilter<"Team"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
@@ -285,6 +305,8 @@ export type TeamOrderByWithAggregationInput = {
   recruitmentNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   leaderId?: Prisma.SortOrder
+  discordThreadId?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordThreadUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TeamCountOrderByAggregateInput
@@ -305,6 +327,8 @@ export type TeamScalarWhereWithAggregatesInput = {
   recruitmentNotes?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
   leaderId?: Prisma.StringWithAggregatesFilter<"Team"> | string
+  discordThreadId?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
+  discordThreadUrl?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Team"> | Date | string
 }
@@ -318,6 +342,8 @@ export type TeamCreateInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutTeamsInput
@@ -336,6 +362,8 @@ export type TeamUncheckedCreateInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutTeamInput
@@ -352,6 +380,8 @@ export type TeamUpdateInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutTeamsNestedInput
@@ -370,6 +400,8 @@ export type TeamUncheckedUpdateInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
@@ -387,6 +419,8 @@ export type TeamCreateManyInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -400,6 +434,8 @@ export type TeamUpdateManyMutationInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -414,6 +450,8 @@ export type TeamUncheckedUpdateManyInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -438,6 +476,8 @@ export type TeamCountOrderByAggregateInput = {
   recruitmentNotes?: Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
+  discordThreadId?: Prisma.SortOrder
+  discordThreadUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -452,6 +492,8 @@ export type TeamMaxOrderByAggregateInput = {
   recruitmentNotes?: Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
+  discordThreadId?: Prisma.SortOrder
+  discordThreadUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -466,6 +508,8 @@ export type TeamMinOrderByAggregateInput = {
   recruitmentNotes?: Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
+  discordThreadId?: Prisma.SortOrder
+  discordThreadUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -579,6 +623,8 @@ export type TeamCreateWithoutEventInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TeamMemberCreateNestedManyWithoutTeamInput
@@ -595,6 +641,8 @@ export type TeamUncheckedCreateWithoutEventInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutTeamInput
@@ -641,6 +689,8 @@ export type TeamScalarWhereInput = {
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
+  discordThreadId?: Prisma.StringNullableFilter<"Team"> | string | null
+  discordThreadUrl?: Prisma.StringNullableFilter<"Team"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Team"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Team"> | Date | string
 }
@@ -654,6 +704,8 @@ export type TeamCreateWithoutMembersInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutTeamsInput
@@ -671,6 +723,8 @@ export type TeamUncheckedCreateWithoutMembersInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   imageSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutTeamInput
@@ -702,6 +756,8 @@ export type TeamUpdateWithoutMembersInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutTeamsNestedInput
@@ -719,6 +775,8 @@ export type TeamUncheckedUpdateWithoutMembersInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   imageSets?: Prisma.ImageSetUncheckedUpdateManyWithoutTeamNestedInput
@@ -734,6 +792,8 @@ export type TeamCreateWithoutJoinRequestsInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutTeamsInput
@@ -751,6 +811,8 @@ export type TeamUncheckedCreateWithoutJoinRequestsInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutTeamInput
@@ -782,6 +844,8 @@ export type TeamUpdateWithoutJoinRequestsInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutTeamsNestedInput
@@ -799,6 +863,8 @@ export type TeamUncheckedUpdateWithoutJoinRequestsInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
@@ -814,6 +880,8 @@ export type TeamCreateWithoutImageSetsInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   event: Prisma.EventCreateNestedOneWithoutTeamsInput
@@ -831,6 +899,8 @@ export type TeamUncheckedCreateWithoutImageSetsInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutTeamInput
@@ -862,6 +932,8 @@ export type TeamUpdateWithoutImageSetsInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   event?: Prisma.EventUpdateOneRequiredWithoutTeamsNestedInput
@@ -879,6 +951,8 @@ export type TeamUncheckedUpdateWithoutImageSetsInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
@@ -894,6 +968,8 @@ export type TeamCreateManyEventInput = {
   recruitmentNotes?: string | null
   disqualificationReason?: string | null
   leaderId: string
+  discordThreadId?: string | null
+  discordThreadUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -907,6 +983,8 @@ export type TeamUpdateWithoutEventInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TeamMemberUpdateManyWithoutTeamNestedInput
@@ -923,6 +1001,8 @@ export type TeamUncheckedUpdateWithoutEventInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
@@ -939,6 +1019,8 @@ export type TeamUncheckedUpdateManyWithoutEventInput = {
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordThreadUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1002,6 +1084,8 @@ export type TeamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   recruitmentNotes?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
+  discordThreadId?: boolean
+  discordThreadUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
@@ -1021,6 +1105,8 @@ export type TeamSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   recruitmentNotes?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
+  discordThreadId?: boolean
+  discordThreadUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
@@ -1036,6 +1122,8 @@ export type TeamSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   recruitmentNotes?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
+  discordThreadId?: boolean
+  discordThreadUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
@@ -1051,11 +1139,13 @@ export type TeamSelectScalar = {
   recruitmentNotes?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
+  discordThreadId?: boolean
+  discordThreadUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TeamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "inviteCode" | "status" | "isRecruiting" | "recruitmentNotes" | "disqualificationReason" | "leaderId" | "createdAt" | "updatedAt", ExtArgs["result"]["team"]>
+export type TeamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "inviteCode" | "status" | "isRecruiting" | "recruitmentNotes" | "disqualificationReason" | "leaderId" | "discordThreadId" | "discordThreadUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["team"]>
 export type TeamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   members?: boolean | Prisma.Team$membersArgs<ExtArgs>
@@ -1088,6 +1178,8 @@ export type $TeamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     recruitmentNotes: string | null
     disqualificationReason: string | null
     leaderId: string
+    discordThreadId: string | null
+    discordThreadUrl: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["team"]>
@@ -1526,6 +1618,8 @@ export interface TeamFieldRefs {
   readonly recruitmentNotes: Prisma.FieldRef<"Team", 'String'>
   readonly disqualificationReason: Prisma.FieldRef<"Team", 'String'>
   readonly leaderId: Prisma.FieldRef<"Team", 'String'>
+  readonly discordThreadId: Prisma.FieldRef<"Team", 'String'>
+  readonly discordThreadUrl: Prisma.FieldRef<"Team", 'String'>
   readonly createdAt: Prisma.FieldRef<"Team", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Team", 'DateTime'>
 }

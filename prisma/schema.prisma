@@ -110,11 +110,14 @@ model Event {
   endDate            DateTime?
   submissionStart    DateTime?
   submissionEnd      DateTime?
-  maxTeamSize        Int?        // Null = unlimited squad size
-  maxTeams           Int?        // Null = unlimited teams in campaign
-  status             EventStatus @default(UPCOMING)
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  maxTeamSize            Int?        // Null = unlimited squad size
+  maxTeams               Int?        // Null = unlimited teams in campaign
+  status                 EventStatus @default(UPCOMING)
+  discordRoleId          String?     // Specific campaign role ID (e.g. SEDS-2026-A)
+  discordAlertsChannelId String?     // Channel ID for discovery alerts & campaign announcements
+  discordSquadsChannelId String?     // Channel ID for squad recruitments & formations
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
   teams              Team[]
   imageSets          ImageSet[]
@@ -132,6 +135,8 @@ model Team {
   recruitmentNotes       String?
   disqualificationReason String?      // Admin moderation reason if team is disabled/disqualified
   leaderId               String // User ID of Team Creator / Leader
+  discordThreadId        String?      // Private Discord Thread ID for this squad
+  discordThreadUrl       String?      // Direct link to open Discord Thread
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 

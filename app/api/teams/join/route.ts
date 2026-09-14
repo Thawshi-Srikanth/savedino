@@ -7,6 +7,7 @@ import {
   calculateTeamStatus,
   isRegistrationClosed,
 } from "@/lib/campaign-engine";
+import { addMemberToThread, assignDiscordRole } from "@/lib/discord";
 
 // POST /api/teams/join - Join a team via invite code
 export async function POST(req: Request) {
@@ -131,6 +132,29 @@ export async function POST(req: Request) {
         data: { status: newStatus },
       }),
     ]);
+
+    // Discord Automation: Add user to private squad thread & assign campaign role
+    (async () => {
+      try {
+        const userAccount = await prisma.account.findFirst({
+          where: { userId: session.user.id, providerId: "discord" },
+          select: { accountId: true },
+        });
+
+        if (userAccount?.accountId) {
+          // Add to squad thread
+          if (team.discordThreadId) {
+            await addMemberToThread(team.discordThreadId, userAccount.accountId);
+          }
+          // Assign campaign role
+          if (team.event?.discordRoleId) {
+            await assignDiscordRole(userAccount.accountId, team.event.discordRoleId);
+          }
+        }
+      } catch (err) {
+        console.error("[Discord Join Automation] Error:", err);
+      }
+    })();
 
     return NextResponse.json({
       success: true,

@@ -75,6 +75,9 @@ export async function POST(req: Request) {
       submissionEnd,
       maxTeamSize,
       maxTeams,
+      discordRoleId,
+      discordAlertsChannelId,
+      discordSquadsChannelId,
     } = body;
 
     const parsedMaxTeamSize =
@@ -105,6 +108,9 @@ export async function POST(req: Request) {
         submissionEnd: submissionEnd ? new Date(submissionEnd) : null,
         maxTeamSize: parsedMaxTeamSize,
         maxTeams: parsedMaxTeams,
+        discordRoleId: discordRoleId?.trim() || null,
+        discordAlertsChannelId: discordAlertsChannelId?.trim() || null,
+        discordSquadsChannelId: discordSquadsChannelId?.trim() || null,
         status: "ACTIVE",
       },
     });

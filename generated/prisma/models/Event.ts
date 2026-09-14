@@ -52,6 +52,9 @@ export type EventMinAggregateOutputType = {
   maxTeamSize: number | null
   maxTeams: number | null
   status: $Enums.EventStatus | null
+  discordRoleId: string | null
+  discordAlertsChannelId: string | null
+  discordSquadsChannelId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +75,9 @@ export type EventMaxAggregateOutputType = {
   maxTeamSize: number | null
   maxTeams: number | null
   status: $Enums.EventStatus | null
+  discordRoleId: string | null
+  discordAlertsChannelId: string | null
+  discordSquadsChannelId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -92,6 +98,9 @@ export type EventCountAggregateOutputType = {
   maxTeamSize: number
   maxTeams: number
   status: number
+  discordRoleId: number
+  discordAlertsChannelId: number
+  discordSquadsChannelId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -124,6 +133,9 @@ export type EventMinAggregateInputType = {
   maxTeamSize?: true
   maxTeams?: true
   status?: true
+  discordRoleId?: true
+  discordAlertsChannelId?: true
+  discordSquadsChannelId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -144,6 +156,9 @@ export type EventMaxAggregateInputType = {
   maxTeamSize?: true
   maxTeams?: true
   status?: true
+  discordRoleId?: true
+  discordAlertsChannelId?: true
+  discordSquadsChannelId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -164,6 +179,9 @@ export type EventCountAggregateInputType = {
   maxTeamSize?: true
   maxTeams?: true
   status?: true
+  discordRoleId?: true
+  discordAlertsChannelId?: true
+  discordSquadsChannelId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -271,6 +289,9 @@ export type EventGroupByOutputType = {
   maxTeamSize: number | null
   maxTeams: number | null
   status: $Enums.EventStatus
+  discordRoleId: string | null
+  discordAlertsChannelId: string | null
+  discordSquadsChannelId: string | null
   createdAt: Date
   updatedAt: Date
   _count: EventCountAggregateOutputType | null
@@ -314,6 +335,9 @@ export type EventWhereInput = {
   maxTeamSize?: Prisma.IntNullableFilter<"Event"> | number | null
   maxTeams?: Prisma.IntNullableFilter<"Event"> | number | null
   status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
+  discordRoleId?: Prisma.StringNullableFilter<"Event"> | string | null
+  discordAlertsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
+  discordSquadsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   teams?: Prisma.TeamListRelationFilter
@@ -336,6 +360,9 @@ export type EventOrderByWithRelationInput = {
   maxTeamSize?: Prisma.SortOrderInput | Prisma.SortOrder
   maxTeams?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  discordRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordAlertsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordSquadsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   teams?: Prisma.TeamOrderByRelationAggregateInput
@@ -361,6 +388,9 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   maxTeamSize?: Prisma.IntNullableFilter<"Event"> | number | null
   maxTeams?: Prisma.IntNullableFilter<"Event"> | number | null
   status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
+  discordRoleId?: Prisma.StringNullableFilter<"Event"> | string | null
+  discordAlertsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
+  discordSquadsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   teams?: Prisma.TeamListRelationFilter
@@ -383,6 +413,9 @@ export type EventOrderByWithAggregationInput = {
   maxTeamSize?: Prisma.SortOrderInput | Prisma.SortOrder
   maxTeams?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  discordRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordAlertsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordSquadsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.EventCountOrderByAggregateInput
@@ -411,6 +444,9 @@ export type EventScalarWhereWithAggregatesInput = {
   maxTeamSize?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
   maxTeams?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
   status?: Prisma.EnumEventStatusWithAggregatesFilter<"Event"> | $Enums.EventStatus
+  discordRoleId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  discordAlertsChannelId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  discordSquadsChannelId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
 }
@@ -431,6 +467,9 @@ export type EventCreateInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamCreateNestedManyWithoutEventInput
@@ -453,6 +492,9 @@ export type EventUncheckedCreateInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutEventInput
@@ -475,6 +517,9 @@ export type EventUpdateInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUpdateManyWithoutEventNestedInput
@@ -497,6 +542,9 @@ export type EventUncheckedUpdateInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUncheckedUpdateManyWithoutEventNestedInput
@@ -519,6 +567,9 @@ export type EventCreateManyInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -539,6 +590,9 @@ export type EventUpdateManyMutationInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -559,6 +613,9 @@ export type EventUncheckedUpdateManyInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -579,6 +636,9 @@ export type EventCountOrderByAggregateInput = {
   maxTeamSize?: Prisma.SortOrder
   maxTeams?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  discordRoleId?: Prisma.SortOrder
+  discordAlertsChannelId?: Prisma.SortOrder
+  discordSquadsChannelId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -604,6 +664,9 @@ export type EventMaxOrderByAggregateInput = {
   maxTeamSize?: Prisma.SortOrder
   maxTeams?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  discordRoleId?: Prisma.SortOrder
+  discordAlertsChannelId?: Prisma.SortOrder
+  discordSquadsChannelId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -624,6 +687,9 @@ export type EventMinOrderByAggregateInput = {
   maxTeamSize?: Prisma.SortOrder
   maxTeams?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  discordRoleId?: Prisma.SortOrder
+  discordAlertsChannelId?: Prisma.SortOrder
+  discordSquadsChannelId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -694,6 +760,9 @@ export type EventCreateWithoutTeamsInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   imageSets?: Prisma.ImageSetCreateNestedManyWithoutEventInput
@@ -715,6 +784,9 @@ export type EventUncheckedCreateWithoutTeamsInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   imageSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutEventInput
@@ -752,6 +824,9 @@ export type EventUpdateWithoutTeamsInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   imageSets?: Prisma.ImageSetUpdateManyWithoutEventNestedInput
@@ -773,6 +848,9 @@ export type EventUncheckedUpdateWithoutTeamsInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   imageSets?: Prisma.ImageSetUncheckedUpdateManyWithoutEventNestedInput
@@ -794,6 +872,9 @@ export type EventCreateWithoutImageSetsInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamCreateNestedManyWithoutEventInput
@@ -815,6 +896,9 @@ export type EventUncheckedCreateWithoutImageSetsInput = {
   maxTeamSize?: number | null
   maxTeams?: number | null
   status?: $Enums.EventStatus
+  discordRoleId?: string | null
+  discordAlertsChannelId?: string | null
+  discordSquadsChannelId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutEventInput
@@ -852,6 +936,9 @@ export type EventUpdateWithoutImageSetsInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUpdateManyWithoutEventNestedInput
@@ -873,6 +960,9 @@ export type EventUncheckedUpdateWithoutImageSetsInput = {
   maxTeamSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxTeams?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUncheckedUpdateManyWithoutEventNestedInput
@@ -934,6 +1024,9 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   maxTeamSize?: boolean
   maxTeams?: boolean
   status?: boolean
+  discordRoleId?: boolean
+  discordAlertsChannelId?: boolean
+  discordSquadsChannelId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teams?: boolean | Prisma.Event$teamsArgs<ExtArgs>
@@ -957,6 +1050,9 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   maxTeamSize?: boolean
   maxTeams?: boolean
   status?: boolean
+  discordRoleId?: boolean
+  discordAlertsChannelId?: boolean
+  discordSquadsChannelId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
@@ -977,6 +1073,9 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   maxTeamSize?: boolean
   maxTeams?: boolean
   status?: boolean
+  discordRoleId?: boolean
+  discordAlertsChannelId?: boolean
+  discordSquadsChannelId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
@@ -997,11 +1096,14 @@ export type EventSelectScalar = {
   maxTeamSize?: boolean
   maxTeams?: boolean
   status?: boolean
+  discordRoleId?: boolean
+  discordAlertsChannelId?: boolean
+  discordSquadsChannelId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "code" | "description" | "regStart" | "regEnd" | "teamFormationStart" | "teamFormationEnd" | "startDate" | "endDate" | "submissionStart" | "submissionEnd" | "maxTeamSize" | "maxTeams" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "code" | "description" | "regStart" | "regEnd" | "teamFormationStart" | "teamFormationEnd" | "startDate" | "endDate" | "submissionStart" | "submissionEnd" | "maxTeamSize" | "maxTeams" | "status" | "discordRoleId" | "discordAlertsChannelId" | "discordSquadsChannelId" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teams?: boolean | Prisma.Event$teamsArgs<ExtArgs>
   imageSets?: boolean | Prisma.Event$imageSetsArgs<ExtArgs>
@@ -1032,6 +1134,9 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     maxTeamSize: number | null
     maxTeams: number | null
     status: $Enums.EventStatus
+    discordRoleId: string | null
+    discordAlertsChannelId: string | null
+    discordSquadsChannelId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["event"]>
@@ -1474,6 +1579,9 @@ export interface EventFieldRefs {
   readonly maxTeamSize: Prisma.FieldRef<"Event", 'Int'>
   readonly maxTeams: Prisma.FieldRef<"Event", 'Int'>
   readonly status: Prisma.FieldRef<"Event", 'EventStatus'>
+  readonly discordRoleId: Prisma.FieldRef<"Event", 'String'>
+  readonly discordAlertsChannelId: Prisma.FieldRef<"Event", 'String'>
+  readonly discordSquadsChannelId: Prisma.FieldRef<"Event", 'String'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>
 }

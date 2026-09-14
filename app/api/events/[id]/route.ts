@@ -138,6 +138,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           : null;
     }
 
+    if (body.discordRoleId !== undefined)
+      dataToUpdate.discordRoleId = body.discordRoleId?.trim() || null;
+    if (body.discordAlertsChannelId !== undefined)
+      dataToUpdate.discordAlertsChannelId = body.discordAlertsChannelId?.trim() || null;
+    if (body.discordSquadsChannelId !== undefined)
+      dataToUpdate.discordSquadsChannelId = body.discordSquadsChannelId?.trim() || null;
+
     const updatedEvent = await prisma.event.update({
       where: { id: existingEvent.id },
       data: dataToUpdate,

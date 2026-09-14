@@ -1210,6 +1210,9 @@ export const EventScalarFieldEnum = {
   maxTeamSize: 'maxTeamSize',
   maxTeams: 'maxTeams',
   status: 'status',
+  discordRoleId: 'discordRoleId',
+  discordAlertsChannelId: 'discordAlertsChannelId',
+  discordSquadsChannelId: 'discordSquadsChannelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1227,6 +1230,8 @@ export const TeamScalarFieldEnum = {
   recruitmentNotes: 'recruitmentNotes',
   disqualificationReason: 'disqualificationReason',
   leaderId: 'leaderId',
+  discordThreadId: 'discordThreadId',
+  discordThreadUrl: 'discordThreadUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

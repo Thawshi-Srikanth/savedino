@@ -54,6 +54,12 @@ interface EditCampaignModalProps {
   setEditCampSubStart: (val: string) => void;
   editCampSubEnd: string;
   setEditCampSubEnd: (val: string) => void;
+  editCampDiscordRoleId: string;
+  setEditCampDiscordRoleId: (val: string) => void;
+  editCampDiscordAlertsChannelId: string;
+  setEditCampDiscordAlertsChannelId: (val: string) => void;
+  editCampDiscordSquadsChannelId: string;
+  setEditCampDiscordSquadsChannelId: (val: string) => void;
   editCampLoading: boolean;
   onSave: (e: React.FormEvent) => void;
 }
@@ -91,6 +97,12 @@ export function EditCampaignModal({
   setEditCampSubStart,
   editCampSubEnd,
   setEditCampSubEnd,
+  editCampDiscordRoleId,
+  setEditCampDiscordRoleId,
+  editCampDiscordAlertsChannelId,
+  setEditCampDiscordAlertsChannelId,
+  editCampDiscordSquadsChannelId,
+  setEditCampDiscordSquadsChannelId,
   editCampLoading,
   onSave,
 }: EditCampaignModalProps) {
@@ -103,13 +115,13 @@ export function EditCampaignModal({
             <span>Edit Campaign &bull; {editingCampaign?.code}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Modify campaign metadata, public descriptions, and timeline milestone dates.
+            Modify campaign metadata, milestone dates, and Discord bot integration.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSave} className="space-y-4 pt-1">
           {/* Nav Tabs for Edit Modal */}
-          <div className="flex border-b border-border text-xs">
+          <div className="flex border-b border-border text-xs gap-1">
             <button
               type="button"
               onClick={() => setEditCampTab("overview")}
@@ -130,7 +142,18 @@ export function EditCampaignModal({
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              Timeline &amp; Milestone Schedules
+              Timeline Schedules
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditCampTab("discord")}
+              className={`pb-2 px-3 font-bold border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                editCampTab === "discord"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span>Discord Automation</span>
             </button>
           </div>
 
@@ -213,7 +236,7 @@ export function EditCampaignModal({
                 />
               </div>
             </div>
-          ) : (
+          ) : editCampTab === "schedule" ? (
             <div className="space-y-3.5">
               <div className="p-2.5 rounded-lg border border-amber-500/20 bg-amber-500/5 text-muted-foreground text-xs font-mono">
                 Milestone dates left blank will appear as <strong>TBA</strong> on the platform.
@@ -331,6 +354,60 @@ export function EditCampaignModal({
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 text-muted-foreground text-xs leading-relaxed">
+                Configure Discord IDs for this specific campaign. Leave blank to disable automated Discord broadcasts for this campaign.
+              </div>
+
+              {/* Campaign Role ID */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">
+                  Campaign Discord Role ID
+                </label>
+                <Input
+                  value={editCampDiscordRoleId}
+                  onChange={(e) => setEditCampDiscordRoleId(e.target.value)}
+                  placeholder="e.g. 123456789012345678 (Role for this campaign)"
+                  className="h-9 text-xs font-mono bg-background"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Auto-assigned to students who form or join squads in this campaign.
+                </p>
+              </div>
+
+              {/* Squads Broadcast Channel ID */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">
+                  Squad Recruitment Channel ID
+                </label>
+                <Input
+                  value={editCampDiscordSquadsChannelId}
+                  onChange={(e) => setEditCampDiscordSquadsChannelId(e.target.value)}
+                  placeholder="e.g. 123456789012345678 (#seds26a-squads)"
+                  className="h-9 text-xs font-mono bg-background"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Where the bot posts squad announcements and invite links when new teams are created.
+                </p>
+              </div>
+
+              {/* Alerts Broadcast Channel ID */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">
+                  Discovery Alerts Channel ID
+                </label>
+                <Input
+                  value={editCampDiscordAlertsChannelId}
+                  onChange={(e) => setEditCampDiscordAlertsChannelId(e.target.value)}
+                  placeholder="e.g. 123456789012345678 (#seds26a-alerts)"
+                  className="h-9 text-xs font-mono bg-background"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Where asteroid candidate submissions and verification cards are broadcast.
+                </p>
               </div>
             </div>
           )}

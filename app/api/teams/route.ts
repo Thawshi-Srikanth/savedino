@@ -7,6 +7,7 @@ import {
   generateInviteCode,
   isRegistrationClosed,
 } from "@/lib/campaign-engine";
+import { notifySquadCreated, createSquadThread } from "@/lib/discord";
 
 // Server-side in-memory cache for Teams (TTL: 5 seconds)
 const teamsCache = new Map<string, { timestamp: number; data: any }>();
@@ -127,6 +128,46 @@ export async function POST(req: Request) {
     });
 
     invalidateTeamsCache();
+
+    // Trigger Discord Thread Creation & Notification (if campaign has configured squad channel)
+    if (targetEvent.discordSquadsChannelId) {
+      // Find leader's linked Discord account if available
+      const leaderAccount = await prisma.account.findFirst({
+        where: { userId: session.user.id, providerId: "discord" },
+        select: { accountId: true },
+      });
+
+      createSquadThread({
+        channelId: targetEvent.discordSquadsChannelId,
+        squadName: newTeam.name,
+        teamCode: newTeam.inviteCode,
+        leaderDiscordUserId: leaderAccount?.accountId || null,
+      })
+        .then(async (threadInfo) => {
+          if (threadInfo) {
+            await prisma.team.update({
+              where: { id: newTeam.id },
+              data: {
+                discordThreadId: threadInfo.threadId,
+                discordThreadUrl: threadInfo.threadUrl,
+              },
+            });
+          }
+
+          return notifySquadCreated({
+            channelId: targetEvent.discordSquadsChannelId,
+            campaignTitle: targetEvent.title,
+            teamName: newTeam.name,
+            leaderName: session.user.name || "Squad Leader",
+            inviteCode: newTeam.inviteCode,
+            isRecruiting: newTeam.isRecruiting,
+            recruitmentNotes: newTeam.recruitmentNotes,
+            maxTeamSize: targetEvent.maxTeamSize,
+            threadUrl: threadInfo?.threadUrl || null,
+          });
+        })
+        .catch((err) => console.error("[Discord Broadcast] Failed squad automation:", err));
+    }
 
     return NextResponse.json({ success: true, team: newTeam }, { status: 201 });
   } catch (error: any) {

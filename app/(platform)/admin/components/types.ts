@@ -14,6 +14,9 @@ export interface EventData {
   status: string;
   maxTeamSize?: number | null;
   maxTeams?: number | null;
+  discordRoleId?: string | null;
+  discordAlertsChannelId?: string | null;
+  discordSquadsChannelId?: string | null;
   _count?: {
     teams: number;
     imageSets?: number;

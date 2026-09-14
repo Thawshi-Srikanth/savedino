@@ -36,6 +36,13 @@ export async function GET(req: Request) {
         country: true,
         whatsapp: true,
         createdAt: true,
+        accounts: {
+          select: {
+            id: true,
+            providerId: true,
+            accountId: true,
+          },
+        },
         teamMembers: {
           include: {
             team: {
@@ -145,6 +152,7 @@ export async function GET(req: Request) {
     const campaigns = Array.from(uniqueCampaignsMap.values());
     const squadsLeadCount = user.teamMembers.filter((tm) => tm.role === "leader").length;
     const submittedSetsCount = user.claimedSets.filter((s) => s.status === "SUBMITTED").length;
+    const isDiscordConnected = user.accounts.some((a) => a.providerId === "discord");
 
     return NextResponse.json({
       success: true,
@@ -158,6 +166,8 @@ export async function GET(req: Request) {
         country: user.country,
         whatsapp: user.whatsapp,
         createdAt: user.createdAt,
+        discordConnected: isDiscordConnected,
+        connectedProviders: user.accounts.map((a) => a.providerId),
       },
       campaigns,
       teams: user.teamMembers.map((tm) => {
