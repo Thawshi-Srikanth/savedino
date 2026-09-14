@@ -3,9 +3,9 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Citizen Science Data Protection",
+  title: "Privacy Policy | SaveDino Asteroid Search",
   description:
-    "Privacy standards, transactional email policies, and scientific data handling for SaveDino citizen scientists participating in astronomical campaigns.",
+    "Privacy standards, Google OAuth user data handling, transactional email policies, and scientific data protection for SaveDino citizen scientists.",
   openGraph: {
     title: "Privacy Policy | SaveDino Asteroid Search",
     description:
@@ -23,260 +23,289 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p className="text-xs font-mono text-muted-foreground">
-          Effective Date: September 11, 2026 &bull; Version 2.0
+          Effective Date: September 14, 2026 &bull; Version 2.1 &bull; SaveDino Platform
         </p>
       </header>
 
       <main className="py-8 space-y-10 text-sm sm:text-base leading-relaxed text-muted-foreground">
+        {/* Section 1: Overview & Application Identity */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            1. Overview &amp; Data Philosophy
+            1. Overview &amp; Application Identity
           </h2>
           <p>
-            SaveDino is operated by Students for the Exploration and Development of Space (SEDS Sri
-            Lanka) in partnership with the International Astronomical Search Collaboration (IASC,
-            Hardin-Simmons University) and the NASA Planetary Defense Coordination Office.
+            This Privacy Policy governs the <strong>SaveDino</strong> platform (available at{" "}
+            <a
+              href="https://savedino.sedssl.org"
+              target="_blank"
+              rel="noreferrer"
+              className="text-foreground underline underline-offset-4"
+            >
+              https://savedino.sedssl.org
+            </a>
+            ), operated by <strong>Students for the Exploration and Development of Space (SEDS Sri Lanka)</strong> in partnership with the <strong>International Astronomical Search Collaboration (IASC, Hardin-Simmons University)</strong> and the <strong>NASA Planetary Defense Coordination Office</strong>.
           </p>
           <p>
-            We are dedicated to maintaining the highest level of privacy, transparency, and data
-            integrity. SaveDino operates strictly as a non-commercial educational and citizen
-            science initiative. We do not sell, rent, monetize, or trade your personal data with
-            third-party advertisers or data brokers.
+            SaveDino is an educational citizen science initiative designed to enable students and amateur astronomers worldwide to analyze astronomical FITS datasets, detect near-Earth objects, and report validated asteroid observations.
           </p>
         </section>
 
+        {/* Section 2: Information We Collect */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
             2. Information We Collect
           </h2>
           <p>
-            To facilitate campaign participation and scientific attribution, we collect the
-            following information:
+            We collect only the minimum personal information required to facilitate platform access, squad coordination, and scientific discovery attribution:
           </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
             <li>
-              <strong className="text-foreground">Email Address:</strong> Required for passwordless
-              authentication via single-use sign-in links, important campaign updates, squad
-              invitations, and participation certificates.
+              <strong className="text-foreground">Authentication &amp; Contact Data:</strong> Email address and full display name (collected via single-use magic links or third-party OAuth providers such as Google and Discord).
             </li>
             <li>
-              <strong className="text-foreground">Full Name:</strong> Required for official IASC
-              asteroid discovery attribution, campaign reports, and verified participation
-              certificates issued in collaboration with NASA partners.
+              <strong className="text-foreground">Profile &amp; Attribution Data:</strong> School/Institution name, country of residence, and optional contact numbers (e.g. WhatsApp) provided voluntarily for squad coordination.
             </li>
             <li>
-              <strong className="text-foreground">WhatsApp Number (Optional):</strong> Collected to
-              enable rapid, time-sensitive coordination between campaign coordinators and squad
-              leaders for urgent follow-up observations and squad announcements.
+              <strong className="text-foreground">Astrometric &amp; Observation Records:</strong> Claimed image set identifiers, Astrometrica coordinate measurements, MPC discovery reports, squad memberships, and campaign progress metrics.
             </li>
             <li>
-              <strong className="text-foreground">School / Organization &amp; Country:</strong> Used
-              to represent schools, universities, astronomy clubs, and regions on campaign
-              leaderboards and global search directories.
-            </li>
-            <li>
-              <strong className="text-foreground">Astrometric &amp; Observation Records:</strong>{" "}
-              Claimed image set identifiers, Astrometrica measurement coordinates, report submission
-              logs, and squad progress metrics.
-            </li>
-            <li>
-              <strong className="text-foreground">Technical Session Data:</strong> Standard session
-              authentication cookies and error logs necessary to maintain system security and
-              prevent automated abuse.
+              <strong className="text-foreground">Technical Session Data:</strong> Authentication session tokens and essential browser cookies necessary to keep you securely logged in and prevent malicious automated access.
             </li>
           </ul>
         </section>
 
-        <section className="space-y-3">
+        {/* Section 3: Google User Data Disclosures */}
+        <section className="space-y-3 bg-card border border-border rounded-xl p-5 sm:p-6">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            3. How We Use Your Information
+            3. Google User Data &amp; OAuth Compliance
           </h2>
           <p>
-            Your information is processed strictly for legitimate scientific and operational
-            purposes:
+            When you sign in to SaveDino using Google Sign-In, we adhere strictly to the following policies regarding your Google account data:
           </p>
-          <ul className="list-disc list-inside space-y-2 pl-2">
-            <li>Authenticating your account securely using sign-in links or OAuth providers.</li>
-            <li>Coordinating research squads, image set allocations, and submission reviews.</li>
-            <li>
-              Transmitting validated astrometric measurement files to IASC and the Minor Planet
-              Center (MPC).
-            </li>
-            <li>Issuing verified digital certificates of discovery and participation.</li>
-            <li>
-              Maintaining platform security, preventing bot spoofing, and ensuring fair data access.
-            </li>
-          </ul>
+          
+          <div className="space-y-4 pt-2">
+            <div>
+              <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">
+                a. What Google Data is Accessed
+              </h3>
+              <p className="pt-1">
+                SaveDino requests access only to non-sensitive identity scopes (<code>openid</code>, <code>.../auth/userinfo.email</code>, and <code>.../auth/userinfo.profile</code>). Specifically, we access:
+              </p>
+              <ul className="list-disc list-inside space-y-1 pl-2 pt-1 text-sm">
+                <li>Your primary Google Account email address</li>
+                <li>Your Google Account display name</li>
+                <li>Your public Google profile avatar URL</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">
+                b. How We Use Google User Data
+              </h3>
+              <p className="pt-1">
+                Your Google user data is used exclusively to:
+              </p>
+              <ul className="list-disc list-inside space-y-1 pl-2 pt-1 text-sm">
+                <li>Authenticate your identity and log you into your SaveDino account.</li>
+                <li>Create and populate your citizen scientist participant profile.</li>
+                <li>Properly attribute validated asteroid discoveries to your name on official certificates.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">
+                c. Sharing, Transfer, and Disclosure of Google Data
+              </h3>
+              <p className="pt-1">
+                <strong>We do not share, sell, rent, monetize, or transfer Google user data to any third parties, advertisers, or data brokers.</strong> Google user data is never used for serving advertisements or training generalized AI models. It is processed solely to provide and improve the SaveDino citizen science application functionality.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide">
+                d. Google API Services Limited Use Statement
+              </h3>
+              <p className="pt-1">
+                SaveDino&apos;s use and transfer of information received from Google APIs to any other app adheres to the{" "}
+                <a
+                  href="https://developers.google.com/terms/api-services-user-data-policy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-foreground underline underline-offset-4"
+                >
+                  Google API Services User Data Policy
+                </a>
+                , including the Limited Use requirements.
+              </p>
+            </div>
+          </div>
         </section>
 
+        {/* Section 4: How We Use Your Information */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            4. Google API &amp; Third-Party OAuth Disclosures
+            4. How We Use General Personal Information
           </h2>
           <p>
-            When you choose to sign in to SaveDino using Google or Discord authentication:
+            Personal information collected across the platform is used strictly for legitimate scientific and operational purposes:
           </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
-            <li>
-              <strong className="text-foreground">Data Accessed:</strong> We access only non-sensitive
-              basic profile information—specifically your primary Google account email address, display name,
-              and public avatar image (via the <code>openid</code>, <code>.../auth/userinfo.email</code>, and <code>.../auth/userinfo.profile</code> scopes).
-            </li>
-            <li>
-              <strong className="text-foreground">Purpose of Use:</strong> This data is used solely to authenticate your identity, establish your citizen science participant account, and attribute asteroid discovery reports to your name.
-            </li>
-            <li>
-              <strong className="text-foreground">No Advertising / No Sale:</strong> SaveDino does not sell Google user data, does not transfer Google user data to data brokers or advertising platforms, and does not use Google user data to serve targeted advertisements.
-            </li>
-            <li>
-              <strong className="text-foreground">Google Limited Use Compliance:</strong> SaveDino&apos;s use and transfer to any other app of information received from Google APIs adheres to the{" "}
-              <a
-                href="https://developers.google.com/terms/api-services-user-data-policy"
-                target="_blank"
-                rel="noreferrer"
-                className="text-foreground underline underline-offset-4"
-              >
-                Google API Services User Data Policy
-              </a>
-              , including the Limited Use requirements.
-            </li>
-            <li>
-              <strong className="text-foreground">Data Retention &amp; Revocation:</strong> You can revoke SaveDino&apos;s access at any time through your Google Account Security settings. You may also request complete removal of your profile data by contacting our support team.
-            </li>
+            <li>Authenticating user sessions and safeguarding account security.</li>
+            <li>Coordinating student squads, assigning campaign FITS image sets, and managing discovery submissions.</li>
+            <li>Transmitting validated astrometric measurement data to IASC and the Minor Planet Center (MPC).</li>
+            <li>Issuing verified digital certificates of asteroid discovery and campaign participation.</li>
+            <li>Maintaining platform security, mitigating bot attacks, and enforcing fair competition rules.</li>
           </ul>
         </section>
 
+        {/* Section 5: Email Communications */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            5. Email Communications &amp; Deliverability
+            5. Email Communications Policy
           </h2>
           <p>
-            SaveDino utilizes enterprise transactional email infrastructure (powered by Resend) to
-            deliver:
+            SaveDino uses transactional email infrastructure (via Resend) solely to deliver essential service communications:
           </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
-            <li>Single-use authentication links when you sign in.</li>
-            <li>Squad join requests and leadership review notifications.</li>
-            <li>Official IASC campaign milestone alerts and certificate issuance.</li>
+            <li>Single-use sign-in access links.</li>
+            <li>Squad joining notifications, invitation confirmations, and leadership reviews.</li>
+            <li>Campaign milestone announcements, image set assignments, and certificate notifications.</li>
           </ul>
           <p>
-            We do not send unsolicited marketing emails, advertisements, or third-party promotional
-            newsletters.
+            We do not send marketing spam, promotional advertisements, or third-party newsletters.
           </p>
         </section>
 
+        {/* Section 6: Scientific Data Sharing */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
             6. Scientific Data Sharing &amp; Public Records
           </h2>
           <p>
-            Citizen science relies on open scientific collaboration. When you submit validated
-            asteroid observations:
+            In accordance with international astronomical research standards:
           </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
             <li>
-              <strong className="text-foreground">Minor Planet Center (MPC):</strong> Astrometric
-              observation reports and discovery credits submitted through IASC to the MPC (operated
-              by the Smithsonian Astrophysical Observatory under IAU auspices) become part of the
-              permanent, open scientific record.
+              <strong className="text-foreground">Minor Planet Center (MPC):</strong> Validated observation reports submitted through IASC to the MPC (operated by the Smithsonian Astrophysical Observatory under IAU auspices) become part of the permanent, open scientific record.
             </li>
             <li>
-              <strong className="text-foreground">Public Discovery Catalogs:</strong> Names of
-              discovering citizen scientists and squad affiliations are published in official Minor
-              Planet Electronic Circulars (MPECs) and IASC discovery archives.
+              <strong className="text-foreground">Discovery Attribution:</strong> Names of discovering citizen scientists and their institutional affiliations are published in official Minor Planet Electronic Circulars (MPECs) and IASC archives.
             </li>
           </ul>
         </section>
 
+        {/* Section 7: Data Protection & Security */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            7. Data Security &amp; Privacy Protection
+            7. Data Protection &amp; Security Measures
           </h2>
-          <p>We implement industry-standard technical safeguards to protect your personal data:</p>
+          <p>
+            We implement comprehensive technical and organizational safeguards to ensure data security:
+          </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
             <li>
-              <strong className="text-foreground">Squad Privacy:</strong> Squad members&apos;
-              personal email addresses are masked within shared squad workspaces so only the squad
-              leader and campaign administrators can access full contact details.
+              <strong className="text-foreground">Encryption:</strong> All data in transit is encrypted using modern TLS/HTTPS encryption protocols.
             </li>
             <li>
-              <strong className="text-foreground">Secure Encryption:</strong> All data in transit is
-              encrypted using TLS/HTTPS protocols, and authentication sessions are secured using
-              cryptographic single-use tokens.
+              <strong className="text-foreground">Database Isolation:</strong> Data is stored in secure, access-restricted PostgreSQL databases protected by strict role-based access control (RBAC).
             </li>
             <li>
-              <strong className="text-foreground">Database Protection:</strong> Database records are
-              hosted in isolated PostgreSQL environments with strict role-based access control.
+              <strong className="text-foreground">Squad Email Masking:</strong> Personal email addresses are masked in squad member rosters to prevent unauthorized exposure among participants.
+            </li>
+            <li>
+              <strong className="text-foreground">Token Security:</strong> Authentication sessions utilize secure, tamper-proof session tokens with automated expiration.
             </li>
           </ul>
         </section>
 
+        {/* Section 8: Data Retention & User Deletion Rights */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            8. Your Privacy Rights &amp; Account Control
+            8. Data Retention, Revocation &amp; Deletion
           </h2>
-          <p>You retain control over your personal information:</p>
+          <p>
+            You have full control over your personal data:
+          </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
             <li>
-              <strong className="text-foreground">Profile Updates:</strong> You can edit your
-              display name, WhatsApp number, institution, and country at any time via the Profile
-              Studio.
+              <strong className="text-foreground">Revoking Google / Third-Party Access:</strong> You can revoke SaveDino&apos;s access at any time through your{" "}
+              <a
+                href="https://myaccount.google.com/permissions"
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground underline underline-offset-4"
+              >
+                Google Account Security Permissions
+              </a>
+              .
             </li>
             <li>
-              <strong className="text-foreground">Account Deletion:</strong> You may request the
-              deletion of your SaveDino account by emailing our support team. Upon deletion, your
-              personal account details will be removed from our active database.
+              <strong className="text-foreground">Account Deletion:</strong> You may request the permanent deletion of your account and all associated personal data by emailing{" "}
+              <a href="mailto:info@sedssl.org" className="text-foreground underline underline-offset-4">
+                info@sedssl.org
+              </a>
+              . Account deletions are processed within 30 days.
             </li>
             <li>
-              <strong className="text-foreground">Permanent Astronomical Record:</strong>{" "}
-              Astrometric measurements and discovery reports already submitted to the Minor Planet
-              Center cannot be erased, as they form an integral part of the global astronomical
-              record.
+              <strong className="text-foreground">Permanent Astronomical Record:</strong> Measurements and discovery records already submitted to the Minor Planet Center cannot be deleted, as they constitute permanent international astronomical scientific data.
             </li>
           </ul>
         </section>
 
+        {/* Section 9: Children's Educational Privacy */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
             9. Children&apos;s Educational Privacy
           </h2>
           <p>
-            SaveDino actively engages school students and youth astronomy clubs. We collect only the
-            minimum information necessary to support educational campaign participation and
-            discovery certificates. We encourage parents and teachers to guide students during squad
-            formation and campaign activities.
+            SaveDino is committed to protecting the privacy of young students participating in astronomical search campaigns. We collect only the minimum information necessary for campaign participation and discovery certificates. We encourage parents and educators to oversee student squad activities.
           </p>
         </section>
 
+        {/* Section 10: Contact Information */}
         <section className="space-y-3 pb-8">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
             10. Contact Information &amp; Data Controller
           </h2>
           <p>
-            If you have questions regarding this Privacy Policy or wish to exercise your data
-            protection rights, please reach out to our data controller:
+            For questions or requests regarding this Privacy Policy or your personal data, please contact:
           </p>
-          <p>
-            Students for the Exploration and Development of Space (SEDS Sri Lanka)
-            <br />
-            Email:{" "}
-            <a
-              href="mailto:info@sedssl.org"
-              className="text-foreground underline underline-offset-4"
-            >
-              info@sedssl.org
-            </a>
-            <br />
-            Website:{" "}
-            <a
-              href="https://sedssl.org"
-              target="_blank"
-              rel="noreferrer"
-              className="text-foreground underline underline-offset-4"
-            >
-              https://sedssl.org
-            </a>
-          </p>
+          <div className="bg-muted/40 border border-border rounded-xl p-4 space-y-1 text-sm">
+            <p className="font-semibold text-foreground">
+              Students for the Exploration and Development of Space (SEDS Sri Lanka)
+            </p>
+            <p>
+              Email:{" "}
+              <a
+                href="mailto:info@sedssl.org"
+                className="text-foreground underline underline-offset-4 font-mono"
+              >
+                info@sedssl.org
+              </a>
+            </p>
+            <p>
+              Website:{" "}
+              <a
+                href="https://sedssl.org"
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground underline underline-offset-4"
+              >
+                https://sedssl.org
+              </a>
+            </p>
+            <p>
+              Application URL:{" "}
+              <a
+                href="https://savedino.sedssl.org"
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground underline underline-offset-4"
+              >
+                https://savedino.sedssl.org
+              </a>
+            </p>
+          </div>
         </section>
 
         {/* Footer Navigation Back Link */}
