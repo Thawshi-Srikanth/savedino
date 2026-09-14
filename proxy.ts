@@ -10,9 +10,14 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isDemo = isDemoModeEnabled();
 
-  // Allow root path, API routes, and static assets
+  // Public informational pages that must always remain accessible (even in Demo Mode)
+  const isPublicInfoPage =
+    pathname === "/privacy" || pathname === "/terms" || pathname === "/credits";
+
+  // Allow root path, public info pages, API routes, and static assets
   if (
     pathname === "/" ||
+    isPublicInfoPage ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
     pathname.includes(".")
@@ -20,7 +25,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // In Demo Mode: Redirect all platform pages to /
+  // In Demo Mode: Redirect all internal platform pages to /
   if (isDemo) {
     return NextResponse.redirect(new URL("/", request.url));
   }

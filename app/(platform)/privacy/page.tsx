@@ -96,7 +96,7 @@ export default function PrivacyPolicyPage() {
             purposes:
           </p>
           <ul className="list-disc list-inside space-y-2 pl-2">
-            <li>Authenticating your account securely using single-use email sign-in links.</li>
+            <li>Authenticating your account securely using sign-in links or OAuth providers.</li>
             <li>Coordinating research squads, image set allocations, and submission reviews.</li>
             <li>
               Transmitting validated astrometric measurement files to IASC and the Minor Planet
@@ -111,7 +111,44 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            4. Email Communications &amp; Deliverability
+            4. Google API &amp; Third-Party OAuth Disclosures
+          </h2>
+          <p>
+            When you choose to sign in to SaveDino using Google or Discord authentication:
+          </p>
+          <ul className="list-disc list-inside space-y-2 pl-2">
+            <li>
+              <strong className="text-foreground">Data Accessed:</strong> We access only non-sensitive
+              basic profile information—specifically your primary Google account email address, display name,
+              and public avatar image (via the <code>openid</code>, <code>.../auth/userinfo.email</code>, and <code>.../auth/userinfo.profile</code> scopes).
+            </li>
+            <li>
+              <strong className="text-foreground">Purpose of Use:</strong> This data is used solely to authenticate your identity, establish your citizen science participant account, and attribute asteroid discovery reports to your name.
+            </li>
+            <li>
+              <strong className="text-foreground">No Advertising / No Sale:</strong> SaveDino does not sell Google user data, does not transfer Google user data to data brokers or advertising platforms, and does not use Google user data to serve targeted advertisements.
+            </li>
+            <li>
+              <strong className="text-foreground">Google Limited Use Compliance:</strong> SaveDino&apos;s use and transfer to any other app of information received from Google APIs adheres to the{" "}
+              <a
+                href="https://developers.google.com/terms/api-services-user-data-policy"
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground underline underline-offset-4"
+              >
+                Google API Services User Data Policy
+              </a>
+              , including the Limited Use requirements.
+            </li>
+            <li>
+              <strong className="text-foreground">Data Retention &amp; Revocation:</strong> You can revoke SaveDino&apos;s access at any time through your Google Account Security settings. You may also request complete removal of your profile data by contacting our support team.
+            </li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">
+            5. Email Communications &amp; Deliverability
           </h2>
           <p>
             SaveDino utilizes enterprise transactional email infrastructure (powered by Resend) to
@@ -130,7 +167,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            5. Scientific Data Sharing &amp; Public Records
+            6. Scientific Data Sharing &amp; Public Records
           </h2>
           <p>
             Citizen science relies on open scientific collaboration. When you submit validated
@@ -153,7 +190,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            6. Data Security &amp; Privacy Protection
+            7. Data Security &amp; Privacy Protection
           </h2>
           <p>We implement industry-standard technical safeguards to protect your personal data:</p>
           <ul className="list-disc list-inside space-y-2 pl-2">
@@ -176,7 +213,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            7. Your Privacy Rights &amp; Account Control
+            8. Your Privacy Rights &amp; Account Control
           </h2>
           <p>You retain control over your personal information:</p>
           <ul className="list-disc list-inside space-y-2 pl-2">
@@ -201,7 +238,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            8. Children&apos;s Educational Privacy
+            9. Children&apos;s Educational Privacy
           </h2>
           <p>
             SaveDino actively engages school students and youth astronomy clubs. We collect only the
@@ -213,7 +250,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3 pb-8">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            9. Contact Information &amp; Data Controller
+            10. Contact Information &amp; Data Controller
           </h2>
           <p>
             If you have questions regarding this Privacy Policy or wish to exercise your data

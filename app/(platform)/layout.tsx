@@ -72,20 +72,23 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     );
   }
 
-  // Navigation Items
-  const navItems = [
-    { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
-    {
-      title: "Teams",
-      url: "/teams",
-      icon: Users,
-      active: pathname === "/teams" || pathname.startsWith("/team/"),
-    },
-  ];
+  // Navigation Items (Disabled in Demo Mode)
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  const navItems = isDemo
+    ? []
+    : [
+        { title: "Campaigns", url: "/campaigns", icon: Telescope, active: pathname === "/campaigns" },
+        {
+          title: "Teams",
+          url: "/teams",
+          icon: Users,
+          active: pathname === "/teams" || pathname.startsWith("/team/"),
+        },
+      ];
 
   // @ts-ignore
   const userRole = session?.user?.role;
-  if (userRole === "admin" || userRole === "staff") {
+  if (!isDemo && (userRole === "admin" || userRole === "staff")) {
     navItems.push({
       title: "Admin Console",
       url: "/admin",
@@ -170,6 +173,18 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <LogOut className="size-3.5" />
                 </Button>
               </div>
+            ) : isDemo ? (
+              <div className="flex items-center gap-2 text-xs">
+                <Link href="/" prefetch={false}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    &lt; Arcade Game
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <div className="flex items-center gap-2 text-xs">
                 <Link href="/login" prefetch={false}>
@@ -240,6 +255,18 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <LogOut className="size-3.5" />
                 </Button>
               </div>
+            ) : isDemo ? (
+              <div className="flex items-center gap-1.5">
+                <Link href="/" prefetch={false}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-2.5 rounded-xl text-xs font-bold border-border shadow-arcade-sm active:translate-y-0.5"
+                  >
+                    Arcade
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <div className="flex items-center gap-1.5">
                 <Link href="/login" prefetch={false}>
@@ -266,42 +293,46 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         </div>
       </header>
 
-      {/* Main Content Body (With pb-24 on mobile so bottom bar never obscures content) */}
-      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 flex flex-col justify-between">
+      {/* Main Content Body */}
+      <main
+        className={`flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-between ${
+          isDemo ? "pb-8" : "pb-24 md:pb-8"
+        }`}
+      >
         <div className="flex-1">{children}</div>
 
         {/* Platform Bottom Footer Note */}
         <footer className="w-full pt-8 mt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-sans text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-foreground">SaveDino</span>
+            <span className="font-semibold text-foreground">SaveDino</span>
             <span className="opacity-40">&bull;</span>
-            <span>NASA &amp; IASC Asteroid Search Collaboration</span>
+            <span className="font-mono text-[11px]">NASA &amp; IASC Collaboration</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 text-xs">
             <Link
               href="/credits"
               prefetch={false}
               className="hover:text-foreground transition-colors hover:underline"
             >
-              Credits
+              Credits &amp; Partners
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40">&bull;</span>
             <Link
               href="/privacy"
               prefetch={false}
               className="hover:text-foreground transition-colors hover:underline"
             >
-              Privacy
+              Privacy Policy
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40">&bull;</span>
             <Link
               href="/terms"
               prefetch={false}
               className="hover:text-foreground transition-colors hover:underline"
             >
-              Terms
+              Terms of Service
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40">&bull;</span>
             <a
               href="https://www.sedssl.org"
               target="_blank"
@@ -315,95 +346,95 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       </main>
 
       {/* Profile Onboarding Modal for Incomplete Magic-Link Profiles */}
-      <ProfileOnboardingDialog />
+      {!isDemo && <ProfileOnboardingDialog />}
 
-      {/* Desktop Floating Arcade Game Button (Hidden on mobile since it is inside the bottom bar) */}
-      <div className="hidden md:block fixed bottom-6 right-6 z-50">
-        <Link href="/" prefetch={false}>
-          <Button
-            size="icon"
-            className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-arcade-amber-lg active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
-            title="Play SaveDino Arcade Game"
-          >
-            <Gamepad2 className="size-6 text-[#0f172a]" />
-          </Button>
-        </Link>
-      </div>
-
-      {/* App-Style Mobile Full-Width Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 dark:bg-[#121315]/95 backdrop-blur-md border-t border-border px-3 py-2 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
-        <div className="flex items-center justify-center gap-2 max-w-md mx-auto">
-          {/* 1. Arcade / Game (First) */}
-          <Link
-            href="/"
-            prefetch={false}
-            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              pathname === "/"
-                ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-arcade-amber-lg active:translate-y-0.5"
-                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
-            }`}
-            title="Play Retro Arcade Game"
-            aria-label="Arcade Game"
-          >
-            <Gamepad2 className="size-4.5 shrink-0" />
-            {pathname === "/" && <span>Arcade</span>}
+      {/* Desktop Floating Arcade Game Button (Hidden on mobile or in demo mode) */}
+      {!isDemo && (
+        <div className="hidden md:block fixed bottom-6 right-6 z-50">
+          <Link href="/" prefetch={false}>
+            <Button
+              size="icon"
+              className="w-12 h-12 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] text-[#0f172a] border border-[#b45309] shadow-arcade-amber-lg active:translate-y-[2px] active:shadow-none flex items-center justify-center cursor-pointer transition-all"
+              title="Play SaveDino Arcade Game"
+            >
+              <Gamepad2 className="size-6 text-[#0f172a]" />
+            </Button>
           </Link>
+        </div>
+      )}
 
-          {/* 2. Campaigns (Second) */}
-          <Link
-            href="/campaigns"
-            prefetch={false}
-            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              pathname === "/campaigns"
-                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
-                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
-            }`}
-            title="Observation Campaigns"
-            aria-label="Campaigns"
-          >
-            <Telescope className="size-4.5 shrink-0" />
-            {pathname === "/campaigns" && <span>Campaigns</span>}
-          </Link>
-
-          {/* 3. Teams (Third) */}
-          <Link
-            href="/teams"
-            prefetch={false}
-            className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              pathname === "/teams" || pathname.startsWith("/team/")
-                ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
-                : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
-            }`}
-            title="Citizen Teams"
-            aria-label="Citizen Teams"
-          >
-            <Users className="size-4.5 shrink-0" />
-            {(pathname === "/teams" || pathname.startsWith("/team/")) && <span>Teams</span>}
-          </Link>
-
-          {/* 4. Profile (Fourth - if signed in) */}
-          {session?.user && (
+      {/* App-Style Mobile Full-Width Bottom Navigation Bar (Hidden in Demo Mode) */}
+      {!isDemo && (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 dark:bg-[#121315]/95 backdrop-blur-md border-t border-border px-3 py-2 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+          <div className="flex items-center justify-center gap-2 max-w-md mx-auto">
+            {/* 1. Arcade / Game (First) */}
             <Link
-              href="/profile"
+              href="/"
               prefetch={false}
               className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                pathname === "/profile"
+                pathname === "/"
+                  ? "flex-1 bg-[#facc15] text-slate-950 border border-[#ca8a04] shadow-arcade-amber-lg active:translate-y-0.5"
+                  : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+              }`}
+              title="Play Retro Arcade Game"
+              aria-label="Arcade Game"
+            >
+              <Gamepad2 className="size-4.5 shrink-0" />
+              {pathname === "/" && <span>Arcade</span>}
+            </Link>
+
+            {/* 2. Campaigns (Second) */}
+            <Link
+              href="/campaigns"
+              prefetch={false}
+              className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                pathname === "/campaigns"
                   ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
                   : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
               }`}
-              title="User Profile & Studio"
-              aria-label="Profile"
+              title="Observation Campaigns"
+              aria-label="Campaigns"
             >
-              <PixelAvatar
-                seed={session.user.image || session.user.name || session.user.id}
-                size={18}
-                showBorder={false}
-              />
-              {pathname === "/profile" && <span>Profile</span>}
+              <Telescope className="size-4.5 shrink-0" />
+              {pathname === "/campaigns" && <span>Campaigns</span>}
             </Link>
-          )}
-        </div>
-      </nav>
+
+            {/* 3. Teams (Third) */}
+            <Link
+              href="/teams"
+              prefetch={false}
+              className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                pathname === "/teams" || pathname.startsWith("/team/")
+                  ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                  : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+              }`}
+              title="Discovery Squads"
+              aria-label="Teams"
+            >
+              <Users className="size-4.5 shrink-0" />
+              {(pathname === "/teams" || pathname.startsWith("/team/")) && <span>Squads</span>}
+            </Link>
+
+            {/* 4. Profile / Studio (Fourth) */}
+            {session?.user && (
+              <Link
+                href="/profile"
+                prefetch={false}
+                className={`flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  pathname === "/profile"
+                    ? "flex-1 bg-primary text-primary-foreground border border-primary/80 shadow-arcade-primary-lg active:translate-y-0.5"
+                    : "size-10 bg-muted/70 text-foreground border border-border shadow-arcade-sm hover:bg-muted active:translate-y-0.5 shrink-0"
+                }`}
+                title="Profile Studio"
+                aria-label="Profile"
+              >
+                <User className="size-4.5 shrink-0" />
+                {pathname === "/profile" && <span>Profile</span>}
+              </Link>
+            )}
+          </div>
+        </nav>
+      )}
     </div>
   );
 }
