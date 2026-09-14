@@ -116,7 +116,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Modal Footer */}
-        <div className="mt-6 text-center border-t border-border pt-4 flex justify-center">
+        <div className="mt-6 text-center border-t border-border pt-4 flex flex-col items-center justify-center gap-2">
           <Button
             onClick={onClose}
             size="default"
@@ -125,6 +125,17 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           >
             Start Mission
           </Button>
+          <p className="text-[10px] font-mono text-muted-foreground/75">
+            An initiative by{" "}
+            <a
+              href="https://www.sedssl.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#8b5cf6] hover:underline"
+            >
+              SEDS Sri Lanka
+            </a>
+          </p>
         </div>
       </div>
     </div>

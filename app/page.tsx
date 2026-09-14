@@ -224,15 +224,15 @@ export default function Home() {
               <ul className="font-sans space-y-1.5 text-xs text-muted-foreground pl-0 leading-relaxed pt-1">
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-[#10b981] shrink-0" />
-                  <span>Form a squad with friends or join an open discovery team</span>
+                  <span>Form or join a discovery squad</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-[#10b981] shrink-0" />
-                  <span>Inspect telescope survey image sets to hunt for moving asteroids</span>
+                  <span>Inspect telescope images to hunt asteroids</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-[#10b981] shrink-0" />
-                  <span>Earn points, climb the leaderboard, and unlock discovery badges</span>
+                  <span>Climb the leaderboard & unlock badges</span>
                 </li>
               </ul>
 
@@ -348,7 +348,14 @@ export default function Home() {
           <div className="flex items-center gap-1.5 truncate">
             <span className="font-bold text-foreground">SaveDino</span>
             <span className="opacity-40">&bull;</span>
-            <span className="opacity-75 hidden sm:inline">SEDS Sri Lanka</span>
+            <a
+              href="https://www.sedssl.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-80 hover:opacity-100 hover:text-foreground transition-opacity underline-offset-2 hover:underline inline-flex items-center"
+            >
+              SEDS Sri Lanka
+            </a>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link

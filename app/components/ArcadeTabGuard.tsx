@@ -198,14 +198,23 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
 
         {/* Footer Note */}
         <div className="w-full max-w-md mx-auto flex items-center justify-between text-[10px] font-mono text-muted-foreground opacity-60 py-2">
-          <span>SaveDino &bull; NASA &amp; IASC Collaboration</span>
-          <Link
-            href="/credits"
-            prefetch={false}
+          <a
+            href="https://www.sedssl.org"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:text-foreground underline underline-offset-2"
           >
-            Credits
-          </Link>
+            SEDS Sri Lanka
+          </a>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/credits"
+              prefetch={false}
+              className="hover:text-foreground underline underline-offset-2"
+            >
+              Credits
+            </Link>
+          </div>
         </div>
       </div>
     );

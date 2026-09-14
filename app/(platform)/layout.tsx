@@ -303,9 +303,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             </Link>
             <span className="opacity-40">|</span>
             <a
-              href="https://sedssl.org"
+              href="https://www.sedssl.org"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="hover:text-foreground transition-colors hover:underline"
             >
               SEDS Sri Lanka
