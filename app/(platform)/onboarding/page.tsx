@@ -50,7 +50,7 @@ function OnboardingForm() {
               user.whatsapp.trim().length > 0;
 
             if (isComplete) {
-              sessionStorage.setItem("savedino_profile_completed", "true");
+              sessionStorage.setItem(`savedino_profile_completed_${user.id}`, "true");
               window.location.href = redirectTo;
               return;
             }
@@ -118,7 +118,7 @@ function OnboardingForm() {
       }
 
       toast.success("Profile setup complete! Welcome aboard.");
-      sessionStorage.setItem("savedino_profile_completed", "true");
+      sessionStorage.setItem(`savedino_profile_completed_${(session?.user as any)?.id}`, "true");
       window.location.href = redirectTo;
     } catch (err: any) {
       toast.error(err.message || "Failed to save profile. Please try again.");

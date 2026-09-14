@@ -24,10 +24,11 @@ export function ProfileOnboardingDialog() {
       return;
     }
 
-    // Fast-path: check if profile completion was already verified in this session
+    // Fast-path: check if profile completion was already verified in this session for this specific user
+    const storageKey = `savedino_profile_completed_${session.user.id}`;
     if (
       typeof window !== "undefined" &&
-      sessionStorage.getItem("savedino_profile_completed") === "true"
+      sessionStorage.getItem(storageKey) === "true"
     ) {
       return;
     }
@@ -50,9 +51,9 @@ export function ProfileOnboardingDialog() {
           const isCompleteWhatsapp = u.whatsapp && u.whatsapp.trim().length > 0;
 
           if (isCompleteName && isCompleteWhatsapp) {
-            sessionStorage.setItem("savedino_profile_completed", "true");
+            sessionStorage.setItem(storageKey, "true");
           } else {
-            sessionStorage.removeItem("savedino_profile_completed");
+            sessionStorage.removeItem(storageKey);
             router.push(`/onboarding?redirectTo=${encodeURIComponent(pathname)}`);
           }
         }

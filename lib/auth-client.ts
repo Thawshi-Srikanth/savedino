@@ -239,6 +239,11 @@ export function useSession() {
 // Wrapper for signOut that instantly clears local cache and notifies all tabs
 export const signOut = async (options?: any) => {
   updateSessionState(null);
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.clear();
+    } catch (e) {}
+  }
   broadcastSessionChange("SESSION_UPDATE", null);
   return authClient.signOut(options);
 };

@@ -345,8 +345,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         </footer>
       </main>
 
-      {/* Profile Onboarding Modal for Incomplete Magic-Link Profiles */}
-      {!isDemo && <ProfileOnboardingDialog />}
+      {/* Profile Onboarding Modal for Incomplete Profiles */}
+      <ProfileOnboardingDialog />
 
       {/* Desktop Floating Arcade Game Button (Hidden on mobile or in demo mode) */}
       {!isDemo && (
