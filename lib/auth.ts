@@ -58,6 +58,13 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "discord"],
+      allowDifferentEmails: true,
+    },
+  },
   user: {
     additionalFields: {
       role: {
