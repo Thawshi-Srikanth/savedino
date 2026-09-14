@@ -11,6 +11,15 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://*.trycloudflare.com",
+    "https://without-clicks-laser-magic.trycloudflare.com",
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    "https://savedino.sedssl.org",
+  ],
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, token, url, metadata }) => {

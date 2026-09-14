@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 /**
  * SaveDino Discord Bot & REST API Automation Engine ($0 Cost)
  * Uses Discord Standard REST API v10 with Bot Authorization Token.
@@ -307,4 +309,113 @@ export async function notifyAsteroidDiscovery(params: {
   };
 
   await sendDiscordMessage(params.channelId, null, [embed]);
+}
+
+/**
+ * Validates Discord Interaction Webhook signatures (Ed25519)
+ */
+export function verifyDiscordSignature(
+  rawBody: string,
+  signature: string | null,
+  timestamp: string | null,
+  publicKeyHex: string = process.env.DISCORD_PUBLIC_KEY || ""
+): boolean {
+  if (!signature || !timestamp || !publicKeyHex || !rawBody) {
+    return false;
+  }
+
+  try {
+    // Convert Discord 64-char hex public key to SPKI DER format for Node crypto
+    const keyDer = Buffer.concat([
+      Buffer.from("302a300506032b6570032100", "hex"), // Ed25519 SPKI ASN.1 header
+      Buffer.from(publicKeyHex, "hex"),
+    ]);
+    const publicKey = crypto.createPublicKey({
+      key: keyDer,
+      format: "der",
+      type: "spki",
+    });
+
+    return crypto.verify(
+      null,
+      Buffer.from(timestamp + rawBody),
+      publicKey,
+      Buffer.from(signature, "hex")
+    );
+  } catch (err) {
+    console.error("[Discord Security] Ed25519 verification failed:", err);
+    return false;
+  }
+}
+
+/**
+ * Generates a signed, short-lived (15 min) token for linking a Discord account to SaveDino
+ */
+export function generateDiscordLinkToken(discordUserId: string, username?: string): string {
+  const secret = process.env.BETTER_AUTH_SECRET || "savedino-discord-secret";
+  const expiresAt = Date.now() + 15 * 60 * 1000; // 15 mins validity
+  const payload = `${discordUserId}:${username || ""}:${expiresAt}`;
+  const hmac = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return Buffer.from(JSON.stringify({ discordUserId, username, expiresAt, hmac })).toString("base64url");
+}
+
+/**
+ * Validates the Discord link token
+ */
+export function verifyDiscordLinkToken(token: string): { discordUserId: string; username?: string } | null {
+  try {
+    const raw = Buffer.from(token, "base64url").toString("utf-8");
+    const { discordUserId, username, expiresAt, hmac } = JSON.parse(raw);
+    if (!discordUserId || !expiresAt || !hmac) return null;
+    if (Date.now() > expiresAt) return null; // Expired
+
+    const secret = process.env.BETTER_AUTH_SECRET || "savedino-discord-secret";
+    const expectedPayload = `${discordUserId}:${username || ""}:${expiresAt}`;
+    const expectedHmac = crypto.createHmac("sha256", secret).update(expectedPayload).digest("hex");
+
+    if (crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expectedHmac))) {
+      return { discordUserId, username };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Registers the /link slash command with Discord (Global or Guild-specific)
+ */
+export async function registerDiscordCommands(guildId?: string) {
+  const token = process.env.DISCORD_BOT_TOKEN;
+  const clientId = process.env.DISCORD_CLIENT_ID;
+  if (!token || !clientId) {
+    throw new Error("DISCORD_BOT_TOKEN and DISCORD_CLIENT_ID must be configured.");
+  }
+
+  const targetGuild = guildId || process.env.DISCORD_GUILD_ID;
+  const url = targetGuild
+    ? `${DISCORD_API_BASE}/applications/${clientId}/guilds/${targetGuild}/commands`
+    : `${DISCORD_API_BASE}/applications/${clientId}/commands`;
+
+  const commandData = {
+    name: "link",
+    description: "Link your Discord account to SaveDino to unlock squad channels and campaign roles.",
+    type: 1, // CHAT_INPUT
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bot ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(commandData),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to register Discord command: ${errorText}`);
+  }
+
+  return await res.json();
 }
