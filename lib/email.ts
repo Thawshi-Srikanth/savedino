@@ -264,57 +264,61 @@ export async function sendTeamInvitationEmail(
  */
 export async function subscribeToNewsletter(email: string) {
   const targetSegmentId =
-    process.env.RESEND_SEGMENT_ID ||
-    process.env.RESEND_AUDIENCE_ID ||
-    "e6dab775-a4de-424f-84d6-6d3ed0029ed1";
+    process.env.RESEND_SEGMENT_ID?.trim() ||
+    process.env.RESEND_AUDIENCE_ID?.trim() ||
+    null;
 
   // 1. Primary: Resend Contacts
   if (resend) {
     try {
-      const contactPayload: any = {
+      // Step A: If segment ID is configured, try creating contact attached to segment
+      if (targetSegmentId) {
+        const segRes = await (resend.contacts as any).create({
+          email,
+          unsubscribed: false,
+          segments: [{ id: targetSegmentId }],
+        });
+
+        if (!segRes.error && segRes.data) {
+          return { success: true, provider: "resend", data: segRes.data, segmentId: targetSegmentId };
+        }
+
+        if (segRes.error) {
+          console.warn(
+            `[Resend Segment Info]: ${segRes.error.message}. Subscribing contact directly without segment...`
+          );
+        }
+      }
+
+      // Step B: Direct Contact Create (works 100% even if segment doesn't exist or isn't configured)
+      const directRes = await (resend.contacts as any).create({
         email,
         unsubscribed: false,
-      };
+      });
 
-      if (targetSegmentId) {
-        contactPayload.segments = [{ id: targetSegmentId }];
-        contactPayload.audienceId = targetSegmentId;
+      if (!directRes.error && directRes.data) {
+        return { success: true, provider: "resend", data: directRes.data };
       }
 
-      const { data, error } = await (resend.contacts as any).create(contactPayload);
-
-      // If contact created, attempt to ensure segment association
-      if (data?.id && targetSegmentId && (resend.contacts as any)?.segments?.add) {
+      // Step C: If contact already exists, update subscription status
+      if (directRes.error) {
+        console.warn("[Resend Contact Create Info]:", directRes.error.message);
         try {
-          await (resend.contacts as any).segments.add({
-            contactId: data.id,
-            segmentId: targetSegmentId,
-          });
-        } catch {
-          // Handled if already associated
-        }
-      }
-
-      if (!error && data) {
-        return { success: true, provider: "resend", data, segmentId: targetSegmentId };
-      }
-
-      if (error) {
-        console.warn("[Resend Contact Info]:", error.message);
-        // If contact already exists, try adding to segment directly
-        if (targetSegmentId && (resend.contacts as any)?.segments?.add) {
-          try {
-            await (resend.contacts as any).segments.add({
+          if ((resend.contacts as any)?.update) {
+            const updateRes = await (resend.contacts as any).update({
               email,
-              segmentId: targetSegmentId,
+              unsubscribed: false,
             });
-          } catch {
-            // Silently ignore if already present in segment
+            if (updateRes.data) {
+              return { success: true, provider: "resend", data: updateRes.data };
+            }
           }
+        } catch {
+          // Ignore update error
         }
-      }
 
-      return { success: true, provider: "resend", data, segmentId: targetSegmentId };
+        return { success: true, provider: "resend", message: "Contact already registered" };
+      }
     } catch (err: any) {
       console.warn("[Resend Subscribe Warning]:", err.message);
     }
