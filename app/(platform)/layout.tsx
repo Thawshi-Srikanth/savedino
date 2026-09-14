@@ -13,6 +13,7 @@ import { PixelAvatar } from "@/components/pixel-avatar";
 import { ProfileOnboardingDialog } from "@/components/profile-onboarding-dialog";
 import { PlatformTourGuide, PlatformTourTriggerButton } from "@/components/platform-tour-guide";
 import { DinoLoading } from "@/components/dino-loading";
+import { FloatingDiscordWidget } from "@/components/floating-discord-widget";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -322,42 +323,44 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         <div className="flex-1">{children}</div>
 
         {/* Platform Bottom Footer Note */}
-        <footer className="w-full pt-8 mt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-sans text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-foreground">SaveDino</span>
+        <footer className="w-full pt-8 mt-12 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans text-muted-foreground pb-4 md:pb-0">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 text-center md:text-left">
+            <span className="font-bold text-foreground">SaveDino</span>
             <span className="opacity-40">&bull;</span>
-            <span className="font-mono text-[11px]">NASA &amp; IASC Collaboration</span>
+            <span className="font-mono text-[11px] bg-muted/60 px-2 py-0.5 rounded-md border border-border/50">
+              NASA &amp; IASC Collaboration
+            </span>
           </div>
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-4 gap-y-1.5 text-xs text-center">
             <Link
               href="/credits"
               prefetch={false}
-              className="hover:text-foreground transition-colors hover:underline"
+              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
             >
               Credits &amp; Partners
             </Link>
-            <span className="opacity-40">&bull;</span>
+            <span className="opacity-40 hidden sm:inline">&bull;</span>
             <Link
               href="/privacy"
               prefetch={false}
-              className="hover:text-foreground transition-colors hover:underline"
+              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
             >
               Privacy Policy
             </Link>
-            <span className="opacity-40">&bull;</span>
+            <span className="opacity-40 hidden sm:inline">&bull;</span>
             <Link
               href="/terms"
               prefetch={false}
-              className="hover:text-foreground transition-colors hover:underline"
+              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
             >
               Terms of Service
             </Link>
-            <span className="opacity-40">&bull;</span>
+            <span className="opacity-40 hidden sm:inline">&bull;</span>
             <a
               href="https://www.sedssl.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors hover:underline"
+              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
             >
               SEDS Sri Lanka
             </a>
@@ -370,6 +373,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
       {/* Interactive Platform Tour Guide */}
       {!isDemo && <PlatformTourGuide />}
+
+      {/* Floating Discord Server & Community Menu Widget */}
+      {!isDemo && <FloatingDiscordWidget />}
 
       {/* Desktop Floating Arcade Game Button (Hidden on mobile or in demo mode) */}
       {!isDemo && (
