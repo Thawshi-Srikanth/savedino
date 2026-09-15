@@ -188,20 +188,25 @@ function LoginForm() {
               <span>Google</span>
             </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleSocialSignIn("discord")}
-              disabled={loading || !!socialLoading}
-              className="h-11 text-xs font-sans font-semibold flex items-center justify-center gap-2 border-[#5865F2]/40 bg-card hover:bg-[#5865F2]/10 text-foreground hover:text-[#5865F2] shadow-arcade active:translate-y-[2px] active:shadow-none transition-all cursor-pointer rounded-xl"
-            >
-              {socialLoading === "discord" ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
-              ) : (
-                <DiscordIcon className="w-4 h-4 shrink-0 text-[#5865F2]" />
-              )}
-              <span>Discord</span>
-            </Button>
+            <div className="relative">
+              <span className="absolute -top-2.5 right-3 z-10 px-1.5 py-0.5 text-[9px] font-sans font-bold tracking-tight uppercase bg-[#5865F2] text-white rounded-full shadow-xs pointer-events-none">
+                Recommended
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleSocialSignIn("discord")}
+                disabled={loading || !!socialLoading}
+                className="w-full h-11 text-xs font-sans font-semibold flex items-center justify-center gap-2 border-[#5865F2]/40 bg-card hover:bg-[#5865F2]/10 text-foreground hover:text-[#5865F2] shadow-arcade active:translate-y-[2px] active:shadow-none transition-all cursor-pointer rounded-xl"
+              >
+                {socialLoading === "discord" ? (
+                  <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <DiscordIcon className="w-4 h-4 shrink-0 text-[#5865F2]" />
+                )}
+                <span>Discord</span>
+              </Button>
+            </div>
           </div>
 
           {/* Divider */}

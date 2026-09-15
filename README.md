@@ -46,6 +46,8 @@ The platform blends a high-performance **Developer Tech** theme with an interact
   - Multi-provider failover system with [Resend](https://resend.com) as primary and [Brevo](https://brevo.com) as secondary.
 - **Built-in Arcade HUD**:
   - Interactive retro Dino mini-game in the platform header to celebrate cosmic milestones.
+- **Discord Bot & Community Integration**:
+  - Zero-cost serverless REST API automation, auto-generated squad workspaces, `/link` slash command, and verified `@Citizen Scientist` role sync. See [Discord Documentation](doc/discord/README.md).
 - **Modern SEO & Structured Data**:
   - OpenGraph / Twitter cards, dynamic XML sitemaps, robots policy, and JSON-LD schema for search engines.
 
