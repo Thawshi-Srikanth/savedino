@@ -14,6 +14,18 @@ export function proxy(request: NextRequest) {
   const isPublicInfoPage =
     pathname === "/privacy" || pathname === "/terms" || pathname === "/credits";
 
+  // Intercept Better Auth OAuth error endpoint and redirect back to /login with styled toast
+  if (pathname === "/api/auth/error") {
+    const errorParam = request.nextUrl.searchParams.get("error") || "";
+    const loginUrl = new URL("/login", request.url);
+    if (errorParam === "unable_to_create_user") {
+      loginUrl.searchParams.set("error", "EARLY_ACCESS_REQUIRED");
+    } else {
+      loginUrl.searchParams.set("error", errorParam || "AUTH_FAILED");
+    }
+    return NextResponse.redirect(loginUrl);
+  }
+
   // Allow root path, public info pages, API routes, and static assets
   if (
     pathname === "/" ||
@@ -38,24 +50,25 @@ export function proxy(request: NextRequest) {
   const isAuthenticated = Boolean(sessionToken);
 
   // Route definitions
-  const isAuthPage = pathname === "/login" || pathname === "/register";
-  const isProtectedRoute = pathname.startsWith("/team/");
-  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/verify";
+  const isInternalPlatformRoute =
+    pathname.startsWith("/campaigns") ||
+    pathname.startsWith("/teams") ||
+    pathname.startsWith("/team/") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/create") ||
+    pathname.startsWith("/join") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/link-discord") ||
+    pathname.startsWith("/admin");
 
   // 1. If user is logged in and visits /login or /register -> Redirect to /campaigns
-  if (isAuthenticated && isAuthPage) {
+  if (isAuthenticated && (pathname === "/login" || pathname === "/register")) {
     return NextResponse.redirect(new URL("/campaigns", request.url));
   }
 
-  // 2. If user is NOT logged in and attempts to access protected team workspace -> Redirect to /login
-  if (!isAuthenticated && isProtectedRoute) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // 3. If user is NOT logged in and attempts to access admin console -> Redirect to /login
-  if (!isAuthenticated && isAdminRoute) {
+  // 2. If user is NOT logged in and attempts to access any internal platform route -> Redirect to /login
+  if (!isAuthenticated && isInternalPlatformRoute) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(loginUrl);

@@ -316,26 +316,28 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Link href="/campaigns" prefetch={false}>
+                    <Link href="/login" prefetch={false}>
                       <Button
                         size="sm"
                         variant="default"
                         className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
                       >
-                        <Telescope className="size-3.5" />
-                        <span>Explore Campaigns</span>
+                        <LogIn className="size-3.5" />
+                        <span>Sign In</span>
                       </Button>
                     </Link>
-                    <Link href="/login" prefetch={false}>
+                    {!isSubscribed && (
                       <Button
+                        type="button"
                         size="sm"
                         variant="outline"
-                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                        onClick={() => setIsNotifyModalOpen(true)}
+                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5 text-foreground hover:text-primary border-border"
                       >
-                        <LogIn className="size-3.5 text-primary" />
-                        <span>Sign In / Join</span>
+                        <Bell className="size-3.5 text-[#8b5cf6]" />
+                        <span>Request Access</span>
                       </Button>
-                    </Link>
+                    )}
                   </>
                 )}
               </div>

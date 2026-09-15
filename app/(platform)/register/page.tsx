@@ -58,26 +58,37 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "discord" | null>(null);
 
-  // If already authenticated, redirect to destination
+  // If already authenticated, redirect to destination and identify in PostHog
   useEffect(() => {
     authClient
       .getSession()
       .then((res) => {
-        if (res?.data?.session) {
+        if (res?.data?.session && res?.data?.user) {
+          try {
+            posthog.identify(res.data.user.id, {
+              email: res.data.user.email,
+              name: res.data.user.name,
+              role: (res.data.user as any).role || "user",
+            });
+          } catch {}
           router.push(redirectTo);
         }
       })
       .catch(() => {});
   }, [redirectTo, router]);
 
-  // Handle URL errors (e.g. expired tokens)
+  // Handle URL errors (e.g. expired tokens, early access)
   useEffect(() => {
     if (urlError) {
-      const msg =
-        urlError === "INVALID_TOKEN"
-          ? "This link has expired or has already been used. Please request a new one."
-          : "Something went wrong. Please try again.";
-      toast.error(msg);
+      if (urlError === "INVALID_TOKEN") {
+        toast.error("This link has expired or has already been used. Please request a new one.");
+      } else if (urlError.includes("EARLY_ACCESS_REQUIRED") || urlError === "UNAUTHORIZED") {
+        toast.error(
+          "SaveDino is currently in Early Access. Only pre-registered citizen scientists can sign in right now."
+        );
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     }
   }, [urlError]);
 
@@ -90,7 +101,14 @@ function RegisterForm() {
         callbackURL,
       });
     } catch (err: any) {
-      toast.error(err?.message || `Failed to sign up with ${provider}.`);
+      const errMsg = err?.message || "";
+      if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
+        toast.error(
+          "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in."
+        );
+      } else {
+        toast.error(err?.message || `Failed to sign up with ${provider}.`);
+      }
       setSocialLoading(null);
     }
   };
@@ -109,9 +127,14 @@ function RegisterForm() {
       });
 
       if (res.error) {
-        const msg =
-          res.error.message || "Failed to send link. Please check your email and try again.";
-        toast.error(msg);
+        const msg = res.error.message || "";
+        if (msg.includes("EARLY_ACCESS_REQUIRED")) {
+          toast.error(
+            "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in right now."
+          );
+        } else {
+          toast.error(msg || "Failed to send link. Please check your email and try again.");
+        }
       } else {
         posthog.capture("registration_link_requested", { auth_method: "magic_link" });
         toast.success("Account link sent! Check your inbox.");
@@ -121,8 +144,14 @@ function RegisterForm() {
       }
     } catch (err: any) {
       posthog.captureException(err, { auth_flow: "registration", auth_method: "magic_link" });
-      const msg = err.message || "An error occurred. Please try again.";
-      toast.error(msg);
+      const errMsg = err?.message || "";
+      if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
+        toast.error(
+          "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in right now."
+        );
+      } else {
+        toast.error(errMsg || "An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -271,7 +300,7 @@ function RegisterForm() {
               .
             </p>
             <p className="text-xs pt-1">
-              Already have an account?{" "}
+              Private Beta &bull; Already invited?{" "}
               <Link
                 href="/login"
                 prefetch={false}

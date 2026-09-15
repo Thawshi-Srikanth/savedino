@@ -59,26 +59,41 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "discord" | null>(null);
 
-  // If already authenticated, redirect to destination
+  // If already authenticated, redirect to destination and identify in PostHog
   useEffect(() => {
     authClient
       .getSession()
       .then((res) => {
-        if (res?.data?.session) {
+        if (res?.data?.session && res?.data?.user) {
+          try {
+            posthog.identify(res.data.user.id, {
+              email: res.data.user.email,
+              name: res.data.user.name,
+              role: (res.data.user as any).role || "user",
+            });
+          } catch {}
           router.push(redirectTo);
         }
       })
       .catch(() => {});
   }, [redirectTo, router]);
 
-  // Handle URL errors (e.g. expired tokens)
+  // Handle URL errors (e.g. expired tokens, early access)
   useEffect(() => {
     if (urlError) {
-      const msg =
-        urlError === "INVALID_TOKEN"
-          ? "This link has expired or has already been used. Please request a new one."
-          : "Something went wrong. Please try again.";
-      toast.error(msg);
+      if (urlError === "INVALID_TOKEN") {
+        toast.error("This link has expired or has already been used. Please request a new one.");
+      } else if (
+        urlError.includes("EARLY_ACCESS_REQUIRED") ||
+        urlError === "unable_to_create_user" ||
+        urlError === "UNAUTHORIZED"
+      ) {
+        toast.error(
+          "SaveDino is currently in Early Access. Only pre-registered citizen scientists can sign in right now."
+        );
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     }
   }, [urlError]);
 
@@ -91,7 +106,14 @@ function LoginForm() {
         callbackURL,
       });
     } catch (err: any) {
-      toast.error(err?.message || `Failed to sign in with ${provider}.`);
+      const errMsg = err?.message || "";
+      if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
+        toast.error(
+          "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in."
+        );
+      } else {
+        toast.error(err?.message || `Failed to sign in with ${provider}.`);
+      }
       setSocialLoading(null);
     }
   };
@@ -110,9 +132,14 @@ function LoginForm() {
       });
 
       if (res.error) {
-        const msg =
-          res.error.message || "Failed to send link. Please check your email and try again.";
-        toast.error(msg);
+        const msg = res.error.message || "";
+        if (msg.includes("EARLY_ACCESS_REQUIRED")) {
+          toast.error(
+            "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in right now."
+          );
+        } else {
+          toast.error(msg || "Failed to send link. Please check your email and try again.");
+        }
       } else {
         posthog.capture("magic_link_requested", { auth_method: "magic_link" });
         toast.success("Sign-in link sent! Check your inbox.");
@@ -122,8 +149,14 @@ function LoginForm() {
       }
     } catch (err: any) {
       posthog.captureException(err, { auth_flow: "login", auth_method: "magic_link" });
-      const msg = err.message || "An error occurred. Please try again.";
-      toast.error(msg);
+      const errMsg = err?.message || "";
+      if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
+        toast.error(
+          "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in right now."
+        );
+      } else {
+        toast.error(errMsg || "An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -262,16 +295,16 @@ function LoginForm() {
 
           <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-1.5">
             <p className="font-semibold text-foreground">
-              No separate sign-up or password required.
+              Private Beta &bull; Pre-registered access only.
             </p>
             <p className="text-[11px] text-muted-foreground">
-              New here?{" "}
+              Need access?{" "}
               <Link
-                href="/register"
+                href="/"
                 prefetch={false}
                 className="font-semibold text-primary hover:underline"
               >
-                Create an account
+                Join the waitlist on homepage
               </Link>
             </p>
           </div>
