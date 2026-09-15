@@ -151,9 +151,7 @@ export async function GET(req: NextRequest) {
             user: {
               ...userScoreRecord.user,
               image: sanitizeSeed(
-                userScoreRecord.user.image ||
-                  userScoreRecord.user.name ||
-                  userScoreRecord.user.id
+                userScoreRecord.user.image || userScoreRecord.user.name || userScoreRecord.user.id
               ),
             },
           };

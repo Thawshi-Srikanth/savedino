@@ -61,8 +61,9 @@ export default function TermsPage() {
             </li>
             <li>
               <strong className="text-foreground">Squad Participation Limits:</strong> Participants
-              collaborate in squads of 1 to 6 members, in strict adherence to IASC campaign rules. A
-              user may only participate in one active squad per observation campaign.
+              collaborate in squads up to the maximum member limit specified on the respective
+              campaign page (in accordance with campaign guidelines). A user may only participate in
+              one active squad per observation campaign.
             </li>
             <li>
               <strong className="text-foreground">Squad Leader Responsibilities:</strong> Squad

@@ -70,7 +70,9 @@ export const auth = betterAuth({
           const imageSeed =
             user.image && !user.image.startsWith("http")
               ? user.image
-              : (metadata.image && !metadata.image.startsWith("http") ? metadata.image : getRandomSeed());
+              : metadata.image && !metadata.image.startsWith("http")
+                ? metadata.image
+                : getRandomSeed();
 
           return {
             data: {

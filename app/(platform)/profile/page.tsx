@@ -3,7 +3,12 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession, invalidateSessionCache, updateCachedUser, authClient } from "@/lib/auth-client";
+import {
+  useSession,
+  invalidateSessionCache,
+  updateCachedUser,
+  authClient,
+} from "@/lib/auth-client";
 import { getUserProfile, invalidateUserProfileCache } from "@/lib/user-profile";
 import { PixelAvatar } from "@/components/pixel-avatar";
 import { getRandomSeed, generateSeedProfile } from "@/lib/seed-avatar";

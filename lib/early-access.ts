@@ -56,11 +56,9 @@ export async function checkEarlyAccessPermission(email: string): Promise<EarlyAc
   if (posthog) {
     try {
       // Evaluate flag in PostHog for this user email (with email person property)
-      const isAllowed = await isFeatureFlagEnabled(
-        normalizedEmail,
-        "early-access-allowed",
-        { email: normalizedEmail }
-      );
+      const isAllowed = await isFeatureFlagEnabled(normalizedEmail, "early-access-allowed", {
+        email: normalizedEmail,
+      });
 
       // If flag is explicitly evaluated by PostHog:
       if (isAllowed === true) {
