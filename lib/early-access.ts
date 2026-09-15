@@ -33,28 +33,8 @@ export async function checkEarlyAccessPermission(email: string): Promise<EarlyAc
     console.warn("[Early Access] DB check warning:", dbErr);
   }
 
-  // 2. PRIMARY: Check PostHog Feature Flag ("early-access-allowed")
-  const posthog = getPostHogClient();
-  if (posthog) {
-    try {
-      // Evaluate flag in PostHog for this user email
-      const isAllowed = await isFeatureFlagEnabled(normalizedEmail, "early-access-allowed");
-
-      // If flag is explicitly evaluated by PostHog:
-      if (isAllowed === true) {
-        return { allowed: true, reason: "posthog_allowed" };
-      } else if (isAllowed === false) {
-        return {
-          allowed: false,
-          error: "EARLY_ACCESS_REQUIRED",
-        };
-      }
-    } catch (phErr) {
-      console.warn("[Early Access] PostHog evaluation warning:", phErr);
-    }
-  }
-
-  // 3. FALLBACK: Environment whitelist or manual DEMO_MODE toggle
+  // 2. IMMEDIATE OVERRIDE: Environment whitelist (EARLY_ACCESS_EMAILS)
+  // Ensures emails listed in environment variables are always allowed, even before PostHog flag evaluation
   const envWhitelist = (process.env.EARLY_ACCESS_EMAILS || "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
@@ -68,6 +48,31 @@ export async function checkEarlyAccessPermission(email: string): Promise<EarlyAc
 
     if (isDirectMatch || isDomainMatch) {
       return { allowed: true, reason: "env_whitelist" };
+    }
+  }
+
+  // 3. PostHog Dynamic Feature Flag ("early-access-allowed")
+  const posthog = getPostHogClient();
+  if (posthog) {
+    try {
+      // Evaluate flag in PostHog for this user email (with email person property)
+      const isAllowed = await isFeatureFlagEnabled(
+        normalizedEmail,
+        "early-access-allowed",
+        { email: normalizedEmail }
+      );
+
+      // If flag is explicitly evaluated by PostHog:
+      if (isAllowed === true) {
+        return { allowed: true, reason: "posthog_allowed" };
+      } else if (isAllowed === false) {
+        return {
+          allowed: false,
+          error: "EARLY_ACCESS_REQUIRED",
+        };
+      }
+    } catch (phErr) {
+      console.warn("[Early Access] PostHog evaluation warning:", phErr);
     }
   }
 

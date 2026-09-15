@@ -68,20 +68,31 @@ export async function captureServerException(
  */
 export async function isFeatureFlagEnabled(
   distinctId: string,
-  flagKey: string
+  flagKey: string,
+  personProperties?: Record<string, string | number | boolean>
 ): Promise<boolean | null> {
   const client = getPostHogClient();
   if (!client) return null;
 
   try {
-    if (typeof (client as any).evaluateFlags === "function") {
-      const flags = await (client as any).evaluateFlags(distinctId);
-      if (flags && typeof flags.isEnabled === "function") {
-        return Boolean(flags.isEnabled(flagKey));
-      }
+    const props = personProperties || { email: distinctId };
+
+    if (typeof (client as any).isFeatureEnabled === "function") {
+      const enabled = await (client as any).isFeatureEnabled(flagKey, distinctId, {
+        personProperties: props,
+      });
+      if (typeof enabled === "boolean") return enabled;
     }
-    const flagVal = await (client as any).getFeatureFlag(flagKey, distinctId);
-    return Boolean(flagVal);
+
+    if (typeof (client as any).getFeatureFlag === "function") {
+      const flagVal = await (client as any).getFeatureFlag(flagKey, distinctId, {
+        personProperties: props,
+      });
+      if (typeof flagVal === "boolean") return flagVal;
+      if (flagVal !== undefined && flagVal !== null) return Boolean(flagVal);
+    }
+
+    return null;
   } catch (err) {
     console.warn(`[PostHog Server] Error evaluating flag "${flagKey}":`, err);
     return null;
