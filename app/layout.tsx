@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DevPersonaSwitcher } from "@/components/dev-persona-switcher";
 import { CookieConsent } from "@/components/cookie-consent";
+import { TopLoadingBar } from "@/components/top-loading-bar";
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -189,6 +190,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <TopLoadingBar />
           <AudioRouteGuard />
           <Toaster position="top-right" />
           <CookieConsent />

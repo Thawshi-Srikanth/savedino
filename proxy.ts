@@ -12,7 +12,10 @@ export function proxy(request: NextRequest) {
 
   // Public informational pages that must always remain accessible (even in Demo Mode)
   const isPublicInfoPage =
-    pathname === "/privacy" || pathname === "/terms" || pathname === "/credits";
+    pathname === "/privacy" ||
+    pathname === "/terms" ||
+    pathname === "/credits" ||
+    pathname === "/cookies";
 
   // Intercept Better Auth OAuth error endpoint and redirect back to /login with styled toast
   if (pathname === "/api/auth/error") {
@@ -26,9 +29,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Allow root path, public info pages, API routes, and static assets
+  // Allow root path, leaderboard, public info pages, API routes, and static assets
   if (
     pathname === "/" ||
+    pathname === "/leaderboard" ||
     isPublicInfoPage ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
