@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, ArrowRight, RefreshCw } from "lucide-react";
+import { Mail, ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { DinoLoading } from "@/components/dino-loading";
@@ -57,27 +57,41 @@ function RegisterForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "discord" | null>(null);
+  const [earlyAccessNotice, setEarlyAccessNotice] = useState(false);
 
-  // If already authenticated, redirect to destination
+  // If already authenticated, redirect to destination and identify in PostHog
   useEffect(() => {
     authClient
       .getSession()
       .then((res) => {
-        if (res?.data?.session) {
+        if (res?.data?.session && res?.data?.user) {
+          try {
+            posthog.identify(res.data.user.id, {
+              email: res.data.user.email,
+              name: res.data.user.name,
+              role: (res.data.user as any).role || "user",
+            });
+          } catch {}
           router.push(redirectTo);
         }
       })
       .catch(() => {});
   }, [redirectTo, router]);
 
-  // Handle URL errors (e.g. expired tokens)
+  // Handle URL errors (e.g. expired tokens, early access)
   useEffect(() => {
     if (urlError) {
-      const msg =
-        urlError === "INVALID_TOKEN"
-          ? "This link has expired or has already been used. Please request a new one."
-          : "Something went wrong. Please try again.";
-      toast.error(msg);
+      if (urlError === "INVALID_TOKEN") {
+        toast.error("This link has expired or has already been used. Please request a new one.");
+      } else if (
+        urlError.includes("EARLY_ACCESS_REQUIRED") ||
+        urlError === "unable_to_create_user" ||
+        urlError === "UNAUTHORIZED"
+      ) {
+        setEarlyAccessNotice(true);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     }
   }, [urlError]);
 
@@ -90,7 +104,12 @@ function RegisterForm() {
         callbackURL,
       });
     } catch (err: any) {
-      toast.error(err?.message || `Failed to sign up with ${provider}.`);
+      const errMsg = err?.message || "";
+      if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
+        setEarlyAccessNotice(true);
+      } else {
+        toast.error(err?.message || `Failed to sign up with ${provider}.`);
+      }
       setSocialLoading(null);
     }
   };
@@ -109,9 +128,12 @@ function RegisterForm() {
       });
 
       if (res.error) {
-        const msg =
-          res.error.message || "Failed to send link. Please check your email and try again.";
-        toast.error(msg);
+        const msg = res.error.message || "";
+        if (msg.includes("EARLY_ACCESS_REQUIRED")) {
+          setEarlyAccessNotice(true);
+        } else {
+          toast.error(msg || "Failed to send link. Please check your email and try again.");
+        }
       } else {
         posthog.capture("registration_link_requested", { auth_method: "magic_link" });
         toast.success("Account link sent! Check your inbox.");
@@ -121,8 +143,12 @@ function RegisterForm() {
       }
     } catch (err: any) {
       posthog.captureException(err, { auth_flow: "registration", auth_method: "magic_link" });
-      const msg = err.message || "An error occurred. Please try again.";
-      toast.error(msg);
+      const errMsg = err?.message || "";
+      if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
+        setEarlyAccessNotice(true);
+      } else {
+        toast.error(errMsg || "An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -133,12 +159,12 @@ function RegisterForm() {
       {/* Top Left Code Comment Accent */}
       <div className="w-full max-w-6xl mx-auto flex items-center justify-between text-xs font-mono text-muted-foreground">
         <div className="space-y-0.5">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <span>// create account</span>
           </div>
           <div className="flex items-center gap-1">
             <span>// citizen science</span>
-            <span className="w-2 h-3.5 bg-[#8b5cf6] inline-block animate-pulse" />
+            <span className="w-2 h-3.5 bg-primary inline-block animate-pulse" />
           </div>
         </div>
 
@@ -155,8 +181,44 @@ function RegisterForm() {
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center">
-          <Logo href="/" size="lg" />
+          <Logo href="/" size="lg" showEarlyAccess />
         </div>
+
+        {/* Early Access Alert Notice */}
+        {earlyAccessNotice && (
+          <div className="w-full rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-3.5 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-sans font-bold text-foreground">Early Access Only</h3>
+                <span className="px-2 py-0.5 text-[9px] font-sans font-bold uppercase rounded-full bg-primary text-primary-foreground shadow-xs">
+                  Invite Only
+                </span>
+              </div>
+              <p className="text-xs font-sans text-muted-foreground leading-relaxed">
+                SaveDino is currently open to invited members. If you haven&apos;t joined yet,
+                request access below.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-border">
+              <Link
+                href="/?requestAccess=true"
+                prefetch={false}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-arcade-primary active:translate-y-[1px] transition-all cursor-pointer"
+              >
+                <Mail className="size-3.5" />
+                <span>Request Access</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setEarlyAccessNotice(false)}
+                className="text-xs font-sans text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer py-1"
+              >
+                Try another email
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Auth Card */}
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
@@ -271,7 +333,7 @@ function RegisterForm() {
               .
             </p>
             <p className="text-xs pt-1">
-              Already have an account?{" "}
+              Private Beta &bull; Already invited?{" "}
               <Link
                 href="/login"
                 prefetch={false}

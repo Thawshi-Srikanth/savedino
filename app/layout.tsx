@@ -5,6 +5,7 @@ import { AudioRouteGuard } from "./components/AudioRouteGuard";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DevPersonaSwitcher } from "@/components/dev-persona-switcher";
+import { CookieConsent } from "@/components/cookie-consent";
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -190,6 +191,7 @@ export default function RootLayout({
         >
           <AudioRouteGuard />
           <Toaster position="top-right" />
+          <CookieConsent />
           {children}
           {process.env.NODE_ENV === "development" && <DevPersonaSwitcher />}
         </ThemeProvider>

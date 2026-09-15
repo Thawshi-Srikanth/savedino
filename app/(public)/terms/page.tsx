@@ -172,7 +172,30 @@ export default function TermsPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            7. Service Availability &amp; Astronomical Disclaimers
+            7. Platform Telemetry, Feature Flags &amp; Early Access
+          </h2>
+          <p>
+            To deliver stable asteroid detection tools, monitor system load, and prevent service
+            crashes, SaveDino collects privacy-focused interaction telemetry and evaluates feature
+            flags (including private beta and early access access controls) through PostHog EU:
+          </p>
+          <ul className="list-disc list-inside space-y-2 pl-2 text-sm">
+            <li>
+              <strong className="text-foreground">Early Access Rollouts:</strong> Access to specific
+              campaigns, automated tool pipelines, or platform features may be restricted or rolled
+              out in waves based on account verification or capacity limits.
+            </li>
+            <li>
+              <strong className="text-foreground">Diagnostics &amp; Bug Tracking:</strong> Anonymous
+              performance telemetry and client error diagnostics are processed within the European
+              Union to identify and resolve software bugs.
+            </li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">
+            8. Service Availability &amp; Astronomical Disclaimers
           </h2>
           <p>
             Telescope observation schedules depend on weather conditions at observatory sites,
@@ -188,7 +211,7 @@ export default function TermsPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            8. Limitation of Liability
+            9. Limitation of Liability
           </h2>
           <p>
             To the maximum extent permitted by applicable law, SEDS Sri Lanka, IASC, NASA, and their
@@ -199,17 +222,18 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg sm:text-xl font-bold text-foreground">9. Changes to Terms</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">10. Changes to Terms</h2>
           <p>
             We may update these Terms and Conditions periodically to reflect changes in campaign
-            rules or international astronomical guidelines. Continued participation in campaigns
-            following published updates constitutes your acceptance of the modified terms.
+            rules, platform capabilities, or international astronomical guidelines. Continued
+            participation in campaigns following published updates constitutes your acceptance of
+            the modified terms.
           </p>
         </section>
 
         <section className="space-y-3 pb-8">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            10. Contact &amp; Governance
+            11. Contact &amp; Governance
           </h2>
           <p>
             For questions regarding campaign participation, squad governance, or these Terms and
@@ -235,36 +259,6 @@ export default function TermsPage() {
             </a>
           </p>
         </section>
-
-        {/* Footer Navigation Back Link */}
-        <div className="pt-6 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs font-sans text-muted-foreground">
-          <div>
-            <span>SaveDino &bull; SEDS Sri Lanka</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              prefetch={false}
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Return Home
-            </Link>
-            <Link
-              href="/credits"
-              prefetch={false}
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Credits
-            </Link>
-            <Link
-              href="/privacy"
-              prefetch={false}
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Privacy
-            </Link>
-          </div>
-        </div>
       </main>
     </div>
   );

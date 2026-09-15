@@ -98,6 +98,11 @@ export default function Home() {
         if (stored === "true") {
           setIsSubscribed(true);
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("requestAccess") === "true" || urlParams.get("subscribe") === "true") {
+          setIsNotifyModalOpen(true);
+        }
       }
     } catch (e) {
       // Ignore localStorage read errors
@@ -316,26 +321,28 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Link href="/campaigns" prefetch={false}>
+                    <Link href="/login" prefetch={false}>
                       <Button
                         size="sm"
                         variant="default"
                         className="text-xs font-bold shadow-arcade-primary cursor-pointer gap-1.5"
                       >
-                        <Telescope className="size-3.5" />
-                        <span>Explore Campaigns</span>
+                        <LogIn className="size-3.5" />
+                        <span>Sign In</span>
                       </Button>
                     </Link>
-                    <Link href="/login" prefetch={false}>
+                    {!isSubscribed && (
                       <Button
+                        type="button"
                         size="sm"
                         variant="outline"
-                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5"
+                        onClick={() => setIsNotifyModalOpen(true)}
+                        className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5 text-foreground hover:text-primary border-border"
                       >
-                        <LogIn className="size-3.5 text-primary" />
-                        <span>Sign In / Join</span>
+                        <Bell className="size-3.5 text-[#8b5cf6]" />
+                        <span>Request Access</span>
                       </Button>
-                    </Link>
+                    )}
                   </>
                 )}
               </div>
@@ -344,8 +351,8 @@ export default function Home() {
         </div>
 
         {/* Footer Note */}
-        <footer className="w-full max-w-[600px] flex items-center justify-between pt-2 pb-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0">
-          <div className="flex items-center gap-1.5 truncate">
+        <footer className="w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-2 pt-3 pb-2 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0 text-center sm:text-left">
+          <div className="flex items-center gap-1.5 justify-center sm:justify-start">
             <span className="font-bold text-foreground">SaveDino</span>
             <span className="opacity-40">&bull;</span>
             <a
@@ -357,7 +364,7 @@ export default function Home() {
               SEDS Sri Lanka
             </a>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-2.5 gap-y-1">
             {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
               <>
                 <Link
@@ -367,7 +374,7 @@ export default function Home() {
                 >
                   Ranks
                 </Link>
-                <span className="opacity-40">|</span>
+                <span className="opacity-40 hidden sm:inline">|</span>
               </>
             )}
             <Link
@@ -377,7 +384,7 @@ export default function Home() {
             >
               Credits
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40 hidden sm:inline">|</span>
             <Link
               href="/privacy"
               prefetch={false}
@@ -385,7 +392,15 @@ export default function Home() {
             >
               Privacy
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40 hidden sm:inline">|</span>
+            <Link
+              href="/cookies"
+              prefetch={false}
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Cookies
+            </Link>
+            <span className="opacity-40 hidden sm:inline">|</span>
             <Link
               href="/terms"
               prefetch={false}

@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { magicLink } from "better-auth/plugins";
 import { prisma } from "./prisma";
 import { sendMagicLinkEmail } from "./email";
+import { checkEarlyAccessPermission } from "./early-access";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
@@ -23,6 +24,13 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, token, url, metadata }) => {
+        // Enforce Early Access pre-registration whitelist
+        const access = await checkEarlyAccessPermission(email);
+        if (!access.allowed) {
+          throw new Error(
+            "EARLY_ACCESS_REQUIRED: SaveDino is currently in Early Access for pre-registered citizen scientists."
+          );
+        }
         await sendMagicLinkEmail({ email, url, token });
       },
     }),
@@ -43,6 +51,14 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user, context) => {
+          // Enforce Early Access pre-registration whitelist for new accounts
+          const access = await checkEarlyAccessPermission(user.email);
+          if (!access.allowed) {
+            throw new Error(
+              "EARLY_ACCESS_REQUIRED: SaveDino is currently in Early Access for pre-registered citizen scientists."
+            );
+          }
+
           // Automatic First Account Admin Provisioning:
           // If no accounts exist in the database, automatically assign admin role to the first user.
           const userCount = await prisma.user.count();
