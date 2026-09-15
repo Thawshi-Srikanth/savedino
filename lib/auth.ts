@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { magicLink } from "better-auth/plugins";
 import { prisma } from "./prisma";
 import { sendMagicLinkEmail } from "./email";
+import { getRandomSeed } from "./seed-avatar";
 import { checkEarlyAccessPermission } from "./early-access";
 
 export const auth = betterAuth({
@@ -65,6 +66,12 @@ export const auth = betterAuth({
           const role = userCount === 0 ? "admin" : user.role || "user";
           const metadata = (context as any)?.metadata || {};
 
+          // Always ensure user.image is a SaveDino 8-bit space sprite seed, not an external OAuth photo URL
+          const imageSeed =
+            user.image && !user.image.startsWith("http")
+              ? user.image
+              : (metadata.image && !metadata.image.startsWith("http") ? metadata.image : getRandomSeed());
+
           return {
             data: {
               ...user,
@@ -72,9 +79,27 @@ export const auth = betterAuth({
               institution: user.institution || metadata.institution || null,
               country: user.country || metadata.country || "Sri Lanka",
               whatsapp: (user as any).whatsapp || metadata.whatsapp || null,
-              image: user.image || `Astro-Dino-${Math.floor(100 + Math.random() * 900)}`,
+              image: imageSeed,
             },
           };
+        },
+      },
+      update: {
+        before: async (user) => {
+          if (
+            user.image &&
+            (user.image.startsWith("http://") ||
+              user.image.startsWith("https://") ||
+              user.image.includes("googleusercontent.com"))
+          ) {
+            return {
+              data: {
+                ...user,
+                image: undefined, // Preserve existing custom seed
+              },
+            };
+          }
+          return { data: user };
         },
       },
     },

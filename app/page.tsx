@@ -19,6 +19,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useSession } from "@/lib/auth-client";
+import { getUserProfile } from "@/lib/user-profile";
 import { Check, Mail, Bell, LayoutDashboard, LogIn, Users, Telescope } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,8 +72,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetch("/api/user/profile")
-        .then((r) => r.json())
+      getUserProfile()
         .then((d) => {
           if (d.success && Array.isArray(d.teams) && d.teams.length > 0) {
             setUserHasSquads(true);

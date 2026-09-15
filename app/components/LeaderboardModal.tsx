@@ -176,7 +176,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ isOpen, onCl
         {/* Consistent Sized Avatar */}
         <div className="relative mt-2 flex items-center justify-center">
           <PixelAvatar
-            seed={entry.user.name || entry.userId}
+            seed={entry.user.image || entry.user.name || entry.userId}
             size={34}
             className="rounded-xl shadow-xs"
           />
@@ -274,7 +274,12 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ isOpen, onCl
 
                   <div className="relative shrink-0 flex items-center justify-center">
                     <PixelAvatar
-                      seed={session.user.name || session.user.id}
+                      seed={
+                        data.currentUser.user?.image ||
+                        (session.user as any)?.image ||
+                        session.user.name ||
+                        session.user.id
+                      }
                       size={34}
                       className="rounded-xl shadow-xs"
                     />

@@ -523,6 +523,21 @@ function hashString(str: string): number {
   return Math.abs(hash >>> 0);
 }
 
+export function sanitizeSeed(seed?: string | null): string {
+  if (!seed || typeof seed !== "string") return "Astro-Dino-42";
+  const trimmed = seed.trim();
+  if (
+    trimmed.length === 0 ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.includes("googleusercontent.com") ||
+    trimmed.includes(".google.com")
+  ) {
+    return "Astro-Dino-42";
+  }
+  return trimmed;
+}
+
 export interface SeedAvatarData {
   seed: string;
   characterName: string;
@@ -540,7 +555,7 @@ export interface SeedAvatarData {
  * by rotating through predefined space pixel arts and defined complementary color schemes.
  */
 export function generateSeedProfile(inputSeed?: string | null): SeedAvatarData {
-  const seed = inputSeed && inputSeed.trim().length > 0 ? inputSeed.trim() : "Astro-Dino-42";
+  const seed = sanitizeSeed(inputSeed);
   const hash = hashString(seed);
 
   // Rotate between predefined space pixel arts

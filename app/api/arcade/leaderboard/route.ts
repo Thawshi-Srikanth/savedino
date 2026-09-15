@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { sanitizeSeed } from "@/lib/seed-avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
       user: {
         id: item.user.id,
         name: item.user.name,
-        image: item.user.image,
+        image: sanitizeSeed(item.user.image || item.user.name || item.user.id),
         institution: item.user.institution,
         country: item.user.country,
         role: item.user.role,
@@ -147,7 +148,14 @@ export async function GET(req: NextRequest) {
             score: userScoreRecord.score,
             meteorsDestroyed: userScoreRecord.meteorsDestroyed,
             updatedAt: userScoreRecord.updatedAt,
-            user: userScoreRecord.user,
+            user: {
+              ...userScoreRecord.user,
+              image: sanitizeSeed(
+                userScoreRecord.user.image ||
+                  userScoreRecord.user.name ||
+                  userScoreRecord.user.id
+              ),
+            },
           };
         }
       }

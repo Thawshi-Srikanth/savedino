@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { validatePhoneNumber } from "@/lib/phone-validation";
 import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
+import { getRandomSeed } from "@/lib/seed-avatar";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -156,6 +157,18 @@ export async function GET(req: Request) {
     const submittedSetsCount = user.claimedSets.filter((s) => s.status === "SUBMITTED").length;
     const isDiscordConnected = user.accounts.some((a) => a.providerId === "discord");
 
+    // Auto-heal legacy Google OAuth URLs to crisp retro space sprite seeds
+    let userImage = user.image;
+    if (!userImage || userImage.startsWith("http") || userImage.includes("googleusercontent.com")) {
+      userImage = getRandomSeed();
+      await prisma.user
+        .update({
+          where: { id: user.id },
+          data: { image: userImage },
+        })
+        .catch(() => {});
+    }
+
     return NextResponse.json({
       success: true,
       user: {
@@ -163,7 +176,7 @@ export async function GET(req: Request) {
         name: user.name,
         email: user.email,
         role: user.role,
-        image: user.image,
+        image: userImage,
         institution: user.institution,
         country: user.country,
         whatsapp: user.whatsapp,

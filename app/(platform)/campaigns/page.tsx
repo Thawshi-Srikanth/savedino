@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { getUserProfile } from "@/lib/user-profile";
 import { isOrganizer } from "@/lib/rbac";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -325,8 +326,7 @@ export default function CampaignsPage() {
       return;
     }
     try {
-      const res = await fetch("/api/user/profile");
-      const data = await res.json();
+      const data = await getUserProfile();
       if (data.success && Array.isArray(data.teams)) {
         const map: Record<string, { teamId: string; teamName: string; role: string }> = {};
         data.teams.forEach((t: any) => {

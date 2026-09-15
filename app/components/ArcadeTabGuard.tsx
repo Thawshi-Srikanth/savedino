@@ -25,16 +25,19 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
   );
   const [isStandby, setIsStandby] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
+  const channelRef = React.useRef<BroadcastChannel | null>(null);
 
   const claimSession = useCallback(() => {
     try {
       localStorage.setItem(STORAGE_KEY, tabId);
       localStorage.setItem(HEARTBEAT_KEY, Date.now().toString());
 
-      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-        const channel = new BroadcastChannel(CHANNEL_NAME);
-        channel.postMessage({ type: "CLAIM_SESSION", senderId: tabId });
-        channel.close();
+      if (channelRef.current) {
+        channelRef.current.postMessage({ type: "CLAIM_SESSION", senderId: tabId });
+      } else if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        const tempChannel = new BroadcastChannel(CHANNEL_NAME);
+        tempChannel.postMessage({ type: "CLAIM_SESSION", senderId: tabId });
+        tempChannel.close();
       }
       setIsStandby(false);
       audioSynth.startMusic();
@@ -48,7 +51,19 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
 
     if (typeof window === "undefined") return;
 
-    let channel: BroadcastChannel | null = null;
+    // Mobile / Touch devices do not run concurrent background game audio and shouldn't be blocked
+    const isMobile =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth < 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      claimSession();
+      setIsStandby(false);
+      return;
+    }
+
     let heartbeatTimer: any = null;
 
     // Check if another tab is actively running
@@ -72,7 +87,8 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
     };
 
     if ("BroadcastChannel" in window) {
-      channel = new BroadcastChannel(CHANNEL_NAME);
+      const channel = new BroadcastChannel(CHANNEL_NAME);
+      channelRef.current = channel;
 
       channel.onmessage = (event) => {
         const { type, senderId } = event.data || {};
@@ -80,12 +96,13 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
           // Another tab took over
           setIsStandby(true);
           audioSynth.pauseMusic();
-        } else if (type === "PING" && !isStandby) {
-          // Confirm to newly opened tabs that an active session exists
-          if (channel) {
+        } else if (type === "PING") {
+          // Confirm to newly opened tabs if we are currently active
+          const activeTab = localStorage.getItem(STORAGE_KEY);
+          if (activeTab === tabId && channel) {
             channel.postMessage({ type: "PONG", senderId: tabId });
           }
-        } else if (type === "TAB_CLOSED" && isStandby) {
+        } else if (type === "TAB_CLOSED") {
           // Active tab was closed; check if we can claim
           setTimeout(checkActiveTab, 100);
         }
@@ -113,8 +130,8 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
         if (currentActive === tabId) {
           localStorage.removeItem(STORAGE_KEY);
           localStorage.removeItem(HEARTBEAT_KEY);
-          if (channel) {
-            channel.postMessage({ type: "TAB_CLOSED", senderId: tabId });
+          if (channelRef.current) {
+            channelRef.current.postMessage({ type: "TAB_CLOSED", senderId: tabId });
           }
         }
       } catch (e) {}
@@ -122,14 +139,17 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
 
     window.addEventListener("beforeunload", handleReleaseSession);
 
-    // Clean up on component unmount (e.g. when navigating to leaderboard/campaigns)
+    // Clean up on component unmount
     return () => {
       window.removeEventListener("beforeunload", handleReleaseSession);
       if (heartbeatTimer) clearInterval(heartbeatTimer);
       handleReleaseSession();
-      if (channel) channel.close();
+      if (channelRef.current) {
+        channelRef.current.close();
+        channelRef.current = null;
+      }
     };
-  }, [tabId, claimSession, isStandby]);
+  }, [tabId, claimSession]);
 
   if (!mounted) {
     return <>{children}</>;

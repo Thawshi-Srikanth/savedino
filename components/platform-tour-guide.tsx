@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
+import { getUserProfile } from "@/lib/user-profile";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, X, HelpCircle, Check } from "lucide-react";
 
@@ -78,9 +79,8 @@ export function PlatformTourGuide({
 
     if (localSeen === "true") return;
 
-    // Verify against database user state
-    fetch("/api/user/profile")
-      .then((res) => res.json())
+    // Verify against database user state with deduplicated caching
+    getUserProfile()
       .then((data) => {
         if (data.success && data.user) {
           if (data.user.tourCompleted) {

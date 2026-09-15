@@ -188,7 +188,7 @@ export default function LeaderboardPage() {
         {/* Consistent Sized Avatar */}
         <div className="relative mt-2 flex items-center justify-center">
           <PixelAvatar
-            seed={entry.user.name || entry.userId}
+            seed={entry.user.image || entry.user.name || entry.userId}
             size={36}
             className="rounded-xl shadow-xs"
           />
@@ -226,8 +226,8 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <main className="h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none bg-background text-foreground">
-      {/* Custom Header identical to Home Page */}
+    <main className="h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-3 px-4 sm:px-8 select-none overscroll-none bg-background text-foreground">
+      {/* Header */}
       <Header
         onOpenHelp={() => setIsHelpOpen(true)}
         isMuted={isMuted}
@@ -236,23 +236,22 @@ export default function LeaderboardPage() {
         onToggleTheme={handleToggleTheme}
       />
 
-      {/* Main Content Stage Constrained to Game Width max-w-[600px] */}
+      {/* Main Leaderboard Stage */}
       <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
-        {/* Section Header */}
-        <div className="w-full text-center space-y-0.5 mb-1.5 sm:mb-2">
-          <h1 className="text-xs sm:text-sm font-pixel font-bold tracking-wide uppercase text-foreground">
+        <div className="w-full text-center space-y-1 mb-2.5 sm:mb-3.5">
+          <h1 className="text-sm sm:text-base font-pixel font-bold tracking-wide uppercase text-foreground">
             SaveDino Champions
           </h1>
-          <p className="text-[11px] sm:text-xs text-muted-foreground font-sans">
+          <p className="text-xs text-muted-foreground font-sans">
             {activeTab === "score"
-              ? "Top high scores on the global SaveDino leaderboard"
-              : "Top asteroid hunters by total asteroids destroyed"}
+              ? "Global high scores in planetary defense"
+              : "Global asteroid interception leaders"}
           </p>
         </div>
 
-        {/* Main Podium Body with Consistent Height to eliminate layout shifts */}
+        {/* Content Area with Locked Height to eliminate layout shifts */}
         {isLoading ? (
-          <div className="w-full h-[330px] sm:h-[350px] flex flex-col items-center justify-center">
+          <div className="w-full h-[290px] sm:h-[310px] flex flex-col items-center justify-center">
             <DinoLoading
               size="lg"
               text={
@@ -263,7 +262,7 @@ export default function LeaderboardPage() {
             />
           </div>
         ) : error ? (
-          <div className="w-full h-[330px] sm:h-[350px] flex flex-col items-center justify-center text-center space-y-2">
+          <div className="w-full h-[290px] sm:h-[310px] flex flex-col items-center justify-center text-center space-y-2">
             <p className="text-xs font-sans text-muted-foreground">{error}</p>
             <Button
               variant="outline"
@@ -271,22 +270,19 @@ export default function LeaderboardPage() {
               onClick={handleRefresh}
               className="h-8 text-xs font-sans cursor-pointer"
             >
-              <RefreshCw className="size-3 mr-1.5" />
               Try Again
             </Button>
           </div>
         ) : !data || data.leaderboard.length === 0 ? (
-          <div className="w-full h-[330px] sm:h-[350px] flex flex-col items-center justify-center text-center space-y-1.5">
-            <p className="text-xs font-semibold text-foreground font-sans">
-              No scores recorded yet
-            </p>
+          <div className="w-full h-[290px] sm:h-[310px] flex flex-col items-center justify-center text-center space-y-1.5">
+            <p className="text-xs font-medium text-foreground font-sans">No scores recorded yet</p>
             <p className="text-[11px] text-muted-foreground font-sans">
               Play a round of the arcade game to claim the #1 spot.
             </p>
           </div>
         ) : (
-          <div className="w-full min-h-[330px] sm:min-h-[350px] flex flex-col justify-between space-y-2.5">
-            {/* User Standing Card ABOVE the Top 3 */}
+          <div className="w-full min-h-[290px] sm:min-h-[310px] flex flex-col justify-between space-y-2.5 sm:space-y-3">
+            {/* Currently Logged-in User Card with Solid Colors ABOVE the Podium */}
             {session?.user && data.currentUser ? (
               <div className="w-full p-2 sm:p-2.5 rounded-2xl border-2 border-border bg-card shadow-arcade-sm flex items-center justify-between gap-2.5 transition-all">
                 {/* Left: Rank & User Info */}
@@ -297,7 +293,12 @@ export default function LeaderboardPage() {
 
                   <div className="relative shrink-0 flex items-center justify-center">
                     <PixelAvatar
-                      seed={session.user.name || session.user.id}
+                      seed={
+                        data.currentUser.user?.image ||
+                        (session.user as any)?.image ||
+                        session.user.name ||
+                        session.user.id
+                      }
                       size={36}
                       className="rounded-xl shadow-xs"
                     />
@@ -342,7 +343,7 @@ export default function LeaderboardPage() {
               <div className="w-full p-2 sm:p-2.5 rounded-2xl border-2 border-border bg-card shadow-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <PixelAvatar
-                    seed={session.user.name || session.user.id}
+                    seed={(session.user as any)?.image || session.user.name || session.user.id}
                     size={34}
                     className="rounded-xl shrink-0"
                   />
@@ -448,8 +449,8 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Footer Note (Identical to Home Page Footer) */}
-      <footer className="w-full max-w-[600px] flex items-center justify-between pt-2 pb-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0">
-        <div className="flex items-center gap-1.5 truncate">
+      <footer className="w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-2 pt-3 pb-2 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0 text-center sm:text-left">
+        <div className="flex items-center gap-1.5 justify-center sm:justify-start">
           <span className="font-bold text-foreground">SaveDino</span>
           <span className="opacity-40">&bull;</span>
           <a
@@ -461,7 +462,7 @@ export default function LeaderboardPage() {
             SEDS Sri Lanka
           </a>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-2.5 gap-y-1">
           <Link
             href="/"
             prefetch={false}
@@ -469,7 +470,7 @@ export default function LeaderboardPage() {
           >
             Play Game
           </Link>
-          <span className="opacity-40">|</span>
+          <span className="opacity-40 hidden sm:inline">|</span>
           <Link
             href="/credits"
             prefetch={false}
@@ -477,7 +478,7 @@ export default function LeaderboardPage() {
           >
             Credits
           </Link>
-          <span className="opacity-40">|</span>
+          <span className="opacity-40 hidden sm:inline">|</span>
           <Link
             href="/privacy"
             prefetch={false}
@@ -485,7 +486,15 @@ export default function LeaderboardPage() {
           >
             Privacy
           </Link>
-          <span className="opacity-40">|</span>
+          <span className="opacity-40 hidden sm:inline">|</span>
+          <Link
+            href="/cookies"
+            prefetch={false}
+            className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+          >
+            Cookies
+          </Link>
+          <span className="opacity-40 hidden sm:inline">|</span>
           <Link
             href="/terms"
             prefetch={false}

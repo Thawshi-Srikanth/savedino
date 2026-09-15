@@ -3,7 +3,8 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession, invalidateSessionCache, authClient } from "@/lib/auth-client";
+import { useSession, invalidateSessionCache, updateCachedUser, authClient } from "@/lib/auth-client";
+import { getUserProfile, invalidateUserProfileCache } from "@/lib/user-profile";
 import { PixelAvatar } from "@/components/pixel-avatar";
 import { getRandomSeed, generateSeedProfile } from "@/lib/seed-avatar";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ interface UserProfileData {
   institution?: string | null;
   country?: string | null;
   whatsapp?: string | null;
-  createdAt: string;
+  createdAt: string | Date;
   discordConnected?: boolean;
   connectedProviders?: string[];
 }
@@ -170,11 +171,7 @@ function ProfileContent() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/user/profile", {
-        cache: "no-store",
-        headers: { "Cache-Control": "no-cache" },
-      });
-      const data = await res.json();
+      const data = await getUserProfile(false);
 
       if (data.success && data.user) {
         setUser(data.user);
@@ -233,7 +230,7 @@ function ProfileContent() {
         }
       }
     }
-  }, [session, isSessionLoading, searchParams]);
+  }, [session?.user?.id, isSessionLoading, searchParams]);
 
   // Handle Save Profile (Only sends request when user explicitly clicks Save Profile)
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -272,6 +269,8 @@ function ProfileContent() {
         toast.success("Profile changes saved successfully!");
         if (formattedWhatsapp) setFormWhatsapp(formattedWhatsapp);
         setUser((prev) => (prev ? { ...prev, ...data.user } : data.user));
+        invalidateUserProfileCache();
+        updateCachedUser(data.user);
         invalidateSessionCache();
       } else {
         toast.error(data.error || "Failed to save profile changes.");

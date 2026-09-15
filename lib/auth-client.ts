@@ -230,6 +230,33 @@ export async function invalidateSessionCache() {
   return fetchSessionDeduplicated(true);
 }
 
+/**
+ * Update cached user fields in local session store & broadcast to all open tabs
+ */
+export function updateCachedUser(partialUser: Partial<NonNullable<SessionData>["user"]>) {
+  if (!memoryState.data?.user) return;
+
+  let hasChanged = false;
+  for (const [key, value] of Object.entries(partialUser)) {
+    if (value !== undefined && (memoryState.data.user as any)[key] !== value) {
+      hasChanged = true;
+      break;
+    }
+  }
+
+  if (!hasChanged) return;
+
+  const updatedData: SessionData = {
+    ...memoryState.data,
+    user: {
+      ...memoryState.data.user,
+      ...partialUser,
+    },
+  };
+  updateSessionState(updatedData);
+  broadcastSessionChange("SESSION_UPDATE", updatedData);
+}
+
 const SERVER_SNAPSHOT: SessionStoreState = { data: null, isPending: false, error: null };
 const getServerSnapshot = () => SERVER_SNAPSHOT;
 const getClientSnapshot = () => memoryState;

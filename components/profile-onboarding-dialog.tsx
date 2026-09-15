@@ -3,23 +3,24 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
+import { getUserProfile } from "@/lib/user-profile";
 
 export function ProfileOnboardingDialog() {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending: isSessionLoading } = useSession();
   const pathname = usePathname();
   const router = useRouter();
   const hasCheckedRef = useRef(false);
 
   useEffect(() => {
-    // Don't intercept auth pages, onboarding, verify, or when not signed in
+    if (isSessionLoading || !session?.user) {
+      return;
+    }
+
     if (
-      isPending ||
-      !session?.user?.id ||
-      pathname === "/login" ||
-      pathname === "/register" ||
-      pathname === "/verify" ||
-      pathname === "/onboarding" ||
-      pathname === "/create"
+      pathname.startsWith("/onboarding") ||
+      pathname.startsWith("/login") ||
+      pathname.startsWith("/register") ||
+      pathname.startsWith("/verify")
     ) {
       return;
     }
@@ -33,9 +34,8 @@ export function ProfileOnboardingDialog() {
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
 
-    // Verify against fresh server profile data
-    fetch("/api/user/profile")
-      .then((res) => res.json())
+    // Verify against fresh server profile data with deduplication
+    getUserProfile()
       .then((data) => {
         if (data.success && data.user) {
           const u = data.user;
@@ -70,7 +70,7 @@ export function ProfileOnboardingDialog() {
           router.push(`/onboarding?redirectTo=${encodeURIComponent(pathname)}`);
         }
       });
-  }, [session, isPending, pathname, router]);
+  }, [session, isSessionLoading, pathname, router]);
 
   return null;
 }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useSession, signOut, updateCachedUser } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Sun, Moon, LogOut, User, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
@@ -14,6 +14,7 @@ import { ProfileOnboardingDialog } from "@/components/profile-onboarding-dialog"
 import { PlatformTourGuide, PlatformTourTriggerButton } from "@/components/platform-tour-guide";
 import { DinoLoading } from "@/components/dino-loading";
 import { FloatingDiscordWidget } from "@/components/floating-discord-widget";
+import { getUserProfile } from "@/lib/user-profile";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,7 +28,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // Sync active database profile and avatar seed to session cache without duplicate network requests
+    if (session?.user?.id) {
+      getUserProfile();
+    }
+  }, [session?.user?.id]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -158,9 +164,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                     className="h-9 px-3 rounded-xl border-border flex items-center gap-2 font-bold text-xs shadow-arcade-sm active:translate-y-0.5"
                   >
                     <PixelAvatar
-                      seed={session.user.name || session.user.id}
+                      seed={session.user.image || session.user.name || session.user.id}
                       size={20}
-                      className="rounded"
+                      showBorder={false}
                     />
                     <span className="max-w-[100px] truncate">{session.user.name}</span>
                   </Button>

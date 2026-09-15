@@ -172,7 +172,11 @@ export function DevPersonaSwitcher() {
       >
         <div className="flex items-center gap-2.5 min-w-0 pr-2">
           <div className="relative shrink-0">
-            <PixelAvatar seed={persona.name || persona.email} size={28} showBorder={false} />
+            <PixelAvatar
+              seed={(persona as any).image || persona.name || persona.email}
+              size={28}
+              showBorder={false}
+            />
             {isActive && (
               <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center">
                 <CheckCircle2 className="w-2 h-2 text-white" />
@@ -270,7 +274,7 @@ export function DevPersonaSwitcher() {
           {currentPersona ? (
             <div className="flex items-center gap-2 max-w-[210px] truncate">
               <PixelAvatar
-                seed={currentPersona.name || currentPersona.email}
+                seed={(currentPersona as any).image || currentPersona.name || currentPersona.email}
                 size={20}
                 showBorder={false}
               />
