@@ -6,7 +6,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, LogOut, User, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  LogOut,
+  User,
+  Gamepad2,
+  Telescope,
+  Users,
+  ShieldAlert,
+  Search,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 import { PixelAvatar } from "@/components/pixel-avatar";
@@ -157,13 +167,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               size="icon"
               onClick={handleToggleTheme}
               className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
-              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+              title="Toggle Day / Night Mode"
             >
-              {isNight ? (
-                <Sun className="size-4 text-amber-400" />
-              ) : (
-                <Moon className="size-4 text-[#8b5cf6]" />
-              )}
+              <Sun className="size-4 text-amber-400 dark:block hidden" />
+              <Moon className="size-4 text-[#8b5cf6] dark:hidden block" />
             </Button>
 
             {session?.user ? (
@@ -173,78 +180,83 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                   <Button
                     size="sm"
                     variant={pathname === "/profile" ? "default" : "outline"}
-                    className="h-9 px-2.5 text-xs font-bold rounded-xl border-border shadow-arcade-sm active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
-                    title="Profile & Studio"
+                    className="h-9 px-3 rounded-xl border-border flex items-center gap-2 font-bold text-xs shadow-arcade-sm active:translate-y-0.5"
                   >
                     <PixelAvatar
-                      seed={session.user.image || session.user.name || session.user.id}
-                      size={22}
-                      showBorder={false}
+                      seed={session.user.name || session.user.id}
+                      size={20}
+                      className="rounded"
                     />
-                    <span className="font-bold max-w-[120px] truncate">{session.user.name}</span>
+                    <span className="max-w-[100px] truncate">{session.user.name}</span>
                   </Button>
                 </Link>
+
+                {/* Sign Out Button */}
                 <Button
-                  size="sm"
                   variant="outline"
+                  size="icon"
                   onClick={handleSignOut}
-                  className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive cursor-pointer rounded-xl border-border shadow-arcade-sm active:translate-y-0.5"
-                  title="Sign Out"
+                  className="h-9 w-9 rounded-xl cursor-pointer text-muted-foreground hover:text-destructive border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
+                  title="Sign out"
                 >
-                  <LogOut className="size-3.5" />
+                  <LogOut className="size-4" />
                 </Button>
               </div>
-            ) : isDemo ? (
-              <div className="flex items-center gap-2 text-xs">
-                <Link href="/" prefetch={false}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
-                  >
-                    &lt; Arcade Game
-                  </Button>
-                </Link>
-              </div>
             ) : (
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2">
                 <Link href="/login" prefetch={false}>
                   <Button
-                    size="sm"
                     variant="outline"
-                    className="h-9 px-3.5 text-xs font-bold rounded-xl border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
+                    size="sm"
+                    className="h-9 px-3.5 rounded-xl border-border font-bold text-xs shadow-arcade-sm active:translate-y-0.5"
                   >
-                    Sign In
+                    Sign in
                   </Button>
                 </Link>
                 <Link href="/register" prefetch={false}>
                   <Button
                     size="sm"
-                    variant="default"
-                    className="h-9 px-3.5 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-arcade-primary active:translate-y-0.5"
+                    className="h-9 px-3.5 rounded-xl font-bold text-xs shadow-arcade-primary active:translate-y-0.5 bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    Join
+                    Get Started
                   </Button>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile Right Controls: Theme Toggle & Auth */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile Right Controls: Search, Theme, Avatar/Sign In, Menu */}
+          <div className="flex items-center gap-2 md:hidden">
+            {/* Quick Search Shortcut for Mobile */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const event = new KeyboardEvent("keydown", {
+                  key: "k",
+                  metaKey: true,
+                  bubbles: true,
+                });
+                document.dispatchEvent(event);
+              }}
+              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
+              title="Search"
+              aria-label="Open command search"
+            >
+              <Search className="size-4 text-muted-foreground" />
+            </Button>
+
+            {/* Mobile Theme Switcher */}
             <Button
               variant="outline"
               size="icon"
               onClick={handleToggleTheme}
               className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
-              title={isNight ? "Switch to Day Mode" : "Switch to Night Mode"}
+              title="Toggle Day / Night Mode"
               aria-label="Toggle theme"
             >
-              {isNight ? (
-                <Sun className="size-4 text-amber-400" />
-              ) : (
-                <Moon className="size-4 text-[#8b5cf6]" />
-              )}
+              <Sun className="size-4 text-amber-400 dark:block hidden" />
+              <Moon className="size-4 text-[#8b5cf6] dark:hidden block" />
             </Button>
 
             {session?.user ? (

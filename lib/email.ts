@@ -264,9 +264,7 @@ export async function sendTeamInvitationEmail(
  */
 export async function subscribeToNewsletter(email: string) {
   const targetSegmentId =
-    process.env.RESEND_SEGMENT_ID?.trim() ||
-    process.env.RESEND_AUDIENCE_ID?.trim() ||
-    null;
+    process.env.RESEND_SEGMENT_ID?.trim() || process.env.RESEND_AUDIENCE_ID?.trim() || null;
 
   // 1. Primary: Resend Contacts
   if (resend) {
@@ -280,7 +278,12 @@ export async function subscribeToNewsletter(email: string) {
         });
 
         if (!segRes.error && segRes.data) {
-          return { success: true, provider: "resend", data: segRes.data, segmentId: targetSegmentId };
+          return {
+            success: true,
+            provider: "resend",
+            data: segRes.data,
+            segmentId: targetSegmentId,
+          };
         }
 
         if (segRes.error) {

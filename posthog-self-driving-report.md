@@ -14,24 +14,24 @@ GitHub was already connected before this run.
 
 ## Products enabled
 
-| Product | Status | Web SDK check |
-|---|---|---|
-| Session Replay | enabled | `posthog.init` has no disabling session-recording override. |
-| Error Tracking | enabled | `capture_exceptions: true` is already set in `instrumentation-client.ts`. |
-| Support | enabled | Connect an inbound email, inbox, or Slack channel in PostHog before tickets can arrive. |
+| Product        | Status  | Web SDK check                                                                           |
+| -------------- | ------- | --------------------------------------------------------------------------------------- |
+| Session Replay | enabled | `posthog.init` has no disabling session-recording override.                             |
+| Error Tracking | enabled | `capture_exceptions: true` is already set in `instrumentation-client.ts`.               |
+| Support        | enabled | Connect an inbound email, inbox, or Slack channel in PostHog before tickets can arrive. |
 
 ## Signal sources
 
-| Source product | Source type | Action |
-|---|---|---|
-| `signals_scout` | `cross_source_issue` | On by default; no row is needed. |
-| `health_checks` | `health_issue` | Enabled — source config `01a0a3f1-3a09-775b-a64a-15bc2864214c`. |
-| `error_tracking` | `issue_created` | Enabled — source config `01a0a3f1-3a11-77e3-bfa6-19214d929986`. |
-| `error_tracking` | `issue_reopened` | Enabled — source config `01a0a3f1-3aa6-7840-b355-46a31b4a47f5`. |
-| `error_tracking` | `issue_spiking` | Enabled — source config `01a0a3f1-3a24-7a94-bd8f-7178ad098d35`. |
-| `conversations` | `ticket` | Enabled — source config `01a0a3f1-3ac5-7279-9c74-c85b97ae950c`; dormant until a Support channel is connected. |
-| `session_replay` | `session_analysis_cluster` | Skipped: retired route. Replay observations are covered by Replay Vision scanners. |
-| `replay_vision` | scanner findings | Enabled through each scanner's `emits_signals` setting; no source-config row was created. |
+| Source product   | Source type                | Action                                                                                                        |
+| ---------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `signals_scout`  | `cross_source_issue`       | On by default; no row is needed.                                                                              |
+| `health_checks`  | `health_issue`             | Enabled — source config `01a0a3f1-3a09-775b-a64a-15bc2864214c`.                                               |
+| `error_tracking` | `issue_created`            | Enabled — source config `01a0a3f1-3a11-77e3-bfa6-19214d929986`.                                               |
+| `error_tracking` | `issue_reopened`           | Enabled — source config `01a0a3f1-3aa6-7840-b355-46a31b4a47f5`.                                               |
+| `error_tracking` | `issue_spiking`            | Enabled — source config `01a0a3f1-3a24-7a94-bd8f-7178ad098d35`.                                               |
+| `conversations`  | `ticket`                   | Enabled — source config `01a0a3f1-3ac5-7279-9c74-c85b97ae950c`; dormant until a Support channel is connected. |
+| `session_replay` | `session_analysis_cluster` | Skipped: retired route. Replay observations are covered by Replay Vision scanners.                            |
+| `replay_vision`  | scanner findings           | Enabled through each scanner's `emits_signals` setting; no source-config row was created.                     |
 
 ## Connected tools
 
@@ -41,12 +41,12 @@ The connected-tools selection was cancelled, so no optional issue-tracker, error
 
 Enabled scouts (daily schedule, emitting to the inbox):
 
-| Scout | Why it is enabled |
-|---|---|
-| `signals-scout-general` | Covers cross-product patterns and gaps not owned by a specialist. |
-| `signals-scout-product-analytics` | Covers SaveDino’s instrumented activation and product-flow behavior. |
-| `signals-scout-web-analytics` | Covers web traffic, attribution, landing-page, bounce, and 404 shifts. |
-| `signals-scout-health-checks` | Groups actionable PostHog setup-health issues. |
+| Scout                             | Why it is enabled                                                      |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `signals-scout-general`           | Covers cross-product patterns and gaps not owned by a specialist.      |
+| `signals-scout-product-analytics` | Covers SaveDino’s instrumented activation and product-flow behavior.   |
+| `signals-scout-web-analytics`     | Covers web traffic, attribution, landing-page, bounce, and 404 shifts. |
+| `signals-scout-health-checks`     | Groups actionable PostHog setup-health issues.                         |
 
 23 other built-in scouts remain disabled to keep the troop focused. `signals-scout-error-tracking` is covered by the native Error Tracking responders and `signals-scout-session-replay` is covered by the Replay Vision scanners. Other surface-specific scouts can be enabled later if their corresponding PostHog product becomes active.
 
@@ -65,21 +65,21 @@ If a future custom scout becomes noisy, set `emit: false` on its PostHog scout c
 
 A scanner is an LLM that watches individual session recordings on a schedule and pushes verified findings to the Self-driving inbox. These are the only items in this setup that spend Replay Vision quota; findings arrive at half weight and require corroboration before promotion into a report.
 
-| Status | Scanner | Scope | Sampling | Estimate |
-|---|---|---|---:|---:|
-| Created | Campaign and discovery flow breakage | Recordings whose URL contains `/campaigns`, the campaign, squad, image-set, and discovery-report completion area. | 50% | 0 observations/month; 0 credits/month |
-| Created | SaveDino participant frustration | Recordings containing `$rageclick` only; no URL filter, to preserve independent coverage. | 100% | 0 observations/month; 0 credits/month |
+| Status  | Scanner                              | Scope                                                                                                             | Sampling |                              Estimate |
+| ------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | -------: | ------------------------------------: |
+| Created | Campaign and discovery flow breakage | Recordings whose URL contains `/campaigns`, the campaign, squad, image-set, and discovery-report completion area. |      50% | 0 observations/month; 0 credits/month |
+| Created | SaveDino participant frustration     | Recordings containing `$rageclick` only; no URL filter, to preserve independent coverage.                         |     100% | 0 observations/month; 0 credits/month |
 
 No recordings were found during setup, so both scanners are armed and will begin working when recordings arrive. The organization has 2,500 Replay Vision credits remaining for the current period and no projected scanner spend yet.
 
 ## Files created or modified
 
-| Path | Change |
-|---|---|
-| `posthog-self-driving-report.md` | Created this setup report. |
-| `.claude/skills/replay-vision-scanners-core/` | Installed shared Replay Vision scanner workflow reference. |
-| `.claude/skills/replay-vision-scanner-broken-experiences/` | Installed the breakage-monitor brief. |
-| `.claude/skills/replay-vision-scanner-user-frustration/` | Installed the user-frustration-monitor brief. |
+| Path                                                       | Change                                                     |
+| ---------------------------------------------------------- | ---------------------------------------------------------- |
+| `posthog-self-driving-report.md`                           | Created this setup report.                                 |
+| `.claude/skills/replay-vision-scanners-core/`              | Installed shared Replay Vision scanner workflow reference. |
+| `.claude/skills/replay-vision-scanner-broken-experiences/` | Installed the breakage-monitor brief.                      |
+| `.claude/skills/replay-vision-scanner-user-frustration/`   | Installed the user-frustration-monitor brief.              |
 
 No application source files were modified.
 

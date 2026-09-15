@@ -19,7 +19,10 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
   const { data: session } = useSession();
   const isAuthenticated = Boolean(session?.user?.id);
 
-  const [tabId] = useState(() => Math.random().toString(36).substring(2) + Date.now().toString(36));
+  // Each browser tab/window gets a truly distinct in-memory tab ID
+  const [tabId] = useState(
+    () => "tab_" + Math.random().toString(36).substring(2) + Date.now().toString(36)
+  );
   const [isStandby, setIsStandby] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
 
@@ -48,19 +51,19 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
     let channel: BroadcastChannel | null = null;
     let heartbeatTimer: any = null;
 
-    // Check if an existing tab is active and fresh
+    // Check if another tab is actively running
     const checkActiveTab = () => {
       try {
         const activeTab = localStorage.getItem(STORAGE_KEY);
         const lastHeartbeat = parseInt(localStorage.getItem(HEARTBEAT_KEY) || "0", 10);
-        const isFresh = Date.now() - lastHeartbeat < 3000;
+        const isFresh = Date.now() - lastHeartbeat < 2000;
 
         if (activeTab && activeTab !== tabId && isFresh) {
-          // Another tab is active! Enter standby mode
+          // Another tab is actively running the arcade! Enter standby
           setIsStandby(true);
           audioSynth.pauseMusic();
         } else {
-          // We become the active tab
+          // No active tab running: claim and run
           claimSession();
         }
       } catch (e) {
@@ -78,17 +81,23 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
           setIsStandby(true);
           audioSynth.pauseMusic();
         } else if (type === "PING" && !isStandby) {
-          // Respond to ping confirming we are alive
+          // Confirm to newly opened tabs that an active session exists
           if (channel) {
             channel.postMessage({ type: "PONG", senderId: tabId });
           }
+        } else if (type === "TAB_CLOSED" && isStandby) {
+          // Active tab was closed; check if we can claim
+          setTimeout(checkActiveTab, 100);
         }
       };
+
+      // Ping existing tabs
+      channel.postMessage({ type: "PING", senderId: tabId });
     }
 
     checkActiveTab();
 
-    // Heartbeat loop for the active tab
+    // Heartbeat loop for the active tab (every 800ms)
     heartbeatTimer = setInterval(() => {
       try {
         const currentActive = localStorage.getItem(STORAGE_KEY);
@@ -96,9 +105,9 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
           localStorage.setItem(HEARTBEAT_KEY, Date.now().toString());
         }
       } catch (e) {}
-    }, 1000);
+    }, 800);
 
-    const handleBeforeUnload = () => {
+    const handleReleaseSession = () => {
       try {
         const currentActive = localStorage.getItem(STORAGE_KEY);
         if (currentActive === tabId) {
@@ -111,11 +120,13 @@ export function ArcadeTabGuard({ children }: ArcadeTabGuardProps) {
       } catch (e) {}
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", handleReleaseSession);
 
+    // Clean up on component unmount (e.g. when navigating to leaderboard/campaigns)
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleReleaseSession);
       if (heartbeatTimer) clearInterval(heartbeatTimer);
+      handleReleaseSession();
       if (channel) channel.close();
     };
   }, [tabId, claimSession, isStandby]);

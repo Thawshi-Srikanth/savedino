@@ -8,8 +8,8 @@ metadata:
 
 # Replay vision scanner mechanics
 
-Shared rules for every scanner task. Your task prompt says *which* scanner you
-create and what you fill in; this skill is *how*.
+Shared rules for every scanner task. Your task prompt says _which_ scanner you
+create and what you fill in; this skill is _how_.
 
 ## Load the authoritative mechanics first
 
@@ -70,8 +70,8 @@ prompt beats a specific-but-fabricated one.
 
 ## The two monitors' queries stay disjoint
 
-The breakage monitor owns *where* the user is (a URL-scoped query on the
-completion flow); the frustration monitor owns *what they did* (the
+The breakage monitor owns _where_ the user is (a URL-scoped query on the
+completion flow); the frustration monitor owns _what they did_ (the
 `$rageclick` gate, its only filter). The two must never match the same
 sessions — every session both match is scanned twice for overlapping
 questions. If one widens, the other narrows; in practice, never add a URL
@@ -95,7 +95,7 @@ brief's **match phrase** (each brief states it as a literal substring), and
 `emits_signals` matches your flow — `false` for the `replay-vision` command
 (the API stores an omitted flag as `false`), `true` for a scanner
 self-driving's step 6c creates to emit signals. A scanner matching type and
-phrase but carrying the *other* flow's `emits_signals` value belongs to that
+phrase but carrying the _other_ flow's `emits_signals` value belongs to that
 flow: leave it untouched and note the overlap in your handoff. Update a match
 in place with `vision-scanners-update` — fresh blanks **including the
 `name`** (this is how legacy fixed-name scanners upgrade to the customized

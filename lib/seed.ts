@@ -4,6 +4,7 @@ export async function seedDatabase() {
   console.log("🌱 Starting Clean SaveDino Database Seeding...");
 
   // 0. Clean wipe existing records in correct foreign key order
+  await prisma.arcadeScore.deleteMany();
   await prisma.imageSet.deleteMany();
   await prisma.teamJoinRequest.deleteMany();
   await prisma.teamMember.deleteMany();
@@ -267,6 +268,39 @@ NET GAIA-DR2
   });
 
   console.log("✅ Created test image sets across teams.");
+
+  // 4. Seed Arcade High Scores
+  await prisma.arcadeScore.createMany({
+    data: [
+      {
+        userId: createdUsers["leader@savedino.org"].id,
+        score: 4850,
+        meteorsDestroyed: 32,
+      },
+      {
+        userId: createdUsers["admin@savedino.org"].id,
+        score: 3620,
+        meteorsDestroyed: 24,
+      },
+      {
+        userId: createdUsers["member@savedino.org"].id,
+        score: 2940,
+        meteorsDestroyed: 19,
+      },
+      {
+        userId: createdUsers["staff@savedino.org"].id,
+        score: 2150,
+        meteorsDestroyed: 14,
+      },
+      {
+        userId: createdUsers["applicant@savedino.org"].id,
+        score: 1480,
+        meteorsDestroyed: 9,
+      },
+    ],
+  });
+  console.log("✅ Seeded initial arcade scores for leaderboard.");
+
   console.log("🚀 SaveDino database seeded cleanly and successfully!");
 
   return {

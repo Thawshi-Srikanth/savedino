@@ -243,6 +243,7 @@ export type UserWhereInput = {
   teamMembers?: Prisma.TeamMemberListRelationFilter
   claimedSets?: Prisma.ImageSetListRelationFilter
   joinRequests?: Prisma.TeamJoinRequestListRelationFilter
+  arcadeScore?: Prisma.XOR<Prisma.ArcadeScoreNullableScalarRelationFilter, Prisma.ArcadeScoreWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -263,6 +264,7 @@ export type UserOrderByWithRelationInput = {
   teamMembers?: Prisma.TeamMemberOrderByRelationAggregateInput
   claimedSets?: Prisma.ImageSetOrderByRelationAggregateInput
   joinRequests?: Prisma.TeamJoinRequestOrderByRelationAggregateInput
+  arcadeScore?: Prisma.ArcadeScoreOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -286,6 +288,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   teamMembers?: Prisma.TeamMemberListRelationFilter
   claimedSets?: Prisma.ImageSetListRelationFilter
   joinRequests?: Prisma.TeamJoinRequestListRelationFilter
+  arcadeScore?: Prisma.XOR<Prisma.ArcadeScoreNullableScalarRelationFilter, Prisma.ArcadeScoreWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -342,6 +345,7 @@ export type UserCreateInput = {
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -362,6 +366,7 @@ export type UserUncheckedCreateInput = {
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -382,6 +387,7 @@ export type UserUpdateInput = {
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -402,6 +408,7 @@ export type UserUncheckedUpdateInput = {
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUncheckedUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -592,6 +599,20 @@ export type UserUpdateOneWithoutClaimedSetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutClaimedSetsInput, Prisma.UserUpdateWithoutClaimedSetsInput>, Prisma.UserUncheckedUpdateWithoutClaimedSetsInput>
 }
 
+export type UserCreateNestedOneWithoutArcadeScoreInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutArcadeScoreInput, Prisma.UserUncheckedCreateWithoutArcadeScoreInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutArcadeScoreInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutArcadeScoreNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutArcadeScoreInput, Prisma.UserUncheckedCreateWithoutArcadeScoreInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutArcadeScoreInput
+  upsert?: Prisma.UserUpsertWithoutArcadeScoreInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutArcadeScoreInput, Prisma.UserUpdateWithoutArcadeScoreInput>, Prisma.UserUncheckedUpdateWithoutArcadeScoreInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   name: string
@@ -609,6 +630,7 @@ export type UserCreateWithoutSessionsInput = {
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -628,6 +650,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -663,6 +686,7 @@ export type UserUpdateWithoutSessionsInput = {
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -682,6 +706,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUncheckedUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -701,6 +726,7 @@ export type UserCreateWithoutAccountsInput = {
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -720,6 +746,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -755,6 +782,7 @@ export type UserUpdateWithoutAccountsInput = {
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -774,6 +802,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUncheckedUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeamMembersInput = {
@@ -793,6 +822,7 @@ export type UserCreateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembersInput = {
@@ -812,6 +842,7 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutClaimedByInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembersInput = {
@@ -847,6 +878,7 @@ export type UserUpdateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembersInput = {
@@ -866,6 +898,7 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUncheckedUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutJoinRequestsInput = {
@@ -885,6 +918,7 @@ export type UserCreateWithoutJoinRequestsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetCreateNestedManyWithoutClaimedByInput
+  arcadeScore?: Prisma.ArcadeScoreCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutJoinRequestsInput = {
@@ -904,6 +938,7 @@ export type UserUncheckedCreateWithoutJoinRequestsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   claimedSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutClaimedByInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutJoinRequestsInput = {
@@ -939,6 +974,7 @@ export type UserUpdateWithoutJoinRequestsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUpdateManyWithoutClaimedByNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJoinRequestsInput = {
@@ -958,6 +994,7 @@ export type UserUncheckedUpdateWithoutJoinRequestsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   claimedSets?: Prisma.ImageSetUncheckedUpdateManyWithoutClaimedByNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutClaimedSetsInput = {
@@ -977,6 +1014,7 @@ export type UserCreateWithoutClaimedSetsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   joinRequests?: Prisma.TeamJoinRequestCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutClaimedSetsInput = {
@@ -996,6 +1034,7 @@ export type UserUncheckedCreateWithoutClaimedSetsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutClaimedSetsInput = {
@@ -1031,6 +1070,7 @@ export type UserUpdateWithoutClaimedSetsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   joinRequests?: Prisma.TeamJoinRequestUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutClaimedSetsInput = {
@@ -1049,6 +1089,103 @@ export type UserUncheckedUpdateWithoutClaimedSetsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.TeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  arcadeScore?: Prisma.ArcadeScoreUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutArcadeScoreInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string
+  institution?: string | null
+  country?: string | null
+  whatsapp?: string | null
+  tourCompleted?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  claimedSets?: Prisma.ImageSetCreateNestedManyWithoutClaimedByInput
+  joinRequests?: Prisma.TeamJoinRequestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutArcadeScoreInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string
+  institution?: string | null
+  country?: string | null
+  whatsapp?: string | null
+  tourCompleted?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  claimedSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutClaimedByInput
+  joinRequests?: Prisma.TeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutArcadeScoreInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutArcadeScoreInput, Prisma.UserUncheckedCreateWithoutArcadeScoreInput>
+}
+
+export type UserUpsertWithoutArcadeScoreInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutArcadeScoreInput, Prisma.UserUncheckedUpdateWithoutArcadeScoreInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutArcadeScoreInput, Prisma.UserUncheckedCreateWithoutArcadeScoreInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutArcadeScoreInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutArcadeScoreInput, Prisma.UserUncheckedUpdateWithoutArcadeScoreInput>
+}
+
+export type UserUpdateWithoutArcadeScoreInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tourCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  claimedSets?: Prisma.ImageSetUpdateManyWithoutClaimedByNestedInput
+  joinRequests?: Prisma.TeamJoinRequestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutArcadeScoreInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tourCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  claimedSets?: Prisma.ImageSetUncheckedUpdateManyWithoutClaimedByNestedInput
   joinRequests?: Prisma.TeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1137,6 +1274,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   teamMembers?: boolean | Prisma.User$teamMembersArgs<ExtArgs>
   claimedSets?: boolean | Prisma.User$claimedSetsArgs<ExtArgs>
   joinRequests?: boolean | Prisma.User$joinRequestsArgs<ExtArgs>
+  arcadeScore?: boolean | Prisma.User$arcadeScoreArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1192,6 +1330,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   teamMembers?: boolean | Prisma.User$teamMembersArgs<ExtArgs>
   claimedSets?: boolean | Prisma.User$claimedSetsArgs<ExtArgs>
   joinRequests?: boolean | Prisma.User$joinRequestsArgs<ExtArgs>
+  arcadeScore?: boolean | Prisma.User$arcadeScoreArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1205,6 +1344,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     teamMembers: Prisma.$TeamMemberPayload<ExtArgs>[]
     claimedSets: Prisma.$ImageSetPayload<ExtArgs>[]
     joinRequests: Prisma.$TeamJoinRequestPayload<ExtArgs>[]
+    arcadeScore: Prisma.$ArcadeScorePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1618,6 +1758,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   teamMembers<T extends Prisma.User$teamMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   claimedSets<T extends Prisma.User$claimedSetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$claimedSetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImageSetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   joinRequests<T extends Prisma.User$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamJoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  arcadeScore<T extends Prisma.User$arcadeScoreArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$arcadeScoreArgs<ExtArgs>>): Prisma.Prisma__ArcadeScoreClient<runtime.Types.Result.GetResult<Prisma.$ArcadeScorePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2169,6 +2310,25 @@ export type User$joinRequestsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.TeamJoinRequestScalarFieldEnum | Prisma.TeamJoinRequestScalarFieldEnum[]
+}
+
+/**
+ * User.arcadeScore
+ */
+export type User$arcadeScoreArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ArcadeScore
+   */
+  select?: Prisma.ArcadeScoreSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ArcadeScore
+   */
+  omit?: Prisma.ArcadeScoreOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ArcadeScoreInclude<ExtArgs> | null
+  where?: Prisma.ArcadeScoreWhereInput
 }
 
 /**

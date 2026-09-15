@@ -59,7 +59,8 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   TeamJoinRequest: 'TeamJoinRequest',
-  ImageSet: 'ImageSet'
+  ImageSet: 'ImageSet',
+  ArcadeScore: 'ArcadeScore'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -227,6 +228,18 @@ export const ImageSetScalarFieldEnum = {
 } as const
 
 export type ImageSetScalarFieldEnum = (typeof ImageSetScalarFieldEnum)[keyof typeof ImageSetScalarFieldEnum]
+
+
+export const ArcadeScoreScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  score: 'score',
+  meteorsDestroyed: 'meteorsDestroyed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ArcadeScoreScalarFieldEnum = (typeof ArcadeScoreScalarFieldEnum)[keyof typeof ArcadeScoreScalarFieldEnum]
 
 
 export const SortOrder = {

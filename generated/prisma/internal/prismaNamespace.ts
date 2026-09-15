@@ -405,7 +405,8 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   TeamJoinRequest: 'TeamJoinRequest',
-  ImageSet: 'ImageSet'
+  ImageSet: 'ImageSet',
+  ArcadeScore: 'ArcadeScore'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "event" | "team" | "teamMember" | "teamJoinRequest" | "imageSet"
+    modelProps: "user" | "session" | "account" | "verification" | "event" | "team" | "teamMember" | "teamJoinRequest" | "imageSet" | "arcadeScore"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1091,6 +1092,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ArcadeScore: {
+      payload: Prisma.$ArcadeScorePayload<ExtArgs>
+      fields: Prisma.ArcadeScoreFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ArcadeScoreFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ArcadeScoreFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>
+        }
+        findFirst: {
+          args: Prisma.ArcadeScoreFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ArcadeScoreFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>
+        }
+        findMany: {
+          args: Prisma.ArcadeScoreFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>[]
+        }
+        create: {
+          args: Prisma.ArcadeScoreCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>
+        }
+        createMany: {
+          args: Prisma.ArcadeScoreCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ArcadeScoreCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>[]
+        }
+        delete: {
+          args: Prisma.ArcadeScoreDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>
+        }
+        update: {
+          args: Prisma.ArcadeScoreUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>
+        }
+        deleteMany: {
+          args: Prisma.ArcadeScoreDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ArcadeScoreUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ArcadeScoreUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>[]
+        }
+        upsert: {
+          args: Prisma.ArcadeScoreUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArcadeScorePayload>
+        }
+        aggregate: {
+          args: Prisma.ArcadeScoreAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArcadeScore>
+        }
+        groupBy: {
+          args: Prisma.ArcadeScoreGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArcadeScoreGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ArcadeScoreCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArcadeScoreCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1279,6 +1354,18 @@ export const ImageSetScalarFieldEnum = {
 } as const
 
 export type ImageSetScalarFieldEnum = (typeof ImageSetScalarFieldEnum)[keyof typeof ImageSetScalarFieldEnum]
+
+
+export const ArcadeScoreScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  score: 'score',
+  meteorsDestroyed: 'meteorsDestroyed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ArcadeScoreScalarFieldEnum = (typeof ArcadeScoreScalarFieldEnum)[keyof typeof ArcadeScoreScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1561,6 +1648,7 @@ export type GlobalOmitConfig = {
   teamMember?: Prisma.TeamMemberOmit
   teamJoinRequest?: Prisma.TeamJoinRequestOmit
   imageSet?: Prisma.ImageSetOmit
+  arcadeScore?: Prisma.ArcadeScoreOmit
 }
 
 /* Types for Logging */

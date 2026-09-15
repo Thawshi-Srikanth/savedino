@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import { audioSynth } from "./AudioSynthesizer";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { Trophy } from "lucide-react";
 
 interface DinoGameCanvasProps {
   onScoreUpdate?: (score: number, high: number, meteorsDestroyed: number) => void;
   onNightModeChange?: (isNight: boolean) => void;
   nightModeOverride?: boolean | null;
+  onOpenLeaderboard?: () => void;
 }
 
 interface Meteor {
@@ -163,7 +168,11 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   onScoreUpdate,
   onNightModeChange,
   nightModeOverride,
+  onOpenLeaderboard,
 }) => {
+  const { data: session } = useSession();
+  const isAuthenticated = Boolean(session?.user?.id);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spriteImgRef = useRef<HTMLImageElement | null>(null);
   const nightModeOverrideRef = useRef<boolean | null>(nightModeOverride ?? null);
@@ -171,7 +180,18 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
 
   // React State for HUD & Theme
   const [gameState, setGameState] = useState<"IDLE" | "RUNNING" | "GAMEOVER">("IDLE");
-  const [isNight, setIsNight] = useState<boolean>(nightModeOverride ?? false);
+  const [isNight, setIsNight] = useState<boolean>(() => {
+    if (nightModeOverride !== undefined && nightModeOverride !== null) {
+      return nightModeOverride;
+    }
+    if (typeof document !== "undefined") {
+      return (
+        document.documentElement.classList.contains("dark") ||
+        document.documentElement.classList.contains("night-mode")
+      );
+    }
+    return false;
+  });
   const isNightRef = useRef<boolean>(nightModeOverride ?? false);
   const [laserCharges, setLaserCharges] = useState<number>(MAX_CHARGES);
   const [rechargeProgress, setRechargeProgress] = useState<number>(1.0);
@@ -180,10 +200,15 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
   const [meteorsDestroyed, setMeteorsDestroyed] = useState<number>(0);
 
   useEffect(() => {
-    if (nightModeOverride !== undefined && nightModeOverride !== null) {
-      setIsNight(nightModeOverride);
-      isNightRef.current = nightModeOverride;
-    }
+    const currentNight =
+      nightModeOverride !== undefined && nightModeOverride !== null
+        ? nightModeOverride
+        : typeof document !== "undefined"
+          ? document.documentElement.classList.contains("dark") ||
+            document.documentElement.classList.contains("night-mode")
+          : false;
+    setIsNight(currentNight);
+    isNightRef.current = currentNight;
   }, [nightModeOverride]);
 
   // Load official Chromium sprite sheet
@@ -255,7 +280,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
     meteorSpawnTimer: 20,
   });
 
-  // Load High Score
+  // Load High Score (Local & Global DB Sync)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedHi = localStorage.getItem("save_dino_laser_hi_score");
@@ -265,7 +290,25 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         stateRef.current.highScore = hi;
       }
     }
-  }, []);
+
+    if (isAuthenticated) {
+      fetch("/api/arcade/leaderboard", { cache: "no-store" })
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && json.currentUser?.score) {
+            const dbHi = json.currentUser.score;
+            if (dbHi > stateRef.current.highScore) {
+              setHighScore(dbHi);
+              stateRef.current.highScore = dbHi;
+              if (typeof window !== "undefined") {
+                localStorage.setItem("save_dino_laser_hi_score", dbHi.toString());
+              }
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isAuthenticated]);
 
   // Fire Expanding Plasma Ball (Shoots horizontally straight while Dino crouches)
   const fireLaser = useCallback(() => {
@@ -849,12 +892,42 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
             });
           }
 
-          if (s.score > s.highScore) {
-            s.highScore = Math.floor(s.score);
+          const finalRunScore = Math.floor(s.score);
+          const finalRunDestroyed = s.meteorsDestroyed;
+
+          if (finalRunScore > s.highScore) {
+            s.highScore = finalRunScore;
             setHighScore(s.highScore);
             if (typeof window !== "undefined") {
               localStorage.setItem("save_dino_laser_hi_score", s.highScore.toString());
             }
+          }
+
+          // Submit to global leaderboard if user is authenticated
+          if (isAuthenticated && finalRunScore > 0) {
+            fetch("/api/arcade/score", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                score: finalRunScore,
+                meteorsDestroyed: finalRunDestroyed,
+              }),
+            })
+              .then((res) => res.json())
+              .then((json) => {
+                if (json.success) {
+                  if (json.isNewHighScore) {
+                    toast.success(
+                      `🏆 New High Score! Global Rank #${json.rank} (${json.highScore.toLocaleString()} pts)`
+                    );
+                    if (json.highScore > s.highScore) {
+                      s.highScore = json.highScore;
+                      setHighScore(json.highScore);
+                    }
+                  }
+                }
+              })
+              .catch(() => {});
           }
         }
 
@@ -1257,13 +1330,28 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           </div>
         </div>
 
-        {/* Right: Scores (HI 00000  00000) */}
-        <div
-          className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
-        >
-          <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span>{" "}
-          {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;
-          {Math.floor(score).toString().padStart(5, "0")}
+        {/* Right: Scores (HI 00000  00000) & Leaderboard Button */}
+        <div className="flex items-center gap-2">
+          {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
+            <Link
+              href="/leaderboard"
+              prefetch={false}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 transition-all cursor-pointer select-none active:translate-y-0.5"
+              title="View Global Arcade Leaderboard"
+            >
+              <Trophy className="size-3 text-amber-500" />
+              <span className="hidden sm:inline">Ranks</span>
+            </Link>
+          )}
+
+          <div
+            className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
+          >
+            <span className={isNight ? "text-[#9aa0a6]" : "text-[#737373]"}>HI</span>{" "}
+            {Math.floor(highScore).toString().padStart(5, "0")}&nbsp;&nbsp;
+            {Math.floor(score).toString().padStart(5, "0")}
+          </div>
         </div>
       </div>
 

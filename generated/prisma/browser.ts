@@ -62,3 +62,8 @@ export type TeamJoinRequest = Prisma.TeamJoinRequestModel
  * 
  */
 export type ImageSet = Prisma.ImageSetModel
+/**
+ * Model ArcadeScore
+ * 
+ */
+export type ArcadeScore = Prisma.ArcadeScoreModel

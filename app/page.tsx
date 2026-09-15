@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
+import { LeaderboardModal } from "./components/LeaderboardModal";
 import { ArcadeTabGuard } from "./components/ArcadeTabGuard";
 import { audioSynth } from "./components/AudioSynthesizer";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ export default function Home() {
 
   const [mounted, setMounted] = useState<boolean>(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const { resolvedTheme, setTheme } = useTheme();
@@ -187,14 +189,11 @@ export default function Home() {
 
   return (
     <ArcadeTabGuard>
-      <main
-        className={`h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none ${
-          isNight ? "bg-[#121315] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
-        }`}
-      >
+      <main className="h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-between pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 sm:px-8 select-none overscroll-none bg-background text-foreground">
         {/* Header */}
         <Header
           onOpenHelp={() => setIsHelpOpen(true)}
+          onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
           isMuted={isMuted}
           onToggleMute={handleToggleMute}
           isNight={isNight}
@@ -205,7 +204,8 @@ export default function Home() {
         <div className="w-full max-w-[600px] flex flex-col items-center justify-center my-auto py-1 px-2 sm:px-0">
           <DinoGameCanvas
             onScoreUpdate={handleScoreUpdate}
-            nightModeOverride={mounted ? isNight : null}
+            nightModeOverride={resolvedTheme === "dark"}
+            onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
           />
 
           {/* Campaign Status Section (Coming Soon in Demo Mode vs Explore in Live Mode) */}
@@ -358,6 +358,18 @@ export default function Home() {
             </a>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
+              <>
+                <Link
+                  href="/leaderboard"
+                  prefetch={false}
+                  className="hover:text-foreground transition-colors underline-offset-2 hover:underline text-amber-500 hover:text-amber-600 dark:hover:text-amber-400 font-semibold"
+                >
+                  Ranks
+                </Link>
+                <span className="opacity-40">|</span>
+              </>
+            )}
             <Link
               href="/credits"
               prefetch={false}
@@ -390,13 +402,14 @@ export default function Home() {
             <DialogHeader className="space-y-1.5 text-left">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#8b5cf6]/10 text-[#8b5cf6] dark:bg-[#8b5cf6]/20 shrink-0">
-                  <Bell className="size-4" />
+                  <Bell className="size-5" />
                 </div>
                 <div>
-                  <DialogTitle className="text-base font-bold font-sans">Get Notified</DialogTitle>
+                  <DialogTitle className="text-base font-bold font-sans">
+                    Get Notified on Launch
+                  </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground font-sans">
-                    Be the first to know when registrations open for the upcoming Asteroid Search
-                    Challenge.
+                    Be the first to know when campaigns & registrations open.
                   </DialogDescription>
                 </div>
               </div>
@@ -404,7 +417,10 @@ export default function Home() {
 
             <form onSubmit={handleSubscribe} className="space-y-4 pt-2">
               <div className="space-y-1.5">
-                <label htmlFor="subscribe-email" className="text-xs font-medium text-foreground">
+                <label
+                  htmlFor="subscribe-email"
+                  className="text-xs font-semibold text-foreground font-sans"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -414,7 +430,7 @@ export default function Home() {
                     type="email"
                     required
                     autoFocus
-                    placeholder="name@example.com"
+                    placeholder="commander@sedssl.org"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isSubscribing}
@@ -429,7 +445,7 @@ export default function Home() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsNotifyModalOpen(false)}
-                  className="h-9 text-xs font-medium cursor-pointer"
+                  className="h-9 text-xs font-sans cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -440,7 +456,10 @@ export default function Home() {
                   className="h-9 text-xs font-semibold gap-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary cursor-pointer"
                 >
                   {isSubscribing ? (
-                    <span>Subscribing...</span>
+                    <>
+                      <div className="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Subscribing...</span>
+                    </>
                   ) : (
                     <>
                       <Bell className="size-3.5" />
@@ -455,6 +474,14 @@ export default function Home() {
 
         {/* Help Modal */}
         <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+
+        {/* Global Arcade Leaderboard Modal (Disabled in Demo Mode) */}
+        {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
+          <LeaderboardModal
+            isOpen={isLeaderboardOpen}
+            onClose={() => setIsLeaderboardOpen(false)}
+          />
+        )}
       </main>
     </ArcadeTabGuard>
   );
