@@ -4,12 +4,14 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { calculateTeamStatus } from "@/lib/campaign-engine";
 import { sendTeamRequestAcceptedEmail, sendTeamRequestRejectedEmail } from "@/lib/email";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 // PUT: Team Leader accepts or rejects a join request
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ teamId: string; requestId: string }> }
 ) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -19,6 +21,7 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
 
+    distinctId = session.user.id;
     const { teamId, requestId } = await params;
     const body = await request.json();
     const { action } = body; // "ACCEPT" | "REJECT"
@@ -87,6 +90,13 @@ export async function PUT(
         });
       }
 
+      await captureServerEvent(session.user.id, "team_join_request_decided", {
+        team_id: team.id,
+        campaign_id: team.eventId,
+        request_id: requestId,
+        decision: "rejected",
+      });
+
       return NextResponse.json({
         success: true,
         message: "Join request rejected.",
@@ -136,6 +146,13 @@ export async function PUT(
         await prisma.teamJoinRequest.update({
           where: { id: requestId },
           data: { status: "ACCEPTED" },
+        });
+        await captureServerEvent(session.user.id, "team_join_request_decided", {
+          team_id: team.id,
+          campaign_id: team.eventId,
+          request_id: requestId,
+          decision: "accepted",
+          member_already_present: true,
         });
         return NextResponse.json({
           success: true,
@@ -193,12 +210,24 @@ export async function PUT(
       });
     }
 
+    await captureServerEvent(session.user.id, "team_join_request_decided", {
+      team_id: team.id,
+      campaign_id: team.eventId,
+      request_id: requestId,
+      decision: "accepted",
+      member_count: updatedMemberCount,
+    });
+
     return NextResponse.json({
       success: true,
       message: "Student accepted into squad!",
     });
   } catch (error: any) {
     console.error("PUT /api/teams/[teamId]/requests/[requestId] error:", error);
+    await captureServerException(error, distinctId, {
+      route: "/api/teams/[teamId]/requests/[requestId]",
+      method: "PUT",
+    });
     return NextResponse.json(
       { success: false, error: error.message || "Failed to process request." },
       { status: 500 }

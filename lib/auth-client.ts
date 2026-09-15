@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { createAuthClient } from "better-auth/react";
 import { magicLinkClient } from "better-auth/client/plugins";
+import posthog from "posthog-js";
 
 export const authClient = createAuthClient({
   baseURL:
@@ -73,6 +74,18 @@ let memoryState: SessionStoreState = {
   error: null,
 };
 
+function identifyPostHogUser(data: SessionData) {
+  if (data?.user?.id) {
+    posthog.identify(data.user.id, {
+      email: data.user.email,
+      name: data.user.name,
+      role: data.user.role,
+    });
+  }
+}
+
+identifyPostHogUser(memoryState.data);
+
 const listeners = new Set<() => void>();
 let inFlightPromise: Promise<SessionData> | null = null;
 let broadcastChannel: BroadcastChannel | null = null;
@@ -87,6 +100,7 @@ function updateSessionState(data: SessionData, error: any = null) {
     isPending: false,
     error,
   };
+  identifyPostHogUser(data);
 
   if (typeof window !== "undefined") {
     try {
@@ -150,11 +164,17 @@ if (typeof window !== "undefined") {
       broadcastChannel.onmessage = (event) => {
         const { type, data } = event.data || {};
         if (type === "SESSION_UPDATE") {
+          const wasIdentified = Boolean(memoryState.data?.user?.id);
           memoryState = {
             data,
             isPending: false,
             error: null,
           };
+          if (data) {
+            identifyPostHogUser(data);
+          } else if (wasIdentified) {
+            posthog.reset();
+          }
           emitChange();
         } else if (type === "SESSION_INVALIDATE") {
           fetchSessionDeduplicated(true);
@@ -168,11 +188,17 @@ if (typeof window !== "undefined") {
     if (event.key === SESSION_STORAGE_KEY) {
       try {
         const newData = event.newValue ? JSON.parse(event.newValue) : null;
+        const wasIdentified = Boolean(memoryState.data?.user?.id);
         memoryState = {
           data: newData,
           isPending: false,
           error: null,
         };
+        if (newData) {
+          identifyPostHogUser(newData);
+        } else if (wasIdentified) {
+          posthog.reset();
+        }
         emitChange();
       } catch (e) {}
     }
@@ -238,6 +264,10 @@ export function useSession() {
 
 // Wrapper for signOut that instantly clears local cache and notifies all tabs
 export const signOut = async (options?: any) => {
+  if (memoryState.data?.user?.id) {
+    posthog.capture("user_logged_out");
+    posthog.reset();
+  }
   updateSessionState(null);
   if (typeof window !== "undefined") {
     try {

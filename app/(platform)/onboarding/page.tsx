@@ -13,6 +13,7 @@ import { Logo } from "@/components/Logo";
 import { DinoLoading } from "@/components/dino-loading";
 import { validatePhoneNumber, getCountryName } from "@/lib/phone-validation";
 import { PhoneInput } from "@/components/ui/phone-input";
+import posthog from "posthog-js";
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -148,6 +149,7 @@ function OnboardingForm() {
       // Move to Step 2: Discord Community Step
       setStep(2);
     } catch (err: any) {
+      posthog.captureException(err, { onboarding_step: 1 });
       toast.error(err.message || "Failed to save profile. Please try again.");
     } finally {
       setLoading(false);
@@ -156,6 +158,9 @@ function OnboardingForm() {
 
   // Final Step: Complete Onboarding & Enter Mission Control
   const handleFinishOnboarding = () => {
+    posthog.capture("onboarding_completed", {
+      discord_connected: isDiscordConnected,
+    });
     toast.success("Welcome aboard, Citizen Scientist!");
     window.location.href = redirectTo;
   };

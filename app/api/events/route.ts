@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 // Server-side in-memory cache for Events (TTL: 10 seconds)
 let cachedEvents: { timestamp: number; data: any } | null = null;
@@ -48,6 +49,7 @@ export async function GET() {
 
 // POST /api/events - Create a new event (Admin only)
 export async function POST(req: Request) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -60,6 +62,7 @@ export async function POST(req: Request) {
       );
     }
 
+    distinctId = session.user.id;
     const body = await req.json();
     const {
       title,
@@ -117,8 +120,18 @@ export async function POST(req: Request) {
 
     invalidateEventsCache();
 
+    await captureServerEvent(session.user.id, "campaign_created", {
+      campaign_id: newEvent.id,
+      status: newEvent.status,
+      max_team_size: newEvent.maxTeamSize,
+      max_teams: newEvent.maxTeams,
+      has_registration_window: Boolean(newEvent.regStart || newEvent.regEnd),
+      has_submission_window: Boolean(newEvent.submissionStart || newEvent.submissionEnd),
+    });
+
     return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
   } catch (error: any) {
+    await captureServerException(error, distinctId, { route: "/api/events", method: "POST" });
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

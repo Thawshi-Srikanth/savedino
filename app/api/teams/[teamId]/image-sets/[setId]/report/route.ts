@@ -5,18 +5,21 @@ import { headers } from "next/headers";
 import { parseMpcReport } from "@/lib/mpc-parser";
 import { isSubmissionClosed } from "@/lib/campaign-engine";
 import { notifyAsteroidDiscovery } from "@/lib/discord";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 // POST /api/teams/[teamId]/image-sets/[setId]/report - Submit MPC Discovery Report
 export async function POST(
   req: Request,
   context: { params: Promise<{ teamId: string; setId: string }> }
 ) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
       return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
 
+    distinctId = session.user.id;
     const { teamId, setId } = await context.params;
     const body = await req.json();
     const { reportText, markClean } = body;
@@ -84,6 +87,15 @@ export async function POST(
         },
       });
 
+      await captureServerEvent(session.user.id, "discovery_report_submitted", {
+        team_id: teamId,
+        campaign_id: team?.eventId,
+        image_set_id: setId,
+        marked_clean: true,
+        pending_approval: targetStatus === "PENDING_APPROVAL",
+        observation_count: 0,
+      });
+
       return NextResponse.json({
         success: true,
         pendingApproval: targetStatus === "PENDING_APPROVAL",
@@ -134,6 +146,15 @@ export async function POST(
       );
     }
 
+    await captureServerEvent(session.user.id, "discovery_report_submitted", {
+      team_id: teamId,
+      campaign_id: team?.eventId,
+      image_set_id: setId,
+      marked_clean: false,
+      pending_approval: targetStatus === "PENDING_APPROVAL",
+      observation_count: parsed.totalObservations,
+    });
+
     return NextResponse.json({
       success: true,
       pendingApproval: targetStatus === "PENDING_APPROVAL",
@@ -147,6 +168,10 @@ export async function POST(
       imageSet: updatedSet,
     });
   } catch (error: any) {
+    await captureServerException(error, distinctId, {
+      route: "/api/teams/[teamId]/image-sets/[setId]/report",
+      method: "POST",
+    });
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

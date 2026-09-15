@@ -11,6 +11,7 @@ import { Mail, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { DinoLoading } from "@/components/dino-loading";
+import posthog from "posthog-js";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -113,12 +114,14 @@ function LoginForm() {
           res.error.message || "Failed to send link. Please check your email and try again.";
         toast.error(msg);
       } else {
+        posthog.capture("magic_link_requested", { auth_method: "magic_link" });
         toast.success("Sign-in link sent! Check your inbox.");
         router.push(
           `/verify?email=${encodeURIComponent(normalizedEmail)}&redirectTo=${encodeURIComponent(redirectTo)}`
         );
       }
     } catch (err: any) {
+      posthog.captureException(err, { auth_flow: "login", auth_method: "magic_link" });
       const msg = err.message || "An error occurred. Please try again.";
       toast.error(msg);
     } finally {

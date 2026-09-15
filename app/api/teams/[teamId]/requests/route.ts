@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendTeamJoinRequestEmail } from "@/lib/email";
 import { maskEmail } from "@/lib/mask-email";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
 
@@ -134,6 +135,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
 
 // POST: Student sends a join request to a recruiting team
 export async function POST(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -142,6 +144,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
+
+    distinctId = session.user.id;
 
     if (session.user.role === "admin" || session.user.role === "staff") {
       return NextResponse.json(
@@ -297,6 +301,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       });
     }
 
+    await captureServerEvent(session.user.id, "team_join_requested", {
+      team_id: team.id,
+      campaign_id: team.eventId,
+      request_id: joinRequest.id,
+      member_count: team.members.length,
+    });
+
     return NextResponse.json({
       success: true,
       request: joinRequest,
@@ -304,6 +315,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
     });
   } catch (error: any) {
     console.error("POST /api/teams/[teamId]/requests error:", error);
+    await captureServerException(error, distinctId, {
+      route: "/api/teams/[teamId]/requests",
+      method: "POST",
+    });
     return NextResponse.json(
       { success: false, error: error.message || "Failed to send join request." },
       { status: 500 }

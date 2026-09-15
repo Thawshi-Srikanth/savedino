@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { validatePhoneNumber } from "@/lib/phone-validation";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -208,6 +209,7 @@ export async function GET(req: Request) {
 
 // PATCH /api/user/profile - Update user profile information & avatar seed
 export async function PATCH(req: Request) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -220,6 +222,7 @@ export async function PATCH(req: Request) {
       );
     }
 
+    distinctId = session.user.id;
     const body = await req.json();
     const { name, institution, country, whatsapp, image } = body;
 
@@ -270,6 +273,18 @@ export async function PATCH(req: Request) {
       },
     });
 
+    await captureServerEvent(session.user.id, "profile_updated", {
+      updated_fields: [
+        name !== undefined && "name",
+        institution !== undefined && "institution",
+        country !== undefined && "country",
+        whatsapp !== undefined && "whatsapp",
+        image !== undefined && "image",
+        body.tourCompleted !== undefined && "tour_completed",
+      ].filter(Boolean),
+      tour_completed: updatedUser.tourCompleted,
+    });
+
     return NextResponse.json({
       success: true,
       user: updatedUser,
@@ -277,6 +292,7 @@ export async function PATCH(req: Request) {
     });
   } catch (err: any) {
     console.error("PATCH /api/user/profile error:", err);
+    await captureServerException(err, distinctId, { route: "/api/user/profile", method: "PATCH" });
     return NextResponse.json(
       { success: false, error: err.message || "Failed to update profile." },
       { status: 500 }

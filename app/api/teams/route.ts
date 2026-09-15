@@ -8,6 +8,7 @@ import {
   isRegistrationClosed,
 } from "@/lib/campaign-engine";
 import { notifySquadCreated, createSquadThread } from "@/lib/discord";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 // Server-side in-memory cache for Teams (TTL: 5 seconds)
 const teamsCache = new Map<string, { timestamp: number; data: any }>();
@@ -19,6 +20,7 @@ export function invalidateTeamsCache() {
 
 // POST /api/teams - Create a team in an event
 export async function POST(req: Request) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -30,6 +32,8 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    distinctId = session.user.id;
 
     if (session.user.role === "admin" || session.user.role === "staff") {
       return NextResponse.json(
@@ -169,8 +173,16 @@ export async function POST(req: Request) {
         .catch((err) => console.error("[Discord Broadcast] Failed squad automation:", err));
     }
 
+    await captureServerEvent(session.user.id, "team_created", {
+      team_id: newTeam.id,
+      campaign_id: newTeam.eventId,
+      status: newTeam.status,
+      member_count: newTeam.members.length,
+    });
+
     return NextResponse.json({ success: true, team: newTeam }, { status: 201 });
   } catch (error: any) {
+    await captureServerException(error, distinctId, { route: "/api/teams", method: "POST" });
     if (error.code === "P2002") {
       return NextResponse.json(
         { success: false, error: "A team with this name already exists in this event." },

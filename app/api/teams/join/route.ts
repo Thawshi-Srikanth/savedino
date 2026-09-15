@@ -8,9 +8,11 @@ import {
   isRegistrationClosed,
 } from "@/lib/campaign-engine";
 import { addMemberToThread, assignDiscordRole } from "@/lib/discord";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 // POST /api/teams/join - Join a team via invite code
 export async function POST(req: Request) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -22,6 +24,8 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    distinctId = session.user.id;
 
     if (session.user.role === "admin" || session.user.role === "staff") {
       return NextResponse.json(
@@ -156,6 +160,14 @@ export async function POST(req: Request) {
       }
     })();
 
+    await captureServerEvent(session.user.id, "team_joined", {
+      team_id: team.id,
+      campaign_id: team.eventId,
+      member_count: newCount,
+      status: newStatus,
+      join_method: "invite_code",
+    });
+
     return NextResponse.json({
       success: true,
       teamId: team.id,
@@ -164,6 +176,7 @@ export async function POST(req: Request) {
       status: newStatus,
     });
   } catch (error: any) {
+    await captureServerException(error, distinctId, { route: "/api/teams/join", method: "POST" });
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

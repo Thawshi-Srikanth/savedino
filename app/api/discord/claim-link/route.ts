@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { verifyDiscordLinkToken, assignDiscordRole, addMemberToThread } from "@/lib/discord";
+import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic";
  * Claims a 1-time Discord link token for the currently authenticated user.
  */
 export async function POST(req: Request) {
+  let distinctId = "server";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -23,6 +25,7 @@ export async function POST(req: Request) {
       );
     }
 
+    distinctId = session.user.id;
     const { token } = await req.json();
     if (!token) {
       return NextResponse.json({ success: false, error: "Missing link token." }, { status: 400 });
@@ -103,6 +106,11 @@ export async function POST(req: Request) {
       }
     }
 
+    await captureServerEvent(userId, "discord_account_linked", {
+      linked_team_count: memberships.length,
+      account_previously_linked: Boolean(existingAccount),
+    });
+
     return NextResponse.json({
       success: true,
       message: `Successfully linked Discord account ${username ? `(@${username})` : ""}!`,
@@ -110,6 +118,10 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error("POST /api/discord/claim-link error:", error);
+    await captureServerException(error, distinctId, {
+      route: "/api/discord/claim-link",
+      method: "POST",
+    });
     return NextResponse.json(
       { success: false, error: error.message || "Failed to link Discord account." },
       { status: 500 }
