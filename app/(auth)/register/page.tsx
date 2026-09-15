@@ -6,8 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Mail, ArrowRight, RefreshCw, Sparkles, ShieldCheck } from "lucide-react";
+import { Mail, ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { DinoLoading } from "@/components/dino-loading";
@@ -49,7 +48,7 @@ function DiscordIcon({ className }: { className?: string }) {
   );
 }
 
-function LoginForm() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/campaigns";
@@ -109,7 +108,7 @@ function LoginForm() {
       if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
         setEarlyAccessNotice(true);
       } else {
-        toast.error(err?.message || `Failed to sign in with ${provider}.`);
+        toast.error(err?.message || `Failed to sign up with ${provider}.`);
       }
       setSocialLoading(null);
     }
@@ -136,14 +135,14 @@ function LoginForm() {
           toast.error(msg || "Failed to send link. Please check your email and try again.");
         }
       } else {
-        posthog.capture("magic_link_requested", { auth_method: "magic_link" });
-        toast.success("Sign-in link sent! Check your inbox.");
+        posthog.capture("registration_link_requested", { auth_method: "magic_link" });
+        toast.success("Account link sent! Check your inbox.");
         router.push(
           `/verify?email=${encodeURIComponent(normalizedEmail)}&redirectTo=${encodeURIComponent(redirectTo)}`
         );
       }
     } catch (err: any) {
-      posthog.captureException(err, { auth_flow: "login", auth_method: "magic_link" });
+      posthog.captureException(err, { auth_flow: "registration", auth_method: "magic_link" });
       const errMsg = err?.message || "";
       if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
         setEarlyAccessNotice(true);
@@ -157,18 +156,14 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none bg-background text-foreground">
-      {/* Top Left Code Comment Accent & Status Badge */}
+      {/* Top Left Code Comment Accent */}
       <div className="w-full max-w-6xl mx-auto flex items-center justify-between text-xs font-mono text-muted-foreground">
         <div className="space-y-0.5">
           <div className="flex items-center gap-1.5">
-            <span>// sign in</span>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-sans font-bold bg-primary text-primary-foreground shadow-xs tracking-wide">
-              <span className="size-1.5 rounded-full bg-primary-foreground animate-pulse" />
-              Early Access
-            </span>
+            <span>// create account</span>
           </div>
           <div className="flex items-center gap-1">
-            <span>// asteroid search</span>
+            <span>// citizen science</span>
             <span className="w-2 h-3.5 bg-primary inline-block animate-pulse" />
           </div>
         </div>
@@ -176,7 +171,6 @@ function LoginForm() {
         {/* Back to Arcade */}
         <Link
           href="/"
-          prefetch={false}
           className="hidden sm:inline-flex items-center gap-1 text-xs font-pixel text-muted-foreground hover:text-foreground transition-colors"
         >
           <span>&lt; Arcade Game</span>
@@ -187,7 +181,7 @@ function LoginForm() {
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center">
-          <Logo href="/" size="lg" />
+          <Logo href="/" size="lg" showEarlyAccess />
         </div>
 
         {/* Early Access Alert Notice */}
@@ -230,10 +224,10 @@ function LoginForm() {
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="text-center space-y-1.5">
             <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
-              Sign in to SaveDino
+              Join SaveDino
             </h1>
             <p className="text-xs sm:text-sm font-sans text-muted-foreground leading-relaxed">
-              Choose your preferred sign-in method to continue.
+              Create your citizen scientist account with Google, Discord, or Email.
             </p>
           </div>
 
@@ -282,7 +276,7 @@ function LoginForm() {
             </div>
             <div className="relative flex justify-center text-[10px] uppercase">
               <span className="bg-card px-2 text-muted-foreground font-mono">
-                or sign in with email
+                or sign up with email
               </span>
             </div>
           </div>
@@ -290,7 +284,7 @@ function LoginForm() {
           <form onSubmit={handleSendMagicLink} className="space-y-4">
             <div>
               <label className="block text-xs font-sans font-semibold uppercase tracking-wider mb-1 text-foreground">
-                Email
+                Email Address
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -319,7 +313,7 @@ function LoginForm() {
                 </>
               ) : (
                 <>
-                  <span>Send Sign-in Link</span>
+                  <span>Create Account</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -327,17 +321,25 @@ function LoginForm() {
           </form>
 
           <div className="text-center text-xs font-sans text-muted-foreground pt-3 border-t border-border space-y-1.5">
-            <p className="font-semibold text-foreground">
-              Private Beta &bull; Pre-registered access only.
-            </p>
             <p className="text-[11px] text-muted-foreground">
-              Need access?{" "}
+              By joining, you agree to our{" "}
+              <Link href="/terms" prefetch={false} className="text-primary hover:underline">
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" prefetch={false} className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+            <p className="text-xs pt-1">
+              Private Beta &bull; Already invited?{" "}
               <Link
-                href="/"
+                href="/login"
                 prefetch={false}
                 className="font-semibold text-primary hover:underline"
               >
-                Join the waitlist on homepage
+                Sign in
               </Link>
             </p>
           </div>
@@ -361,10 +363,10 @@ function LoginForm() {
   );
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <Suspense fallback={<DinoLoading size="lg" text="Loading..." fullScreen />}>
-      <LoginForm />
+      <RegisterForm />
     </Suspense>
   );
 }

@@ -1355,8 +1355,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
         />
       </div>
 
-      {/* Controls Bar with Clean Theme-Aware Keycaps */}
-      <div className="w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-2 px-2 mt-1 text-xs font-mono text-muted-foreground">
+      {/* Controls Bar with Clean Theme-Aware Keycaps (Hidden on mobile) */}
+      <div className="w-full max-w-[600px] hidden sm:flex items-center justify-between gap-2 px-2 mt-1 text-xs font-mono text-muted-foreground">
         <div className="flex items-center gap-3">
           {/* Spacebar Keycap */}
           <div className="flex items-center gap-1.5">
@@ -1377,10 +1377,7 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           </div>
         </div>
 
-        <span className="text-[11px] text-muted-foreground font-sans">
-          <span className="sm:hidden">Tap left Jump / Dbl-Jump, right Shoot &bull; </span>Laser
-          expands in flight
-        </span>
+        <span className="text-[11px] text-muted-foreground font-sans">Laser expands in flight</span>
       </div>
 
       {/* Dedicated Touch Arcade Controls at Bottom (Visible on mobile) */}

@@ -351,8 +351,8 @@ export default function Home() {
         </div>
 
         {/* Footer Note */}
-        <footer className="w-full max-w-[600px] flex items-center justify-between pt-2 pb-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0">
-          <div className="flex items-center gap-1.5 truncate">
+        <footer className="w-full max-w-[600px] flex flex-col sm:flex-row items-center justify-between gap-2 pt-3 pb-2 text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border/40 select-text shrink-0 text-center sm:text-left">
+          <div className="flex items-center gap-1.5 justify-center sm:justify-start">
             <span className="font-bold text-foreground">SaveDino</span>
             <span className="opacity-40">&bull;</span>
             <a
@@ -364,7 +364,7 @@ export default function Home() {
               SEDS Sri Lanka
             </a>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-2.5 gap-y-1">
             {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
               <>
                 <Link
@@ -374,7 +374,7 @@ export default function Home() {
                 >
                   Ranks
                 </Link>
-                <span className="opacity-40">|</span>
+                <span className="opacity-40 hidden sm:inline">|</span>
               </>
             )}
             <Link
@@ -384,7 +384,7 @@ export default function Home() {
             >
               Credits
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40 hidden sm:inline">|</span>
             <Link
               href="/privacy"
               prefetch={false}
@@ -392,7 +392,15 @@ export default function Home() {
             >
               Privacy
             </Link>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40 hidden sm:inline">|</span>
+            <Link
+              href="/cookies"
+              prefetch={false}
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Cookies
+            </Link>
+            <span className="opacity-40 hidden sm:inline">|</span>
             <Link
               href="/terms"
               prefetch={false}

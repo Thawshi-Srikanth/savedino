@@ -341,8 +341,17 @@ export default function CreditsPage() {
               icons powering navigation and status indicators (ISC License).
             </li>
             <li>
-              <strong className="text-foreground">Bun:</strong> High-performance JavaScript runtime,
-              bundler, and package manager (MIT License).
+              <strong className="text-foreground">pnpm &amp; Node.js:</strong> Fast, disk space
+              efficient package manager and modern JavaScript runtime.
+            </li>
+            <li>
+              <strong className="text-foreground">PostHog:</strong> Privacy-conscious product
+              analytics, session telemetry, and feature flag management hosted in the European Union
+              (MIT License / PostHog Cloud EU).
+            </li>
+            <li>
+              <strong className="text-foreground">Resend:</strong> Transactional email delivery
+              engine powering sign-in links and campaign notifications.
             </li>
             <li>
               <strong className="text-foreground">Prisma ORM:</strong> Next-generation TypeScript

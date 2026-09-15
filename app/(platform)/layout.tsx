@@ -6,17 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import {
-  Sun,
-  Moon,
-  LogOut,
-  User,
-  Gamepad2,
-  Telescope,
-  Users,
-  ShieldAlert,
-  Search,
-} from "lucide-react";
+import { Sun, Moon, LogOut, User, Gamepad2, Telescope, Users, ShieldAlert } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 import { PixelAvatar } from "@/components/pixel-avatar";
@@ -69,21 +59,6 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     return <DinoLoading size="lg" text="Signing out..." fullScreen />;
   }
 
-  // Dedicated Full-Screen Layout for Login, Register, Verify, Onboarding & Create (No Navbar)
-  if (
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/verify" ||
-    pathname === "/onboarding" ||
-    pathname === "/create"
-  ) {
-    return (
-      <div className="min-h-screen w-full flex flex-col justify-between bg-background text-foreground font-sans select-none">
-        {children}
-      </div>
-    );
-  }
-
   // Navigation Items (Disabled in Demo Mode)
   const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
   const navItems = isDemo
@@ -119,20 +94,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
-          {/* SaveDino Branding Logo */}
+          {/* SaveDino Branding Logo with floating Early Access badge */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <div className="block sm:hidden">
-              <Logo href="/" size="sm" />
+              <Logo href="/" size="sm" showEarlyAccess />
             </div>
             <div className="hidden sm:block">
-              <Logo href="/" size="md" />
+              <Logo href="/" size="md" showEarlyAccess />
             </div>
-
-            {/* Early Access Status Badge */}
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold bg-primary text-primary-foreground shadow-xs tracking-wide shrink-0">
-              <span className="size-1.5 rounded-full bg-primary-foreground animate-pulse" />
-              Early Access
-            </span>
 
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
@@ -231,27 +200,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             )}
           </div>
 
-          {/* Mobile Right Controls: Search, Theme, Avatar/Sign In, Menu */}
+          {/* Mobile Right Controls: Theme, Avatar/Sign In, Menu */}
           <div className="flex items-center gap-2 md:hidden">
-            {/* Quick Search Shortcut for Mobile */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                const event = new KeyboardEvent("keydown", {
-                  key: "k",
-                  metaKey: true,
-                  bubbles: true,
-                });
-                document.dispatchEvent(event);
-              }}
-              className="h-9 w-9 rounded-xl cursor-pointer border-border hover:bg-muted shadow-arcade-sm active:translate-y-0.5"
-              title="Search"
-              aria-label="Open command search"
-            >
-              <Search className="size-4 text-muted-foreground" />
-            </Button>
-
             {/* Mobile Theme Switcher */}
             <Button
               variant="outline"
@@ -341,47 +291,51 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         <div className="flex-1">{children}</div>
 
         {/* Platform Bottom Footer Note */}
-        <footer className="w-full pt-8 mt-12 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans text-muted-foreground pb-4 md:pb-0">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 text-center md:text-left">
+        <footer className="w-full pt-8 mt-12 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-muted-foreground pb-4 md:pb-0 text-center sm:text-left select-text">
+          <div className="flex items-center gap-1.5 justify-center sm:justify-start">
             <span className="font-bold text-foreground">SaveDino</span>
             <span className="opacity-40">&bull;</span>
-            <span className="font-mono text-[11px] bg-muted/60 px-2 py-0.5 rounded-md border border-border/50">
-              NASA &amp; IASC Collaboration
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-4 gap-y-1.5 text-xs text-center">
-            <Link
-              href="/credits"
-              prefetch={false}
-              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
-            >
-              Credits &amp; Partners
-            </Link>
-            <span className="opacity-40 hidden sm:inline">&bull;</span>
-            <Link
-              href="/privacy"
-              prefetch={false}
-              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <span className="opacity-40 hidden sm:inline">&bull;</span>
-            <Link
-              href="/terms"
-              prefetch={false}
-              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <span className="opacity-40 hidden sm:inline">&bull;</span>
             <a
               href="https://www.sedssl.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="py-1 px-1.5 rounded hover:text-foreground hover:bg-muted/40 transition-colors"
+              className="opacity-80 hover:opacity-100 hover:text-foreground transition-opacity underline-offset-2 hover:underline inline-flex items-center"
             >
               SEDS Sri Lanka
             </a>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-2.5 gap-y-1">
+            <Link
+              href="/credits"
+              prefetch={false}
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Credits
+            </Link>
+            <span className="opacity-40 hidden sm:inline">|</span>
+            <Link
+              href="/privacy"
+              prefetch={false}
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Privacy
+            </Link>
+            <span className="opacity-40 hidden sm:inline">|</span>
+            <Link
+              href="/cookies"
+              prefetch={false}
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Cookies
+            </Link>
+            <span className="opacity-40 hidden sm:inline">|</span>
+            <Link
+              href="/terms"
+              prefetch={false}
+              className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Terms
+            </Link>
           </div>
         </footer>
       </main>

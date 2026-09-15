@@ -252,7 +252,7 @@ function VerifyContent() {
       {/* Main Centered Verification Section */}
       {verifying ? (
         <div className="w-full max-w-md mx-auto my-auto py-12 flex flex-col items-center justify-center text-center space-y-4">
-          <Logo href="/" size="lg" className="mb-2" />
+          <Logo href="/" size="lg" showEarlyAccess className="mb-2" />
           <DinoLoading size="lg" text="Authenticating..." />
           <div className="space-y-1">
             <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
@@ -267,7 +267,7 @@ function VerifyContent() {
         <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
           {/* Brand Logo */}
           <div className="flex flex-col items-center justify-center">
-            <Logo href="/" size="lg" />
+            <Logo href="/" size="lg" showEarlyAccess />
           </div>
 
           {/* Consistent Theme Verification Card */}

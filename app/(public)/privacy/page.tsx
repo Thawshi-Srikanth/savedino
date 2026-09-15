@@ -84,9 +84,10 @@ export default function PrivacyPolicyPage() {
               reports, squad memberships, and campaign progress metrics.
             </li>
             <li>
-              <strong className="text-foreground">Technical Session Data:</strong> Authentication
-              session tokens and essential browser cookies necessary to keep you securely logged in
-              and prevent malicious automated access.
+              <strong className="text-foreground">Technical Session &amp; Telemetry Data:</strong>{" "}
+              Authentication session tokens, feature flag states, browser user-agent, error
+              diagnostics, and privacy-respecting interaction telemetry processed through our
+              EU-hosted analytics infrastructure to optimize platform performance.
             </li>
           </ul>
         </section>
@@ -221,10 +222,46 @@ export default function PrivacyPolicyPage() {
           </p>
         </section>
 
-        {/* Section 6: Scientific Data Sharing */}
+        {/* Section 6: Analytics, Telemetry & PostHog EU Data Processing */}
+        <section className="space-y-3 bg-card border border-border rounded-xl p-5 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">
+            6. Analytics, Telemetry &amp; PostHog EU Processing
+          </h2>
+          <p>
+            To monitor platform health, troubleshoot pipeline errors, evaluate feature flags (such
+            as our Early Access rollout), and understand user experience, SaveDino uses{" "}
+            <strong>PostHog Cloud EU</strong> (hosted exclusively within European Union data centers
+            at <code>eu.i.posthog.com</code> / <code>a.savedino.sedssl.org</code>).
+          </p>
+          <ul className="list-disc list-inside space-y-2 pl-2 text-sm pt-1">
+            <li>
+              <strong className="text-foreground">European Union Data Residency:</strong> All
+              telemetry, page view metrics, and diagnostic event logs are ingested and stored
+              strictly within the European Union in compliance with GDPR standards.
+            </li>
+            <li>
+              <strong className="text-foreground">No Advertising or Data Brokerage:</strong>{" "}
+              Analytics data is never shared with third-party advertisers, data brokers, or
+              marketing networks. It is used solely by the SaveDino development team to ensure
+              uptime and reliable asteroid hunting tools.
+            </li>
+            <li>
+              <strong className="text-foreground">Privacy Safeguards:</strong> Sensitive inputs,
+              passwords, authentication tokens, and private contact numbers are strictly masked and
+              omitted from telemetry records.
+            </li>
+            <li>
+              <strong className="text-foreground">Cookies &amp; Local Storage:</strong> We use local
+              storage and first-party cookies for essential session persistence, Day/Night theme
+              selection, audio synth preferences, and feature flag caching.
+            </li>
+          </ul>
+        </section>
+
+        {/* Section 7: Scientific Data Sharing */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            6. Scientific Data Sharing &amp; Public Records
+            7. Scientific Data Sharing &amp; Public Records
           </h2>
           <p>In accordance with international astronomical research standards:</p>
           <ul className="list-disc list-inside space-y-2 pl-2">
@@ -242,10 +279,10 @@ export default function PrivacyPolicyPage() {
           </ul>
         </section>
 
-        {/* Section 7: Data Protection & Security */}
+        {/* Section 8: Data Protection & Security */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            7. Data Protection &amp; Security Measures
+            8. Data Protection &amp; Security Measures
           </h2>
           <p>
             We implement comprehensive technical and organizational safeguards to ensure data
@@ -273,10 +310,10 @@ export default function PrivacyPolicyPage() {
           </ul>
         </section>
 
-        {/* Section 8: Data Retention & User Deletion Rights */}
+        {/* Section 9: Data Retention & User Deletion Rights */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            8. Data Retention, Revocation &amp; Deletion
+            9. Data Retention, Revocation &amp; Deletion
           </h2>
           <p>You have full control over your personal data:</p>
           <ul className="list-disc list-inside space-y-2 pl-2">
@@ -312,10 +349,10 @@ export default function PrivacyPolicyPage() {
           </ul>
         </section>
 
-        {/* Section 9: Children's Educational Privacy */}
+        {/* Section 10: Children's Educational Privacy */}
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            9. Children&apos;s Educational Privacy
+            10. Children&apos;s Educational Privacy
           </h2>
           <p>
             SaveDino is committed to protecting the privacy of young students participating in
@@ -325,10 +362,10 @@ export default function PrivacyPolicyPage() {
           </p>
         </section>
 
-        {/* Section 10: Contact Information */}
+        {/* Section 11: Contact Information */}
         <section className="space-y-3 pb-8">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            10. Contact Information &amp; Data Controller
+            11. Contact Information &amp; Data Controller
           </h2>
           <p>
             For questions or requests regarding this Privacy Policy or your personal data, please
@@ -371,36 +408,6 @@ export default function PrivacyPolicyPage() {
             </p>
           </div>
         </section>
-
-        {/* Footer Navigation Back Link */}
-        <div className="pt-6 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs font-sans text-muted-foreground">
-          <div>
-            <span>SaveDino &bull; SEDS Sri Lanka</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              prefetch={false}
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Return Home
-            </Link>
-            <Link
-              href="/credits"
-              prefetch={false}
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Credits
-            </Link>
-            <Link
-              href="/terms"
-              prefetch={false}
-              className="hover:text-foreground underline underline-offset-4"
-            >
-              Terms
-            </Link>
-          </div>
-        </div>
       </main>
     </div>
   );
