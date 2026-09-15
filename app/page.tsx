@@ -98,6 +98,11 @@ export default function Home() {
         if (stored === "true") {
           setIsSubscribed(true);
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("requestAccess") === "true" || urlParams.get("subscribe") === "true") {
+          setIsNotifyModalOpen(true);
+        }
       }
     } catch (e) {
       // Ignore localStorage read errors

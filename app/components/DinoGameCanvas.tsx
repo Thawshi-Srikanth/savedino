@@ -6,7 +6,6 @@ import { audioSynth } from "./AudioSynthesizer";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { Trophy } from "lucide-react";
 
 interface DinoGameCanvasProps {
   onScoreUpdate?: (score: number, high: number, meteorsDestroyed: number) => void;
@@ -1330,21 +1329,8 @@ export const DinoGameCanvas: React.FC<DinoGameCanvasProps> = ({
           </div>
         </div>
 
-        {/* Right: Scores (HI 00000  00000) & Leaderboard Button */}
+        {/* Right: Scores (HI 00000  00000) */}
         <div className="flex items-center gap-2">
-          {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
-            <Link
-              href="/leaderboard"
-              prefetch={false}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 transition-all cursor-pointer select-none active:translate-y-0.5"
-              title="View Global Arcade Leaderboard"
-            >
-              <Trophy className="size-3 text-amber-500" />
-              <span className="hidden sm:inline">Ranks</span>
-            </Link>
-          )}
-
           <div
             className={`font-pixel text-[10px] sm:text-[11px] tracking-wider ${isNight ? "text-[#e8eaed]" : "text-[#535353]"}`}
           >

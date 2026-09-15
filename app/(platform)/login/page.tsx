@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Mail, ArrowRight, RefreshCw } from "lucide-react";
+import { Mail, ArrowRight, RefreshCw, Sparkles, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { DinoLoading } from "@/components/dino-loading";
@@ -58,6 +58,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "discord" | null>(null);
+  const [earlyAccessNotice, setEarlyAccessNotice] = useState(false);
 
   // If already authenticated, redirect to destination and identify in PostHog
   useEffect(() => {
@@ -88,9 +89,7 @@ function LoginForm() {
         urlError === "unable_to_create_user" ||
         urlError === "UNAUTHORIZED"
       ) {
-        toast.error(
-          "SaveDino is currently in Early Access. Only pre-registered citizen scientists can sign in right now."
-        );
+        setEarlyAccessNotice(true);
       } else {
         toast.error("Something went wrong. Please try again.");
       }
@@ -108,9 +107,7 @@ function LoginForm() {
     } catch (err: any) {
       const errMsg = err?.message || "";
       if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
-        toast.error(
-          "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in."
-        );
+        setEarlyAccessNotice(true);
       } else {
         toast.error(err?.message || `Failed to sign in with ${provider}.`);
       }
@@ -134,9 +131,7 @@ function LoginForm() {
       if (res.error) {
         const msg = res.error.message || "";
         if (msg.includes("EARLY_ACCESS_REQUIRED")) {
-          toast.error(
-            "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in right now."
-          );
+          setEarlyAccessNotice(true);
         } else {
           toast.error(msg || "Failed to send link. Please check your email and try again.");
         }
@@ -151,9 +146,7 @@ function LoginForm() {
       posthog.captureException(err, { auth_flow: "login", auth_method: "magic_link" });
       const errMsg = err?.message || "";
       if (errMsg.includes("EARLY_ACCESS_REQUIRED")) {
-        toast.error(
-          "SaveDino is in Early Access. Only pre-registered citizen scientists can sign in right now."
-        );
+        setEarlyAccessNotice(true);
       } else {
         toast.error(errMsg || "An error occurred. Please try again.");
       }
@@ -164,15 +157,19 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between p-4 sm:p-8 select-none bg-background text-foreground">
-      {/* Top Left Code Comment Accent */}
+      {/* Top Left Code Comment Accent & Status Badge */}
       <div className="w-full max-w-6xl mx-auto flex items-center justify-between text-xs font-mono text-muted-foreground">
         <div className="space-y-0.5">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <span>// sign in</span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-sans font-bold bg-primary text-primary-foreground shadow-xs tracking-wide">
+              <span className="size-1.5 rounded-full bg-primary-foreground animate-pulse" />
+              Early Access
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <span>// asteroid search</span>
-            <span className="w-2 h-3.5 bg-[#8b5cf6] inline-block animate-pulse" />
+            <span className="w-2 h-3.5 bg-primary inline-block animate-pulse" />
           </div>
         </div>
 
@@ -192,6 +189,42 @@ function LoginForm() {
         <div className="flex flex-col items-center justify-center">
           <Logo href="/" size="lg" />
         </div>
+
+        {/* Early Access Alert Notice */}
+        {earlyAccessNotice && (
+          <div className="w-full rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-3.5 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-sans font-bold text-foreground">Early Access Only</h3>
+                <span className="px-2 py-0.5 text-[9px] font-sans font-bold uppercase rounded-full bg-primary text-primary-foreground shadow-xs">
+                  Invite Only
+                </span>
+              </div>
+              <p className="text-xs font-sans text-muted-foreground leading-relaxed">
+                SaveDino is currently open to invited members. If you haven&apos;t joined yet,
+                request access below.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-border">
+              <Link
+                href="/?requestAccess=true"
+                prefetch={false}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-arcade-primary active:translate-y-[1px] transition-all cursor-pointer"
+              >
+                <Mail className="size-3.5" />
+                <span>Request Access</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setEarlyAccessNotice(false)}
+                className="text-xs font-sans text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer py-1"
+              >
+                Try another email
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Auth Card */}
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">

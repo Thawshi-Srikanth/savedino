@@ -128,6 +128,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <Logo href="/" size="md" />
             </div>
 
+            {/* Early Access Status Badge */}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold bg-primary text-primary-foreground shadow-xs tracking-wide shrink-0">
+              <span className="size-1.5 rounded-full bg-primary-foreground animate-pulse" />
+              Early Access
+            </span>
+
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}
             <nav className="hidden md:flex items-center gap-2 ml-4">
               {navItems.map((item) => (

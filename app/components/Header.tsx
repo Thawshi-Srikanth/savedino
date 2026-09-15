@@ -42,9 +42,15 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="w-full relative px-2 py-3 flex flex-col items-center select-none">
       {/* Top Navigation Bar - Constrained to Game Window max-w-[600px] */}
       <div className="w-full max-w-[600px] flex items-center justify-between gap-3">
-        {/* SaveDino Branding Logo & Nav Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* SaveDino Branding Logo, Early Access Badge & Nav Buttons */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <Logo href="/" size="md" />
+
+          {/* Early Access Status Badge */}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold bg-primary text-primary-foreground shadow-xs tracking-wide">
+            <span className="size-1.5 rounded-full bg-primary-foreground animate-pulse" />
+            Early Access
+          </span>
 
           {/* Action button shown only when authenticated and not in Demo Mode */}
           {process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && isAuthenticated && (
