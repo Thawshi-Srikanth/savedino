@@ -193,7 +193,9 @@ export function SupportWidget() {
     try {
       const response = await conv.getMessages(ticketId);
       if (response && Array.isArray(response.messages)) {
-        const publicMessages = response.messages.filter((m: ConversationMessage) => !m.is_private);
+        const publicMessages: ConversationMessage[] = response.messages.filter(
+          (m: ConversationMessage) => !m.is_private
+        );
         setMessages((prev) => {
           const autoReplies = prev.filter((m) => m.id.startsWith("auto-reply-"));
           const serverHasNonCustomer = publicMessages.some((m) => m.author_type !== "customer");
@@ -734,7 +736,9 @@ export function SupportWidget() {
                   {!session?.user?.email && messages.length > 0 && !emailSaved && (
                     <div className="p-3 rounded-lg bg-card border border-border space-y-2 mt-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-foreground">Get replies by email</span>
+                        <span className="text-xs font-semibold text-foreground">
+                          Get replies by email
+                        </span>
                         <button
                           type="button"
                           onClick={() => setEmailSaved(true)}
@@ -755,7 +759,11 @@ export function SupportWidget() {
                           onChange={(e) => setUserEmail(e.target.value)}
                           className="h-7 text-xs bg-background rounded-lg"
                         />
-                        <Button type="submit" size="sm" className="h-7 text-xs px-3 rounded-lg font-medium">
+                        <Button
+                          type="submit"
+                          size="sm"
+                          className="h-7 text-xs px-3 rounded-lg font-medium"
+                        >
                           Save
                         </Button>
                       </form>
@@ -765,7 +773,10 @@ export function SupportWidget() {
                   {/* Confirmed notification chip */}
                   {!session?.user?.email && messages.length > 0 && emailSaved && userEmail && (
                     <div className="px-3 py-1.5 rounded-lg bg-muted/40 border border-border/50 text-[10px] text-muted-foreground flex items-center justify-between mt-1">
-                      <span>Email notifications: <strong className="text-foreground">{userEmail}</strong></span>
+                      <span>
+                        Email notifications:{" "}
+                        <strong className="text-foreground">{userEmail}</strong>
+                      </span>
                       <button
                         type="button"
                         onClick={() => setEmailSaved(false)}
