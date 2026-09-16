@@ -18,5 +18,10 @@ if (!projectToken) {
     capture_pageview: true,
     capture_exceptions: true,
     debug: process.env.NODE_ENV === "development",
+    loaded: (ph) => {
+      if ((ph as any)?.conversations?.hide) {
+        (ph as any).conversations.hide();
+      }
+    },
   });
 }

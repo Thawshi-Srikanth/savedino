@@ -357,7 +357,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
       {/* Desktop Floating Arcade Game Button (Hidden on mobile or in demo mode) */}
       {!isDemo && (
-        <div className="hidden md:block fixed bottom-6 right-6 z-50">
+        <div className="hidden md:block fixed bottom-6 right-6 z-40">
           <Link href="/" prefetch={false}>
             <Button
               id="tour-desktop-arcade"

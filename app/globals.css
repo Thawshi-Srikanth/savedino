@@ -320,3 +320,12 @@ body,
 .animate-marquee-pingpong {
   animation: marquee-pingpong 6.5s ease-in-out infinite;
 }
+
+/* Suppress PostHog's default generic support widget container */
+.ph-conversations-widget,
+[data-ph-conversations-widget],
+#posthog-conversations-widget,
+.ph-survey,
+.ph-conversations-floating-button {
+  display: none !important;
+}

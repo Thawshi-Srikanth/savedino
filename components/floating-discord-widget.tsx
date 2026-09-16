@@ -20,7 +20,7 @@ export function FloatingDiscordWidget() {
   if (isExcludedPage) return null;
 
   return (
-    <div className="fixed bottom-20 right-4 md:bottom-6 md:right-20 z-40 select-none font-sans">
+    <div className="fixed bottom-20 right-4 md:bottom-[4.875rem] md:right-6 z-40 select-none font-sans">
       <a
         href={discordInviteUrl}
         target="_blank"

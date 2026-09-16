@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { DevPersonaSwitcher } from "@/components/dev-persona-switcher";
 import { CookieConsent } from "@/components/cookie-consent";
 import { TopLoadingBar } from "@/components/top-loading-bar";
+import { SupportWidget } from "@/components/support-widget";
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -194,6 +195,7 @@ export default function RootLayout({
           <AudioRouteGuard />
           <Toaster position="top-right" />
           <CookieConsent />
+          <SupportWidget />
           {children}
           {process.env.NODE_ENV === "development" && <DevPersonaSwitcher />}
         </ThemeProvider>
