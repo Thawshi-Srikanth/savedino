@@ -134,13 +134,40 @@ export function SupportWidget() {
     };
   }, []);
 
-  // Sync user info from session
+  const [emailSaved, setEmailSaved] = useState(false);
+
+  // Sync user info from session or localStorage
   useEffect(() => {
     if (session?.user) {
       setUserEmail(session.user.email || "");
       setUserName(session.user.name || "");
+      setEmailSaved(true);
+    } else {
+      const stored = localStorage.getItem("savedino_support_email");
+      if (stored) {
+        setUserEmail(stored);
+        setEmailSaved(true);
+      }
     }
   }, [session?.user]);
+
+  const handleSaveEmail = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const clean = userEmail.trim();
+    if (!clean || !clean.includes("@")) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    localStorage.setItem("savedino_support_email", clean);
+    setEmailSaved(true);
+    toast.success("Email saved for reply notifications!");
+
+    // If active ticket exists, update traits in PostHog
+    const conv = (posthog as any)?.conversations;
+    if (conv && typeof conv.sendMessage === "function" && currentTicketId) {
+      conv.sendMessage("", { email: clean, name: userName.trim() || undefined }).catch(() => {});
+    }
+  };
 
   // Scroll messages to bottom
   const scrollToBottom = useCallback(() => {
@@ -167,7 +194,14 @@ export function SupportWidget() {
       const response = await conv.getMessages(ticketId);
       if (response && Array.isArray(response.messages)) {
         const publicMessages = response.messages.filter((m: ConversationMessage) => !m.is_private);
-        setMessages(publicMessages);
+        setMessages((prev) => {
+          const autoReplies = prev.filter((m) => m.id.startsWith("auto-reply-"));
+          const serverHasNonCustomer = publicMessages.some((m) => m.author_type !== "customer");
+          if (serverHasNonCustomer || autoReplies.length === 0) {
+            return publicMessages;
+          }
+          return [...publicMessages, ...autoReplies];
+        });
         if (response.ticket_id) {
           setCurrentTicketId(response.ticket_id);
         }
@@ -305,6 +339,8 @@ export function SupportWidget() {
     setInputText("");
     scrollToBottom();
 
+    const isNewConversation = !currentTicketId || messages.length === 0;
+
     try {
       const response = await conv.sendMessage(messageContent, userTraits);
       if (response?.ticket_id) {
@@ -312,6 +348,27 @@ export function SupportWidget() {
       }
       await fetchMessages(response?.ticket_id || currentTicketId || undefined);
       scrollToBottom();
+
+      // Instant automated reassurance from SaveDino Team
+      if (isNewConversation) {
+        setTimeout(() => {
+          setMessages((prev) => {
+            const hasAutoReply = prev.some((m) => m.id.startsWith("auto-reply-"));
+            if (hasAutoReply) return prev;
+            return [
+              ...prev,
+              {
+                id: `auto-reply-${Date.now()}`,
+                content: "Thanks for reaching out! Someone from our team will respond to you soon.",
+                author_type: "human",
+                author_name: "SaveDino Team",
+                created_at: new Date().toISOString(),
+              },
+            ];
+          });
+          scrollToBottom();
+        }, 600);
+      }
     } catch (err: any) {
       console.error("[SupportWidget] Error sending message:", err);
       // Remove temporary optimistic message on failure and restore typed message
@@ -402,15 +459,19 @@ export function SupportWidget() {
             title="Help & Support"
             className="group relative flex items-center justify-center size-11 sm:size-12 rounded-xl bg-card hover:bg-muted text-foreground border border-border hover:border-primary shadow-arcade active:translate-y-[2px] active:shadow-none transition-all duration-200 cursor-pointer"
           >
+            {/* Solid Support Badge */}
+            <span className="absolute -top-2.5 right-1/2 translate-x-1/2 px-1.5 py-0.5 bg-primary text-primary-foreground text-[8px] font-bold uppercase tracking-wider rounded-full shadow-xs whitespace-nowrap pointer-events-none ring-2 ring-background font-sans">
+              Support
+            </span>
+
             <div className="relative flex items-center justify-center">
               <LifeBuoy className="size-5.5 text-foreground group-hover:text-primary group-hover:scale-105 transition-all duration-200" />
               {unreadCount > 0 && (
-                <span className="absolute -top-2.5 -right-2.5 flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground shadow-sm ring-2 ring-background font-mono">
+                <span className="absolute -top-2.5 -right-2.5 flex size-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-background font-mono">
                   {unreadCount}
                 </span>
               )}
             </div>
-            <span className="sr-only">Support</span>
           </button>
         </div>
       )}
@@ -668,6 +729,53 @@ export function SupportWidget() {
                       );
                     })
                   )}
+
+                  {/* Inline Email Collection Prompt for Guest Users */}
+                  {!session?.user?.email && messages.length > 0 && !emailSaved && (
+                    <div className="p-3 rounded-lg bg-card border border-border space-y-2 mt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-foreground">Get replies by email</span>
+                        <button
+                          type="button"
+                          onClick={() => setEmailSaved(true)}
+                          className="text-[10px] text-muted-foreground hover:text-foreground"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Enter your email so our team can follow up even after you leave.
+                      </p>
+                      <form onSubmit={handleSaveEmail} className="flex items-center gap-1.5 pt-0.5">
+                        <Input
+                          type="email"
+                          required
+                          placeholder="your@email.com"
+                          value={userEmail}
+                          onChange={(e) => setUserEmail(e.target.value)}
+                          className="h-7 text-xs bg-background rounded-lg"
+                        />
+                        <Button type="submit" size="sm" className="h-7 text-xs px-3 rounded-lg font-medium">
+                          Save
+                        </Button>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Confirmed notification chip */}
+                  {!session?.user?.email && messages.length > 0 && emailSaved && userEmail && (
+                    <div className="px-3 py-1.5 rounded-lg bg-muted/40 border border-border/50 text-[10px] text-muted-foreground flex items-center justify-between mt-1">
+                      <span>Email notifications: <strong className="text-foreground">{userEmail}</strong></span>
+                      <button
+                        type="button"
+                        onClick={() => setEmailSaved(false)}
+                        className="text-primary hover:underline text-[10px]"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
+
                   <div ref={messagesEndRef} />
                 </div>
 
