@@ -297,7 +297,6 @@ function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-11 pl-10 font-sans text-xs bg-background"
-                  autoFocus
                 />
               </div>
             </div>
