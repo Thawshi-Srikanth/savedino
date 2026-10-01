@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="w-full max-w-[600px] flex items-center justify-between gap-3">
         {/* SaveDino Branding Logo with floating Early Access badge */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <Logo href="/" size="md" showEarlyAccess />
+          <Logo href="/" size="md" />
         </div>
 
         {/* Top Right Controls: Theme Toggle, Leaderboard/Play & Controls Help */}

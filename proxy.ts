@@ -21,11 +21,7 @@ export function proxy(request: NextRequest) {
   if (pathname === "/api/auth/error") {
     const errorParam = request.nextUrl.searchParams.get("error") || "";
     const loginUrl = new URL("/login", request.url);
-    if (errorParam === "unable_to_create_user") {
-      loginUrl.searchParams.set("error", "EARLY_ACCESS_REQUIRED");
-    } else {
-      loginUrl.searchParams.set("error", errorParam || "AUTH_FAILED");
-    }
+    loginUrl.searchParams.set("error", errorParam || "AUTH_FAILED");
     return NextResponse.redirect(loginUrl);
   }
 

@@ -197,7 +197,7 @@ function OnboardingForm() {
       <div className="w-full max-w-md mx-auto my-auto py-8 space-y-6">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center">
-          <Logo href="/" size="lg" showEarlyAccess />
+          <Logo href="/" size="lg" />
         </div>
 
         {/* Auth / Onboarding Card */}

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSession } from "@/lib/auth-client";
 import { getUserProfile } from "@/lib/user-profile";
-import { Check, Mail, Bell, LayoutDashboard, LogIn, Users, Telescope } from "lucide-react";
+import { Check, Mail, Bell, LayoutDashboard, LogIn, Users, Telescope, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 // Dynamically import DinoGameCanvas with SSR disabled
@@ -331,18 +331,16 @@ export default function Home() {
                         <span>Sign In</span>
                       </Button>
                     </Link>
-                    {!isSubscribed && (
+                    <Link href="/register" prefetch={false}>
                       <Button
-                        type="button"
                         size="sm"
                         variant="outline"
-                        onClick={() => setIsNotifyModalOpen(true)}
                         className="text-xs font-bold shadow-arcade cursor-pointer gap-1.5 text-foreground hover:text-primary border-border"
                       >
-                        <Bell className="size-3.5 text-[#8b5cf6]" />
-                        <span>Request Access</span>
+                        <UserPlus className="size-3.5 text-[#10b981]" />
+                        <span>Create Account</span>
                       </Button>
-                    )}
+                    </Link>
                   </>
                 )}
               </div>

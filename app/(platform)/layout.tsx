@@ -103,10 +103,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           {/* SaveDino Branding Logo with floating Early Access badge */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <div className="block sm:hidden">
-              <Logo href="/" size="sm" showEarlyAccess />
+              <Logo href="/" size="sm" />
             </div>
             <div className="hidden sm:block">
-              <Logo href="/" size="md" showEarlyAccess />
+              <Logo href="/" size="md" />
             </div>
 
             {/* Desktop Navigation Pills with Uniform 3D Button Styling */}

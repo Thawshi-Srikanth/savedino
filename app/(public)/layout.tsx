@@ -29,7 +29,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <header className="sticky top-0 z-40 w-full border-b border-border bg-[#f8fafc]/90 dark:bg-[#121315]/90 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <Logo href="/" size="md" showEarlyAccess />
+            <Logo href="/" size="md" />
           </div>
 
           <div className="flex items-center gap-2">
