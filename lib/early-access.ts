@@ -14,6 +14,11 @@ export interface EarlyAccessResult {
 export async function checkEarlyAccessPermission(email: string): Promise<EarlyAccessResult> {
   const normalizedEmail = email.trim().toLowerCase();
 
+  // 0. Hard override: if EARLY_ACCESS_ENABLED is explicitly "false", allow everyone immediately
+  if (process.env.EARLY_ACCESS_ENABLED === "false") {
+    return { allowed: true, reason: "public_access" };
+  }
+
   // 1. Always allow existing Admin / Staff or first DB user to prevent lockout
   try {
     const existingUser = await prisma.user.findUnique({
