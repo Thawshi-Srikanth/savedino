@@ -18,34 +18,103 @@ export function renderAccountBannedEmail({
   html: string;
   text: string;
 } {
+  const isCountryPolicy =
+    reason.toLowerCase().includes("country") ||
+    reason.toLowerCase().includes("region") ||
+    reason.toLowerCase().includes("geographic") ||
+    reason.toLowerCase().includes("isolation") ||
+    reason.toLowerCase().includes("isolated");
+
   const greeting = name ? `Hello ${escapeHtml(name)},` : "Hello Citizen Scientist,";
-  const appealSubject = encodeURIComponent(
-    `Account Suspension Inquiry: ${name ? `${name} (${email})` : email}`
+  const inquirySubject = encodeURIComponent(
+    isCountryPolicy
+      ? `Campaign Policy Inquiry: ${name ? `${name} (${email})` : email}`
+      : `Account Suspension Inquiry: ${name ? `${name} (${email})` : email}`
   );
-  const supportMailto = `mailto:${supportEmail}?subject=${appealSubject}`;
+  const supportMailto = `mailto:${supportEmail}?subject=${inquirySubject}`;
+
+  const badgeHtml = isCountryPolicy
+    ? `<span style="display:inline-block;padding:5px 12px;border-radius:6px;background-color:#4f46e5;color:#ffffff;font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">
+        Campaign Policy Notice
+      </span>`
+    : `<span style="display:inline-block;padding:5px 12px;border-radius:6px;background-color:#ef4444;color:#ffffff;font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">
+        Account Suspended
+      </span>`;
+
+  const headerTitle = isCountryPolicy
+    ? "Notice Regarding Campaign Regional Policy"
+    : "Notice of Account Suspension";
+
+  const introParagraphs = isCountryPolicy
+    ? `
+    <p class="email-text-muted" style="margin:0 0 14px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;line-height:1.6;color:#94a3b8;">
+      ${greeting} thank you very much for your interest and enthusiasm for SaveDino and citizen science asteroid search campaigns.
+    </p>
+    <p class="email-text-muted" style="margin:0 0 20px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;line-height:1.6;color:#94a3b8;">
+      We are writing to kindly inform you that this specific campaign is isolated and restricted to participants within designated regional partner institutions and eligible countries in accordance with campaign policy agreements. Because of this policy, we are unable to accept your account for this regional campaign and have had to deactivate your access.
+    </p>`
+    : `
+    <p class="email-text-muted" style="margin:0 0 20px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;line-height:1.6;color:#94a3b8;">
+      ${greeting} your SaveDino account has been suspended by an administrator due to a violation of our community standards or campaign guidelines.
+    </p>`;
+
+  const reasonBorderColor = isCountryPolicy ? "#6366f1" : "#ef4444";
+  const reasonTextColor = isCountryPolicy ? "#a5b4fc" : "#f87171";
+
+  const noticeSectionHtml = isCountryPolicy
+    ? `
+    <!-- Uncontainerized Notice (Red Title, Normal Text) -->
+    <div style="margin:0 0 28px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:13px;line-height:1.6;">
+      <p style="margin:0 0 6px 0;font-weight:700;color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">
+        Notice &bull; Campaign Policy Details:
+      </p>
+      <ul style="margin:0 0 12px 20px;padding:0;color:#94a3b8;">
+        <li style="margin-bottom:4px;">This specific campaign is isolated to designated regional participants under partnership agreements.</li>
+        <li style="margin-bottom:4px;">Access to this platform's squad workspaces and data sets has been deactivated.</li>
+        <li style="margin-bottom:0;">We warmly encourage you to explore globally accessible international asteroid search campaigns at <strong style="color:#f3f4f6;">iasc.cosmicsearch.org</strong>.</li>
+      </ul>
+      <p style="margin:0;font-size:12px;color:#64748b;">
+        If you believe your region was identified incorrectly or if you represent a partner educational institution, please reach out to our team.
+      </p>
+    </div>`
+    : `
+    <!-- Uncontainerized Warning / Suspension Restrictions (Red Title, Normal Text) -->
+    <div style="margin:0 0 28px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:13px;line-height:1.6;">
+      <p style="margin:0 0 6px 0;font-weight:700;color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">
+        Warning &bull; Account Restrictions:
+      </p>
+      <ul style="margin:0 0 12px 20px;padding:0;color:#94a3b8;">
+        <li style="margin-bottom:4px;">You cannot log in or start new sessions.</li>
+        <li style="margin-bottom:4px;">Access to squad workspaces and image analysis tools is disabled.</li>
+        <li style="margin-bottom:0;">Any active asteroid search submissions have been put on hold.</li>
+      </ul>
+      <p style="margin:0;font-size:12px;color:#64748b;">
+        If you believe this suspension was made in error or wish to submit an appeal, please contact the SaveDino moderation team.
+      </p>
+    </div>`;
+
+  const ctaButtonText = isCountryPolicy
+    ? "Contact Support / Inquiries &rarr;"
+    : "Contact Support / Appeal &rarr;";
 
   const content = `
     <!-- Header Notice Badge (Solid) -->
     <div style="margin:0 0 16px 0;">
-      <span style="display:inline-block;padding:5px 12px;border-radius:6px;background-color:#ef4444;color:#ffffff;font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">
-        Account Suspended
-      </span>
+      ${badgeHtml}
     </div>
 
     <h1 class="email-text-title" style="margin:0 0 12px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:22px;font-weight:700;color:#f3f4f6;letter-spacing:-0.4px;">
-      Notice of Account Suspension
+      ${headerTitle}
     </h1>
 
-    <p class="email-text-muted" style="margin:0 0 20px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:14px;line-height:1.6;color:#94a3b8;">
-      ${greeting} your SaveDino account has been suspended by an administrator due to a violation of our community standards or campaign guidelines.
-    </p>
+    ${introParagraphs}
 
     <!-- Reason Box -->
-    <div style="margin:0 0 24px 0;padding:16px;background-color:#1c1d21;border:1px solid #38393e;border-left:3px solid #ef4444;border-radius:8px;">
+    <div style="margin:0 0 24px 0;padding:16px;background-color:#1c1d21;border:1px solid #38393e;border-left:3px solid ${reasonBorderColor};border-radius:8px;">
       <div style="font-family:'Space Mono', monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;font-weight:700;">
         Primary Reason
       </div>
-      <div style="font-family:'Inter', sans-serif;font-size:14px;font-weight:600;color:#f87171;line-height:1.5;">
+      <div style="font-family:'Inter', sans-serif;font-size:14px;font-weight:600;color:${reasonTextColor};line-height:1.5;">
         ${escapeHtml(reason)}
       </div>
 
@@ -65,20 +134,7 @@ export function renderAccountBannedEmail({
       }
     </div>
 
-    <!-- Uncontainerized Warning / Suspension Restrictions (Red Title, Normal Text) -->
-    <div style="margin:0 0 28px 0;padding:0;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:13px;line-height:1.6;">
-      <p style="margin:0 0 6px 0;font-weight:700;color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">
-        Warning &bull; Account Restrictions:
-      </p>
-      <ul style="margin:0 0 12px 20px;padding:0;color:#94a3b8;">
-        <li style="margin-bottom:4px;">You cannot log in or start new sessions.</li>
-        <li style="margin-bottom:4px;">Access to squad workspaces and image analysis tools is disabled.</li>
-        <li style="margin-bottom:0;">Any active asteroid search submissions have been put on hold.</li>
-      </ul>
-      <p style="margin:0;font-size:12px;color:#64748b;">
-        If you believe this suspension was made in error or wish to submit an appeal, please contact the SaveDino moderation team.
-      </p>
-    </div>
+    ${noticeSectionHtml}
 
     <!-- Call to Action Button -->
     <table width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:0 0 28px 0;">
@@ -91,7 +147,7 @@ export function renderAccountBannedEmail({
               style="color:#ffffff !important;text-decoration:none;display:block;width:100%;box-sizing:border-box;text-align:center;background-color:#8b5cf6;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:14px 24px;border:1px solid #7c3aed;border-bottom:3px solid #6d28d9;border-radius:6px;"
               target="_blank"
             >
-              Contact Support / Appeal &rarr;
+              ${ctaButtonText}
             </a>
           </td>
         </tr>
@@ -104,43 +160,79 @@ export function renderAccountBannedEmail({
     </p>
   `;
 
-  const reasonText =
-    "You have received this notification regarding an administrative moderation action on your SaveDino account.";
+  const reasonText = isCountryPolicy
+    ? "You have received this notification regarding regional participation policies for SaveDino campaigns."
+    : "You have received this notification regarding an administrative moderation action on your SaveDino account.";
+
+  const emailSubjectTitle = isCountryPolicy
+    ? "SaveDino - Campaign Regional Policy Notice"
+    : "SaveDino - Notice of Account Suspension";
 
   const html = renderBaseEmailLayout({
-    title: "SaveDino Account Suspension Notice",
-    previewText: `Your SaveDino account has been suspended: ${reason}`,
+    title: emailSubjectTitle,
+    previewText: isCountryPolicy
+      ? `Notice regarding SaveDino campaign eligibility and region policy: ${reason}`
+      : `Your SaveDino account has been suspended: ${reason}`,
     content,
     recipientEmail: email,
     reasonText,
   });
 
-  const text = [
-    "SaveDino - Notice of Account Suspension",
-    "",
-    greeting,
-    "",
-    "Your SaveDino account has been suspended by an administrator.",
-    "",
-    `Reason: ${reason}`,
-    details && details.trim() ? `Moderator Notes:\n${details.trim()}\n` : "",
-    "WARNING - ACCOUNT RESTRICTIONS:",
-    "- You cannot log in or start new sessions.",
-    "- Access to squad workspaces and image analysis tools is disabled.",
-    "- Any active asteroid search submissions have been put on hold.",
-    "",
-    `If you believe this was made in error, please contact support at ${supportEmail}`,
-    "",
-    email
-      ? `This email was sent to ${email}`
-      : "This email was sent to your registered email address",
-    reasonText,
-    "",
-    "SaveDino - NASA & IASC Asteroid Search Collaboration",
-    "SEDS Sri Lanka",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const text = isCountryPolicy
+    ? [
+        "SaveDino - Notice Regarding Campaign Regional Policy",
+        "",
+        greeting,
+        "",
+        "Thank you very much for your interest and enthusiasm for SaveDino.",
+        "We are writing to kindly inform you that this specific campaign is isolated and restricted to participants within designated regional partner institutions and eligible countries in accordance with campaign policy agreements.",
+        "Because of this policy, we are unable to accept accounts from your region for this specific campaign, and your account access has been deactivated.",
+        "",
+        `Reason: ${reason}`,
+        details && details.trim() ? `Moderator Notes:\n${details.trim()}\n` : "",
+        "NOTICE - CAMPAIGN POLICY DETAILS:",
+        "- This specific campaign is isolated to designated regional participants under partnership agreements.",
+        "- Access to this platform's squad workspaces and data sets has been deactivated.",
+        "- We warmly encourage you to explore globally accessible international asteroid search campaigns at iasc.cosmicsearch.org",
+        "",
+        `If you have questions or inquiries, please contact support at ${supportEmail}`,
+        "",
+        email
+          ? `This email was sent to ${email}`
+          : "This email was sent to your registered email address",
+        reasonText,
+        "",
+        "SaveDino - NASA & IASC Asteroid Search Collaboration",
+        "SEDS Sri Lanka",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : [
+        "SaveDino - Notice of Account Suspension",
+        "",
+        greeting,
+        "",
+        "Your SaveDino account has been suspended by an administrator.",
+        "",
+        `Reason: ${reason}`,
+        details && details.trim() ? `Moderator Notes:\n${details.trim()}\n` : "",
+        "WARNING - ACCOUNT RESTRICTIONS:",
+        "- You cannot log in or start new sessions.",
+        "- Access to squad workspaces and image analysis tools is disabled.",
+        "- Any active asteroid search submissions have been put on hold.",
+        "",
+        `If you believe this was made in error, please contact support at ${supportEmail}`,
+        "",
+        email
+          ? `This email was sent to ${email}`
+          : "This email was sent to your registered email address",
+        reasonText,
+        "",
+        "SaveDino - NASA & IASC Asteroid Search Collaboration",
+        "SEDS Sri Lanka",
+      ]
+        .filter(Boolean)
+        .join("\n");
 
   return { html, text };
 }

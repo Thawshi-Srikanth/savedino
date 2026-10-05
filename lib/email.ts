@@ -280,6 +280,13 @@ export async function sendAccountBannedEmail({
   supportEmail,
   from,
 }: SendAccountBannedParams) {
+  const isCountryPolicy =
+    reason.toLowerCase().includes("country") ||
+    reason.toLowerCase().includes("region") ||
+    reason.toLowerCase().includes("geographic") ||
+    reason.toLowerCase().includes("isolation") ||
+    reason.toLowerCase().includes("isolated");
+
   const { html, text } = renderAccountBannedEmail({
     name,
     email,
@@ -287,7 +294,11 @@ export async function sendAccountBannedEmail({
     details,
     supportEmail,
   });
-  const subject = "Important: Notice of Account Suspension - SaveDino";
+
+  const subject = isCountryPolicy
+    ? "Notice Regarding Campaign Regional Policy - SaveDino"
+    : "Important: Notice of Account Suspension - SaveDino";
+
   return sendEmailInternal({
     to: email,
     subject,

@@ -88,6 +88,20 @@ function getTemplateData(type: string, baseUrl: string, recipientEmail?: string)
         }),
       };
 
+    case "countryban":
+      return {
+        name: "Campaign Regional Policy Notice",
+        subject: "Notice Regarding Campaign Regional Policy - SaveDino",
+        ...renderAccountBannedEmail({
+          name: "Alex Morgan",
+          email: targetRecipient,
+          reason: "Ineligible Country / Regional Campaign Policy Restriction",
+          details:
+            "This asteroid search campaign is strictly designated for regional institutional participants in Sri Lanka under collaboration policy.",
+          supportEmail: "info@sedssl.org",
+        }),
+      };
+
     case "namewarning":
       return {
         name: "Invalid Full Name Warning",
@@ -504,6 +518,9 @@ export async function GET(request: NextRequest) {
           </a>
           <a href="?type=squadbanned" class="nav-pill ${type === "squadbanned" ? "active" : ""}">
             <span>8. Squad Notice</span>
+          </a>
+          <a href="?type=countryban" class="nav-pill ${type === "countryban" ? "active" : ""}">
+            <span>9. Country Policy Notice</span>
           </a>
         </nav>
       </div>

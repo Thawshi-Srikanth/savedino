@@ -23,6 +23,7 @@ import { ShieldAlert, UserCheck, AlertTriangle, Mail, UserX, AlertCircle } from 
 import { UserData } from "./types";
 
 export const PREDEFINED_BAN_REASONS = [
+  "Ineligible Country / Regional Campaign Policy Restriction",
   "Violation of Code of Conduct / Platform Terms",
   "Academic Dishonesty / Data Falsification or Plagiarism in Asteroid Submissions",
   "Harassment, Abuse, or Disruptive Behavior towards Squad Members or Organizers",
