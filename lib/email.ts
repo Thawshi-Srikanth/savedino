@@ -10,6 +10,15 @@ import {
   TeamRequestRejectedEmailParams,
   TeamInvitationEmailParams,
 } from "./email-templates/team-request";
+import {
+  renderAccountBannedEmail,
+  AccountBannedEmailParams,
+} from "./email-templates/account-banned";
+import { renderNameWarningEmail, NameWarningEmailParams } from "./email-templates/name-warning";
+import {
+  renderTeamMemberBannedEmail,
+  TeamMemberBannedEmailParams,
+} from "./email-templates/team-member-banned";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const isResendConfigured =
@@ -252,6 +261,97 @@ export async function sendTeamInvitationEmail(
   const subject = `You are invited to join squad ${params.teamName} - SaveDino`;
   return sendEmailInternal({
     to: toEmail,
+    subject,
+    html,
+    text,
+    from: from || EMAIL_SENDERS.squads,
+  });
+}
+
+export interface SendAccountBannedParams extends AccountBannedEmailParams {
+  from?: string;
+}
+
+export async function sendAccountBannedEmail({
+  email,
+  name,
+  reason,
+  details,
+  supportEmail,
+  from,
+}: SendAccountBannedParams) {
+  const { html, text } = renderAccountBannedEmail({
+    name,
+    email,
+    reason,
+    details,
+    supportEmail,
+  });
+  const subject = "Important: Notice of Account Suspension - SaveDino";
+  return sendEmailInternal({
+    to: email,
+    subject,
+    html,
+    text,
+    from: from || EMAIL_SENDERS.auth,
+  });
+}
+
+export interface SendNameWarningParams extends NameWarningEmailParams {
+  from?: string;
+}
+
+export async function sendNameWarningEmail({
+  email,
+  name,
+  currentName,
+  customNote,
+  profileUrl,
+  from,
+}: SendNameWarningParams) {
+  const { html, text } = renderNameWarningEmail({
+    name,
+    email,
+    currentName,
+    customNote,
+    profileUrl,
+  });
+  const subject = "Action Required: Update Your Full Name for Campaign Participation - SaveDino";
+  return sendEmailInternal({
+    to: email,
+    subject,
+    html,
+    text,
+    from: from || EMAIL_SENDERS.auth,
+  });
+}
+
+export interface SendTeamMemberBannedParams extends TeamMemberBannedEmailParams {
+  from?: string;
+}
+
+export async function sendTeamMemberBannedEmail({
+  leaderEmail,
+  leaderName,
+  memberName,
+  memberEmail,
+  teamName,
+  campaignName,
+  workspaceUrl,
+  from,
+}: SendTeamMemberBannedParams) {
+  const { html, text } = renderTeamMemberBannedEmail({
+    leaderName,
+    leaderEmail,
+    memberName,
+    memberEmail,
+    teamName,
+    campaignName,
+    workspaceUrl,
+  });
+  const subject = `Squad Roster Update: Member removed from ${teamName} - SaveDino`;
+  return sendEmailInternal({
+    to: leaderEmail,
     subject,
     html,
     text,

@@ -116,7 +116,9 @@ function LoginForm() {
       });
 
       if (res.error) {
-        toast.error(res.error.message || "Failed to send link. Please check your email and try again.");
+        toast.error(
+          res.error.message || "Failed to send link. Please check your email and try again."
+        );
       } else {
         posthog.capture("magic_link_requested", { auth_method: "magic_link" });
         toast.success("Sign-in link sent! Check your inbox.");
@@ -162,8 +164,6 @@ function LoginForm() {
         <div className="flex flex-col items-center justify-center">
           <Logo href="/" size="lg" />
         </div>
-
-
 
         {/* Auth Card */}
         <div className="w-full bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">

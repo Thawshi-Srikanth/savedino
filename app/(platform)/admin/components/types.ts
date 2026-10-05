@@ -65,6 +65,9 @@ export interface UserData {
   institution?: string | null;
   country?: string | null;
   role: "admin" | "staff" | "leader" | "user" | string;
+  banned?: boolean;
+  banReason?: string | null;
+  bannedAt?: string | null;
   emailVerified?: boolean;
   createdAt: string;
   teamMembers: Array<{

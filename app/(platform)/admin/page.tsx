@@ -23,6 +23,7 @@ import { DeleteCampaignDialog } from "./components/delete-campaign-dialog";
 import { EditTeamModal } from "./components/edit-team-modal";
 import { DeleteTeamDialog } from "./components/delete-team-dialog";
 import { ReportTeamModal } from "./components/report-team-modal";
+import { BanUserModal } from "./components/ban-user-modal";
 
 type AdminTab = "USERS" | "MATCHMAKING" | "TEAMS" | "EVENTS";
 
@@ -125,6 +126,13 @@ export default function AdminDashboardPage() {
   const [deletingUser, setDeletingUser] = useState<UserData | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+  // Ban / Suspend User Modal State
+  const [banningUser, setBanningUser] = useState<UserData | null>(null);
+  const [banningInitialAction, setBanningInitialAction] = useState<"BAN" | "WARN_NAME" | "UNBAN">(
+    "BAN"
+  );
+  const [banLoading, setBanLoading] = useState<boolean>(false);
+
   // Campaign Management State
   const [campaignSearch, setCampaignSearch] = useState<string>("");
   const [campaignStatusFilter, setCampaignStatusFilter] = useState<string>("ALL");
@@ -202,7 +210,12 @@ export default function AdminDashboardPage() {
         (u.institution && u.institution.toLowerCase().includes(userSearch.toLowerCase())) ||
         (u.country && u.country.toLowerCase().includes(userSearch.toLowerCase()));
 
-      const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
+      const matchesRole =
+        roleFilter === "ALL"
+          ? true
+          : roleFilter === "banned"
+            ? Boolean(u.banned)
+            : u.role === roleFilter && !u.banned;
 
       const isUnassigned = u.teamMembers.length === 0;
       const matchesTeam =
@@ -522,6 +535,48 @@ export default function AdminDashboardPage() {
       toast.error(err.message || "Failed to delete account.");
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  // Ban / Reinstate User Handler
+  const handleConfirmBanUser = async (
+    userId: string,
+    action: "BAN" | "UNBAN" | "WARN_NAME",
+    reason: string,
+    customMessage: string,
+    sendEmail: boolean
+  ) => {
+    setBanLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/ban`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, reason, customMessage, sendEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update ban status");
+      }
+
+      if (action === "BAN") {
+        fetchAdminData();
+      } else if (data.user) {
+        setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, ...data.user } : u)));
+      }
+
+      toast.success(
+        data.message ||
+          (action === "BAN"
+            ? "User banned successfully."
+            : action === "WARN_NAME"
+              ? "Name warning sent."
+              : "User reinstated successfully.")
+      );
+      setBanningUser(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process moderation action.");
+    } finally {
+      setBanLoading(false);
     }
   };
 
@@ -925,6 +980,10 @@ export default function AdminDashboardPage() {
               onQuickRoleChange={handleQuickRoleChange}
               onEditUser={handleOpenEditUser}
               onDeleteUser={setDeletingUser}
+              onBanUser={(u, action = "BAN") => {
+                setBanningUser(u);
+                setBanningInitialAction(action);
+              }}
             />
           </TabsContent>
 
@@ -1125,6 +1184,14 @@ export default function AdminDashboardPage() {
           setReportingTeam={setReportingTeam}
           reportLoading={reportTeamLoading}
           onConfirmReport={handleConfirmReportTeam}
+        />
+
+        <BanUserModal
+          user={banningUser}
+          initialAction={banningInitialAction}
+          onClose={() => setBanningUser(null)}
+          loading={banLoading}
+          onConfirmAction={handleConfirmBanUser}
         />
       </div>
     </TooltipProvider>

@@ -6,6 +6,9 @@ import {
   renderTeamRequestRejectedEmail,
   renderTeamInvitationEmail,
 } from "@/lib/email-templates/team-request";
+import { renderAccountBannedEmail } from "@/lib/email-templates/account-banned";
+import { renderNameWarningEmail } from "@/lib/email-templates/name-warning";
+import { renderTeamMemberBannedEmail } from "@/lib/email-templates/team-member-banned";
 import { sendEmailInternal, EMAIL_SENDERS } from "@/lib/email";
 
 function getTemplateData(type: string, baseUrl: string, recipientEmail?: string) {
@@ -68,6 +71,49 @@ function getTemplateData(type: string, baseUrl: string, recipientEmail?: string)
           inviteCode: "APOLLO-9X2",
           joinUrl: `${baseUrl}/join/apollo-9x2`,
           recipientEmail: targetRecipient,
+        }),
+      };
+
+    case "banned":
+      return {
+        name: "Account Suspended",
+        subject: "Important: Notice of Account Suspension - SaveDino",
+        ...renderAccountBannedEmail({
+          name: "Kavindu Perera",
+          email: targetRecipient,
+          reason: "Academic Dishonesty / Data Falsification or Plagiarism in Asteroid Submissions",
+          details:
+            "Multiple duplicate FITS coordinate reports were detected matching existing published astronomical catalogs without authentic analysis.",
+          supportEmail: "info@sedssl.org",
+        }),
+      };
+
+    case "namewarning":
+      return {
+        name: "Invalid Full Name Warning",
+        subject: "Action Required: Update Your Full Name for Campaign Participation - SaveDino",
+        ...renderNameWarningEmail({
+          name: "Kavindu",
+          email: targetRecipient,
+          currentName: "Kavindu P.",
+          customNote:
+            "Please provide your authentic first and last legal name (e.g. Kavindu Perera) so your NASA asteroid detection certificates and IASC catalog records are valid.",
+          profileUrl: `${baseUrl}/profile`,
+        }),
+      };
+
+    case "squadbanned":
+      return {
+        name: "Squad Member Removed Notice",
+        subject: "Squad Roster Update: Member removed from Apollo Asteroid Hunters - SaveDino",
+        ...renderTeamMemberBannedEmail({
+          leaderName: "Nuwan Jayasuriya",
+          leaderEmail: targetRecipient,
+          memberName: "Kavindu Perera",
+          memberEmail: "kavindu.p@university.edu.lk",
+          teamName: "Apollo Asteroid Hunters",
+          campaignName: "All-Sri Lanka Asteroid Search 2026",
+          workspaceUrl: `${baseUrl}/team/team_123`,
         }),
       };
 
@@ -449,6 +495,15 @@ export async function GET(request: NextRequest) {
           </a>
           <a href="?type=invitation" class="nav-pill ${type === "invitation" ? "active" : ""}">
             <span>5. Squad Invite Code</span>
+          </a>
+          <a href="?type=banned" class="nav-pill ${type === "banned" ? "active" : ""}">
+            <span>6. Account Suspended</span>
+          </a>
+          <a href="?type=namewarning" class="nav-pill ${type === "namewarning" ? "active" : ""}">
+            <span>7. Name Warning</span>
+          </a>
+          <a href="?type=squadbanned" class="nav-pill ${type === "squadbanned" ? "active" : ""}">
+            <span>8. Squad Notice</span>
           </a>
         </nav>
       </div>

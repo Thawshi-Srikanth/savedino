@@ -242,10 +242,7 @@ export async function GET(req: Request) {
         where.AND = [
           ...(where.AND || []),
           {
-            OR: [
-              { isRecruiting: true },
-              { members: { some: { userId: session.user.id } } },
-            ],
+            OR: [{ isRecruiting: true }, { members: { some: { userId: session.user.id } } }],
           },
         ];
       } else {

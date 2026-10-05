@@ -47,6 +47,9 @@ import {
   ChevronsRight,
   MoreHorizontal,
   Copy,
+  ShieldAlert,
+  UserCheck,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, getInitials } from "./types";
@@ -76,6 +79,7 @@ interface UsersTabProps {
   onQuickRoleChange: (userId: string, newRole: string) => void;
   onEditUser: (u: UserData) => void;
   onDeleteUser: (u: UserData) => void;
+  onBanUser: (u: UserData, initialAction?: "BAN" | "WARN_NAME" | "UNBAN") => void;
 }
 
 export function UsersTab({
@@ -103,7 +107,9 @@ export function UsersTab({
   onQuickRoleChange,
   onEditUser,
   onDeleteUser,
+  onBanUser,
 }: UsersTabProps) {
+  const bannedCount = users.filter((u) => u.banned).length;
   const renderRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
@@ -205,6 +211,28 @@ export function UsersTab({
               className={`font-mono text-[11px] font-bold ${roleFilter === "user" ? "text-white" : "text-muted-foreground"}`}
             >
               {citizenCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setRoleFilter(roleFilter === "banned" ? "ALL" : "banned")}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+              roleFilter === "banned"
+                ? "bg-destructive text-destructive-foreground font-bold shadow-arcade-destructive active:translate-y-0.5"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <ShieldAlert className="size-3.5 text-destructive" />
+              <span>Suspended</span>
+            </span>
+            <span
+              className={`font-mono text-[11px] font-bold ${
+                roleFilter === "banned" ? "text-white" : "text-destructive font-bold"
+              }`}
+            >
+              {bannedCount}
             </span>
           </button>
         </nav>
@@ -385,8 +413,27 @@ export function UsersTab({
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="font-semibold text-xs text-foreground truncate flex items-center gap-1.5">
-                              <span className="truncate">{u.name}</span>
-                              {u.emailVerified && (
+                              <span
+                                className={`truncate ${u.banned ? "line-through text-muted-foreground" : ""}`}
+                              >
+                                {u.name}
+                              </span>
+                              {u.banned && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex items-center text-[9px] font-bold px-1.5 py-0.5 rounded bg-destructive/15 text-destructive border border-destructive/30 uppercase tracking-wider cursor-help shrink-0">
+                                      Suspended
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="text-xs max-w-xs font-sans">
+                                    <p className="font-bold text-destructive">Account Suspended</p>
+                                    <p className="text-muted-foreground">
+                                      {u.banReason || "No reason specified"}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              {u.emailVerified && !u.banned && (
                                 <span
                                   title="Email Verified"
                                   className="size-1.5 rounded-full bg-[#10b981] shrink-0"
@@ -486,7 +533,7 @@ export function UsersTab({
                               <MoreHorizontal className="size-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44 bg-card border-border">
+                          <DropdownMenuContent align="end" className="w-48 bg-card border-border">
                             <DropdownMenuItem
                               onClick={() => onEditUser(u)}
                               className="gap-2 text-xs cursor-pointer"
@@ -507,6 +554,34 @@ export function UsersTab({
                             </DropdownMenuItem>
 
                             <DropdownMenuSeparator />
+
+                            {u.banned ? (
+                              <DropdownMenuItem
+                                onClick={() => onBanUser(u, "UNBAN")}
+                                className="gap-2 text-xs cursor-pointer text-emerald-500 focus:text-emerald-500 focus:bg-emerald-500/10"
+                              >
+                                <UserCheck className="size-3.5" />
+                                <span>Reinstate Account</span>
+                              </DropdownMenuItem>
+                            ) : (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => onBanUser(u, "WARN_NAME")}
+                                  className="gap-2 text-xs cursor-pointer text-amber-500 focus:text-amber-500 focus:bg-amber-500/10"
+                                >
+                                  <AlertCircle className="size-3.5" />
+                                  <span>Send Name Warning</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                  onClick={() => onBanUser(u, "BAN")}
+                                  className="gap-2 text-xs cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                                >
+                                  <ShieldAlert className="size-3.5" />
+                                  <span>Ban Account</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
 
                             <DropdownMenuItem
                               onClick={() => onDeleteUser(u)}

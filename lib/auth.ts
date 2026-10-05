@@ -25,6 +25,21 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, token, url, metadata }) => {
+        const normalizedEmail = email.trim().toLowerCase();
+        // Check if user account is banned
+        const existingUser = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+          select: { banned: true, banReason: true },
+        });
+
+        if (existingUser?.banned) {
+          throw new Error(
+            `ACCOUNT_BANNED: Your account has been suspended${
+              existingUser.banReason ? `: ${existingUser.banReason}` : ""
+            }. Contact info@sedssl.org for assistance.`
+          );
+        }
+
         // Enforce Early Access pre-registration whitelist
         const access = await checkEarlyAccessPermission(email);
         if (!access.allowed) {
@@ -132,6 +147,14 @@ export const auth = betterAuth({
         required: false,
       },
       whatsapp: {
+        type: "string",
+        required: false,
+      },
+      banned: {
+        type: "boolean",
+        defaultValue: false,
+      },
+      banReason: {
         type: "string",
         required: false,
       },

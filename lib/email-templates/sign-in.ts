@@ -48,9 +48,12 @@ export function renderSignInEmail({ url, email }: SignInEmailParams): {
     </p>
 
     <!-- Security & Expiration Disclaimer -->
-    <div class="email-divider email-text-faint" style="margin:0;padding:20px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:11px;line-height:1.6;color:#64748b;">
-      <p style="margin:0 0 3px 0;">This link will expire in 5 minutes and can only be used once.</p>
-      <p style="margin:0;">If you did not request this email, you can safely ignore it.</p>
+    <div class="email-divider" style="margin:0;padding:20px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
+        Security Notice:
+      </p>
+      <p style="margin:0 0 4px 0;color:#94a3b8;">This link will expire in 5 minutes and can only be used once.</p>
+      <p style="margin:0;color:#64748b;">If you did not request this email, you can safely ignore it.</p>
     </div>
   `;
 

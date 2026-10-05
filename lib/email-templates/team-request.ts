@@ -73,8 +73,12 @@ export function renderTeamJoinRequestEmail({
       </tbody>
     </table>
 
-    <div class="email-divider email-text-faint" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:11px;line-height:1.6;color:#64748b;">
-      <p style="margin:0;">You can accept or decline this request anytime inside your squad workspace.</p>
+    <!-- Uncontainerized Notice (Red Title, Normal Text) -->
+    <div class="email-divider" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
+        Notice:
+      </p>
+      <p style="margin:0;color:#94a3b8;">You can accept or decline this request anytime inside your squad workspace.</p>
     </div>
   `;
 
@@ -175,8 +179,12 @@ export function renderTeamRequestAcceptedEmail({
       </tbody>
     </table>
 
-    <div class="email-divider email-text-faint" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:11px;line-height:1.6;color:#64748b;">
-      <p style="margin:0;">You can now view your squad roster, claim asteroid image sets, and submit candidate observations.</p>
+    <!-- Uncontainerized Notice (Red Title, Normal Text) -->
+    <div class="email-divider" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
+        Next Steps:
+      </p>
+      <p style="margin:0;color:#94a3b8;">You can now view your squad roster, claim asteroid image sets, and submit candidate observations.</p>
     </div>
   `;
 
@@ -263,8 +271,12 @@ export function renderTeamRequestRejectedEmail({
       </tbody>
     </table>
 
-    <div class="email-divider email-text-faint" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:11px;line-height:1.6;color:#64748b;">
-      <p style="margin:0;">Need help finding a team? Use our Solo Researcher Matchmaking in the teams directory.</p>
+    <!-- Uncontainerized Notice (Red Title, Normal Text) -->
+    <div class="email-divider" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
+        Need Help:
+      </p>
+      <p style="margin:0;color:#94a3b8;">Use our Solo Researcher Matchmaking in the teams directory to find open squads.</p>
     </div>
   `;
 
@@ -362,8 +374,12 @@ export function renderTeamInvitationEmail({
       </tbody>
     </table>
 
-    <div class="email-divider email-text-faint" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:11px;line-height:1.6;color:#64748b;">
-      <p style="margin:0;">Click the button above or enter code <strong>${escapeHtml(inviteCode.toUpperCase())}</strong> on the teams directory.</p>
+    <!-- Uncontainerized Notice (Red Title, Normal Text) -->
+    <div class="email-divider" style="margin:0;padding:16px 0 0 0;border-top:1px solid #26282e;font-family:'Inter', sans-serif;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
+        Important:
+      </p>
+      <p style="margin:0;color:#94a3b8;">Click the button above or enter code <strong style="color:#f3f4f6;font-family:'Space Mono', monospace;">${escapeHtml(inviteCode.toUpperCase())}</strong> on the teams directory.</p>
     </div>
   `;
 

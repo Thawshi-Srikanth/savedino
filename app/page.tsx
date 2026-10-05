@@ -20,7 +20,16 @@ import {
 } from "@/components/ui/dialog";
 import { useSession } from "@/lib/auth-client";
 import { getUserProfile } from "@/lib/user-profile";
-import { Check, Mail, Bell, LayoutDashboard, LogIn, Users, Telescope, UserPlus } from "lucide-react";
+import {
+  Check,
+  Mail,
+  Bell,
+  LayoutDashboard,
+  LogIn,
+  Users,
+  Telescope,
+  UserPlus,
+} from "lucide-react";
 import { toast } from "sonner";
 
 // Dynamically import DinoGameCanvas with SSR disabled

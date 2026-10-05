@@ -29,6 +29,9 @@ export async function GET() {
         institution: true,
         country: true,
         role: true,
+        banned: true,
+        banReason: true,
+        bannedAt: true,
         createdAt: true,
         teamMembers: {
           include: {
