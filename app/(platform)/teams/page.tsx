@@ -189,10 +189,18 @@ function TeamsContent() {
     return () => clearTimeout(timer);
   }, [fetchTeams]);
 
-  // STRICT GUARD: Exclude all DISQUALIFIED squads completely from public directory
+  // STRICT GUARD: Exclude all DISQUALIFIED squads and non-recruiting squads (unless user is a member)
   const validTeams = useMemo(() => {
-    return teams.filter((t) => t.status !== "DISQUALIFIED");
-  }, [teams]);
+    return teams.filter((t) => {
+      if (t.status === "DISQUALIFIED") return false;
+      const isUserMember = session?.user?.id
+        ? t.members?.some((m) => m.user?.id === session.user.id)
+        : false;
+      // If recruiting is disabled, hide from directory unless logged-in user is a member
+      if (!t.isRecruiting && !isUserMember) return false;
+      return true;
+    });
+  }, [teams, session]);
 
   // Filtered teams list based on active tab & query
   const filteredTeams = useMemo(() => {

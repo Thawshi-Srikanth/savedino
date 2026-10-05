@@ -218,6 +218,8 @@ export async function GET(req: Request) {
       });
     }
 
+    const isStaffOrAdmin = session?.user?.role === "admin" || session?.user?.role === "staff";
+
     const where: any = {};
 
     if (eventId) {
@@ -234,6 +236,21 @@ export async function GET(req: Request) {
       where.isRecruiting = true;
     } else if (isRecruiting === "false") {
       where.isRecruiting = false;
+    } else if (!isStaffOrAdmin && !includeDisqualified) {
+      // For public directory: only list teams with isRecruiting = true (or squads the user is a member of)
+      if (session?.user?.id) {
+        where.AND = [
+          ...(where.AND || []),
+          {
+            OR: [
+              { isRecruiting: true },
+              { members: { some: { userId: session.user.id } } },
+            ],
+          },
+        ];
+      } else {
+        where.isRecruiting = true;
+      }
     }
 
     if (search.trim()) {
@@ -306,8 +323,6 @@ export async function GET(req: Request) {
         createdAt: "desc",
       },
     });
-
-    const isStaffOrAdmin = session?.user?.role === "admin" || session?.user?.role === "staff";
 
     const formattedTeams = teams.map((team: any) => {
       const isLeader = Boolean(session?.user?.id && team.leaderId === session.user.id);

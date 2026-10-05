@@ -19,20 +19,41 @@ export function calculateTeamStatus(memberCount: number): "FORMING" | "ACTIVE" {
 }
 
 /**
- * Checks if team registration/formation deadline has passed for an event.
+ * Checks if team registration/formation deadline has passed or not started yet for an event.
  */
 export function isRegistrationClosed(
   event: {
+    teamFormationStart?: Date | string | null;
     teamFormationEnd?: Date | string | null;
+    regStart?: Date | string | null;
     regEnd?: Date | string | null;
     startDate?: Date | string | null;
     status?: string;
   },
   now: Date = new Date()
-): { closed: boolean; reason?: string } {
+): { closed: boolean; notStarted?: boolean; reason?: string; formattedStartDate?: string } {
   if (event.status === "COMPLETED") {
     return { closed: true, reason: "This campaign has already concluded." };
   }
+
+  // Check if team formation has not started yet
+  if (event.teamFormationStart) {
+    const start = new Date(event.teamFormationStart);
+    if (!isNaN(start.getTime()) && now.getTime() < start.getTime()) {
+      const formattedStartDate = start.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      return {
+        closed: true,
+        notStarted: true,
+        formattedStartDate,
+        reason: `Team formation has not started yet. Team formation begins on ${formattedStartDate}.`,
+      };
+    }
+  }
+
   const deadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
   if (deadlineStr) {
     const deadline = new Date(deadlineStr);

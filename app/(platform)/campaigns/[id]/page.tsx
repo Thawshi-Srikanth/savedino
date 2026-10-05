@@ -268,6 +268,17 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     }
     if (!event) return;
 
+    // Check team formation start date
+    if (event.teamFormationStart && Date.now() < new Date(event.teamFormationStart).getTime()) {
+      const formatted = new Date(event.teamFormationStart).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      setCreateError(`Team formation has not started yet. Team formation begins on ${formatted}.`);
+      return;
+    }
+
     // Check registration deadline
     const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
     if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
@@ -315,6 +326,17 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       return;
     }
     if (!event) return;
+
+    // Check team formation start date
+    if (event.teamFormationStart && Date.now() < new Date(event.teamFormationStart).getTime()) {
+      const formatted = new Date(event.teamFormationStart).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      setJoinError(`Team formation has not started yet. Team formation begins on ${formatted}.`);
+      return;
+    }
 
     // Check registration deadline
     const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
@@ -723,6 +745,18 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
               ? currentTime > new Date(regDeadlineStr).getTime()
               : false;
 
+            const teamFormationStartMs = event.teamFormationStart
+              ? new Date(event.teamFormationStart).getTime()
+              : NaN;
+            const isTeamFormationStarted =
+              isNaN(teamFormationStartMs) || currentTime >= teamFormationStartMs;
+            const formattedFormationStart = !isNaN(teamFormationStartMs)
+              ? new Date(teamFormationStartMs).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+              : null;
+
             return (
               <>
                 {/* 1. Dynamic Deadline & Countdown */}
@@ -734,7 +768,9 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         ? "Search Window Closes"
                         : activePipelineStage?.name === "Submit Reports"
                           ? "Submission Deadline"
-                          : "Registration Deadline"}
+                          : !isTeamFormationStarted && formattedFormationStart
+                            ? "Team Formation Starts"
+                            : "Registration Deadline"}
                   </div>
 
                   <div
@@ -749,7 +785,9 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         ? formatStageDate(event.endDate)
                         : activePipelineStage?.name === "Submit Reports"
                           ? formatStageDate(event.submissionEnd || event.endDate)
-                          : regInfo.formattedDate}
+                          : !isTeamFormationStarted && formattedFormationStart
+                            ? formatStageDate(event.teamFormationStart)
+                            : regInfo.formattedDate}
                   </div>
 
                   {(() => {
@@ -784,6 +822,22 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         </div>
                       ) : null;
                     }
+                    if (!isTeamFormationStarted && !isNaN(teamFormationStartMs)) {
+                      const formationTimeline = getStageTimelineData(
+                        event.teamFormationStart,
+                        event.teamFormationEnd || event.startDate,
+                        currentTime
+                      );
+                      return formationTimeline.countdownText ? (
+                        <div className="text-xs font-mono font-semibold text-primary">
+                          Opens in {formationTimeline.countdownText} ({formattedFormationStart})
+                        </div>
+                      ) : (
+                        <div className="text-xs font-mono font-semibold text-primary">
+                          Opens on {formattedFormationStart}
+                        </div>
+                      );
+                    }
                     return regInfo.countdownText ? (
                       <div
                         className={`text-xs font-mono font-semibold ${
@@ -809,7 +863,9 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                             ? "Submissions Open"
                             : isRegClosed
                               ? "Registration Closed"
-                              : "Registration Active"}
+                              : !isTeamFormationStarted
+                                ? "Registration Open"
+                                : "Team Formation Open"}
                     </span>
                     <span className="size-2 rounded-full bg-white animate-pulse" />
                   </div>
@@ -833,7 +889,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                           </Button>
                         </Link>
 
-                        {!isRegClosed ? (
+                        {!isRegClosed && isTeamFormationStarted ? (
                           <div className="grid grid-cols-2 gap-2">
                             <Button
                               onClick={() => {
@@ -944,6 +1000,14 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                               <Clock className="size-4" />
                               <span>Registration Closed</span>
                             </Button>
+                          ) : !isTeamFormationStarted ? (
+                            <Button
+                              disabled
+                              className="w-full h-11 text-xs font-sans font-bold gap-2 opacity-90 bg-white/20 text-white border border-white/30 rounded-xl cursor-not-allowed"
+                            >
+                              <Calendar className="size-4" />
+                              <span>Team Formation Starts {formattedFormationStart}</span>
+                            </Button>
                           ) : event.maxTeams &&
                             event.maxTeams > 0 &&
                             squadCount >= event.maxTeams ? (
@@ -1037,6 +1101,25 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         <CheckCircle2 className="size-3.5 text-white shrink-0" />
                         <span>Campaign observations completed and archived</span>
                       </div>
+                    ) : !isTeamFormationStarted ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Team formation opens on {formattedFormationStart}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>
+                            {event.maxTeamSize && event.maxTeamSize > 0
+                              ? `Form squads of 2 to ${event.maxTeamSize} members once open`
+                              : "Form squads with flexible member limits once open"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-3.5 text-white shrink-0" />
+                          <span>Prepare your research squad in advance</span>
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div className="flex items-center gap-2">

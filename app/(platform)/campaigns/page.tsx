@@ -120,6 +120,11 @@ function getEventStages(ev: EventItem, now: number = Date.now()) {
 
 function getStageAction(ev: EventItem, now: number = Date.now()) {
   const stages = getEventStages(ev, now);
+  const s2Start = ev.teamFormationStart
+    ? new Date(ev.teamFormationStart).getTime()
+    : ev.regEnd
+      ? new Date(ev.regEnd).getTime()
+      : NaN;
   const s3Start = ev.startDate ? new Date(ev.startDate).getTime() : NaN;
   const s3End = ev.endDate ? new Date(ev.endDate).getTime() : NaN;
   const s4End = ev.submissionEnd ? new Date(ev.submissionEnd).getTime() : s3End;
@@ -127,6 +132,7 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
   const regDeadline = ev.teamFormationEnd || ev.regEnd || ev.startDate;
   const regDeadlineMs = regDeadline ? new Date(regDeadline).getTime() : NaN;
   const isRegClosed = !isNaN(regDeadlineMs) && now > regDeadlineMs;
+  const isTeamFormationStarted = isNaN(s2Start) || now >= s2Start;
 
   // 1. Completed
   if (ev.status === "COMPLETED" || (!isNaN(s4End) && now >= s4End)) {
@@ -169,8 +175,7 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
     };
   }
 
-  // 4. Registration or Team Setup (Active & Open)
-  const regStage = stages.find((s) => s.name === "Registration");
+  // 4. Team Setup stage (Active & Open)
   const teamStage = stages.find((s) => s.name === "Team Setup");
   const isCapacityFull = Boolean(
     ev.maxTeams && ev.maxTeams > 0 && (ev._count?.teams || 0) >= ev.maxTeams
@@ -188,10 +193,8 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
     };
   }
 
-  if (
-    (regStage?.status === "ACTIVE" || teamStage?.status === "ACTIVE" || ev.status === "ACTIVE") &&
-    !isRegClosed
-  ) {
+  // Only allow "Form a Team" if Team Setup stage is actually ACTIVE and team formation has started
+  if (teamStage?.status === "ACTIVE" && isTeamFormationStarted && !isRegClosed) {
     return {
       isModal: true,
       isClosed: false,
@@ -202,7 +205,23 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
     };
   }
 
-  // 5. If registration is closed before start date
+  // 5. If Team Formation hasn't started yet (e.g. today is 5th, starts on 7th)
+  if (!isTeamFormationStarted && !isNaN(s2Start)) {
+    const formattedDate = new Date(s2Start).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    return {
+      isModal: false,
+      isClosed: false,
+      label: `Forming ${formattedDate}`,
+      href: `/campaigns/${ev.id}`,
+      icon: Calendar,
+      className: "bg-muted hover:bg-muted/80 text-foreground border border-border shadow-arcade-sm",
+    };
+  }
+
+  // 6. If registration is closed before start date
   if (isRegClosed && !isNaN(s3Start) && now < s3Start) {
     return {
       isModal: false,
@@ -215,7 +234,7 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
     };
   }
 
-  // 6. Default / Upcoming
+  // 7. Default / Upcoming
   return {
     isModal: false,
     isClosed: false,
@@ -438,6 +457,15 @@ export default function CampaignsPage() {
       toast.info("Administrators and staff manage campaigns and cannot join participant teams.");
       return;
     }
+    if (event?.teamFormationStart && Date.now() < new Date(event.teamFormationStart).getTime()) {
+      const formatted = new Date(event.teamFormationStart).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      toast.info(`Team formation has not started yet. Team formation begins on ${formatted}.`);
+      return;
+    }
     setSelectedEventForJoin(event || null);
     setJoinCode("");
     setJoinError(null);
@@ -451,6 +479,15 @@ export default function CampaignsPage() {
     }
     if (isOrganizer(session.user)) {
       toast.info("Administrators and staff manage campaigns and cannot form participant teams.");
+      return;
+    }
+    if (event.teamFormationStart && Date.now() < new Date(event.teamFormationStart).getTime()) {
+      const formatted = new Date(event.teamFormationStart).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      toast.info(`Team formation has not started yet. Team formation begins on ${formatted}.`);
       return;
     }
     setSelectedEventForTeam(event);
@@ -467,6 +504,18 @@ export default function CampaignsPage() {
 
     if (!joinCode.trim()) {
       setJoinError("Please enter a valid invite code.");
+      return;
+    }
+
+    if (
+      selectedEventForJoin?.teamFormationStart &&
+      Date.now() < new Date(selectedEventForJoin.teamFormationStart).getTime()
+    ) {
+      const formatted = new Date(selectedEventForJoin.teamFormationStart).toLocaleDateString(
+        "en-US",
+        { month: "short", day: "numeric", year: "numeric" }
+      );
+      setJoinError(`Team formation has not started yet. Team formation begins on ${formatted}.`);
       return;
     }
 
@@ -499,6 +548,18 @@ export default function CampaignsPage() {
     e.preventDefault();
     if (!selectedEventForTeam || !session) {
       router.push("/login");
+      return;
+    }
+
+    if (
+      selectedEventForTeam.teamFormationStart &&
+      Date.now() < new Date(selectedEventForTeam.teamFormationStart).getTime()
+    ) {
+      const formatted = new Date(selectedEventForTeam.teamFormationStart).toLocaleDateString(
+        "en-US",
+        { month: "short", day: "numeric", year: "numeric" }
+      );
+      setCreateError(`Team formation has not started yet. Team formation begins on ${formatted}.`);
       return;
     }
 

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendTeamJoinRequestEmail } from "@/lib/email";
 import { maskEmail } from "@/lib/mask-email";
+import { isRegistrationClosed } from "@/lib/campaign-engine";
 import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
@@ -193,6 +194,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
         },
         { status: 403 }
       );
+    }
+
+    if (team.event) {
+      const regCheck = isRegistrationClosed(team.event);
+      if (regCheck.closed) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: regCheck.reason || "Team registration has closed for this campaign.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     if (!team.isRecruiting) {
