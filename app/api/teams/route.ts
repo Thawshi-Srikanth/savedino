@@ -325,7 +325,10 @@ export async function GET(req: Request) {
     const formattedTeams = teams.map((team: any) => {
       const isLeader = Boolean(session?.user?.id && team.leaderId === session.user.id);
       const isMember = Boolean(
-        session?.user?.id && team.members?.some((m: any) => m.userId === session.user.id || m.user?.id === session.user.id)
+        session?.user?.id &&
+        team.members?.some(
+          (m: any) => m.userId === session.user.id || m.user?.id === session.user.id
+        )
       );
       const canSeeInvite = isLeader || isStaffOrAdmin;
       const canSeeLeaderContact = isLeader || isMember || isStaffOrAdmin;

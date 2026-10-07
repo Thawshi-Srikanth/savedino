@@ -27,6 +27,8 @@ export function renderBaseEmailLayout({
     "You've received this email because you have an account or active research session on SaveDino.";
   const activeReason = reasonText || defaultReason;
 
+  const uniqueId = `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
+
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -88,9 +90,11 @@ export function renderBaseEmailLayout({
 </head>
 <body dir="ltr" lang="en" class="email-canvas" style="background-color:#121315;margin:0;padding:0;color:#f3f4f6;">
   <!-- Hidden preview text for email client inboxes -->
-  <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;" data-skip-in-text="true">
+  <div style="display:none;font-size:1px;color:#121315;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
     ${escapeHtml(preview)}
-    <div>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  </div>
+  <div style="display:none;font-size:1px;color:#121315;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+    &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy; &#847; &zwnj; &nbsp; &#8199; &shy;
   </div>
 
   <!-- Main Canvas Table -->
@@ -158,6 +162,10 @@ export function renderBaseEmailLayout({
       </tr>
     </tbody>
   </table>
+  <!-- Anti-threading / anti-collapse unique fingerprint -->
+  <div style="display:none;font-size:0;line-height:0;max-height:0;mso-hide:all;color:transparent;opacity:0;">
+    [ref:${uniqueId}]
+  </div>
 </body>
 </html>`;
 }

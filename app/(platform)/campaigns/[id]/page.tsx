@@ -1268,7 +1268,25 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 className="h-9 text-xs bg-background font-sans"
               />
               <p className="text-[11px] text-muted-foreground">
-                Visible only to members who join your squad so they can coordinate with you.
+                Any contact information or links provided here will be accessible to all confirmed
+                members who join your squad. Please review our{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="underline text-foreground hover:text-primary"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="underline text-foreground hover:text-primary"
+                >
+                  Terms &amp; Code of Conduct
+                </Link>
+                . Phishing, malicious links, pornographic, or abusive content will result in
+                immediate leader disqualification and member reassignment.
               </p>
             </div>
 

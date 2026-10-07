@@ -166,7 +166,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       return NextResponse.json(
         {
           success: false,
-          error: "Application message is required. Please explain your background or interest in joining this squad.",
+          error:
+            "Application message is required. Please explain your background or interest in joining this squad.",
         },
         { status: 400 }
       );

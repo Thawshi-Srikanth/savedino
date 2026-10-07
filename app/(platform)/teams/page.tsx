@@ -1085,7 +1085,8 @@ function TeamsContent() {
               className="text-xs font-sans bg-background resize-none"
             />
             <p className="text-[11px] text-muted-foreground">
-              Briefly describe your interest so the squad leader can review and accept your application.
+              Briefly describe your interest so the squad leader can review and accept your
+              application.
             </p>
           </div>
 

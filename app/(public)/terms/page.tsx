@@ -138,10 +138,10 @@ export default function TermsPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg sm:text-xl font-bold text-foreground">
-            5. Platform Code of Conduct &amp; Scientific Integrity
+            5. Platform Code of Conduct, Contact Channel Safety &amp; Scientific Integrity
           </h2>
           <p>To maintain fairness, trust, and the scientific credibility of our findings:</p>
-          <ul className="list-disc list-inside space-y-2 pl-2">
+          <ul className="list-disc list-inside space-y-2.5 pl-2">
             <li>
               <strong className="text-foreground">Zero Tolerance for Spoofing:</strong> Submitting
               fabricated measurements, altering FITS headers, or using automated script bots to
@@ -152,6 +152,21 @@ export default function TermsPage() {
               <strong className="text-foreground">Respectful Collaboration:</strong> Harassment,
               abusive language, or disruptive behavior toward squad members, campaign coordinators,
               or staff will result in account termination.
+            </li>
+            <li>
+              <strong className="text-foreground">
+                Squad Contact Information &amp; External Link Rules (Zero Tolerance):
+              </strong>{" "}
+              All contact details, social links, and communication channels provided by squad
+              leaders must be solely dedicated to authentic research collaboration. Any inclusion of
+              phishing links, malicious URLs, pornographic/NSFW material, abusive content, scams, or
+              unauthorized promotions will result in{" "}
+              <strong className="text-destructive">
+                immediate disqualification of the squad leader
+              </strong>{" "}
+              and permanent platform account restriction. In any proven incident report, innocent
+              squad members will be protected and reassigned to other active research squads by
+              campaign administrators.
             </li>
             <li>
               <strong className="text-foreground">System Security:</strong> Users must not attempt

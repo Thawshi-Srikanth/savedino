@@ -23,6 +23,7 @@ import {
   renderTeamFormationEmail,
   TeamFormationEmailParams,
 } from "./email-templates/team-formation";
+import { renderTeamReportEmail, TeamReportEmailParams } from "./email-templates/team-report";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const isResendConfigured =
@@ -55,6 +56,11 @@ export const EMAIL_SENDERS = {
     process.env.EMAIL_FROM ||
     process.env.RESEND_FROM_EMAIL ||
     "SaveDino Campaigns <campaigns@savedino.sedssl.org>",
+  reports:
+    process.env.EMAIL_FROM_REPORTS ||
+    process.env.EMAIL_FROM ||
+    process.env.RESEND_FROM_EMAIL ||
+    "SaveDino Reports <reports@savedino.sedssl.org>",
   default:
     process.env.EMAIL_FROM ||
     process.env.RESEND_FROM_EMAIL ||
@@ -99,6 +105,7 @@ export async function sendEmailInternal({
 }: GenericEmailOptions) {
   const activeFrom = from || EMAIL_SENDERS.default;
   const activeReplyTo = replyTo || defaultReplyToEmail;
+  const dispatchId = `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
 
   // 1. PRIMARY: Resend (if provider is 'auto' or 'resend')
   if ((provider === "auto" || provider === "resend") && resend) {
@@ -110,6 +117,11 @@ export async function sendEmailInternal({
         subject,
         html,
         text,
+        headers: {
+          "X-Entity-Ref-ID": dispatchId,
+          "Auto-Submitted": "auto-generated",
+          "X-Auto-Response-Suppress": "OOF, AutoReply",
+        },
       });
 
       if (!error && data) {
@@ -153,6 +165,11 @@ export async function sendEmailInternal({
           subject,
           htmlContent: html,
           textContent: text,
+          headers: {
+            "X-Entity-Ref-ID": dispatchId,
+            "Auto-Submitted": "auto-generated",
+            "X-Auto-Response-Suppress": "OOF, AutoReply",
+          },
         }),
       });
 
@@ -411,6 +428,23 @@ export async function sendTeamFormationEmail({
     html,
     text,
     from: from || EMAIL_SENDERS.campaigns,
+  });
+}
+
+export async function sendTeamReportEmail(
+  params: TeamReportEmailParams,
+  toEmail: string = "savedino@sedssl.org",
+  from?: string
+) {
+  const { html, text } = renderTeamReportEmail(params);
+  const subject = `[Squad Incident Report] ${params.teamName} - ${params.reason} - SaveDino`;
+  return sendEmailInternal({
+    to: toEmail,
+    subject,
+    html,
+    text,
+    replyTo: `${params.reporterName} <${params.reporterEmail}>`,
+    from: from || EMAIL_SENDERS.reports || EMAIL_SENDERS.default,
   });
 }
 

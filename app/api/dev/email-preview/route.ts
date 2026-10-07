@@ -10,6 +10,7 @@ import { renderAccountBannedEmail } from "@/lib/email-templates/account-banned";
 import { renderNameWarningEmail } from "@/lib/email-templates/name-warning";
 import { renderTeamMemberBannedEmail } from "@/lib/email-templates/team-member-banned";
 import { renderTeamFormationEmail } from "@/lib/email-templates/team-formation";
+import { renderTeamReportEmail } from "@/lib/email-templates/team-report";
 import { sendEmailInternal, EMAIL_SENDERS } from "@/lib/email";
 
 function getTemplateData(type: string, baseUrl: string, recipientEmail?: string) {
@@ -135,8 +136,7 @@ function getTemplateData(type: string, baseUrl: string, recipientEmail?: string)
     case "teamformation":
       return {
         name: "Team Formation Begins",
-        subject:
-          "Team Formation Begins: Form Your Research Squad (SEDS-2026-A) - SaveDino",
+        subject: "Team Formation Begins: Form Your Research Squad (SEDS-2026-A) - SaveDino",
         ...renderTeamFormationEmail({
           userName: "Kavindu Perera",
           campaignTitle: "All-Sri Lanka Asteroid Search Campaign 2026",
@@ -145,6 +145,29 @@ function getTemplateData(type: string, baseUrl: string, recipientEmail?: string)
           teamFormationUrl: `${baseUrl}/teams`,
           maxTeams: 20,
           recipientEmail: targetRecipient,
+        }),
+      };
+
+    case "report":
+    case "teamreport":
+      return {
+        name: "Squad Incident Report",
+        subject:
+          "[Squad Incident Report] Apollo Asteroid Hunters - Inactive / Unresponsive Squad Leader - SaveDino",
+        ...renderTeamReportEmail({
+          reporterName: "Kavindu Perera",
+          reporterEmail: "kavindu.p@university.edu.lk",
+          reporterRole: "Squad Member",
+          reporterUserId: "user_kavindu_123",
+          teamName: "Apollo Asteroid Hunters",
+          teamId: "team_apollo_456",
+          campaignName: "All-Sri Lanka Asteroid Search 2026",
+          leaderName: "Nuwan Jayasuriya",
+          leaderEmail: "nuwan.j@university.edu.lk",
+          reason: "Inactive / Unresponsive Squad Leader",
+          description:
+            "Our squad leader has not been active for the past 5 days and has not reviewed or approved our asteroid candidate observations. We have tried contacting via WhatsApp and email without response.",
+          teamUrl: `${baseUrl}/team/team_apollo_456`,
         }),
       };
 
@@ -188,7 +211,12 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const defaultFrom = type === "signin" ? EMAIL_SENDERS.auth : EMAIL_SENDERS.squads;
+  const defaultFrom =
+    type === "signin"
+      ? EMAIL_SENDERS.auth
+      : type === "report" || type === "teamreport"
+        ? EMAIL_SENDERS.reports || EMAIL_SENDERS.default
+        : EMAIL_SENDERS.squads;
 
   const fullStudioHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -541,6 +569,9 @@ export async function GET(request: NextRequest) {
           </a>
           <a href="?type=teamformation" class="nav-pill ${type === "teamformation" ? "active" : ""}">
             <span>10. Team Formation Begins</span>
+          </a>
+          <a href="?type=report" class="nav-pill ${type === "report" || type === "teamreport" ? "active" : ""}">
+            <span>11. Squad Incident Report</span>
           </a>
         </nav>
       </div>

@@ -304,6 +304,21 @@ export default function PrivacyPolicyPage() {
               participants.
             </li>
             <li>
+              <strong className="text-foreground">
+                Squad Leader Contact Information &amp; Member Visibility:
+              </strong>{" "}
+              Any communication channels, phone numbers, messaging links (e.g. WhatsApp, Discord,
+              Telegram), or coordination notes entered by a Squad Leader in the team formation or
+              squad settings are{" "}
+              <strong>accessible to all confirmed members who join that squad</strong>. Team leaders
+              should keep this in mind before entering personal contact details versus dedicated
+              squad group links. All shared channels must comply with our{" "}
+              <Link href="/terms" className="text-foreground underline underline-offset-4">
+                Terms of Service &amp; Code of Conduct
+              </Link>
+              .
+            </li>
+            <li>
               <strong className="text-foreground">Token Security:</strong> Authentication sessions
               utilize secure, tamper-proof session tokens with automated expiration.
             </li>

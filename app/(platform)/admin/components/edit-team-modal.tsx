@@ -239,7 +239,8 @@ export function EditTeamModal({
                 className="h-9 text-xs bg-background font-sans"
               />
               <span className="text-[11px] text-muted-foreground block">
-                Visible only to members who join this squad.
+                Visible to confirmed members of this squad. Subject to Privacy Policy &amp; Terms of
+                Service rules.
               </span>
             </div>
           </div>

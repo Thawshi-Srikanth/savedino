@@ -213,9 +213,49 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
   const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
   const [removingMember, setRemovingMember] = useState<boolean>(false);
 
+  // Squad Incident / Issue Report State
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportReason, setReportReason] = useState<string>("Inactive / Unresponsive Squad Leader");
+  const [reportDescription, setReportDescription] = useState<string>("");
+  const [submittingSquadReport, setSubmittingSquadReport] = useState<boolean>(false);
+
   // Access Restriction State
   const [accessDeniedError, setAccessDeniedError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const handleSubmitSquadReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportDescription.trim() || reportDescription.trim().length < 10) {
+      toast.error("Please provide a detailed description (at least 10 characters).");
+      return;
+    }
+
+    setSubmittingSquadReport(true);
+    try {
+      const res = await fetch(`/api/teams/${teamId}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reason: reportReason,
+          description: reportDescription,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.error || "Failed to submit report");
+      } else {
+        toast.success(data.message || "Report submitted successfully to savedino@sedssl.org");
+        setShowReportModal(false);
+        setReportDescription("");
+        setReportReason("Inactive / Unresponsive Squad Leader");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred.");
+    } finally {
+      setSubmittingSquadReport(false);
+    }
+  };
 
   const handleCopyContact = (text: string, index?: number) => {
     if (!text) return;
@@ -881,6 +921,21 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                 </Button>
               </div>
             )}
+
+            {/* Report Squad Action Button for Members & Staff */}
+            {(isMember || isStaffOrAdmin) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowReportModal(true)}
+                className="h-9 px-3 text-xs font-bold rounded-xl border-border text-muted-foreground hover:text-[#ef4444] hover:border-[#ef4444]/40 hover:bg-[#ef4444]/10 shadow-arcade active:translate-y-0.5 cursor-pointer gap-1.5"
+                title="Report an incident, inactive leader, or rule violation to administration"
+              >
+                <AlertTriangle className="size-3.5 text-[#ef4444]" />
+                <span>Report Squad</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -1530,7 +1585,9 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                   <MessageSquare className="size-3.5" />
                 </div>
                 <div>
-                  <span className="font-bold text-foreground">Need to coordinate with your Squad Leader?</span>{" "}
+                  <span className="font-bold text-foreground">
+                    Need to coordinate with your Squad Leader?
+                  </span>{" "}
                   <span className="text-muted-foreground">
                     {team?.leaderContact
                       ? "Direct channels and group links are available in the dedicated Leader Contact tab."
@@ -1732,7 +1789,8 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Direct contact and group channels provided by the squad leader for team collaboration.
+                  Direct contact and group channels provided by the squad leader for team
+                  collaboration.
                 </p>
               </div>
 
@@ -1807,33 +1865,18 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                             <span className="truncate max-w-[200px]">{leaderInstitution}</span>
                           </div>
                         )}
-                        {leaderEmail && (
-                          <div className="flex items-center gap-1">
-                            <Mail className="size-3 shrink-0 text-muted-foreground" />
-                            <span className="truncate max-w-[220px]">{leaderEmail}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* External Squad Coordination Links (Discord Thread & Email) */}
+                  {/* External Squad Coordination Link (Discord Thread) */}
                   <div className="flex items-center gap-2 w-full sm:w-auto">
-                    {leaderEmail && (
-                      <a
-                        href={`mailto:${leaderEmail}`}
-                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 rounded-xl border border-border bg-card text-xs font-bold text-foreground hover:bg-muted transition-colors shadow-arcade"
-                      >
-                        <Mail className="size-3.5 text-muted-foreground" />
-                        <span>Email Leader</span>
-                      </a>
-                    )}
                     {team?.discordThreadUrl && (
                       <a
                         href={team.discordThreadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold transition-colors shadow-arcade"
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 h-8 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold transition-colors shadow-arcade"
                       >
                         <MessageSquare className="size-3.5" />
                         <span>Discord Thread</span>
@@ -1934,13 +1977,21 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                                   Phone
                                 </Badge>
                               )}
-                              {!isWhatsApp && !isDiscord && !isTelegram && !isEmail && !isPhone && isLink && (
-                                <Badge className="bg-primary/10 text-primary text-[10px] font-bold border-0 px-2 py-0.5">
-                                  Link
-                                </Badge>
-                              )}
+                              {!isWhatsApp &&
+                                !isDiscord &&
+                                !isTelegram &&
+                                !isEmail &&
+                                !isPhone &&
+                                isLink && (
+                                  <Badge className="bg-primary/10 text-primary text-[10px] font-bold border-0 px-2 py-0.5">
+                                    Link
+                                  </Badge>
+                                )}
                               {!isLink && !isEmail && !isPhone && (
-                                <Badge variant="secondary" className="text-[10px] font-semibold text-muted-foreground px-2 py-0.5">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] font-semibold text-muted-foreground px-2 py-0.5"
+                                >
                                   Instruction
                                 </Badge>
                               )}
@@ -2022,12 +2073,26 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                   })}
                 </div>
 
-                {/* Coordination Notes Footer Alert */}
-                <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex items-start gap-2.5 text-xs text-muted-foreground">
-                  <Info className="size-4 shrink-0 text-primary mt-0.5" />
-                  <span>
-                    <strong>Coordination Tip:</strong> Join your squad&apos;s direct channels above to introduce yourself, discuss telescope image sets, and divide workload with your teammates during active campaigns.
-                  </span>
+                {/* Coordination Notes & Incident Report Alert */}
+                <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2.5">
+                    <Info className="size-4 shrink-0 text-primary mt-0.5" />
+                    <span>
+                      <strong>Coordination Tip:</strong> Join your squad&apos;s direct channels
+                      above to introduce yourself, discuss telescope image sets, and divide workload
+                      with your teammates during active campaigns.
+                    </span>
+                  </div>
+                  {(isMember || isStaffOrAdmin) && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReportModal(true)}
+                      className="text-xs font-bold text-muted-foreground hover:text-[#ef4444] transition-colors flex items-center gap-1 shrink-0 cursor-pointer underline-offset-4 hover:underline"
+                    >
+                      <AlertTriangle className="size-3 text-[#ef4444]" />
+                      <span>Report Squad Concern</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -2042,7 +2107,8 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                   </h3>
                   <p className="text-xs text-muted-foreground">
                     The squad leader hasn&apos;t provided custom chat links or contact details yet.
-                    You can reach them using the leader email button above or through the campaign Discord.
+                    You can coordinate with your teammates through the squad Discord thread or wait
+                    for leader updates.
                   </p>
                 </div>
 
@@ -2391,7 +2457,33 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                     className="text-xs bg-background rounded-xl font-mono"
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    This contact information is private to your squad and is displayed to confirmed members in the Leader Contact tab so they can coordinate with you.
+                    Any contact information or links provided here will be accessible to all
+                    confirmed members who join your squad. Please review our{" "}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      className="text-foreground underline underline-offset-2 hover:text-primary"
+                    >
+                      Privacy Policy
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="text-foreground underline underline-offset-2 hover:text-primary"
+                    >
+                      Terms of Service
+                    </Link>
+                    .
+                  </p>
+                  <p className="text-[11px] text-muted-foreground/90 bg-muted/40 p-2.5 rounded-xl border border-border/70">
+                    <strong className="text-[#ef4444]">
+                      Code of Conduct &amp; Safety Warning:
+                    </strong>{" "}
+                    Phishing links, malicious URLs, pornographic/NSFW material, or abusive text in
+                    contact channels is strictly prohibited. Any confirmed violation results in{" "}
+                    <strong>immediate squad leader disqualification</strong> and innocent squad
+                    members will be reassigned to other squads.
                   </p>
                 </div>
 
@@ -2923,6 +3015,147 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* SQUAD INCIDENT / ISSUE REPORT MODAL */}
+      <Dialog open={showReportModal} onOpenChange={setShowReportModal}>
+        <DialogContent className="bg-card border-border sm:max-w-lg rounded-2xl">
+          <form onSubmit={handleSubmitSquadReport} className="space-y-4">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded-xl bg-[#ef4444]/15 text-[#ef4444] flex items-center justify-center">
+                  <AlertTriangle className="size-4" />
+                </div>
+                <DialogTitle className="text-lg font-bold text-foreground">
+                  Report Squad Incident or Issue
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Submit a confidential report directly to SaveDino administration (
+                <span className="font-mono text-foreground font-semibold">savedino@sedssl.org</span>
+                ). Our team will review the issue and take necessary action.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3.5 pt-1">
+              {/* Squad Summary Pill */}
+              <div className="p-3 rounded-xl border border-border bg-background flex items-center justify-between gap-2 text-xs">
+                <div>
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+                    Target Squad
+                  </span>
+                  <span className="font-bold text-foreground">{team?.name}</span>
+                </div>
+                <Badge className="bg-[#8b5cf6]/10 text-[#8b5cf6] font-mono text-[10px] font-bold border-0">
+                  {team?.event?.code || "Campaign"}
+                </Badge>
+              </div>
+
+              {/* Reason Selector */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-foreground">
+                  Reason for Report <span className="text-[#ef4444]">*</span>
+                </label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full h-9 px-3 rounded-xl border border-border bg-background text-xs text-foreground font-medium focus:outline-hidden focus:ring-2 focus:ring-primary cursor-pointer"
+                  required
+                >
+                  <option value="Inactive / Unresponsive Squad Leader">
+                    Inactive / Unresponsive Squad Leader
+                  </option>
+                  <option value="Harassment or Inappropriate Conduct">
+                    Harassment or Inappropriate Conduct
+                  </option>
+                  <option value="Cheating or Fake Astrometry Observations">
+                    Cheating or Fake Astrometry Observations
+                  </option>
+                  <option value="Communication or Collaboration Problems">
+                    Communication or Collaboration Problems
+                  </option>
+                  <option value="Abusive Language or Toxic Behavior">
+                    Abusive Language or Toxic Behavior
+                  </option>
+                  <option value="Roster / Member Disqualification Request">
+                    Roster / Member Disqualification Request
+                  </option>
+                  <option value="Other Rule Violation / Concern">
+                    Other Rule Violation / Concern
+                  </option>
+                </select>
+              </div>
+
+              {/* Detailed Description */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-foreground">
+                    Detailed Statement &amp; Evidence <span className="text-[#ef4444]">*</span>
+                  </label>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    Min 10 characters
+                  </span>
+                </div>
+                <Textarea
+                  rows={4}
+                  placeholder="Please describe what occurred, including any dates, member names, or relevant context so campaign coordinators can investigate thoroughly..."
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  className="text-xs bg-background rounded-xl font-sans"
+                  required
+                />
+              </div>
+
+              {/* Confidentiality Notice */}
+              <div className="p-3 rounded-xl bg-muted/40 border border-border/80 flex items-start gap-2 text-[11px] text-muted-foreground">
+                <ShieldCheck className="size-4 shrink-0 text-[#10b981] mt-0.5" />
+                <span>
+                  <strong>Confidential Submission:</strong> This report will be transmitted securely
+                  to{" "}
+                  <span className="font-mono text-foreground font-semibold">
+                    savedino@sedssl.org
+                  </span>{" "}
+                  with your member profile and squad metadata.
+                </span>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={submittingSquadReport}
+                onClick={() => setShowReportModal(false)}
+                className="rounded-xl text-xs cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={
+                  submittingSquadReport ||
+                  !reportDescription.trim() ||
+                  reportDescription.trim().length < 10
+                }
+                className="rounded-xl text-xs font-bold gap-1.5 bg-[#ef4444] text-white hover:bg-[#dc2626] border-0 shadow-arcade-destructive active:translate-y-0.5 cursor-pointer disabled:opacity-50"
+              >
+                {submittingSquadReport ? (
+                  <>
+                    <RefreshCw className="size-3.5 animate-spin" />
+                    <span>Sending to savedino@sedssl.org...</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="size-3.5" />
+                    <span>Submit Incident Report</span>
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
