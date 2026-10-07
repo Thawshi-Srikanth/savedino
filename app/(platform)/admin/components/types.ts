@@ -64,6 +64,8 @@ export interface UserData {
   email: string;
   institution?: string | null;
   country?: string | null;
+  whatsapp?: string | null;
+  tourCompleted?: boolean;
   role: "admin" | "staff" | "leader" | "user" | string;
   banned?: boolean;
   banReason?: string | null;

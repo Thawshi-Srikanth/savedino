@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
-import { getUserProfile } from "@/lib/user-profile";
+import { getUserProfile, invalidateUserProfileCache } from "@/lib/user-profile";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, X, HelpCircle, Check } from "lucide-react";
 
@@ -163,7 +163,11 @@ export function PlatformTourGuide({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tourCompleted: true }),
-      }).catch((err) => console.error("Failed to save tour completion to db:", err));
+      })
+        .then(() => {
+          invalidateUserProfileCache();
+        })
+        .catch((err) => console.error("Failed to save tour completion to db:", err));
     }
     setIsOpen(false);
     setCurrentStep(0);

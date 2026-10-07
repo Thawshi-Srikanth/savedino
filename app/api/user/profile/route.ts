@@ -237,13 +237,10 @@ export async function PATCH(req: Request) {
 
     distinctId = session.user.id;
     const body = await req.json();
-    const { name, institution, country, whatsapp, image } = body;
+    const { name, institution, country, whatsapp, image, tourCompleted } = body;
 
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: "Name is required and cannot be empty." },
-        { status: 400 }
-      );
+    if (name !== undefined && (typeof name !== "string" || name.trim().length === 0)) {
+      return NextResponse.json({ success: false, error: "Name cannot be empty." }, { status: 400 });
     }
 
     let formattedWhatsapp: string | null | undefined = undefined;
@@ -265,12 +262,12 @@ export async function PATCH(req: Request) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: name ? name.trim() : undefined,
+        name: name !== undefined ? name.trim() : undefined,
         institution: institution !== undefined ? institution?.trim() || null : undefined,
         country: country !== undefined ? country?.trim() || null : undefined,
         whatsapp: formattedWhatsapp,
         image: image !== undefined ? image?.trim() || null : undefined,
-        tourCompleted: body.tourCompleted !== undefined ? Boolean(body.tourCompleted) : undefined,
+        tourCompleted: tourCompleted !== undefined ? Boolean(tourCompleted) : undefined,
       },
       select: {
         id: true,
@@ -293,7 +290,7 @@ export async function PATCH(req: Request) {
         country !== undefined && "country",
         whatsapp !== undefined && "whatsapp",
         image !== undefined && "image",
-        body.tourCompleted !== undefined && "tour_completed",
+        tourCompleted !== undefined && "tour_completed",
       ].filter(Boolean),
       tour_completed: updatedUser.tourCompleted,
     });

@@ -28,6 +28,8 @@ export async function GET() {
         emailVerified: true,
         institution: true,
         country: true,
+        whatsapp: true,
+        tourCompleted: true,
         role: true,
         banned: true,
         banReason: true,

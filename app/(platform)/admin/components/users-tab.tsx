@@ -50,6 +50,7 @@ import {
   ShieldAlert,
   UserCheck,
   AlertCircle,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, getInitials } from "./types";
@@ -110,6 +111,83 @@ export function UsersTab({
   onBanUser,
 }: UsersTabProps) {
   const bannedCount = users.filter((u) => u.banned).length;
+  const activeRegisteredCount = users.filter((u) => !u.banned).length;
+
+  const handleExportActiveUsers = () => {
+    const activeUsers = users.filter((u) => !u.banned);
+
+    if (activeUsers.length === 0) {
+      toast.info("No active registered users found to export.");
+      return;
+    }
+
+    const headers = [
+      "User ID",
+      "Full Name",
+      "Email Address",
+      "Email Verified",
+      "Role",
+      "Institution / Organization",
+      "Country / Region",
+      "WhatsApp / Contact",
+      "Tour Completed",
+      "Squad Status",
+      "Squad Name",
+      "Squad Role",
+      "Campaign Code",
+      "Campaign Title",
+      "Registered Date",
+    ];
+
+    const escapeCsv = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = activeUsers.map((u) => {
+      const inTeam = u.teamMembers && u.teamMembers.length > 0;
+      const teamMember = inTeam ? u.teamMembers[0] : null;
+      const squadName = teamMember?.team?.name || "Unassigned";
+      const squadRole = teamMember?.role || "";
+      const squadCode = teamMember?.team?.event?.code || "";
+      const squadEventTitle = teamMember?.team?.event?.title || "";
+      const squadStatus = inTeam ? "In Squad" : "Solo (Unassigned)";
+
+      return [
+        escapeCsv(u.id),
+        escapeCsv(u.name),
+        escapeCsv(u.email),
+        escapeCsv(u.emailVerified ? "Yes" : "No"),
+        escapeCsv(u.role),
+        escapeCsv(u.institution || ""),
+        escapeCsv(u.country || ""),
+        escapeCsv(u.whatsapp || ""),
+        escapeCsv(u.tourCompleted ? "Yes" : "No"),
+        escapeCsv(squadStatus),
+        escapeCsv(squadName),
+        escapeCsv(squadRole),
+        escapeCsv(squadCode),
+        escapeCsv(squadEventTitle),
+        escapeCsv(u.createdAt ? new Date(u.createdAt).toISOString() : ""),
+      ].join(",");
+    });
+
+    const csvContent = "\uFEFF" + [headers.map((h) => `"${h}"`).join(","), ...rows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.setAttribute("href", url);
+    link.setAttribute("download", `savedino_active_registered_users_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success(`Exported ${activeUsers.length} active registered users to CSV.`);
+  };
+
   const renderRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
@@ -302,6 +380,29 @@ export function UsersTab({
                 <SelectItem value="UNASSIGNED">Unassigned ({unassignedCount})</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Export Active Users Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportActiveUsers}
+                  className="h-8 text-xs font-semibold gap-1.5 cursor-pointer shadow-arcade active:translate-y-0.5 border-border bg-background hover:bg-muted text-foreground shrink-0"
+                >
+                  <Download className="size-3.5 text-[#10b981]" />
+                  <span className="hidden sm:inline">Export Active Users</span>
+                  <span className="sm:hidden">Export</span>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    ({activeRegisteredCount})
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs font-sans">
+                Export registered users who are not suspended ({activeRegisteredCount}) to CSV
+              </TooltipContent>
+            </Tooltip>
 
             {/* Refresh Icon Button with Tooltip */}
             <Tooltip>
