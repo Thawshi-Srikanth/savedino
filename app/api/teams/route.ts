@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { eventId, name } = body;
+    const { eventId, name, leaderContact } = body;
 
     if (!eventId || !name) {
       return NextResponse.json(
@@ -111,6 +111,7 @@ export async function POST(req: Request) {
         name: name.trim(),
         inviteCode,
         leaderId: session.user.id,
+        leaderContact: typeof leaderContact === "string" ? leaderContact.trim() || null : null,
         status: "FORMING", // Initially 1 member (< 2 is FORMING)
         members: {
           create: {
@@ -323,11 +324,16 @@ export async function GET(req: Request) {
 
     const formattedTeams = teams.map((team: any) => {
       const isLeader = Boolean(session?.user?.id && team.leaderId === session.user.id);
+      const isMember = Boolean(
+        session?.user?.id && team.members?.some((m: any) => m.userId === session.user.id || m.user?.id === session.user.id)
+      );
       const canSeeInvite = isLeader || isStaffOrAdmin;
+      const canSeeLeaderContact = isLeader || isMember || isStaffOrAdmin;
       const myReq = team.joinRequests?.[0];
       return {
         ...team,
         inviteCode: canSeeInvite ? team.inviteCode : null,
+        leaderContact: canSeeLeaderContact ? team.leaderContact : null,
         myRequestStatus: myReq?.status || null,
       };
     });

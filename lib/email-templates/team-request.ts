@@ -125,6 +125,7 @@ export interface TeamRequestAcceptedEmailParams {
   teamName: string;
   campaignName: string;
   leaderName?: string;
+  leaderContact?: string | null;
   workspaceUrl: string;
   recipientEmail?: string;
 }
@@ -134,6 +135,7 @@ export function renderTeamRequestAcceptedEmail({
   teamName,
   campaignName,
   leaderName,
+  leaderContact,
   workspaceUrl,
   recipientEmail,
 }: TeamRequestAcceptedEmailParams): { html: string; text: string } {
@@ -159,6 +161,19 @@ export function renderTeamRequestAcceptedEmail({
       <div class="email-text-muted" style="font-family:'Space Mono', monospace;font-size:12px;color:#94a3b8;">
         ${escapeHtml(campaignName)}
       </div>
+      ${
+        leaderContact
+          ? `
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #26282e;">
+        <div class="email-text-faint" style="font-family:'Space Mono', monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#10b981;margin-bottom:3px;font-weight:700;">
+          Squad Leader Contact &amp; Coordination
+        </div>
+        <div class="email-text-muted" style="font-family:'Inter', sans-serif;font-size:13px;color:#e2e8f0;line-height:1.4;white-space:pre-wrap;">${escapeHtml(
+          leaderContact
+        )}</div>
+      </div>`
+          : ""
+      }
     </div>
 
     <!-- Call to Action Button -->
@@ -204,6 +219,7 @@ export function renderTeamRequestAcceptedEmail({
     "",
     `Hello ${applicantName},`,
     `Your request to join squad "${teamName}" for "${campaignName}" has been approved!`,
+    leaderContact ? `Squad Leader Contact: ${leaderContact}` : null,
     "",
     `Open your squad workspace:`,
     workspaceUrl,

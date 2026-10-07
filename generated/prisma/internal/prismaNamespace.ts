@@ -1307,6 +1307,7 @@ export const TeamScalarFieldEnum = {
   status: 'status',
   isRecruiting: 'isRecruiting',
   recruitmentNotes: 'recruitmentNotes',
+  leaderContact: 'leaderContact',
   disqualificationReason: 'disqualificationReason',
   leaderId: 'leaderId',
   discordThreadId: 'discordThreadId',

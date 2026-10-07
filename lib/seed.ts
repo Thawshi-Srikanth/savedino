@@ -158,6 +158,7 @@ export async function seedDatabase() {
       status: "ACTIVE",
       isRecruiting: true,
       recruitmentNotes: "Active team reviewing Pan-STARRS batches. Open for dedicated observers.",
+      leaderContact: "WhatsApp Group: https://chat.whatsapp.com/sample-nova-orbitals | Discord: @NovaLeader",
     },
   });
 

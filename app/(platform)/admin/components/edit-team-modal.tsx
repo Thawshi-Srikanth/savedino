@@ -36,6 +36,8 @@ interface EditTeamModalProps {
   setEditIsRecruiting: (val: boolean) => void;
   editRecruitmentNotes: string;
   setEditRecruitmentNotes: (notes: string) => void;
+  editLeaderContact: string;
+  setEditLeaderContact: (contact: string) => void;
   editDisqualificationReason: string;
   setEditDisqualificationReason: (reason: string) => void;
   editLeaderId: string;
@@ -57,6 +59,8 @@ export function EditTeamModal({
   setEditIsRecruiting,
   editRecruitmentNotes,
   setEditRecruitmentNotes,
+  editLeaderContact,
+  setEditLeaderContact,
   editDisqualificationReason,
   setEditDisqualificationReason,
   editLeaderId,
@@ -221,6 +225,22 @@ export function EditTeamModal({
                 rows={2}
                 className="text-xs bg-background resize-none font-sans"
               />
+            </div>
+
+            <div className="space-y-1 pt-1">
+              <label className="text-xs font-semibold text-foreground">
+                Leader Contact &amp; Squad Communication Info
+              </label>
+              <Input
+                type="text"
+                placeholder="e.g. WhatsApp group link, Discord tag, or contact instructions"
+                value={editLeaderContact}
+                onChange={(e) => setEditLeaderContact(e.target.value)}
+                className="h-9 text-xs bg-background font-sans"
+              />
+              <span className="text-[11px] text-muted-foreground block">
+                Visible only to members who join this squad.
+              </span>
             </div>
           </div>
 

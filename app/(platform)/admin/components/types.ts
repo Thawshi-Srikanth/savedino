@@ -30,6 +30,7 @@ export interface TeamData {
   status: "FORMING" | "ACTIVE" | "SUBMITTED" | "DISQUALIFIED" | string;
   isRecruiting?: boolean;
   recruitmentNotes?: string | null;
+  leaderContact?: string | null;
   disqualificationReason?: string | null;
   leaderId?: string;
   eventId: string;

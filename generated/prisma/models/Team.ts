@@ -32,6 +32,7 @@ export type TeamMinAggregateOutputType = {
   status: $Enums.TeamStatus | null
   isRecruiting: boolean | null
   recruitmentNotes: string | null
+  leaderContact: string | null
   disqualificationReason: string | null
   leaderId: string | null
   discordThreadId: string | null
@@ -48,6 +49,7 @@ export type TeamMaxAggregateOutputType = {
   status: $Enums.TeamStatus | null
   isRecruiting: boolean | null
   recruitmentNotes: string | null
+  leaderContact: string | null
   disqualificationReason: string | null
   leaderId: string | null
   discordThreadId: string | null
@@ -64,6 +66,7 @@ export type TeamCountAggregateOutputType = {
   status: number
   isRecruiting: number
   recruitmentNotes: number
+  leaderContact: number
   disqualificationReason: number
   leaderId: number
   discordThreadId: number
@@ -82,6 +85,7 @@ export type TeamMinAggregateInputType = {
   status?: true
   isRecruiting?: true
   recruitmentNotes?: true
+  leaderContact?: true
   disqualificationReason?: true
   leaderId?: true
   discordThreadId?: true
@@ -98,6 +102,7 @@ export type TeamMaxAggregateInputType = {
   status?: true
   isRecruiting?: true
   recruitmentNotes?: true
+  leaderContact?: true
   disqualificationReason?: true
   leaderId?: true
   discordThreadId?: true
@@ -114,6 +119,7 @@ export type TeamCountAggregateInputType = {
   status?: true
   isRecruiting?: true
   recruitmentNotes?: true
+  leaderContact?: true
   disqualificationReason?: true
   leaderId?: true
   discordThreadId?: true
@@ -203,6 +209,7 @@ export type TeamGroupByOutputType = {
   status: $Enums.TeamStatus
   isRecruiting: boolean
   recruitmentNotes: string | null
+  leaderContact: string | null
   disqualificationReason: string | null
   leaderId: string
   discordThreadId: string | null
@@ -240,6 +247,7 @@ export type TeamWhereInput = {
   status?: Prisma.EnumTeamStatusFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
+  leaderContact?: Prisma.StringNullableFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
   discordThreadId?: Prisma.StringNullableFilter<"Team"> | string | null
@@ -260,6 +268,7 @@ export type TeamOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  leaderContact?: Prisma.SortOrderInput | Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   discordThreadId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -283,6 +292,7 @@ export type TeamWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumTeamStatusFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
+  leaderContact?: Prisma.StringNullableFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
   discordThreadId?: Prisma.StringNullableFilter<"Team"> | string | null
@@ -303,6 +313,7 @@ export type TeamOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  leaderContact?: Prisma.SortOrderInput | Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   discordThreadId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -325,6 +336,7 @@ export type TeamScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumTeamStatusWithAggregatesFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolWithAggregatesFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
+  leaderContact?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
   leaderId?: Prisma.StringWithAggregatesFilter<"Team"> | string
   discordThreadId?: Prisma.StringNullableWithAggregatesFilter<"Team"> | string | null
@@ -340,6 +352,7 @@ export type TeamCreateInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -360,6 +373,7 @@ export type TeamUncheckedCreateInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -378,6 +392,7 @@ export type TeamUpdateInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -398,6 +413,7 @@ export type TeamUncheckedUpdateInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -417,6 +433,7 @@ export type TeamCreateManyInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -432,6 +449,7 @@ export type TeamUpdateManyMutationInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -448,6 +466,7 @@ export type TeamUncheckedUpdateManyInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -474,6 +493,7 @@ export type TeamCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrder
+  leaderContact?: Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   discordThreadId?: Prisma.SortOrder
@@ -490,6 +510,7 @@ export type TeamMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrder
+  leaderContact?: Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   discordThreadId?: Prisma.SortOrder
@@ -506,6 +527,7 @@ export type TeamMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   isRecruiting?: Prisma.SortOrder
   recruitmentNotes?: Prisma.SortOrder
+  leaderContact?: Prisma.SortOrder
   disqualificationReason?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   discordThreadId?: Prisma.SortOrder
@@ -621,6 +643,7 @@ export type TeamCreateWithoutEventInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -639,6 +662,7 @@ export type TeamUncheckedCreateWithoutEventInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -687,6 +711,7 @@ export type TeamScalarWhereInput = {
   status?: Prisma.EnumTeamStatusFilter<"Team"> | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFilter<"Team"> | boolean
   recruitmentNotes?: Prisma.StringNullableFilter<"Team"> | string | null
+  leaderContact?: Prisma.StringNullableFilter<"Team"> | string | null
   disqualificationReason?: Prisma.StringNullableFilter<"Team"> | string | null
   leaderId?: Prisma.StringFilter<"Team"> | string
   discordThreadId?: Prisma.StringNullableFilter<"Team"> | string | null
@@ -702,6 +727,7 @@ export type TeamCreateWithoutMembersInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -721,6 +747,7 @@ export type TeamUncheckedCreateWithoutMembersInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -754,6 +781,7 @@ export type TeamUpdateWithoutMembersInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -773,6 +801,7 @@ export type TeamUncheckedUpdateWithoutMembersInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -790,6 +819,7 @@ export type TeamCreateWithoutJoinRequestsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -809,6 +839,7 @@ export type TeamUncheckedCreateWithoutJoinRequestsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -842,6 +873,7 @@ export type TeamUpdateWithoutJoinRequestsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -861,6 +893,7 @@ export type TeamUncheckedUpdateWithoutJoinRequestsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -878,6 +911,7 @@ export type TeamCreateWithoutImageSetsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -897,6 +931,7 @@ export type TeamUncheckedCreateWithoutImageSetsInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -930,6 +965,7 @@ export type TeamUpdateWithoutImageSetsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -949,6 +985,7 @@ export type TeamUncheckedUpdateWithoutImageSetsInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -966,6 +1003,7 @@ export type TeamCreateManyEventInput = {
   status?: $Enums.TeamStatus
   isRecruiting?: boolean
   recruitmentNotes?: string | null
+  leaderContact?: string | null
   disqualificationReason?: string | null
   leaderId: string
   discordThreadId?: string | null
@@ -981,6 +1019,7 @@ export type TeamUpdateWithoutEventInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -999,6 +1038,7 @@ export type TeamUncheckedUpdateWithoutEventInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1017,6 +1057,7 @@ export type TeamUncheckedUpdateManyWithoutEventInput = {
   status?: Prisma.EnumTeamStatusFieldUpdateOperationsInput | $Enums.TeamStatus
   isRecruiting?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recruitmentNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disqualificationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   discordThreadId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1082,6 +1123,7 @@ export type TeamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  leaderContact?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
   discordThreadId?: boolean
@@ -1103,6 +1145,7 @@ export type TeamSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  leaderContact?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
   discordThreadId?: boolean
@@ -1120,6 +1163,7 @@ export type TeamSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  leaderContact?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
   discordThreadId?: boolean
@@ -1137,6 +1181,7 @@ export type TeamSelectScalar = {
   status?: boolean
   isRecruiting?: boolean
   recruitmentNotes?: boolean
+  leaderContact?: boolean
   disqualificationReason?: boolean
   leaderId?: boolean
   discordThreadId?: boolean
@@ -1145,7 +1190,7 @@ export type TeamSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TeamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "inviteCode" | "status" | "isRecruiting" | "recruitmentNotes" | "disqualificationReason" | "leaderId" | "discordThreadId" | "discordThreadUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["team"]>
+export type TeamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "inviteCode" | "status" | "isRecruiting" | "recruitmentNotes" | "leaderContact" | "disqualificationReason" | "leaderId" | "discordThreadId" | "discordThreadUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["team"]>
 export type TeamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   members?: boolean | Prisma.Team$membersArgs<ExtArgs>
@@ -1176,6 +1221,7 @@ export type $TeamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     status: $Enums.TeamStatus
     isRecruiting: boolean
     recruitmentNotes: string | null
+    leaderContact: string | null
     disqualificationReason: string | null
     leaderId: string
     discordThreadId: string | null
@@ -1616,6 +1662,7 @@ export interface TeamFieldRefs {
   readonly status: Prisma.FieldRef<"Team", 'TeamStatus'>
   readonly isRecruiting: Prisma.FieldRef<"Team", 'Boolean'>
   readonly recruitmentNotes: Prisma.FieldRef<"Team", 'String'>
+  readonly leaderContact: Prisma.FieldRef<"Team", 'String'>
   readonly disqualificationReason: Prisma.FieldRef<"Team", 'String'>
   readonly leaderId: Prisma.FieldRef<"Team", 'String'>
   readonly discordThreadId: Prisma.FieldRef<"Team", 'String'>

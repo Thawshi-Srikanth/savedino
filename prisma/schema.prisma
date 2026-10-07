@@ -138,6 +138,7 @@ model Team {
   status           TeamStatus   @default(FORMING)
   isRecruiting           Boolean      @default(true) // Open for solo student matching
   recruitmentNotes       String?
+  leaderContact          String?      // Contact info / group link provided by leader for squad members
   disqualificationReason String?      // Admin moderation reason if team is disabled/disqualified
   leaderId               String // User ID of Team Creator / Leader
   discordThreadId        String?      // Private Discord Thread ID for this squad

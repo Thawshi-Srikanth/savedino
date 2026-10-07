@@ -101,6 +101,7 @@ export default function AdminDashboardPage() {
   const [editTeamStatus, setEditTeamStatus] = useState<string>("ACTIVE");
   const [editTeamIsRecruiting, setEditTeamIsRecruiting] = useState<boolean>(true);
   const [editTeamRecruitmentNotes, setEditTeamRecruitmentNotes] = useState<string>("");
+  const [editTeamLeaderContact, setEditTeamLeaderContact] = useState<string>("");
   const [editTeamDisqualificationReason, setEditTeamDisqualificationReason] = useState<string>("");
   const [editTeamLeaderId, setEditTeamLeaderId] = useState<string>("");
   const [editTeamLoading, setEditTeamLoading] = useState<boolean>(false);
@@ -658,6 +659,7 @@ export default function AdminDashboardPage() {
     setEditTeamStatus(team.status || "ACTIVE");
     setEditTeamIsRecruiting(team.isRecruiting ?? true);
     setEditTeamRecruitmentNotes(team.recruitmentNotes || "");
+    setEditTeamLeaderContact(team.leaderContact || "");
     setEditTeamDisqualificationReason(team.disqualificationReason || "");
     const leaderMember = team.members.find((m) => m.role === "LEADER" || m.role === "leader");
     setEditTeamLeaderId(team.leaderId || (leaderMember ? leaderMember.user.id : ""));
@@ -677,6 +679,7 @@ export default function AdminDashboardPage() {
           status: editTeamStatus,
           isRecruiting: editTeamIsRecruiting,
           recruitmentNotes: editTeamRecruitmentNotes,
+          leaderContact: editTeamLeaderContact,
           disqualificationReason:
             editTeamStatus === "DISQUALIFIED" ? editTeamDisqualificationReason : null,
           leaderId: editTeamLeaderId,
@@ -1164,6 +1167,8 @@ export default function AdminDashboardPage() {
           setEditIsRecruiting={setEditTeamIsRecruiting}
           editRecruitmentNotes={editTeamRecruitmentNotes}
           setEditRecruitmentNotes={setEditTeamRecruitmentNotes}
+          editLeaderContact={editTeamLeaderContact}
+          setEditLeaderContact={setEditTeamLeaderContact}
           editDisqualificationReason={editTeamDisqualificationReason}
           setEditDisqualificationReason={setEditTeamDisqualificationReason}
           editLeaderId={editTeamLeaderId}

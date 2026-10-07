@@ -230,6 +230,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   // Modals
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [teamName, setTeamName] = useState<string>("");
+  const [leaderContact, setLeaderContact] = useState<string>("");
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
@@ -301,6 +302,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
         body: JSON.stringify({
           eventId: event.id,
           name: teamName.trim(),
+          leaderContact: leaderContact.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -310,6 +312,8 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       } else {
         toast.success("Team created successfully!");
         setCreateModalOpen(false);
+        setTeamName("");
+        setLeaderContact("");
         router.push(`/team/${data.team.id}`);
       }
     } catch (err: any) {
@@ -1249,6 +1253,23 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 onChange={(e) => setTeamName(e.target.value)}
                 className="h-9 text-xs bg-background font-sans"
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-foreground flex items-center justify-between">
+                <span>Leader Contact / Group Link</span>
+                <span className="text-[10px] text-muted-foreground font-normal">Optional</span>
+              </label>
+              <Input
+                type="text"
+                placeholder="e.g. WhatsApp group link, Discord handle, or contact details"
+                value={leaderContact}
+                onChange={(e) => setLeaderContact(e.target.value)}
+                className="h-9 text-xs bg-background font-sans"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Visible only to members who join your squad so they can coordinate with you.
+              </p>
             </div>
 
             <div className="text-xs text-muted-foreground p-3 rounded-lg border border-border bg-muted/40 space-y-1.5">

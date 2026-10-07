@@ -72,6 +72,7 @@ interface Team {
   status: "FORMING" | "ACTIVE" | "SUBMITTED" | "DISQUALIFIED" | string;
   isRecruiting: boolean;
   recruitmentNotes?: string | null;
+  leaderContact?: string | null;
   disqualificationReason?: string | null;
   createdAt: string;
   myRequestStatus?: string | null;
@@ -271,6 +272,10 @@ function TeamsContent() {
   // Submit Join Request
   const handleSendJoinRequest = async () => {
     if (!requestTeam || !session) return;
+    if (!requestMsg.trim()) {
+      toast.error("Please enter a message or application note to the squad leader.");
+      return;
+    }
     setRequestLoading(true);
 
     try {
@@ -1063,18 +1068,25 @@ function TeamsContent() {
           <div className="space-y-2 py-3">
             <label
               htmlFor="join-request-msg"
-              className="block text-xs font-semibold text-foreground"
+              className="block text-xs font-semibold text-foreground flex items-center justify-between"
             >
-              Message to Squad Leader (Optional)
+              <span>Application Message to Squad Leader</span>
+              <span className="text-[10px] text-destructive font-bold uppercase tracking-wider">
+                * Required
+              </span>
             </label>
             <Textarea
               id="join-request-msg"
-              placeholder="Hi! I am active daily and ready to analyze image sets with your team."
+              required
+              placeholder="Introduce yourself, your timezone/availability, and why you want to join this squad..."
               value={requestMsg}
               onChange={(e) => setRequestMsg(e.target.value)}
               rows={3}
               className="text-xs font-sans bg-background resize-none"
             />
+            <p className="text-[11px] text-muted-foreground">
+              Briefly describe your interest so the squad leader can review and accept your application.
+            </p>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0 pt-2">
@@ -1089,10 +1101,10 @@ function TeamsContent() {
             <Button
               size="sm"
               onClick={handleSendJoinRequest}
-              disabled={requestLoading}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
+              disabled={requestLoading || !requestMsg.trim()}
+              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-arcade-primary active:translate-y-0.5 cursor-pointer disabled:opacity-50"
             >
-              {requestLoading ? "Sending..." : "Submit Request"}
+              {requestLoading ? "Sending..." : "Submit Application"}
             </Button>
           </DialogFooter>
         </DialogContent>

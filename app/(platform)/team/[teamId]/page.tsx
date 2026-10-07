@@ -49,6 +49,9 @@ import {
   ShieldAlert,
   ShieldCheck,
   Info,
+  MessageSquare,
+  ExternalLink,
+  Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -127,6 +130,7 @@ interface TeamData {
   leaderId: string;
   isRecruiting: boolean;
   recruitmentNotes?: string;
+  leaderContact?: string | null;
   disqualificationReason?: string;
   discordThreadUrl?: string | null;
   event: {
@@ -180,9 +184,11 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
   const [requestPage, setRequestPage] = useState<number>(1);
   const REQUESTS_PER_PAGE = 8;
 
-  // Recruitment Settings Form
+  // Recruitment & Leader Contact Settings Form
   const [isRecruiting, setIsRecruiting] = useState<boolean>(true);
   const [recruitmentNotes, setRecruitmentNotes] = useState<string>("");
+  const [leaderContact, setLeaderContact] = useState<string>("");
+  const [copiedContact, setCopiedContact] = useState<boolean>(false);
   const [recruitLoading, setRecruitLoading] = useState<boolean>(false);
   const [rotatingCode, setRotatingCode] = useState<boolean>(false);
 
@@ -209,6 +215,61 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
 
   // Access Restriction State
   const [accessDeniedError, setAccessDeniedError] = useState<string | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const handleCopyContact = (text: string, index?: number) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    if (typeof index === "number") {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } else {
+      setCopiedContact(true);
+      setTimeout(() => setCopiedContact(false), 2000);
+    }
+    toast.success("Contact info copied to clipboard!");
+  };
+
+  const parseContactLines = (text: string) => {
+    if (!text) return [];
+    return text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line, idx) => {
+        const urlRegex =
+          /(https?:\/\/[^\s]+|chat\.whatsapp\.com\/[^\s]+|whatsapp\.com\/channel\/[^\s]+|discord\.gg\/[^\s]+|t\.me\/[^\s]+)/i;
+        const urlMatch = line.match(urlRegex);
+        let extractedUrl: string | null = null;
+        if (urlMatch) {
+          extractedUrl = urlMatch[0].startsWith("http") ? urlMatch[0] : `https://${urlMatch[0]}`;
+        }
+
+        let type: "whatsapp" | "discord" | "telegram" | "email" | "phone" | "link" | "text" =
+          "text";
+        const lower = line.toLowerCase();
+        if (lower.includes("whatsapp") || lower.includes("wa.me")) {
+          type = "whatsapp";
+        } else if (lower.includes("discord")) {
+          type = "discord";
+        } else if (lower.includes("telegram") || lower.includes("t.me")) {
+          type = "telegram";
+        } else if (lower.includes("email") || lower.includes("@") || lower.includes("mailto:")) {
+          type = "email";
+        } else if (lower.startsWith("+") || lower.includes("phone") || lower.includes("tel:")) {
+          type = "phone";
+        } else if (extractedUrl) {
+          type = "link";
+        }
+
+        return {
+          id: idx,
+          raw: line,
+          url: extractedUrl,
+          type,
+        };
+      });
+  };
 
   const fetchTeamData = async () => {
     try {
@@ -231,6 +292,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
       setTeam(teamData.team);
       setIsRecruiting(teamData.team.isRecruiting ?? true);
       setRecruitmentNotes(teamData.team.recruitmentNotes || "");
+      setLeaderContact(teamData.team.leaderContact || "");
 
       const setsData = await setsRes.json();
       if (setsData.success) {
@@ -322,14 +384,15 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
         body: JSON.stringify({
           isRecruiting,
           recruitmentNotes,
+          leaderContact,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("Squad recruitment settings saved!");
+        toast.success("Squad settings saved successfully!");
         fetchTeamData();
       } else {
-        toast.error(data.error || "Failed to update recruitment settings");
+        toast.error(data.error || "Failed to update squad settings");
       }
     } catch (err: any) {
       toast.error(err.message || "An error occurred");
@@ -912,6 +975,19 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                 </Badge>
               </TabsTrigger>
 
+              <TabsTrigger
+                value="contact"
+                className="h-10 px-3 sm:px-4 text-xs font-semibold gap-1.5 sm:gap-2 cursor-pointer rounded-t-xl rounded-b-none border-b-2 border-transparent transition-all data-[state=active]:border-b-[#8b5cf6] data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 shadow-none shrink-0"
+              >
+                <MessageSquare className="size-3.5 shrink-0" />
+                <span>Leader Contact</span>
+                {team?.leaderContact ? (
+                  <Badge className="bg-[#10b981] text-white text-[10px] px-1.5 py-0 font-bold border-0 shadow-arcade-emerald">
+                    Active
+                  </Badge>
+                ) : null}
+              </TabsTrigger>
+
               {/* Join Requests: Leader/Admin Only */}
               {isLeaderOrAdmin && (
                 <TabsTrigger
@@ -1447,6 +1523,32 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
               </div>
             )}
 
+            {/* Quick Leader Contact Shortcut */}
+            <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="size-7 rounded-lg bg-[#8b5cf6]/10 text-[#8b5cf6] flex items-center justify-center shrink-0">
+                  <MessageSquare className="size-3.5" />
+                </div>
+                <div>
+                  <span className="font-bold text-foreground">Need to coordinate with your Squad Leader?</span>{" "}
+                  <span className="text-muted-foreground">
+                    {team?.leaderContact
+                      ? "Direct channels and group links are available in the dedicated Leader Contact tab."
+                      : "View leader profile and coordination options in the Leader Contact tab."}
+                  </span>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveWorkspaceTab("contact")}
+                className="h-7.5 px-3 text-xs font-bold gap-1 rounded-lg shadow-arcade active:translate-y-0.5 shrink-0 cursor-pointer"
+              >
+                <span>View Leader Contact &rarr;</span>
+              </Button>
+            </div>
+
             {/* Members Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {team?.members?.map((m, idx) => {
@@ -1613,8 +1715,354 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
           </Card>
         </TabsContent>
 
+        {/* ============================================================= */}
+        {/* TAB 3: SQUAD LEADER CONTACT & COORDINATION                    */}
+        {/* ============================================================= */}
+        <TabsContent value="contact" className="space-y-5">
+          <Card className="p-5 sm:p-6 bg-card border-border shadow-arcade rounded-2xl space-y-6">
+            {/* Header & Subtitle */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-foreground">
+                    Squad Leader Contact &amp; Coordination
+                  </h2>
+                  <Badge className="bg-[#10b981]/15 text-[#10b981] dark:bg-[#10b981]/20 dark:text-[#34d399] text-[10px] font-bold border-0">
+                    Members Only
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Direct contact and group channels provided by the squad leader for team collaboration.
+                </p>
+              </div>
+
+              {/* Action Buttons: Edit Channels (Leader/Admin) or Copy All */}
+              <div className="flex items-center gap-2 shrink-0">
+                {team?.leaderContact && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCopyContact(team.leaderContact || "")}
+                    className="h-8 px-3 text-xs font-bold gap-1.5 rounded-xl shadow-arcade active:translate-y-0.5 cursor-pointer"
+                  >
+                    {copiedContact ? (
+                      <Check className="size-3.5 text-[#10b981]" />
+                    ) : (
+                      <Copy className="size-3.5" />
+                    )}
+                    <span>{copiedContact ? "Copied" : "Copy All"}</span>
+                  </Button>
+                )}
+                {isLeaderOrAdmin && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveWorkspaceTab("settings")}
+                    className="h-8 px-3 text-xs font-bold gap-1.5 rounded-xl shadow-arcade active:translate-y-0.5 cursor-pointer"
+                  >
+                    <Settings className="size-3.5" />
+                    <span>Edit Channels</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Squad Leader Profile Card */}
+            {(() => {
+              const leaderMember = team?.members?.find(
+                (m) => m.role === "LEADER" || m.user.id === team.leaderId
+              );
+              const leaderName = leaderMember?.user?.name || "Squad Leader";
+              const leaderEmail = leaderMember?.user?.email || "";
+              const leaderCountry = leaderMember?.user?.country;
+              const leaderInstitution = leaderMember?.user?.institution;
+
+              return (
+                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-background flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="size-11 sm:size-12 rounded-2xl bg-[#8b5cf6]/15 text-[#8b5cf6] flex items-center justify-center font-bold text-base uppercase font-mono shadow-xs shrink-0">
+                      {leaderName.substring(0, 2)}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-base text-foreground">{leaderName}</span>
+                        <Badge className="bg-[#8b5cf6] text-white font-bold text-[10px] border-0 py-0.5 px-2 gap-1 shadow-arcade-primary">
+                          <Crown className="size-3 text-amber-300" />
+                          <span>Squad Leader</span>
+                        </Badge>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        {leaderCountry && (
+                          <div className="flex items-center gap-1">
+                            <Globe className="size-3 shrink-0 text-[#8b5cf6]" />
+                            <span>{leaderCountry}</span>
+                          </div>
+                        )}
+                        {leaderInstitution && (
+                          <div className="flex items-center gap-1">
+                            <Building2 className="size-3 shrink-0 text-muted-foreground" />
+                            <span className="truncate max-w-[200px]">{leaderInstitution}</span>
+                          </div>
+                        )}
+                        {leaderEmail && (
+                          <div className="flex items-center gap-1">
+                            <Mail className="size-3 shrink-0 text-muted-foreground" />
+                            <span className="truncate max-w-[220px]">{leaderEmail}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* External Squad Coordination Links (Discord Thread & Email) */}
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {leaderEmail && (
+                      <a
+                        href={`mailto:${leaderEmail}`}
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 rounded-xl border border-border bg-card text-xs font-bold text-foreground hover:bg-muted transition-colors shadow-arcade"
+                      >
+                        <Mail className="size-3.5 text-muted-foreground" />
+                        <span>Email Leader</span>
+                      </a>
+                    )}
+                    {team?.discordThreadUrl && (
+                      <a
+                        href={team.discordThreadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold transition-colors shadow-arcade"
+                      >
+                        <MessageSquare className="size-3.5" />
+                        <span>Discord Thread</span>
+                        <ExternalLink className="size-3 opacity-70" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Contact Channels List */}
+            {team?.leaderContact ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Direct Contact Methods &amp; Group Links
+                  </span>
+                  <span className="text-[11px] text-muted-foreground font-mono">
+                    {parseContactLines(team.leaderContact).length} channel(s) / instruction line(s)
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {parseContactLines(team.leaderContact).map((item) => {
+                    const isCopied = copiedIndex === item.id;
+                    const isWhatsApp = item.type === "whatsapp";
+                    const isDiscord = item.type === "discord";
+                    const isTelegram = item.type === "telegram";
+                    const isEmail = item.type === "email";
+                    const isPhone = item.type === "phone";
+                    const isLink = item.type === "link" || !!item.url;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-3.5 sm:p-4 rounded-2xl border border-border bg-background flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors hover:border-border/80 shadow-xs"
+                      >
+                        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                          {/* Channel Specific Icon */}
+                          <div
+                            className={`size-9 rounded-xl flex items-center justify-center shrink-0 ${
+                              isWhatsApp
+                                ? "bg-[#25D366]/15 text-[#25D366]"
+                                : isDiscord
+                                  ? "bg-[#5865F2]/15 text-[#5865F2]"
+                                  : isTelegram
+                                    ? "bg-[#229ED9]/15 text-[#229ED9]"
+                                    : isEmail
+                                      ? "bg-[#8b5cf6]/15 text-[#8b5cf6]"
+                                      : isPhone
+                                        ? "bg-[#10b981]/15 text-[#10b981]"
+                                        : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {isWhatsApp ? (
+                              <MessageSquare className="size-4" />
+                            ) : isDiscord ? (
+                              <MessageSquare className="size-4" />
+                            ) : isTelegram ? (
+                              <MessageSquare className="size-4" />
+                            ) : isEmail ? (
+                              <Mail className="size-4" />
+                            ) : isPhone ? (
+                              <Phone className="size-4" />
+                            ) : isLink ? (
+                              <Globe className="size-4" />
+                            ) : (
+                              <MessageSquare className="size-4" />
+                            )}
+                          </div>
+
+                          {/* Channel Details */}
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {isWhatsApp && (
+                                <Badge className="bg-[#25D366]/15 text-[#25D366] text-[10px] font-bold border-0 px-2 py-0.5">
+                                  WhatsApp
+                                </Badge>
+                              )}
+                              {isDiscord && (
+                                <Badge className="bg-[#5865F2]/15 text-[#5865F2] text-[10px] font-bold border-0 px-2 py-0.5">
+                                  Discord
+                                </Badge>
+                              )}
+                              {isTelegram && (
+                                <Badge className="bg-[#229ED9]/15 text-[#229ED9] text-[10px] font-bold border-0 px-2 py-0.5">
+                                  Telegram
+                                </Badge>
+                              )}
+                              {isEmail && (
+                                <Badge className="bg-[#8b5cf6]/15 text-[#8b5cf6] text-[10px] font-bold border-0 px-2 py-0.5">
+                                  Email
+                                </Badge>
+                              )}
+                              {isPhone && (
+                                <Badge className="bg-[#10b981]/15 text-[#10b981] text-[10px] font-bold border-0 px-2 py-0.5">
+                                  Phone
+                                </Badge>
+                              )}
+                              {!isWhatsApp && !isDiscord && !isTelegram && !isEmail && !isPhone && isLink && (
+                                <Badge className="bg-primary/10 text-primary text-[10px] font-bold border-0 px-2 py-0.5">
+                                  Link
+                                </Badge>
+                              )}
+                              {!isLink && !isEmail && !isPhone && (
+                                <Badge variant="secondary" className="text-[10px] font-semibold text-muted-foreground px-2 py-0.5">
+                                  Instruction
+                                </Badge>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-foreground font-mono break-all font-medium select-all">
+                              {item.raw}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons for this item */}
+                        <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                          {item.url && (
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`inline-flex items-center gap-1 px-3 py-1.5 h-8 text-xs font-bold rounded-xl transition-colors shadow-arcade active:translate-y-0.5 ${
+                                isWhatsApp
+                                  ? "bg-[#25D366] hover:bg-[#1EBE5D] text-white"
+                                  : isDiscord
+                                    ? "bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                                    : isTelegram
+                                      ? "bg-[#229ED9] hover:bg-[#1B8ABF] text-white"
+                                      : "bg-primary text-primary-foreground hover:bg-primary/90"
+                              }`}
+                            >
+                              <span>
+                                {isWhatsApp
+                                  ? "Open WhatsApp"
+                                  : isDiscord
+                                    ? "Join Discord"
+                                    : isTelegram
+                                      ? "Open Telegram"
+                                      : "Open Link"}
+                              </span>
+                              <ExternalLink className="size-3" />
+                            </a>
+                          )}
+
+                          {isEmail && !item.url && (
+                            <a
+                              href={`mailto:${item.raw.replace(/email:?|mailto:?/i, "").trim()}`}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 h-8 text-xs font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-arcade active:translate-y-0.5"
+                            >
+                              <span>Send Email</span>
+                              <Mail className="size-3" />
+                            </a>
+                          )}
+
+                          {isPhone && !item.url && (
+                            <a
+                              href={`tel:${item.raw.replace(/phone:?|tel:?/i, "").trim()}`}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 h-8 text-xs font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-arcade active:translate-y-0.5"
+                            >
+                              <span>Call</span>
+                              <Phone className="size-3" />
+                            </a>
+                          )}
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCopyContact(item.url || item.raw, item.id)}
+                            className="h-8 px-2.5 text-xs font-bold gap-1 rounded-xl shadow-arcade active:translate-y-0.5 cursor-pointer"
+                          >
+                            {isCopied ? (
+                              <Check className="size-3.5 text-[#10b981]" />
+                            ) : (
+                              <Copy className="size-3.5" />
+                            )}
+                            <span className="hidden xs:inline">{isCopied ? "Copied" : "Copy"}</span>
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Coordination Notes Footer Alert */}
+                <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex items-start gap-2.5 text-xs text-muted-foreground">
+                  <Info className="size-4 shrink-0 text-primary mt-0.5" />
+                  <span>
+                    <strong>Coordination Tip:</strong> Join your squad&apos;s direct channels above to introduce yourself, discuss telescope image sets, and divide workload with your teammates during active campaigns.
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Empty State: No Contact Info Set */
+              <div className="p-8 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-center space-y-3 bg-muted/20">
+                <div className="size-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground">
+                  <MessageSquare className="size-6 opacity-60" />
+                </div>
+                <div className="space-y-1 max-w-md">
+                  <h3 className="font-bold text-sm text-foreground">
+                    No Direct Contact Channels Listed Yet
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    The squad leader hasn&apos;t provided custom chat links or contact details yet.
+                    You can reach them using the leader email button above or through the campaign Discord.
+                  </p>
+                </div>
+
+                {isLeaderOrAdmin && (
+                  <Button
+                    type="button"
+                    onClick={() => setActiveWorkspaceTab("settings")}
+                    className="h-8.5 px-4 text-xs font-bold gap-1.5 rounded-xl shadow-arcade-primary active:translate-y-0.5 cursor-pointer mt-2"
+                  >
+                    <Settings className="size-3.5" />
+                    <span>Set Squad Contact Channels</span>
+                  </Button>
+                )}
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+
         {/* ------------------------------------------------------------- */}
-        {/* TAB 3: JOIN REQUESTS (LEADER / ADMIN ONLY) */}
+        {/* TAB 4: JOIN REQUESTS (LEADER / ADMIN ONLY) */}
         {/* ------------------------------------------------------------- */}
         {isLeaderOrAdmin && (
           <TabsContent value="requests" className="space-y-5">
@@ -1924,6 +2372,29 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
               </div>
 
               <form onSubmit={handleSaveRecruitmentSettings} className="space-y-5">
+                {/* Squad Leader Contact & Coordination Channel */}
+                <div className="space-y-1.5 p-4 rounded-2xl border border-border bg-background">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="block text-xs font-bold text-foreground">
+                      Leader Contact &amp; Squad Communication Channel
+                    </label>
+                    <Badge className="bg-[#8b5cf6]/10 text-[#8b5cf6] text-[10px] font-mono font-bold border-0">
+                      Members Only
+                    </Badge>
+                  </div>
+                  <Textarea
+                    rows={2}
+                    placeholder="e.g. WhatsApp Group Link (https://chat.whatsapp.com/...), Discord tag (@username), Telegram handle, or coordination instructions..."
+                    value={leaderContact}
+                    disabled={team?.status === "DISQUALIFIED"}
+                    onChange={(e) => setLeaderContact(e.target.value)}
+                    className="text-xs bg-background rounded-xl font-mono"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    This contact information is private to your squad and is displayed to confirmed members in the Leader Contact tab so they can coordinate with you.
+                  </p>
+                </div>
+
                 {/* Recruitment Stance Switch */}
                 <div className="p-4 rounded-2xl border border-border bg-background flex items-center justify-between gap-4">
                   <div className="space-y-0.5">
@@ -1971,9 +2442,9 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                   <Button
                     type="submit"
                     disabled={recruitLoading || team?.status === "DISQUALIFIED"}
-                    className="h-9 px-5 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5"
+                    className="h-9 px-5 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl shadow-arcade-primary active:translate-y-0.5 cursor-pointer"
                   >
-                    {recruitLoading ? "Saving..." : "Save Recruitment Settings"}
+                    {recruitLoading ? "Saving..." : "Save Squad Settings"}
                   </Button>
                 </div>
               </form>

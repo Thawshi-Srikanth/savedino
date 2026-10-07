@@ -138,6 +138,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ te
       status,
       isRecruiting,
       recruitmentNotes,
+      leaderContact,
       disqualificationReason,
       leaderId,
       rotateInviteCode,
@@ -203,6 +204,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ te
 
     if (typeof recruitmentNotes === "string") {
       updateData.recruitmentNotes = recruitmentNotes.trim();
+    }
+
+    if (typeof leaderContact === "string") {
+      updateData.leaderContact = leaderContact.trim() || null;
     }
 
     if (typeof disqualificationReason === "string" && isAdmin) {

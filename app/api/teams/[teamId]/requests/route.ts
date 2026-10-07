@@ -160,7 +160,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
 
     const { teamId } = await params;
     const body = await request.json();
-    const message = body.message?.trim() || null;
+    const message = body.message?.trim();
+
+    if (!message) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Application message is required. Please explain your background or interest in joining this squad.",
+        },
+        { status: 400 }
+      );
+    }
 
     // Check if team exists and is recruiting
     const team = await prisma.team.findUnique({

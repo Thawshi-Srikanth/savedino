@@ -204,6 +204,7 @@ export async function PUT(
         teamName: team.name,
         campaignName: team.event?.title || "Asteroid Campaign",
         leaderName: session.user.name || "Squad Leader",
+        leaderContact: team.leaderContact || null,
         workspaceUrl: `${appUrl}/team/${team.id}`,
       }).catch((err) => {
         console.warn("[Send Team Acceptance Email Warning]:", err?.message || err);
