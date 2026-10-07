@@ -9,6 +9,7 @@ import {
 import { renderAccountBannedEmail } from "@/lib/email-templates/account-banned";
 import { renderNameWarningEmail } from "@/lib/email-templates/name-warning";
 import { renderTeamMemberBannedEmail } from "@/lib/email-templates/team-member-banned";
+import { renderTeamFormationEmail } from "@/lib/email-templates/team-formation";
 import { sendEmailInternal, EMAIL_SENDERS } from "@/lib/email";
 
 function getTemplateData(type: string, baseUrl: string, recipientEmail?: string) {
@@ -128,6 +129,22 @@ function getTemplateData(type: string, baseUrl: string, recipientEmail?: string)
           teamName: "Apollo Asteroid Hunters",
           campaignName: "All-Sri Lanka Asteroid Search 2026",
           workspaceUrl: `${baseUrl}/team/team_123`,
+        }),
+      };
+
+    case "teamformation":
+      return {
+        name: "Team Formation Begins",
+        subject:
+          "Team Formation Begins: Form Your Research Squad (SEDS-2026-A) - SaveDino",
+        ...renderTeamFormationEmail({
+          userName: "Kavindu Perera",
+          campaignTitle: "All-Sri Lanka Asteroid Search Campaign 2026",
+          campaignCode: "SEDS-2026-A",
+          discordInviteUrl: "https://discord.gg/Yp4Ctt6Ece",
+          teamFormationUrl: `${baseUrl}/teams`,
+          maxTeams: 20,
+          recipientEmail: targetRecipient,
         }),
       };
 
@@ -521,6 +538,9 @@ export async function GET(request: NextRequest) {
           </a>
           <a href="?type=countryban" class="nav-pill ${type === "countryban" ? "active" : ""}">
             <span>9. Country Policy Notice</span>
+          </a>
+          <a href="?type=teamformation" class="nav-pill ${type === "teamformation" ? "active" : ""}">
+            <span>10. Team Formation Begins</span>
           </a>
         </nav>
       </div>

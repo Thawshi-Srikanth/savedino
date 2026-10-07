@@ -19,6 +19,10 @@ import {
   renderTeamMemberBannedEmail,
   TeamMemberBannedEmailParams,
 } from "./email-templates/team-member-banned";
+import {
+  renderTeamFormationEmail,
+  TeamFormationEmailParams,
+} from "./email-templates/team-formation";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const isResendConfigured =
@@ -367,6 +371,46 @@ export async function sendTeamMemberBannedEmail({
     html,
     text,
     from: from || EMAIL_SENDERS.squads,
+  });
+}
+
+export interface SendTeamFormationParams extends TeamFormationEmailParams {
+  to: string;
+  from?: string;
+  subject?: string;
+}
+
+export async function sendTeamFormationEmail({
+  to,
+  userName,
+  campaignTitle,
+  campaignCode,
+  discordInviteUrl,
+  teamFormationUrl,
+  maxTeams,
+  from,
+  subject,
+}: SendTeamFormationParams) {
+  const { html, text } = renderTeamFormationEmail({
+    userName,
+    campaignTitle,
+    campaignCode,
+    discordInviteUrl,
+    teamFormationUrl,
+    maxTeams,
+    recipientEmail: to,
+  });
+
+  const emailSubject =
+    subject ||
+    `Team Formation Begins: Form Your Research Squad (${campaignCode || "SEDS-2026-A"}) - SaveDino`;
+
+  return sendEmailInternal({
+    to,
+    subject: emailSubject,
+    html,
+    text,
+    from: from || EMAIL_SENDERS.campaigns,
   });
 }
 
