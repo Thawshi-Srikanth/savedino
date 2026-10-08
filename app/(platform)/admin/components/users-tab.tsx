@@ -51,6 +51,7 @@ import {
   UserCheck,
   AlertCircle,
   Download,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, getInitials } from "./types";
@@ -81,6 +82,7 @@ interface UsersTabProps {
   onEditUser: (u: UserData) => void;
   onDeleteUser: (u: UserData) => void;
   onBanUser: (u: UserData, initialAction?: "BAN" | "WARN_NAME" | "UNBAN") => void;
+  onSendEmail?: (u: UserData) => void;
 }
 
 export function UsersTab({
@@ -109,6 +111,7 @@ export function UsersTab({
   onEditUser,
   onDeleteUser,
   onBanUser,
+  onSendEmail,
 }: UsersTabProps) {
   const bannedCount = users.filter((u) => u.banned).length;
   const activeRegisteredCount = users.filter((u) => !u.banned).length;
@@ -642,6 +645,16 @@ export function UsersTab({
                               <Edit2 className="size-3.5 text-primary" />
                               <span>Edit User Profile</span>
                             </DropdownMenuItem>
+
+                            {onSendEmail && (
+                              <DropdownMenuItem
+                                onClick={() => onSendEmail(u)}
+                                className="gap-2 text-xs cursor-pointer text-violet-400 focus:text-violet-400 focus:bg-violet-500/10"
+                              >
+                                <Mail className="size-3.5" />
+                                <span>Send Custom Email</span>
+                              </DropdownMenuItem>
+                            )}
 
                             <DropdownMenuItem
                               onClick={() => {

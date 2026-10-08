@@ -24,6 +24,7 @@ import { EditTeamModal } from "./components/edit-team-modal";
 import { DeleteTeamDialog } from "./components/delete-team-dialog";
 import { ReportTeamModal } from "./components/report-team-modal";
 import { BanUserModal } from "./components/ban-user-modal";
+import { SendEmailModal } from "./components/send-email-modal";
 
 type AdminTab = "USERS" | "MATCHMAKING" | "TEAMS" | "EVENTS";
 
@@ -133,6 +134,9 @@ export default function AdminDashboardPage() {
     "BAN"
   );
   const [banLoading, setBanLoading] = useState<boolean>(false);
+
+  // Send Custom Email Modal State
+  const [emailingUser, setEmailingUser] = useState<UserData | null>(null);
 
   // Campaign Management State
   const [campaignSearch, setCampaignSearch] = useState<string>("");
@@ -987,6 +991,7 @@ export default function AdminDashboardPage() {
                 setBanningUser(u);
                 setBanningInitialAction(action);
               }}
+              onSendEmail={setEmailingUser}
             />
           </TabsContent>
 
@@ -1197,6 +1202,11 @@ export default function AdminDashboardPage() {
           onClose={() => setBanningUser(null)}
           loading={banLoading}
           onConfirmAction={handleConfirmBanUser}
+        />
+
+        <SendEmailModal
+          user={emailingUser}
+          onClose={() => setEmailingUser(null)}
         />
       </div>
     </TooltipProvider>

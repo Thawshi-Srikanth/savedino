@@ -24,6 +24,10 @@ import {
   TeamFormationEmailParams,
 } from "./email-templates/team-formation";
 import { renderTeamReportEmail, TeamReportEmailParams } from "./email-templates/team-report";
+import {
+  renderCustomAdminEmail,
+  CustomAdminEmailParams,
+} from "./email-templates/custom-admin-email";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const isResendConfigured =
@@ -445,6 +449,23 @@ export async function sendTeamReportEmail(
     text,
     replyTo: `${params.reporterName} <${params.reporterEmail}>`,
     from: from || EMAIL_SENDERS.reports || EMAIL_SENDERS.default,
+  });
+}
+
+export interface SendCustomUserEmailParams extends CustomAdminEmailParams {
+  from?: string;
+  replyTo?: string;
+}
+
+export async function sendCustomUserEmail(params: SendCustomUserEmailParams) {
+  const { html, text } = renderCustomAdminEmail(params);
+  return sendEmailInternal({
+    to: params.email,
+    subject: params.subject,
+    html,
+    text,
+    replyTo: params.replyTo || defaultReplyToEmail,
+    from: params.from || EMAIL_SENDERS.default,
   });
 }
 
