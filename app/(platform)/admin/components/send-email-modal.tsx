@@ -246,7 +246,9 @@ export function SendEmailModal({ user, onClose, onSuccess }: SendEmailModalProps
                   <DialogDescription className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
                     <span>Recipient:</span>
                     <strong className="text-foreground font-semibold">{user.name}</strong>
-                    <span className="font-mono text-[11px] text-muted-foreground">({user.email})</span>
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      ({user.email})
+                    </span>
                   </DialogDescription>
                 </div>
               </div>
@@ -365,7 +367,9 @@ export function SendEmailModal({ user, onClose, onSuccess }: SendEmailModalProps
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Badge Accent Color</label>
+                  <label className="text-xs font-semibold text-foreground">
+                    Badge Accent Color
+                  </label>
                   <Select
                     value={badgeColor}
                     onValueChange={(v) =>

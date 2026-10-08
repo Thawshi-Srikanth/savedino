@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
@@ -41,6 +41,7 @@ import {
   ChevronLeft,
   ChevronRight,
   HelpCircle,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -91,6 +92,21 @@ interface CampaignEvent {
   status: string;
 }
 
+function pseudoRandomShuffle<T extends { id: string }>(items: T[], seed: number): T[] {
+  const array = [...items];
+  let state = seed || 1;
+  const nextRandom = () => {
+    state = (state * 9301 + 49297) % 233280;
+    return state / 233280;
+  };
+
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(nextRandom() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 function TeamsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -104,6 +120,9 @@ function TeamsContent() {
   const [events, setEvents] = useState<CampaignEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const isDisplayLoading = useMinimumLoading(loading, 1000);
+
+  // Automatic Random Shuffle Seed for Equal Opportunity Discovery
+  const [shuffleSeed] = useState<number>(() => Math.floor(Math.random() * 100000) + 1);
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -227,27 +246,69 @@ function TeamsContent() {
     });
   }, [validTeams, activeTabFilter, session]);
 
+  // Automatically Fair-Shuffled Squads List (gives every squad equal discovery opportunity)
+  const shuffledTeams = useMemo(() => {
+    return pseudoRandomShuffle(filteredTeams, shuffleSeed);
+  }, [filteredTeams, shuffleSeed]);
+
   // Total Pages Calculation
-  const totalPages = Math.max(1, Math.ceil(filteredTeams.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(shuffledTeams.length / pageSize));
 
   // Paginated/Sliced Teams for Load More vs Paginated Mode
   const displayedTeams = useMemo(() => {
     if (paginationMode === "LOAD_MORE") {
-      return filteredTeams.slice(0, visibleCount);
+      return shuffledTeams.slice(0, visibleCount);
     }
     const startIdx = (currentPage - 1) * pageSize;
-    return filteredTeams.slice(startIdx, startIdx + pageSize);
-  }, [filteredTeams, paginationMode, visibleCount, currentPage, pageSize]);
+    return shuffledTeams.slice(startIdx, startIdx + pageSize);
+  }, [shuffledTeams, paginationMode, visibleCount, currentPage, pageSize]);
 
-  const hasMore = visibleCount < filteredTeams.length;
-  const remainingCount = Math.max(0, filteredTeams.length - visibleCount);
+  const hasMore = visibleCount < shuffledTeams.length;
+  const remainingCount = Math.max(0, shuffledTeams.length - visibleCount);
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+  const [isAutoLoading, setIsAutoLoading] = useState<boolean>(false);
+
+  // Automatic Infinite Scroll: Auto-load next batch when user scrolls near the bottom
+  useEffect(() => {
+    if (paginationMode !== "LOAD_MORE" || !hasMore || loading) {
+      return;
+    }
+
+    const sentinel = loadMoreSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          setIsAutoLoading(true);
+          setVisibleCount((prev) => Math.min(shuffledTeams.length, prev + pageSize));
+          const timer = setTimeout(() => {
+            setIsAutoLoading(false);
+          }, 300);
+          return () => clearTimeout(timer);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "350px", // Trigger smoothly ahead of reaching the very bottom
+        threshold: 0.05,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [paginationMode, hasMore, loading, shuffledTeams.length, pageSize]);
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(filteredTeams.length, prev + pageSize));
+    setVisibleCount((prev) => Math.min(shuffledTeams.length, prev + pageSize));
   };
 
   const handleShowAll = () => {
-    setVisibleCount(filteredTeams.length);
+    setVisibleCount(shuffledTeams.length);
   };
 
   // Derived Counts
@@ -652,14 +713,14 @@ function TeamsContent() {
                 {paginationMode === "LOAD_MORE" ? (
                   <>
                     Showing <strong className="text-foreground">{displayedTeams.length}</strong> of{" "}
-                    <strong className="text-foreground">{filteredTeams.length}</strong>{" "}
-                    {filteredTeams.length === 1 ? "team" : "teams"}
+                    <strong className="text-foreground">{shuffledTeams.length}</strong>{" "}
+                    {shuffledTeams.length === 1 ? "team" : "teams"}
                   </>
                 ) : (
                   <>
                     Page <strong className="text-foreground">{currentPage}</strong> of{" "}
                     <strong className="text-foreground">{totalPages}</strong> (
-                    {filteredTeams.length} total {filteredTeams.length === 1 ? "team" : "teams"})
+                    {shuffledTeams.length} total {shuffledTeams.length === 1 ? "team" : "teams"})
                   </>
                 )}
               </span>
@@ -693,7 +754,7 @@ function TeamsContent() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Load More
+                  Auto Scroll
                 </button>
                 <button
                   type="button"
@@ -936,43 +997,63 @@ function TeamsContent() {
               </div>
 
               {/* PAGINATION / LOAD MORE FOOTER */}
-              {filteredTeams.length > 0 && (
+              {shuffledTeams.length > 0 && (
                 <div className="pt-3 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/60">
                   {paginationMode === "LOAD_MORE" ? (
                     <>
                       <div className="text-xs text-muted-foreground font-mono">
                         Showing <strong className="text-foreground">{displayedTeams.length}</strong>{" "}
-                        of <strong className="text-foreground">{filteredTeams.length}</strong>{" "}
+                        of <strong className="text-foreground">{shuffledTeams.length}</strong>{" "}
                         squads
                       </div>
 
                       {hasMore ? (
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <Button
-                            onClick={handleLoadMore}
-                            variant="outline"
-                            className="h-8 px-3.5 text-xs font-bold gap-1.5 cursor-pointer bg-background hover:bg-accent text-foreground shadow-arcade active:translate-y-0.5 flex-1 sm:flex-initial"
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                          {/* Automatic Scroll Sentinel with visual feedback */}
+                          <div
+                            ref={loadMoreSentinelRef}
+                            className="flex items-center gap-2 py-1 text-xs text-muted-foreground font-sans"
                           >
-                            <span>Load More Squads (+{Math.min(pageSize, remainingCount)})</span>
-                          </Button>
+                            <Loader2 className="size-3.5 animate-spin text-primary" />
+                            <span>
+                              {isAutoLoading
+                                ? "Loading next squads..."
+                                : "Scroll to load more squads"}
+                            </span>
+                          </div>
 
-                          <Button
-                            onClick={handleShowAll}
-                            variant="ghost"
-                            className="h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
-                          >
-                            <span>Show All</span>
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              onClick={handleLoadMore}
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-3 text-xs font-semibold gap-1.5 cursor-pointer bg-background hover:bg-accent text-foreground shadow-arcade active:translate-y-0.5"
+                            >
+                              <span>Load Now (+{Math.min(pageSize, remainingCount)})</span>
+                            </Button>
+
+                            <Button
+                              onClick={handleShowAll}
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                            >
+                              <span>Show All ({shuffledTeams.length})</span>
+                            </Button>
+                          </div>
                         </div>
-                      ) : filteredTeams.length > pageSize ? (
+                      ) : shuffledTeams.length > pageSize ? (
                         <div className="text-xs text-muted-foreground font-sans flex items-center gap-2">
-                          <span>All matching squads loaded</span>
+                          <span>All {shuffledTeams.length} matching squads loaded</span>
                           <Button
-                            onClick={() => setVisibleCount(pageSize)}
+                            onClick={() => {
+                              setVisibleCount(pageSize);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
                             variant="ghost"
                             className="h-7 px-2 text-xs text-primary hover:underline font-semibold cursor-pointer"
                           >
-                            Collapse to {pageSize}
+                            Collapse & Scroll to Top
                           </Button>
                         </div>
                       ) : null}
@@ -982,7 +1063,7 @@ function TeamsContent() {
                       <div className="text-xs text-muted-foreground font-mono">
                         Page <strong className="text-foreground">{currentPage}</strong> of{" "}
                         <strong className="text-foreground">{totalPages}</strong> (
-                        {filteredTeams.length} squads)
+                        {shuffledTeams.length} squads)
                       </div>
 
                       <div className="flex items-center gap-1.5">

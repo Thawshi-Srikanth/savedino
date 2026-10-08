@@ -1204,10 +1204,7 @@ export default function AdminDashboardPage() {
           onConfirmAction={handleConfirmBanUser}
         />
 
-        <SendEmailModal
-          user={emailingUser}
-          onClose={() => setEmailingUser(null)}
-        />
+        <SendEmailModal user={emailingUser} onClose={() => setEmailingUser(null)} />
       </div>
     </TooltipProvider>
   );
