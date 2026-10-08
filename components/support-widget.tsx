@@ -65,6 +65,7 @@ export function SupportWidget() {
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [currentTicketId, setCurrentTicketId] = useState<string | null>(null);
+  const [currentTicketStatus, setCurrentTicketStatus] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Tickets List State
@@ -208,6 +209,10 @@ export function SupportWidget() {
         if (response.ticket_id) {
           setCurrentTicketId(response.ticket_id);
         }
+        const status = response.status || response.ticket_status || response.ticket?.status || null;
+        if (status) {
+          setCurrentTicketStatus(status);
+        }
         if (typeof response.unread_count === "number") {
           setUnreadCount(response.unread_count);
         }
@@ -306,8 +311,17 @@ export function SupportWidget() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
+  const isResolved =
+    currentTicketStatus?.toLowerCase() === "resolved" ||
+    currentTicketStatus?.toLowerCase() === "closed" ||
+    currentTicketStatus?.toLowerCase() === "archived";
+
   // Send message
   const handleSendMessage = async (textToSend?: string) => {
+    if (isResolved) {
+      toast.error("This conversation is resolved. Please start a new conversation.");
+      return;
+    }
     const messageContent = (textToSend || inputText).trim();
     if (!messageContent || sending) return;
 
@@ -395,6 +409,7 @@ export function SupportWidget() {
   // Start new conversation
   const handleStartNewTicket = async () => {
     setCurrentTicketId(null);
+    setCurrentTicketStatus(null);
     setMessages([]);
     setActiveTab("chat");
     setTimeout(() => {
@@ -405,6 +420,10 @@ export function SupportWidget() {
   // Select existing ticket
   const handleSelectTicket = async (ticketId: string) => {
     setCurrentTicketId(ticketId);
+    const existingTicket = tickets.find((t) => t.id === ticketId);
+    if (existingTicket?.status) {
+      setCurrentTicketStatus(existingTicket.status);
+    }
     setActiveTab("chat");
     setLoadingMessages(true);
     await fetchMessages(ticketId);
@@ -526,8 +545,8 @@ export function SupportWidget() {
               </div>
             </div>
 
-            {/* Sub-bar for Tab Switching */}
-            {activeTab !== "chat" && (
+            {/* Sub-bar for Tab Switching / Active Ticket Status */}
+            {activeTab !== "chat" ? (
               <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border text-xs shrink-0 select-none">
                 <button
                   onClick={() => setActiveTab("chat")}
@@ -542,7 +561,27 @@ export function SupportWidget() {
                   {activeTab === "tickets" ? "Restore by Email" : "All Tickets"}
                 </button>
               </div>
-            )}
+            ) : currentTicketId ? (
+              <div className="flex items-center justify-between px-4 py-1.5 bg-muted/40 border-b border-border text-xs shrink-0 select-none">
+                <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+                  <span>Ticket</span>
+                  <span className="font-semibold text-foreground">
+                    #{currentTicketId.slice(0, 8)}
+                  </span>
+                </div>
+                {currentTicketStatus && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-sans font-medium uppercase tracking-wider ${
+                      isResolved
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                        : "bg-primary/10 text-primary border border-primary/20"
+                    }`}
+                  >
+                    {currentTicketStatus}
+                  </span>
+                )}
+              </div>
+            ) : null}
 
             {/* TAB: TICKETS LIST */}
             {activeTab === "tickets" && (
@@ -788,11 +827,25 @@ export function SupportWidget() {
                     </div>
                   )}
 
+                  {/* Resolved Ticket Banner in Feed */}
+                  {isResolved && messages.length > 0 && (
+                    <div className="p-3.5 rounded-xl bg-card border border-border text-center space-y-1.5 my-2 shadow-xs select-none">
+                      <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle2 className="size-4" />
+                        <span>Ticket Resolved</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        This support ticket has been marked as resolved. You can review the messages
+                        above or start a new conversation.
+                      </p>
+                    </div>
+                  )}
+
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Guest Email Field */}
-                {!session?.user && messages.length === 0 && (
+                {!session?.user && messages.length === 0 && !isResolved && (
                   <div className="px-3 py-2 bg-card border-t border-border grid grid-cols-2 gap-2">
                     <Input
                       placeholder="Name (Optional)"
@@ -810,49 +863,67 @@ export function SupportWidget() {
                   </div>
                 )}
 
-                {/* Input Area */}
-                <div className="p-3 bg-card border-t border-border shrink-0">
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }}
-                    className="relative flex items-center gap-2"
-                  >
-                    <Textarea
-                      ref={textareaRef}
-                      rows={1}
-                      value={inputText}
-                      placeholder="Type a message..."
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      className="min-h-[38px] max-h-[80px] resize-none text-xs py-2 px-3 rounded-lg bg-background border-border focus-visible:ring-1 focus-visible:ring-primary font-sans"
-                    />
+                {/* Input Area or Resolved Action Bar */}
+                {isResolved ? (
+                  <div className="p-3.5 bg-card border-t border-border flex flex-col items-center justify-center gap-2 text-center shrink-0 select-none">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                      <span>This conversation is closed for new replies</span>
+                    </div>
                     <Button
-                      type="submit"
-                      size="icon"
-                      disabled={!inputText.trim() || sending}
-                      className="size-8 rounded-lg bg-primary text-primary-foreground shrink-0 shadow-sm cursor-pointer"
+                      type="button"
+                      size="sm"
+                      onClick={handleStartNewTicket}
+                      className="text-xs h-8 px-3.5 rounded-lg bg-primary text-primary-foreground font-medium shadow-xs hover:bg-primary/90 cursor-pointer"
                     >
-                      {sending ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <Send className="size-3.5" />
-                      )}
+                      <Plus className="size-3.5 mr-1.5" />
+                      Start New Conversation
                     </Button>
-                  </form>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1.5 px-0.5">
-                    <span>Enter to send</span>
-                    {currentTicketId && (
-                      <span className="font-mono">#{currentTicketId.slice(0, 8)}</span>
-                    )}
                   </div>
-                </div>
+                ) : (
+                  <div className="p-3 bg-card border-t border-border shrink-0">
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }}
+                      className="relative flex items-center gap-2"
+                    >
+                      <Textarea
+                        ref={textareaRef}
+                        rows={1}
+                        value={inputText}
+                        placeholder="Type a message..."
+                        onChange={(e) => setInputText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        className="min-h-[38px] max-h-[80px] resize-none text-xs py-2 px-3 rounded-lg bg-background border-border focus-visible:ring-1 focus-visible:ring-primary font-sans"
+                      />
+                      <Button
+                        type="submit"
+                        size="icon"
+                        disabled={!inputText.trim() || sending}
+                        className="size-8 rounded-lg bg-primary text-primary-foreground shrink-0 shadow-sm cursor-pointer"
+                      >
+                        {sending ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Send className="size-3.5" />
+                        )}
+                      </Button>
+                    </form>
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1.5 px-0.5">
+                      <span>Enter to send</span>
+                      {currentTicketId && (
+                        <span className="font-mono">#{currentTicketId.slice(0, 8)}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
