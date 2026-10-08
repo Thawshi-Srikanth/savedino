@@ -21,6 +21,7 @@ import {
   Mail,
   CheckCircle2,
 } from "lucide-react";
+import { ChatMessageContent } from "@/components/chat-message-content";
 
 interface ConversationMessage {
   id: string;
@@ -480,10 +481,10 @@ export function SupportWidget() {
 
       {/* Support Modal Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[60] select-none font-sans">
-          <div className="w-[360px] sm:w-[380px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-5rem)] flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden origin-bottom-right animate-in fade-in-0 zoom-in-90 slide-in-from-bottom-5 duration-200 ease-out">
+        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[60] font-sans">
+          <div className="w-[360px] sm:w-[390px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-5rem)] flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden origin-bottom-right animate-in fade-in-0 zoom-in-90 slide-in-from-bottom-5 duration-200 ease-out">
             {/* Flat Theme Header */}
-            <div className="px-4 py-3 bg-card border-b border-border flex items-center justify-between shrink-0">
+            <div className="px-4 py-3 bg-card border-b border-border flex items-center justify-between shrink-0 select-none">
               <div className="flex items-center gap-2">
                 <LifeBuoy className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground tracking-tight">
@@ -527,7 +528,7 @@ export function SupportWidget() {
 
             {/* Sub-bar for Tab Switching */}
             {activeTab !== "chat" && (
-              <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border text-xs shrink-0">
+              <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border text-xs shrink-0 select-none">
                 <button
                   onClick={() => setActiveTab("chat")}
                   className="text-primary hover:underline font-medium text-xs flex items-center gap-1"
@@ -545,8 +546,8 @@ export function SupportWidget() {
 
             {/* TAB: TICKETS LIST */}
             {activeTab === "tickets" && (
-              <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-background">
-                <div className="flex items-center justify-between px-1 pb-1">
+              <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 bg-background">
+                <div className="flex items-center justify-between px-1 pb-1 select-none">
                   <span className="text-xs font-medium text-muted-foreground">Your Tickets</span>
                   <button
                     onClick={loadTickets}
@@ -592,7 +593,7 @@ export function SupportWidget() {
                           {t.status}
                         </span>
                       </div>
-                      <p className="text-xs text-foreground line-clamp-1">
+                      <p className="text-xs text-foreground line-clamp-1 break-words [overflow-wrap:anywhere]">
                         {t.last_message || "No messages yet"}
                       </p>
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-2 font-mono">
@@ -607,7 +608,7 @@ export function SupportWidget() {
 
             {/* TAB: RESTORE TICKETS */}
             {activeTab === "restore" && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-background">
                 <div className="text-center space-y-1 pt-2">
                   <Mail className="size-8 text-muted-foreground/50 mx-auto" />
                   <h3 className="text-sm font-semibold text-foreground">Restore Tickets</h3>
@@ -661,14 +662,14 @@ export function SupportWidget() {
             {activeTab === "chat" && (
               <>
                 {/* Messages Feed */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-background">
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3.5 sm:p-4 space-y-3.5 bg-background">
                   {loadingMessages ? (
                     <div className="h-full flex items-center justify-center">
                       <Loader2 className="size-4 animate-spin text-muted-foreground" />
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="space-y-4 py-2">
-                      <div className="p-3.5 rounded-lg bg-card border border-border space-y-1.5">
+                      <div className="p-3.5 rounded-xl bg-card border border-border space-y-1.5 shadow-xs">
                         <p className="text-xs font-semibold text-foreground">
                           How can we help you today?
                         </p>
@@ -681,16 +682,16 @@ export function SupportWidget() {
                         <span className="text-[11px] font-medium text-muted-foreground px-0.5">
                           Common Topics
                         </span>
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           {QUICK_TOPICS.map((topic, i) => (
                             <button
                               key={i}
                               type="button"
                               onClick={() => handleSendMessage(topic)}
-                              className="w-full text-left px-3 py-2 rounded-lg bg-card hover:bg-muted border border-border text-xs text-foreground font-normal transition-colors flex items-center justify-between cursor-pointer"
+                              className="w-full text-left px-3 py-2.5 rounded-xl bg-card hover:bg-muted border border-border text-xs text-foreground font-normal transition-colors flex items-center justify-between cursor-pointer gap-2"
                             >
-                              <span>{topic}</span>
-                              <ChevronRight className="size-3 text-muted-foreground shrink-0 ml-1" />
+                              <span className="break-words [overflow-wrap:anywhere]">{topic}</span>
+                              <ChevronRight className="size-3 text-muted-foreground shrink-0" />
                             </button>
                           ))}
                         </div>
@@ -703,14 +704,14 @@ export function SupportWidget() {
                       return (
                         <div
                           key={msg.id}
-                          className={`flex flex-col ${isCustomer ? "items-end" : "items-start"} space-y-1`}
+                          className={`flex flex-col ${isCustomer ? "items-end" : "items-start"} space-y-1 w-full`}
                         >
-                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground px-0.5">
-                            <span className="font-medium">
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground px-1 max-w-full">
+                            <span className="font-medium truncate">
                               {isCustomer ? "You" : msg.author_name || "Support"}
                             </span>
-                            <span>•</span>
-                            <span className="font-mono text-[10px]">
+                            <span className="shrink-0">•</span>
+                            <span className="font-mono text-[10px] shrink-0">
                               {new Date(msg.created_at).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -719,13 +720,13 @@ export function SupportWidget() {
                           </div>
 
                           <div
-                            className={`max-w-[85%] px-3.5 py-2 rounded-lg text-xs leading-relaxed whitespace-pre-wrap ${
+                            className={`max-w-[85%] sm:max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed break-words [overflow-wrap:anywhere] select-text shadow-xs ${
                               isCustomer
-                                ? "bg-primary text-primary-foreground font-sans"
-                                : "bg-card border border-border text-foreground font-sans"
+                                ? "bg-primary text-primary-foreground rounded-br-xs font-sans"
+                                : "bg-card border border-border text-foreground rounded-bl-xs font-sans"
                             }`}
                           >
-                            {msg.content}
+                            <ChatMessageContent content={msg.content} isCustomer={isCustomer} />
                           </div>
                         </div>
                       );
