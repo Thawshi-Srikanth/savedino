@@ -40,10 +40,11 @@ export async function GET() {
       },
     });
 
-    // 3. Get all eligible participant users (excluding platform admins)
+    // 3. Get all eligible participant users (excluding platform admins and suspended users)
     const allUsers = await prisma.user.findMany({
       where: {
         role: { not: "admin" },
+        banned: false,
       },
       select: {
         id: true,
@@ -110,6 +111,13 @@ export async function POST(req: Request) {
     if (targetUser.role === "admin") {
       return NextResponse.json(
         { success: false, error: "Administrators cannot be assigned to participant teams." },
+        { status: 400 }
+      );
+    }
+
+    if (targetUser.banned) {
+      return NextResponse.json(
+        { success: false, error: "Suspended / banned accounts cannot be assigned to research squads." },
         { status: 400 }
       );
     }

@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, getInitials } from "./types";
+import { resolveCountryCode, getCountryFlag } from "@/lib/phone-validation";
 
 interface MatchmakingTabProps {
   users: UserData[];
@@ -269,7 +270,7 @@ export function MatchmakingTab({
       <div className="w-full overflow-x-auto min-h-0 relative">
         {loading ? (
           <DinoLoading size="md" text="Loading researchers list..." className="py-16" />
-        ) : users.filter((u) => u.teamMembers.length === 0).length === 0 ? (
+        ) : users.filter((u) => u.teamMembers.length === 0 && !u.banned).length === 0 ? (
           <div className="py-16 text-center text-xs text-muted-foreground space-y-1">
             <Users className="size-8 mx-auto text-muted-foreground/30 mb-1" />
             <div className="font-semibold text-sm text-foreground">
@@ -341,11 +342,22 @@ export function MatchmakingTab({
                     {renderRoleBadge(u.role)}
                   </TableCell>
                   <TableCell className="py-2 px-3 w-[27%] min-w-0 overflow-hidden text-xs text-muted-foreground">
-                    <span className="truncate block max-w-full">
-                      <span className="text-foreground/90">{u.institution || "Independent"}</span>
-                      <span className="text-muted-foreground mx-1">&middot;</span>
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        {u.country || "Global"}
+                    <span className="truncate flex items-center gap-1.5 max-w-full">
+                      <span className="text-foreground/90 font-sans truncate">
+                        {u.institution || "Independent"}
+                      </span>
+                      <span className="text-muted-foreground shrink-0">&middot;</span>
+                      <span className="font-mono text-[11px] text-muted-foreground inline-flex items-center gap-1 shrink-0">
+                        {u.country ? (
+                          <>
+                            <span className="text-xs shrink-0" title={u.country}>
+                              {getCountryFlag(resolveCountryCode(u.country))}
+                            </span>
+                            <span>{u.country}</span>
+                          </>
+                        ) : (
+                          <span>Global</span>
+                        )}
                       </span>
                     </span>
                   </TableCell>

@@ -291,10 +291,10 @@ export default function AdminDashboardPage() {
     [events]
   );
 
-  // Solo Matchmaking Filtered List
+  // Solo Matchmaking Filtered List (Excludes suspended / banned accounts)
   const unassignedSoloUsers = useMemo(() => {
     return users
-      .filter((u) => u.teamMembers.length === 0)
+      .filter((u) => u.teamMembers.length === 0 && !u.banned)
       .filter((u) => {
         if (!soloSearch.trim()) return true;
         const q = soloSearch.toLowerCase();
