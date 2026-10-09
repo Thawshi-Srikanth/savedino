@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, use, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { getTeamContextPermissions, isOrganizer, isAdmin } from "@/lib/rbac";
 import { parseMpcReport } from "@/lib/mpc-parser";
@@ -153,6 +154,35 @@ interface TeamData {
 export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId: string }> }) {
   const { teamId } = use(params);
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const getValidTab = (rawTab: string | null): string => {
+    if (!rawTab) return "imagesets";
+    const lower = rawTab.toLowerCase().trim();
+    if (lower === "settings" || lower === "squad-settings" || lower === "squadsettings")
+      return "settings";
+    if (lower === "contact" || lower === "leader-contact" || lower === "leadercontact")
+      return "contact";
+    if (lower === "requests" || lower === "join-requests" || lower === "joinrequests")
+      return "requests";
+    if (
+      lower === "members" ||
+      lower === "roster" ||
+      lower === "squad-roster" ||
+      lower === "squadroster"
+    )
+      return "members";
+    if (
+      lower === "imagesets" ||
+      lower === "images" ||
+      lower === "image-sets" ||
+      lower === "imageset"
+    )
+      return "imagesets";
+    return "imagesets";
+  };
 
   const [team, setTeam] = useState<TeamData | null>(null);
   const [imageSets, setImageSets] = useState<ImageSetItem[]>([]);
@@ -161,8 +191,28 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
   const isDisplayLoading = useMinimumLoading(loading, 1000);
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Active workspace tab
-  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<string>("imagesets");
+  // Active workspace tab initialized from URL query (?tab=settings, etc.)
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<string>(() =>
+    getValidTab(searchParams.get("tab"))
+  );
+
+  // Synchronize state when URL query params change (e.g. forward/back button or direct navigation)
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      const valid = getValidTab(tabParam);
+      if (valid !== activeWorkspaceTab) {
+        setActiveWorkspaceTab(valid);
+      }
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (newTab: string) => {
+    setActiveWorkspaceTab(newTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", newTab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   // Filter & Search for Image Sets
   const [imageSetTab, setImageSetTab] = useState<
@@ -975,11 +1025,7 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
       </Card>
 
       {/* Main Workspace Navigation Tabs */}
-      <Tabs
-        value={activeWorkspaceTab}
-        onValueChange={setActiveWorkspaceTab}
-        className="w-full space-y-6"
-      >
+      <Tabs value={activeWorkspaceTab} onValueChange={handleTabChange} className="w-full space-y-6">
         {/* Modern Tabs Bar matching Admin & Profile headers */}
         <div className="border-b border-border">
           <div className="overflow-x-auto scrollbar-none">

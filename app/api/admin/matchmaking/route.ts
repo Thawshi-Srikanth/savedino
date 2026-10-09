@@ -117,7 +117,10 @@ export async function POST(req: Request) {
 
     if (targetUser.banned) {
       return NextResponse.json(
-        { success: false, error: "Suspended / banned accounts cannot be assigned to research squads." },
+        {
+          success: false,
+          error: "Suspended / banned accounts cannot be assigned to research squads.",
+        },
         { status: 400 }
       );
     }

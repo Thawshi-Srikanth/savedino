@@ -39,6 +39,14 @@ import { renderCustomAdminEmail } from "@/lib/email-templates/custom-admin-email
 
 interface SendEmailModalProps {
   user: UserData | null;
+  initialPresetId?: string;
+  initialSubject?: string;
+  initialMessage?: string;
+  initialBadgeText?: string;
+  initialBadgeColor?: "violet" | "emerald" | "amber" | "sky" | "rose";
+  initialSenderType?: "default" | "campaigns" | "squads";
+  initialActionLabel?: string;
+  initialActionUrl?: string;
   onClose: () => void;
   onSuccess?: () => void;
 }
@@ -56,6 +64,18 @@ interface EmailPreset {
 }
 
 const EMAIL_PRESETS: EmailPreset[] = [
+  {
+    id: "squad_incomplete_info",
+    name: "Missing Squad Contact & Pitch",
+    badge: "Action Required",
+    badgeColor: "amber",
+    subject: "Action Required: Update Leader Contact & Pitch for your Squad",
+    message:
+      "We noticed that your research squad is currently missing important details (such as leader contact info or a recruitment pitch description).\n\nCompleting your squad details makes it easier for citizen scientists to join your squad and allows organizers to coordinate telescope observation data with you.\n\nPlease update your squad settings using the link below:",
+    actionLabel: "Update Squad Settings",
+    actionUrl: "https://savedino.sedssl.org/teams",
+    senderType: "squads",
+  },
   {
     id: "general",
     name: "General Announcement",
@@ -106,7 +126,19 @@ const EMAIL_PRESETS: EmailPreset[] = [
   },
 ];
 
-export function SendEmailModal({ user, onClose, onSuccess }: SendEmailModalProps) {
+export function SendEmailModal({
+  user,
+  initialPresetId,
+  initialSubject,
+  initialMessage,
+  initialBadgeText,
+  initialBadgeColor,
+  initialSenderType,
+  initialActionLabel,
+  initialActionUrl,
+  onClose,
+  onSuccess,
+}: SendEmailModalProps) {
   const [activeTab, setActiveTab] = useState<"compose" | "preview">("compose");
   const [selectedPresetId, setSelectedPresetId] = useState<string>("custom");
 
@@ -123,23 +155,42 @@ export function SendEmailModal({ user, onClose, onSuccess }: SendEmailModalProps
 
   const [sending, setSending] = useState<boolean>(false);
 
-  // Initialize or reset when user changes
+  // Initialize or reset when user or initial props change
   useEffect(() => {
     if (user) {
       setActiveTab("compose");
-      setSelectedPresetId("custom");
-      setSubject(`Important message from SaveDino`);
-      setBadgeText("Direct Message");
-      setBadgeColor("violet");
-      setSenderType("default");
-      setMessage(
-        `Hello ${user.name},\n\nWe are writing to you regarding your SaveDino account and asteroid search activities.\n\nPlease let us know if you have any questions or need assistance.`
+      setSelectedPresetId(initialPresetId || "custom");
+      setSubject(initialSubject || `Important message from SaveDino`);
+      setBadgeText(initialBadgeText || "Direct Message");
+      setBadgeColor(initialBadgeColor || "violet");
+      setSenderType(
+        initialSenderType || (initialPresetId === "squad_incomplete_info" ? "squads" : "default")
       );
-      setActionLabel("Open SaveDino Dashboard");
-      setActionUrl("https://savedino.sedssl.org/dashboard");
-      setShowActionFields(true);
+      setMessage(
+        initialMessage ||
+          `Hello ${user.name},\n\nWe are writing to you regarding your SaveDino account and asteroid search activities.\n\nPlease let us know if you have any questions or need assistance.`
+      );
+      if (initialActionLabel || initialActionUrl) {
+        setShowActionFields(true);
+        setActionLabel(initialActionLabel || "Open Squad Settings");
+        setActionUrl(initialActionUrl || "https://savedino.sedssl.org/dashboard");
+      } else {
+        setActionLabel("Open SaveDino Dashboard");
+        setActionUrl("https://savedino.sedssl.org/dashboard");
+        setShowActionFields(true);
+      }
     }
-  }, [user]);
+  }, [
+    user,
+    initialPresetId,
+    initialSubject,
+    initialMessage,
+    initialBadgeText,
+    initialBadgeColor,
+    initialSenderType,
+    initialActionLabel,
+    initialActionUrl,
+  ]);
 
   const handleApplyPreset = (presetId: string) => {
     setSelectedPresetId(presetId);

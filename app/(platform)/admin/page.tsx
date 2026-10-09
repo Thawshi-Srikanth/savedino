@@ -138,6 +138,16 @@ export default function AdminDashboardPage() {
 
   // Send Custom Email Modal State
   const [emailingUser, setEmailingUser] = useState<UserData | null>(null);
+  const [emailPresetConfig, setEmailPresetConfig] = useState<{
+    presetId?: string;
+    subject?: string;
+    message?: string;
+    badgeText?: string;
+    badgeColor?: "violet" | "emerald" | "amber" | "sky" | "rose";
+    senderType?: "default" | "campaigns" | "squads";
+    actionLabel?: string;
+    actionUrl?: string;
+  } | null>(null);
 
   // View User Profile Modal State
   const [viewingUser, setViewingUser] = useState<UserData | null>(null);
@@ -318,6 +328,10 @@ export default function AdminDashboardPage() {
       teams.filter((t) => t.event?.maxTeamSize && t.members.length >= t.event.maxTeamSize).length,
     [teams]
   );
+  const incompleteSquadsCount = useMemo(
+    () => teams.filter((t) => !t.leaderContact?.trim() || !t.recruitmentNotes?.trim()).length,
+    [teams]
+  );
   const totalSquadMembers = useMemo(
     () => teams.reduce((acc, t) => acc + t.members.length, 0),
     [teams]
@@ -349,10 +363,14 @@ export default function AdminDashboardPage() {
       const maxTeamSize = t.event?.maxTeamSize;
       const isFull = maxTeamSize && maxTeamSize > 0 ? t.members.length >= maxTeamSize : false;
       const isOpen = !isFull;
+      const isIncomplete = !t.leaderContact?.trim() || !t.recruitmentNotes?.trim();
       const matchesCapacity =
         teamCapacityFilter === "ALL" ||
+        (teamCapacityFilter === "ACTIVE" && t.status === "ACTIVE") ||
         (teamCapacityFilter === "OPEN" && isOpen) ||
-        (teamCapacityFilter === "FULL" && isFull);
+        (teamCapacityFilter === "FULL" && isFull) ||
+        (teamCapacityFilter === "INCOMPLETE" && isIncomplete) ||
+        (teamCapacityFilter === "DISQUALIFIED" && t.status === "DISQUALIFIED");
 
       const matchesCampaign =
         teamCampaignFilter === "ALL" ||
@@ -786,6 +804,54 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Squad Leader Incomplete Information Reminder Email
+  const handleSendTeamLeaderReminder = (
+    team: TeamData,
+    leaderUser: { id: string; name: string; email: string }
+  ) => {
+    const missingItems: string[] = [];
+    if (!team.leaderContact || !team.leaderContact.trim()) {
+      missingItems.push("• Squad Leader Contact (Discord tag, Telegram handle, or active email)");
+    }
+    if (!team.recruitmentNotes || !team.recruitmentNotes.trim()) {
+      missingItems.push("• Squad Recruitment Pitch & Description (what roles your squad needs)");
+    }
+    if (missingItems.length === 0) {
+      missingItems.push("• Squad workspace details & roster configuration");
+    }
+
+    const origin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : "https://savedino.sedssl.org";
+    const actionUrl = `${origin}/team/${team.id}?tab=settings`;
+
+    const fullLeaderUser: UserData = users.find((u) => u.id === leaderUser.id) || {
+      id: leaderUser.id,
+      name: leaderUser.name,
+      email: leaderUser.email,
+      role: "user",
+      country: "US",
+      institution: "",
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      teamMembers: [],
+    };
+
+    setEmailPresetConfig({
+      presetId: "squad_incomplete_info",
+      subject: `Action Required: Complete squad details for "${team.name}"`,
+      badgeText: "Missing Squad Information",
+      badgeColor: "amber",
+      senderType: "squads",
+      message: `Hello ${leaderUser.name},\n\nWe noticed that your research squad "${team.name}" is missing some important information on SaveDino:\n\n${missingItems.join("\n")}\n\nHaving complete details ensures new researchers and campaign organizers can easily find and communicate with your squad.\n\nPlease click the button below to update your squad settings:`,
+      actionLabel: "Complete Squad Settings",
+      actionUrl,
+    });
+
+    setEmailingUser(fullLeaderUser);
+  };
+
   // Quick Campaign Status Action
   const handleQuickCampaignStatus = async (eventId: string, newStatus: string) => {
     try {
@@ -1014,7 +1080,10 @@ export default function AdminDashboardPage() {
                 setBanningUser(u);
                 setBanningInitialAction(action);
               }}
-              onSendEmail={setEmailingUser}
+              onSendEmail={(u) => {
+                setEmailPresetConfig(null);
+                setEmailingUser(u);
+              }}
               onViewUser={setViewingUser}
             />
           </TabsContent>
@@ -1057,6 +1126,7 @@ export default function AdminDashboardPage() {
               getTeamPageNumbers={getTeamPageNumbers}
               openSquadsCount={openSquadsCount}
               fullSquadsCount={fullSquadsCount}
+              incompleteSquadsCount={incompleteSquadsCount}
               totalSquadMembers={totalSquadMembers}
               totalOpenSlots={totalOpenSlots}
               loading={isDisplayLoading}
@@ -1066,6 +1136,7 @@ export default function AdminDashboardPage() {
               onEditTeam={handleOpenEditTeam}
               onReportTeam={setReportingTeam}
               onDeleteTeam={setDeletingTeam}
+              onSendLeaderReminder={handleSendTeamLeaderReminder}
             />
           </TabsContent>
 
@@ -1229,13 +1300,30 @@ export default function AdminDashboardPage() {
           onConfirmAction={handleConfirmBanUser}
         />
 
-        <SendEmailModal user={emailingUser} onClose={() => setEmailingUser(null)} />
+        <SendEmailModal
+          user={emailingUser}
+          initialPresetId={emailPresetConfig?.presetId}
+          initialSubject={emailPresetConfig?.subject}
+          initialMessage={emailPresetConfig?.message}
+          initialBadgeText={emailPresetConfig?.badgeText}
+          initialBadgeColor={emailPresetConfig?.badgeColor}
+          initialSenderType={emailPresetConfig?.senderType}
+          initialActionLabel={emailPresetConfig?.actionLabel}
+          initialActionUrl={emailPresetConfig?.actionUrl}
+          onClose={() => {
+            setEmailingUser(null);
+            setEmailPresetConfig(null);
+          }}
+        />
 
         <ViewUserModal
           user={viewingUser}
           onClose={() => setViewingUser(null)}
           onEditUser={handleOpenEditUser}
-          onSendEmail={setEmailingUser}
+          onSendEmail={(u) => {
+            setEmailPresetConfig(null);
+            setEmailingUser(u);
+          }}
           onBanUser={(u, action = "BAN") => {
             setBanningUser(u);
             setBanningInitialAction(action);

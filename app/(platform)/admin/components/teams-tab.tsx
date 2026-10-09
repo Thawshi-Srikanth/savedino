@@ -45,6 +45,7 @@ import {
   AlertTriangle,
   ShieldAlert,
   FileText,
+  Mail,
   X,
   ChevronLeft,
   ChevronRight,
@@ -73,6 +74,7 @@ interface TeamsTabProps {
   getTeamPageNumbers: () => (number | string)[];
   openSquadsCount: number;
   fullSquadsCount: number;
+  incompleteSquadsCount?: number;
   totalSquadMembers: number;
   totalOpenSlots: number;
   loading: boolean;
@@ -82,6 +84,10 @@ interface TeamsTabProps {
   onEditTeam: (team: TeamData) => void;
   onReportTeam: (team: TeamData) => void;
   onDeleteTeam: (team: TeamData) => void;
+  onSendLeaderReminder?: (
+    team: TeamData,
+    leaderUser: { id: string; name: string; email: string }
+  ) => void;
 }
 
 export function TeamsTab({
@@ -103,6 +109,7 @@ export function TeamsTab({
   getTeamPageNumbers,
   openSquadsCount,
   fullSquadsCount,
+  incompleteSquadsCount = 0,
   totalSquadMembers,
   totalOpenSlots,
   loading,
@@ -112,6 +119,7 @@ export function TeamsTab({
   onEditTeam,
   onReportTeam,
   onDeleteTeam,
+  onSendLeaderReminder,
 }: TeamsTabProps) {
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -248,6 +256,25 @@ export function TeamsTab({
           <button
             type="button"
             onClick={() =>
+              setTeamCapacityFilter(teamCapacityFilter === "INCOMPLETE" ? "ALL" : "INCOMPLETE")
+            }
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+              teamCapacityFilter === "INCOMPLETE"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-arcade active:translate-y-0.5"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            }`}
+          >
+            <span>Missing Details</span>
+            <span
+              className={`font-mono text-[11px] font-bold ${teamCapacityFilter === "INCOMPLETE" ? "text-slate-950" : "text-amber-500"}`}
+            >
+              {incompleteSquadsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
               setTeamCapacityFilter(teamCapacityFilter === "DISQUALIFIED" ? "ALL" : "DISQUALIFIED")
             }
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
@@ -279,6 +306,12 @@ export function TeamsTab({
             <span>Full Squads:</span>
             <span className="font-bold text-[#8b5cf6] font-mono">{fullSquadsCount}</span>
           </div>
+          {incompleteSquadsCount > 0 && (
+            <div className="flex justify-between text-amber-500">
+              <span>Missing Details:</span>
+              <span className="font-bold font-mono">{incompleteSquadsCount}</span>
+            </div>
+          )}
           {disabledSquadsCount > 0 && (
             <div className="flex justify-between text-destructive">
               <span>Disabled Squads:</span>
@@ -333,6 +366,9 @@ export function TeamsTab({
                 <SelectItem value="ACTIVE">Active ({activeSquadsCount})</SelectItem>
                 <SelectItem value="OPEN">Open Slots ({openSquadsCount})</SelectItem>
                 <SelectItem value="FULL">Full Squads ({fullSquadsCount})</SelectItem>
+                <SelectItem value="INCOMPLETE">
+                  Missing Contact / Pitch ({incompleteSquadsCount})
+                </SelectItem>
                 <SelectItem value="DISQUALIFIED">Disabled ({disabledSquadsCount})</SelectItem>
               </SelectContent>
             </Select>
@@ -468,6 +504,9 @@ export function TeamsTab({
                   const isFull =
                     maxTeamSize && maxTeamSize > 0 ? t.members.length >= maxTeamSize : false;
                   const isDisqualified = t.status === "DISQUALIFIED";
+                  const isMissingContact = !t.leaderContact || !t.leaderContact.trim();
+                  const isMissingPitch = !t.recruitmentNotes || !t.recruitmentNotes.trim();
+                  const isIncomplete = isMissingContact || isMissingPitch;
 
                   return (
                     <TableRow key={t.id} className="hover:bg-muted/30 border-b border-border/60">
@@ -577,7 +616,41 @@ export function TeamsTab({
                               <div className="text-[10px] text-muted-foreground font-mono truncate">
                                 {leaderMember.user.email}
                               </div>
+                              {isMissingContact ? (
+                                <div className="mt-0.5">
+                                  <span className="inline-flex items-center text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                                    Missing Contact
+                                  </span>
+                                </div>
+                              ) : t.leaderContact ? (
+                                <div
+                                  className="text-[10px] text-muted-foreground font-mono truncate"
+                                  title={t.leaderContact}
+                                >
+                                  {t.leaderContact}
+                                </div>
+                              ) : null}
                             </div>
+                            {isIncomplete && onSendLeaderReminder && leaderMember?.user && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onSendLeaderReminder(t, leaderMember.user);
+                                    }}
+                                    className="size-6 p-0 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 cursor-pointer rounded-md shrink-0"
+                                  >
+                                    <Mail className="size-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">
+                                  Send Missing Details Reminder
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                           </div>
                         ) : (
                           <span className="text-xs text-muted-foreground italic">
@@ -631,66 +704,75 @@ export function TeamsTab({
 
                       {/* Disclaimer & Moderation Notes */}
                       <TableCell className="py-2.5 px-3 w-[21%] min-w-0 overflow-hidden">
-                        {t.disqualificationReason || t.recruitmentNotes ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="cursor-pointer group flex items-start gap-1.5 min-w-0">
-                                {t.disqualificationReason ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive text-white shadow-xs shrink-0">
-                                    <ShieldAlert className="size-3 text-white" />
-                                    Disabled
+                        <div className="space-y-1 min-w-0">
+                          {isMissingPitch && (
+                            <div>
+                              <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                                Missing Pitch
+                              </span>
+                            </div>
+                          )}
+                          {t.disqualificationReason || t.recruitmentNotes ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="cursor-pointer group flex items-start gap-1.5 min-w-0">
+                                  {t.disqualificationReason ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive text-white shadow-xs shrink-0">
+                                      <ShieldAlert className="size-3 text-white" />
+                                      Disabled
+                                    </span>
+                                  ) : t.recruitmentNotes?.includes("[ADMIN") ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive text-white shadow-xs shrink-0">
+                                      <ShieldAlert className="size-3 text-white" />
+                                      Notice
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-foreground border border-border shrink-0">
+                                      <FileText className="size-3 text-primary" />
+                                      Notes
+                                    </span>
+                                  )}
+                                  <span className="text-[11px] text-muted-foreground group-hover:text-foreground line-clamp-2 leading-tight break-words min-w-0 flex-1">
+                                    {t.disqualificationReason ||
+                                      t.recruitmentNotes?.replace(/^\[ADMIN [^\]]*\]:\s*/, "")}
                                   </span>
-                                ) : t.recruitmentNotes?.includes("[ADMIN") ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive text-white shadow-xs shrink-0">
-                                    <ShieldAlert className="size-3 text-white" />
-                                    Notice
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-foreground border border-border shrink-0">
-                                    <FileText className="size-3 text-primary" />
-                                    Notes
-                                  </span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="top"
+                                align="start"
+                                className="max-w-sm p-3 space-y-2 bg-popover text-popover-foreground border border-border shadow-xl rounded-lg"
+                              >
+                                {t.disqualificationReason && (
+                                  <div className="space-y-1">
+                                    <div className="font-bold text-xs flex items-center gap-1.5 text-destructive">
+                                      <ShieldAlert className="size-3.5 text-destructive" />
+                                      <span>Disqualification Reason</span>
+                                    </div>
+                                    <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-destructive/10 p-2 rounded border border-destructive/20">
+                                      {t.disqualificationReason}
+                                    </p>
+                                  </div>
                                 )}
-                                <span className="text-[11px] text-muted-foreground group-hover:text-foreground line-clamp-2 leading-tight break-words min-w-0 flex-1">
-                                  {t.disqualificationReason ||
-                                    t.recruitmentNotes?.replace(/^\[ADMIN [^\]]*\]:\s*/, "")}
-                                </span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              align="start"
-                              className="max-w-sm p-3 space-y-2 bg-popover text-popover-foreground border border-border shadow-xl rounded-lg"
-                            >
-                              {t.disqualificationReason && (
-                                <div className="space-y-1">
-                                  <div className="font-bold text-xs flex items-center gap-1.5 text-destructive">
-                                    <ShieldAlert className="size-3.5 text-destructive" />
-                                    <span>Disqualification Reason</span>
+                                {t.recruitmentNotes && (
+                                  <div className="space-y-1">
+                                    <div className="font-bold text-xs flex items-center gap-1.5 text-foreground">
+                                      <FileText className="size-3.5 text-primary" />
+                                      <span>Recruitment Stance Notes</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed font-sans">
+                                      {t.recruitmentNotes}
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-destructive/10 p-2 rounded border border-destructive/20">
-                                    {t.disqualificationReason}
-                                  </p>
-                                </div>
-                              )}
-                              {t.recruitmentNotes && (
-                                <div className="space-y-1">
-                                  <div className="font-bold text-xs flex items-center gap-1.5 text-foreground">
-                                    <FileText className="size-3.5 text-primary" />
-                                    <span>Recruitment Stance Notes</span>
-                                  </div>
-                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed font-sans">
-                                    {t.recruitmentNotes}
-                                  </p>
-                                </div>
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="text-xs text-muted-foreground/50 font-sans italic">
-                            &mdash;
-                          </span>
-                        )}
+                                )}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : !isMissingPitch ? (
+                            <span className="text-xs text-muted-foreground/50 font-sans italic">
+                              &mdash;
+                            </span>
+                          ) : null}
+                        </div>
                       </TableCell>
 
                       {/* Actions Dropdown */}
@@ -710,6 +792,18 @@ export function TeamsTab({
                               Squad Management
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
+                            {onSendLeaderReminder && leaderMember?.user && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => onSendLeaderReminder(t, leaderMember.user)}
+                                  className="text-xs cursor-pointer gap-2 text-primary focus:text-primary font-medium"
+                                >
+                                  <Mail className="size-3.5" />
+                                  <span>Send Leader Reminder</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                              </>
+                            )}
                             <DropdownMenuItem
                               onClick={() => onEditTeam(t)}
                               className="text-xs cursor-pointer gap-2"
