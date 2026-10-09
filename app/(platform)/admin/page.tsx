@@ -219,16 +219,24 @@ export default function AdminDashboardPage() {
         (u.institution && u.institution.toLowerCase().includes(userSearch.toLowerCase())) ||
         (u.country && u.country.toLowerCase().includes(userSearch.toLowerCase()));
 
+      const isSquadLeader = u.teamMembers.some((tm) => tm.role === "leader");
+
       const matchesRole =
         roleFilter === "ALL"
           ? true
           : roleFilter === "banned"
             ? Boolean(u.banned)
-            : u.role === roleFilter && !u.banned;
+            : roleFilter === "leader"
+              ? isSquadLeader && !u.banned
+              : u.role === roleFilter && !u.banned;
 
       const isUnassigned = u.teamMembers.length === 0;
+      const isMemberOnly = u.teamMembers.length > 0 && !isSquadLeader;
+
       const matchesTeam =
         teamStatusFilter === "ALL" ||
+        (teamStatusFilter === "LEADER" && isSquadLeader) ||
+        (teamStatusFilter === "MEMBERS_ONLY" && isMemberOnly) ||
         (teamStatusFilter === "UNASSIGNED" && isUnassigned) ||
         (teamStatusFilter === "IN_TEAM" && !isUnassigned);
 
@@ -244,14 +252,24 @@ export default function AdminDashboardPage() {
   }, [filteredUsers, currentPage, pageSize]);
 
   // Derived Role Distribution Stats
-  const adminCount = useMemo(() => users.filter((u) => u.role === "admin").length, [users]);
-  const staffCount = useMemo(() => users.filter((u) => u.role === "staff").length, [users]);
+  const adminCount = useMemo(
+    () => users.filter((u) => u.role === "admin" && !u.banned).length,
+    [users]
+  );
+  const staffCount = useMemo(
+    () => users.filter((u) => u.role === "staff" && !u.banned).length,
+    [users]
+  );
+  const leaderCount = useMemo(
+    () => users.filter((u) => u.teamMembers.some((tm) => tm.role === "leader") && !u.banned).length,
+    [users]
+  );
   const citizenCount = useMemo(
-    () => users.filter((u) => u.role === "user" || !u.role).length,
+    () => users.filter((u) => (u.role === "user" || !u.role) && !u.banned).length,
     [users]
   );
   const unassignedCount = useMemo(
-    () => users.filter((u) => u.teamMembers.length === 0).length,
+    () => users.filter((u) => u.teamMembers.length === 0 && !u.banned).length,
     [users]
   );
 
@@ -984,6 +1002,7 @@ export default function AdminDashboardPage() {
               getPageNumbers={getPageNumbers}
               adminCount={adminCount}
               staffCount={staffCount}
+              leaderCount={leaderCount}
               citizenCount={citizenCount}
               unassignedCount={unassignedCount}
               loading={isDisplayLoading}

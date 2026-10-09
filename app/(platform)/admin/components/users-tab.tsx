@@ -76,6 +76,7 @@ interface UsersTabProps {
   getPageNumbers: () => (number | string)[];
   adminCount: number;
   staffCount: number;
+  leaderCount?: number;
   citizenCount: number;
   unassignedCount: number;
   loading: boolean;
@@ -106,6 +107,7 @@ export function UsersTab({
   getPageNumbers,
   adminCount,
   staffCount,
+  leaderCount = 0,
   citizenCount,
   unassignedCount,
   loading,
@@ -293,6 +295,26 @@ export function UsersTab({
 
           <button
             type="button"
+            onClick={() => setRoleFilter(roleFilter === "leader" ? "ALL" : "leader")}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+              roleFilter === "leader"
+                ? "bg-[#f59e0b] text-[#0f172a] font-bold shadow-arcade active:translate-y-0.5"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Crown className="size-3.5 text-amber-500" />
+              <span>Squad Leaders</span>
+            </span>
+            <span
+              className={`font-mono text-[11px] font-bold ${roleFilter === "leader" ? "text-[#0f172a]" : "text-amber-500"}`}
+            >
+              {leaderCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setRoleFilter(roleFilter === "user" ? "ALL" : "user")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
               roleFilter === "user"
@@ -333,6 +355,10 @@ export function UsersTab({
 
         {/* Quick Summary Pill */}
         <div className="pt-2.5 border-t border-border space-y-1.5 text-[11px] text-muted-foreground px-1">
+          <div className="flex justify-between">
+            <span>Squad Leaders:</span>
+            <span className="font-bold text-amber-500 font-mono">{leaderCount}</span>
+          </div>
           <div className="flex justify-between">
             <span>In Squad:</span>
             <span className="font-bold text-foreground font-mono">
@@ -379,6 +405,7 @@ export function UsersTab({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All Roles ({users.length})</SelectItem>
+                <SelectItem value="leader">Squad Leaders ({leaderCount})</SelectItem>
                 <SelectItem value="admin">Admin ({adminCount})</SelectItem>
                 <SelectItem value="staff">Staff ({staffCount})</SelectItem>
                 <SelectItem value="user">Citizen ({citizenCount})</SelectItem>
@@ -387,13 +414,15 @@ export function UsersTab({
 
             {/* Team Status Filter Selector */}
             <Select value={teamStatusFilter} onValueChange={setTeamStatusFilter}>
-              <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[130px]">
+              <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[140px]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="IN_TEAM">In Squad ({users.length - unassignedCount})</SelectItem>
-                <SelectItem value="UNASSIGNED">Unassigned ({unassignedCount})</SelectItem>
+                <SelectItem value="LEADER">Squad Leaders ({leaderCount})</SelectItem>
+                <SelectItem value="IN_TEAM">In Squad (All)</SelectItem>
+                <SelectItem value="MEMBERS_ONLY">Squad Members Only</SelectItem>
+                <SelectItem value="UNASSIGNED">Solo / Unassigned ({unassignedCount})</SelectItem>
               </SelectContent>
             </Select>
 
@@ -620,12 +649,19 @@ export function UsersTab({
                         {inTeam && currentTeam ? (
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span className="size-2 rounded-full bg-[#10b981] shrink-0" />
-                            <span className="font-semibold text-foreground truncate max-w-[130px]">
+                            <span className="font-semibold text-foreground truncate max-w-[120px]">
                               {currentTeam.name}
                             </span>
-                            <span className="text-[10px] font-mono text-muted-foreground shrink-0">
-                              ({currentTeam.event?.code || "AST"})
-                            </span>
+                            {u.teamMembers.some((tm) => tm.role === "leader") ? (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
+                                <Crown className="size-2.5" />
+                                <span>Leader</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                                ({currentTeam.event?.code || "AST"})
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 font-semibold">
