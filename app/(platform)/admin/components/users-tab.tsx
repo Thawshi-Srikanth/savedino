@@ -55,7 +55,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import { UserData, getInitials } from "./types";
+import { UserData, getInitials, isUserSquadLeader } from "./types";
 import { resolveCountryCode, getCountryFlag } from "@/lib/phone-validation";
 
 interface UsersTabProps {
@@ -652,7 +652,7 @@ export function UsersTab({
                             <span className="font-semibold text-foreground truncate max-w-[120px]">
                               {currentTeam.name}
                             </span>
-                            {u.teamMembers.some((tm) => tm.role === "leader") ? (
+                            {isUserSquadLeader(u) ? (
                               <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
                                 <Crown className="size-2.5" />
                                 <span>Leader</span>

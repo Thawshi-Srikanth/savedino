@@ -41,7 +41,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
-import { UserData, getInitials } from "./types";
+import { UserData, getInitials, isUserSquadLeader } from "./types";
 import { resolveCountryCode, getCountryFlag } from "@/lib/phone-validation";
 
 interface ViewUserModalProps {
@@ -249,10 +249,17 @@ export function ViewUserModal({
 
             {/* 5. Squad Status Tag */}
             {inTeam ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20">
-                <Telescope className="size-2.5" />
-                <span>In Squad ({user.teamMembers.length})</span>
-              </span>
+              isUserSquadLeader(user) ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                  <Crown className="size-2.5" />
+                  <span>Squad Leader</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20">
+                  <Telescope className="size-2.5" />
+                  <span>In Squad ({user.teamMembers.length})</span>
+                </span>
+              )
             ) : (
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
                 <Compass className="size-2.5" />
@@ -580,7 +587,7 @@ export function ViewUserModal({
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-bold text-foreground">{tm.team.name}</span>
-                        {tm.role === "leader" ? (
+                        {tm.role?.toLowerCase() === "leader" || tm.team?.leaderId === user.id ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
                             <Crown className="size-2.5" />
                             Leader

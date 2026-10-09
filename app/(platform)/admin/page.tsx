@@ -10,7 +10,7 @@ import { useMinimumLoading } from "@/hooks/use-minimum-loading";
 import { Users, Telescope, Rocket, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
-import { EventData, TeamData, UserData, toLocalInput } from "./components/types";
+import { EventData, TeamData, UserData, toLocalInput, isUserSquadLeader } from "./components/types";
 import { UsersTab } from "./components/users-tab";
 import { MatchmakingTab } from "./components/matchmaking-tab";
 import { TeamsTab } from "./components/teams-tab";
@@ -219,7 +219,7 @@ export default function AdminDashboardPage() {
         (u.institution && u.institution.toLowerCase().includes(userSearch.toLowerCase())) ||
         (u.country && u.country.toLowerCase().includes(userSearch.toLowerCase()));
 
-      const isSquadLeader = u.teamMembers.some((tm) => tm.role === "leader");
+      const isSquadLeader = isUserSquadLeader(u);
 
       const matchesRole =
         roleFilter === "ALL"
@@ -261,7 +261,7 @@ export default function AdminDashboardPage() {
     [users]
   );
   const leaderCount = useMemo(
-    () => users.filter((u) => u.teamMembers.some((tm) => tm.role === "leader") && !u.banned).length,
+    () => users.filter((u) => isUserSquadLeader(u) && !u.banned).length,
     [users]
   );
   const citizenCount = useMemo(

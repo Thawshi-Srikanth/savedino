@@ -91,6 +91,7 @@ export interface UserData {
     team: {
       id: string;
       name: string;
+      leaderId?: string;
       event: {
         id: string;
         title: string;
@@ -98,6 +99,16 @@ export interface UserData {
       };
     };
   }>;
+}
+
+export function isUserSquadLeader(u: UserData): boolean {
+  if (!u || !u.teamMembers || u.teamMembers.length === 0) return false;
+  return u.teamMembers.some((tm) => {
+    const roleLower = (tm.role || "").toLowerCase().trim();
+    const isLeaderRole = roleLower === "leader";
+    const isLeaderId = Boolean(tm.team?.leaderId && tm.team.leaderId === u.id);
+    return isLeaderRole || isLeaderId;
+  });
 }
 
 export const toLocalInput = (dateStr?: string | null) => {
