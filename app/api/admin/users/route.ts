@@ -35,6 +35,24 @@ export async function GET() {
         banReason: true,
         bannedAt: true,
         createdAt: true,
+        accounts: {
+          select: {
+            id: true,
+            providerId: true,
+            createdAt: true,
+          },
+        },
+        sessions: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            userAgent: true,
+            ipAddress: true,
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 1,
+        },
         teamMembers: {
           include: {
             team: {

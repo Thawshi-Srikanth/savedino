@@ -26,7 +26,10 @@ import {
   Star,
   UserPlus,
   X,
+  Download,
+  Eye,
 } from "lucide-react";
+import { toast } from "sonner";
 import { UserData, getInitials } from "./types";
 
 interface MatchmakingTabProps {
@@ -37,6 +40,7 @@ interface MatchmakingTabProps {
   loading: boolean;
   fetchAdminData: () => void;
   onAssignClick: (u: UserData) => void;
+  onViewUser?: (u: UserData) => void;
 }
 
 export function MatchmakingTab({
@@ -47,6 +51,7 @@ export function MatchmakingTab({
   loading,
   fetchAdminData,
   onAssignClick,
+  onViewUser,
 }: MatchmakingTabProps) {
   const [hideStaffAdmin, setHideStaffAdmin] = useState(true);
 
@@ -58,6 +63,64 @@ export function MatchmakingTab({
       return true;
     });
   }, [unassignedSoloUsers, hideStaffAdmin]);
+
+  const handleExportSoloUsers = () => {
+    if (filteredSoloUsers.length === 0) {
+      toast.info("No unassigned researchers found to export.");
+      return;
+    }
+
+    const headers = [
+      "User ID",
+      "Full Name",
+      "Email Address",
+      "Email Verified",
+      "Role",
+      "Institution / Organization",
+      "Country / Region",
+      "WhatsApp / Phone",
+      "Tour Completed",
+      "Registered Date",
+      "Matchmaking Status",
+    ];
+
+    const escapeCsv = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = filteredSoloUsers.map((u) =>
+      [
+        escapeCsv(u.id),
+        escapeCsv(u.name),
+        escapeCsv(u.email),
+        escapeCsv(u.emailVerified ? "Yes" : "No"),
+        escapeCsv(u.role),
+        escapeCsv(u.institution || ""),
+        escapeCsv(u.country || ""),
+        escapeCsv(u.whatsapp || ""),
+        escapeCsv(u.tourCompleted ? "Yes" : "No"),
+        escapeCsv(u.createdAt ? new Date(u.createdAt).toISOString() : ""),
+        escapeCsv("Solo (Unassigned)"),
+      ].join(",")
+    );
+
+    const csvContent = "\uFEFF" + [headers.map((h) => `"${h}"`).join(","), ...rows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `savedino-solo-matchmaking-users-${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filteredSoloUsers.length} solo researchers to CSV.`);
+  };
 
   const renderRoleBadge = (role: string) => {
     switch (role) {
@@ -113,6 +176,20 @@ export function MatchmakingTab({
               </button>
             )}
           </div>
+
+          {/* Export Solo Researchers CSV Button */}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleExportSoloUsers}
+            disabled={filteredSoloUsers.length === 0}
+            className="h-8 text-xs font-semibold gap-1.5 shrink-0 bg-background hover:bg-muted text-foreground border-border shadow-arcade active:translate-y-0.5 cursor-pointer disabled:opacity-50"
+            title="Download CSV list of unassigned solo researchers"
+          >
+            <Download className="size-3.5 text-primary" />
+            <span>Export Solo List ({filteredSoloUsers.length})</span>
+          </Button>
 
           {/* Hide Staff & Admin Toggle Button */}
           <Button
@@ -237,13 +314,23 @@ export function MatchmakingTab({
                 <TableRow key={u.id} className="hover:bg-muted/30 border-b border-border/60">
                   <TableCell className="py-2 px-3 w-[35%] min-w-0 overflow-hidden">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="size-7 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[10px] font-bold text-foreground shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => onViewUser && onViewUser(u)}
+                        className="size-7 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[10px] font-bold text-foreground hover:border-primary/60 hover:text-primary transition-colors cursor-pointer shrink-0"
+                        title="View researcher profile"
+                      >
                         {getInitials(u.name)}
-                      </div>
+                      </button>
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-xs text-foreground truncate">
+                        <button
+                          type="button"
+                          onClick={() => onViewUser && onViewUser(u)}
+                          className="font-semibold text-xs text-foreground truncate hover:text-primary transition-colors cursor-pointer text-left block max-w-full"
+                          title="View researcher profile"
+                        >
                           {u.name}
-                        </div>
+                        </button>
                         <div className="text-[11px] text-muted-foreground font-mono truncate">
                           {u.email}
                         </div>
@@ -263,15 +350,29 @@ export function MatchmakingTab({
                     </span>
                   </TableCell>
                   <TableCell className="py-2 px-3 w-[20%] text-right whitespace-nowrap overflow-hidden">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onAssignClick(u)}
-                      className="h-6.5 text-[11px] font-semibold gap-1.5 cursor-pointer bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 border-[#10b981]/30 shadow-arcade-emerald active:translate-y-0.5"
-                    >
-                      <UserPlus className="size-3" />
-                      <span>Assign to Squad</span>
-                    </Button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      {onViewUser && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onViewUser(u)}
+                          className="h-6.5 px-2 text-[11px] font-semibold gap-1 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+                          title="View user details"
+                        >
+                          <Eye className="size-3" />
+                          <span>Profile</span>
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onAssignClick(u)}
+                        className="h-6.5 text-[11px] font-semibold gap-1.5 cursor-pointer bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 border-[#10b981]/30 shadow-arcade-emerald active:translate-y-0.5"
+                      >
+                        <UserPlus className="size-3" />
+                        <span>Assign</span>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

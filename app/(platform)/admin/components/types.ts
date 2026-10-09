@@ -73,6 +73,18 @@ export interface UserData {
   bannedAt?: string | null;
   emailVerified?: boolean;
   createdAt: string;
+  accounts?: Array<{
+    id: string;
+    providerId: string;
+    createdAt?: string;
+  }>;
+  sessions?: Array<{
+    id: string;
+    createdAt?: string;
+    updatedAt?: string;
+    userAgent?: string | null;
+    ipAddress?: string | null;
+  }>;
   teamMembers: Array<{
     id: string;
     role: string;

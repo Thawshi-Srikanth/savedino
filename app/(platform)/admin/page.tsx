@@ -25,6 +25,7 @@ import { DeleteTeamDialog } from "./components/delete-team-dialog";
 import { ReportTeamModal } from "./components/report-team-modal";
 import { BanUserModal } from "./components/ban-user-modal";
 import { SendEmailModal } from "./components/send-email-modal";
+import { ViewUserModal } from "./components/view-user-modal";
 
 type AdminTab = "USERS" | "MATCHMAKING" | "TEAMS" | "EVENTS";
 
@@ -137,6 +138,9 @@ export default function AdminDashboardPage() {
 
   // Send Custom Email Modal State
   const [emailingUser, setEmailingUser] = useState<UserData | null>(null);
+
+  // View User Profile Modal State
+  const [viewingUser, setViewingUser] = useState<UserData | null>(null);
 
   // Campaign Management State
   const [campaignSearch, setCampaignSearch] = useState<string>("");
@@ -992,6 +996,7 @@ export default function AdminDashboardPage() {
                 setBanningInitialAction(action);
               }}
               onSendEmail={setEmailingUser}
+              onViewUser={setViewingUser}
             />
           </TabsContent>
 
@@ -1008,6 +1013,7 @@ export default function AdminDashboardPage() {
                 setAssigningUser(u);
                 setSelectedTeamId("");
               }}
+              onViewUser={setViewingUser}
             />
           </TabsContent>
 
@@ -1205,6 +1211,21 @@ export default function AdminDashboardPage() {
         />
 
         <SendEmailModal user={emailingUser} onClose={() => setEmailingUser(null)} />
+
+        <ViewUserModal
+          user={viewingUser}
+          onClose={() => setViewingUser(null)}
+          onEditUser={handleOpenEditUser}
+          onSendEmail={setEmailingUser}
+          onBanUser={(u, action = "BAN") => {
+            setBanningUser(u);
+            setBanningInitialAction(action);
+          }}
+          onAssignUser={(u) => {
+            setAssigningUser(u);
+            setSelectedTeamId("");
+          }}
+        />
       </div>
     </TooltipProvider>
   );

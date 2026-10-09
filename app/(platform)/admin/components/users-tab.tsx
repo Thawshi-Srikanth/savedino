@@ -52,9 +52,11 @@ import {
   AlertCircle,
   Download,
   Mail,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, getInitials } from "./types";
+import { resolveCountryCode, getCountryFlag } from "@/lib/phone-validation";
 
 interface UsersTabProps {
   users: UserData[];
@@ -83,6 +85,7 @@ interface UsersTabProps {
   onDeleteUser: (u: UserData) => void;
   onBanUser: (u: UserData, initialAction?: "BAN" | "WARN_NAME" | "UNBAN") => void;
   onSendEmail?: (u: UserData) => void;
+  onViewUser?: (u: UserData) => void;
 }
 
 export function UsersTab({
@@ -112,6 +115,7 @@ export function UsersTab({
   onDeleteUser,
   onBanUser,
   onSendEmail,
+  onViewUser,
 }: UsersTabProps) {
   const bannedCount = users.filter((u) => u.banned).length;
   const activeRegisteredCount = users.filter((u) => !u.banned).length;
@@ -132,6 +136,8 @@ export function UsersTab({
       "Role",
       "Institution / Organization",
       "Country / Region",
+      "Last Logged IP",
+      "Last Active Date",
       "WhatsApp / Contact",
       "Tour Completed",
       "Squad Status",
@@ -156,6 +162,11 @@ export function UsersTab({
       const squadCode = teamMember?.team?.event?.code || "";
       const squadEventTitle = teamMember?.team?.event?.title || "";
       const squadStatus = inTeam ? "In Squad" : "Solo (Unassigned)";
+      const latestSession = u.sessions && u.sessions.length > 0 ? u.sessions[0] : null;
+      const lastLoggedIp = latestSession?.ipAddress || "";
+      const lastActiveDate = latestSession?.updatedAt
+        ? new Date(latestSession.updatedAt).toISOString()
+        : "";
 
       return [
         escapeCsv(u.id),
@@ -165,6 +176,8 @@ export function UsersTab({
         escapeCsv(u.role),
         escapeCsv(u.institution || ""),
         escapeCsv(u.country || ""),
+        escapeCsv(lastLoggedIp),
+        escapeCsv(lastActiveDate),
         escapeCsv(u.whatsapp || ""),
         escapeCsv(u.tourCompleted ? "Yes" : "No"),
         escapeCsv(squadStatus),
@@ -512,16 +525,26 @@ export function UsersTab({
                       {/* User Avatar, Name & Monospace Email */}
                       <TableCell className="py-2 px-3 w-[32%] min-w-0 overflow-hidden">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="size-7 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[10px] font-bold text-foreground shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => onViewUser && onViewUser(u)}
+                            className="size-7 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[10px] font-bold text-foreground hover:border-primary/60 hover:text-primary transition-colors cursor-pointer shrink-0"
+                            title="View user profile"
+                          >
                             {getInitials(u.name)}
-                          </div>
+                          </button>
                           <div className="min-w-0 flex-1">
                             <div className="font-semibold text-xs text-foreground truncate flex items-center gap-1.5">
-                              <span
-                                className={`truncate ${u.banned ? "line-through text-muted-foreground" : ""}`}
+                              <button
+                                type="button"
+                                onClick={() => onViewUser && onViewUser(u)}
+                                className={`truncate text-left hover:text-primary transition-colors cursor-pointer ${
+                                  u.banned ? "line-through text-muted-foreground" : ""
+                                }`}
+                                title="View user profile"
                               >
                                 {u.name}
-                              </span>
+                              </button>
                               {u.banned && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -614,13 +637,22 @@ export function UsersTab({
 
                       {/* Affiliation & Region */}
                       <TableCell className="py-2 px-3 w-[24%] min-w-0 overflow-hidden text-xs text-muted-foreground">
-                        <span className="truncate block max-w-full">
-                          <span className="text-foreground/90 font-sans">
+                        <span className="truncate flex items-center gap-1.5 max-w-full">
+                          <span className="text-foreground/90 font-sans truncate">
                             {u.institution || "Independent"}
                           </span>
-                          <span className="text-muted-foreground mx-1">&middot;</span>
-                          <span className="font-mono text-[11px] text-muted-foreground">
-                            {u.country || "Global"}
+                          <span className="text-muted-foreground shrink-0">&middot;</span>
+                          <span className="font-mono text-[11px] text-muted-foreground inline-flex items-center gap-1 shrink-0">
+                            {u.country ? (
+                              <>
+                                <span className="text-xs shrink-0" title={u.country}>
+                                  {getCountryFlag(resolveCountryCode(u.country))}
+                                </span>
+                                <span>{u.country}</span>
+                              </>
+                            ) : (
+                              <span>Global</span>
+                            )}
                           </span>
                         </span>
                       </TableCell>
@@ -638,11 +670,21 @@ export function UsersTab({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+                            {onViewUser && (
+                              <DropdownMenuItem
+                                onClick={() => onViewUser(u)}
+                                className="gap-2 text-xs cursor-pointer font-semibold text-primary focus:text-primary focus:bg-primary/10"
+                              >
+                                <Eye className="size-3.5" />
+                                <span>View Full Profile</span>
+                              </DropdownMenuItem>
+                            )}
+
                             <DropdownMenuItem
                               onClick={() => onEditUser(u)}
                               className="gap-2 text-xs cursor-pointer"
                             >
-                              <Edit2 className="size-3.5 text-primary" />
+                              <Edit2 className="size-3.5 text-muted-foreground" />
                               <span>Edit User Profile</span>
                             </DropdownMenuItem>
 
