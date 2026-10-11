@@ -94,3 +94,37 @@ export function isSubmissionClosed(
   }
   return { closed: false };
 }
+
+/**
+ * Checks if a user's account creation date permits them to participate in an event.
+ * If the event has a registration deadline (`regEnd`), users who created their accounts
+ * AFTER `regEnd` are prohibited from creating or joining teams for this event.
+ */
+export function checkUserRegistrationEligibility(
+  userCreatedAt: Date | string | null | undefined,
+  event: {
+    regEnd?: Date | string | null;
+    title?: string;
+  }
+): { eligible: boolean; reason?: string } {
+  if (!event?.regEnd || !userCreatedAt) {
+    return { eligible: true };
+  }
+
+  const regDeadline = new Date(event.regEnd);
+  const userCreated = new Date(userCreatedAt);
+
+  if (isNaN(regDeadline.getTime()) || isNaN(userCreated.getTime())) {
+    return { eligible: true };
+  }
+
+  if (userCreated.getTime() > regDeadline.getTime()) {
+    return {
+      eligible: false,
+      reason:
+        "Campaign registration closed before your account was created. You cannot create or join squads for this campaign.",
+    };
+  }
+
+  return { eligible: true };
+}

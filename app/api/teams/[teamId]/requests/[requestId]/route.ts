@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { calculateTeamStatus } from "@/lib/campaign-engine";
+import { calculateTeamStatus, checkUserRegistrationEligibility } from "@/lib/campaign-engine";
 import { sendTeamRequestAcceptedEmail, sendTeamRequestRejectedEmail } from "@/lib/email";
 import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
@@ -58,6 +58,7 @@ export async function PUT(
             id: true,
             name: true,
             email: true,
+            createdAt: true,
           },
         },
       },
@@ -121,6 +122,21 @@ export async function PUT(
           {
             success: false,
             error: `Squad is already at max capacity (${team.event.maxTeamSize} members).`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Verify registration eligibility for this campaign
+    if (team.event?.regEnd) {
+      const eligibility = checkUserRegistrationEligibility(joinReq.user?.createdAt, team.event);
+      if (!eligibility.eligible) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Cannot accept: This user's account was created after the registration period closed for this campaign.",
           },
           { status: 400 }
         );

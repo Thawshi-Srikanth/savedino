@@ -4,6 +4,7 @@ import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { checkUserRegistrationEligibility } from "@/lib/campaign-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -287,6 +288,17 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       return;
     }
 
+    // Check registration eligibility: account created after regEnd is forbidden
+    if (session?.user?.role !== "admin" && event.regEnd && session?.user?.createdAt) {
+      const eligibility = checkUserRegistrationEligibility(session.user.createdAt, event);
+      if (!eligibility.eligible) {
+        setCreateError(
+          eligibility.reason || "Campaign registration closed before your account was created."
+        );
+        return;
+      }
+    }
+
     if (!teamName.trim()) {
       setCreateError("Please enter a team name.");
       return;
@@ -347,6 +359,17 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
       setJoinError("Team registration for this campaign has closed.");
       return;
+    }
+
+    // Check registration eligibility: account created after regEnd is forbidden
+    if (session?.user?.role !== "admin" && event.regEnd && session?.user?.createdAt) {
+      const eligibility = checkUserRegistrationEligibility(session.user.createdAt, event);
+      if (!eligibility.eligible) {
+        setJoinError(
+          eligibility.reason || "Campaign registration closed before your account was created."
+        );
+        return;
+      }
     }
 
     if (!joinCode.trim()) {
@@ -761,6 +784,13 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 })
               : null;
 
+            const isAccountIneligible = Boolean(
+              session?.user?.role !== "admin" &&
+              event.regEnd &&
+              session?.user?.createdAt &&
+              new Date(session.user.createdAt).getTime() > new Date(event.regEnd).getTime()
+            );
+
             return (
               <>
                 {/* 1. Dynamic Deadline & Countdown */}
@@ -893,7 +923,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                           </Button>
                         </Link>
 
-                        {!isRegClosed && isTeamFormationStarted ? (
+                        {!isRegClosed && isTeamFormationStarted && !isAccountIneligible ? (
                           <div className="grid grid-cols-2 gap-2">
                             <Button
                               onClick={() => {
@@ -1024,6 +1054,15 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                                 Campaign Full ({squadCount}/{event.maxTeams} Teams)
                               </span>
                             </Button>
+                          ) : isAccountIneligible ? (
+                            <div className="w-full p-2.5 rounded-xl bg-white/10 border border-white/20 text-center font-sans">
+                              <p className="text-xs font-semibold text-white">
+                                Registration Closed
+                              </p>
+                              <p className="text-[11px] text-white/75 mt-0.5">
+                                Registration closed before your account was created.
+                              </p>
+                            </div>
                           ) : (
                             <>
                               <Button

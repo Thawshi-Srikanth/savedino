@@ -6,6 +6,7 @@ import {
   checkUserEventConcurrency,
   generateInviteCode,
   isRegistrationClosed,
+  checkUserRegistrationEligibility,
 } from "@/lib/campaign-engine";
 import { notifySquadCreated, createSquadThread } from "@/lib/discord";
 import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
@@ -70,6 +71,18 @@ export async function POST(req: Request) {
         { success: false, error: regCheck.reason || "Registration has closed for this campaign." },
         { status: 400 }
       );
+    }
+
+    // 1b. Check User Registration Eligibility (Accounts created after regEnd cannot create teams)
+    if (targetEvent.regEnd && session.user.role !== "admin") {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { createdAt: true },
+      });
+      const eligibility = checkUserRegistrationEligibility(user?.createdAt, targetEvent);
+      if (!eligibility.eligible) {
+        return NextResponse.json({ success: false, error: eligibility.reason }, { status: 403 });
+      }
     }
 
     // 2. Check Campaign Max Teams Limit (if configured)
@@ -287,6 +300,7 @@ export async function GET(req: Request) {
             status: true,
             maxTeamSize: true,
             maxTeams: true,
+            regEnd: true,
           },
         },
         members: {

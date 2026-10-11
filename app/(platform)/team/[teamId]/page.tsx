@@ -2380,6 +2380,18 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                           </div>
                         )}
 
+                        {/* Late Registration Alert */}
+                        {(req as any).isLateRegistration && isPending && (
+                          <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-start gap-2.5 text-xs font-sans">
+                            <Clock className="size-4 shrink-0 mt-0.5" />
+                            <div>
+                              <strong>Late Registration:</strong> This user&apos;s account was
+                              created after campaign registration closed. They cannot be added to
+                              squads for this campaign.
+                            </div>
+                          </div>
+                        )}
+
                         {/* Leader Action Buttons */}
                         {isPending && isLeaderOrAdmin && (
                           <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-border/60">
@@ -2387,27 +2399,35 @@ export default function TeamWorkspacePage({ params }: { params: Promise<{ teamId
                               size="sm"
                               variant="emerald"
                               disabled={
-                                hasJoinedOtherSquad || isFull || isSquadDisabled || isProcessing
+                                hasJoinedOtherSquad ||
+                                (req as any).isLateRegistration ||
+                                isFull ||
+                                isSquadDisabled ||
+                                isProcessing
                               }
                               onClick={() => handleRespondToRequest(req.id, "ACCEPT")}
                               className="h-8.5 px-4 text-xs font-bold rounded-xl gap-1.5 active:translate-y-0.5 border-0 shadow-arcade-emerald"
                               title={
                                 hasJoinedOtherSquad
                                   ? `Already in squad "${req.alreadyJoinedSquad?.teamName}"`
-                                  : isFull
-                                    ? `Squad roster is full (${memberCount}/${maxCapacity})`
-                                    : isSquadDisabled
-                                      ? "Squad is disabled"
-                                      : "Accept applicant into squad"
+                                  : (req as any).isLateRegistration
+                                    ? "User registered after campaign deadline"
+                                    : isFull
+                                      ? `Squad roster is full (${memberCount}/${maxCapacity})`
+                                      : isSquadDisabled
+                                        ? "Squad is disabled"
+                                        : "Accept applicant into squad"
                               }
                             >
                               <UserCheck className="size-3.5" />
                               <span>
                                 {hasJoinedOtherSquad
                                   ? "Joined Another Squad"
-                                  : isFull
-                                    ? `Roster Full (${memberCount}/${maxCapacity})`
-                                    : "Accept into Squad"}
+                                  : (req as any).isLateRegistration
+                                    ? "Late Registration"
+                                    : isFull
+                                      ? `Roster Full (${memberCount}/${maxCapacity})`
+                                      : "Accept into Squad"}
                               </span>
                             </Button>
 

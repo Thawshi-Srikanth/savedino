@@ -76,4 +76,5 @@ export {
   calculateTeamStatus,
   isRegistrationClosed,
   isSubmissionClosed,
+  checkUserRegistrationEligibility,
 } from "./campaign-utils";

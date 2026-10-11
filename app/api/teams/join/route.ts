@@ -6,6 +6,7 @@ import {
   checkUserEventConcurrency,
   calculateTeamStatus,
   isRegistrationClosed,
+  checkUserRegistrationEligibility,
 } from "@/lib/campaign-engine";
 import { addMemberToThread, assignDiscordRole } from "@/lib/discord";
 import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
@@ -88,6 +89,18 @@ export async function POST(req: Request) {
           },
           { status: 400 }
         );
+      }
+
+      // Check User Registration Eligibility (Accounts created after regEnd cannot join squads)
+      if (team.event.regEnd && session.user.role !== "admin") {
+        const user = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { createdAt: true },
+        });
+        const eligibility = checkUserRegistrationEligibility(user?.createdAt, team.event);
+        if (!eligibility.eligible) {
+          return NextResponse.json({ success: false, error: eligibility.reason }, { status: 403 });
+        }
       }
     }
 

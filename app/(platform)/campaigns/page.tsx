@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { getUserProfile } from "@/lib/user-profile";
 import { isOrganizer } from "@/lib/rbac";
+import { checkUserRegistrationEligibility } from "@/lib/campaign-utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -118,7 +119,11 @@ function getEventStages(ev: EventItem, now: number = Date.now()) {
   ];
 }
 
-function getStageAction(ev: EventItem, now: number = Date.now()) {
+function getStageAction(
+  ev: EventItem,
+  now: number = Date.now(),
+  user?: { role?: string; createdAt?: string | Date } | null
+) {
   const stages = getEventStages(ev, now);
   const s2Start = ev.teamFormationStart
     ? new Date(ev.teamFormationStart).getTime()
@@ -195,6 +200,25 @@ function getStageAction(ev: EventItem, now: number = Date.now()) {
 
   // Only allow "Form a Team" if Team Setup stage is actually ACTIVE and team formation has started
   if (teamStage?.status === "ACTIVE" && isTeamFormationStarted && !isRegClosed) {
+    const isLateUser = Boolean(
+      user?.role !== "admin" &&
+      ev.regEnd &&
+      user?.createdAt &&
+      new Date(user.createdAt).getTime() > new Date(ev.regEnd).getTime()
+    );
+
+    if (isLateUser) {
+      return {
+        isModal: false,
+        isClosed: true,
+        label: "Registration Closed",
+        href: `/campaigns/${ev.id}`,
+        icon: Clock,
+        className:
+          "bg-muted text-muted-foreground border border-border opacity-80 cursor-not-allowed shadow-arcade-sm",
+      };
+    }
+
     return {
       isModal: true,
       isClosed: false,
@@ -562,6 +586,24 @@ export default function CampaignsPage() {
       );
       setCreateError(`Team formation has not started yet. Team formation begins on ${formatted}.`);
       return;
+    }
+
+    // Check registration eligibility: account created after regEnd is forbidden
+    if (
+      session?.user?.role !== "admin" &&
+      selectedEventForTeam.regEnd &&
+      session?.user?.createdAt
+    ) {
+      const eligibility = checkUserRegistrationEligibility(
+        session.user.createdAt,
+        selectedEventForTeam
+      );
+      if (!eligibility.eligible) {
+        setCreateError(
+          eligibility.reason || "Campaign registration closed before your account was created."
+        );
+        return;
+      }
     }
 
     if (!teamName.trim()) {
@@ -1010,7 +1052,11 @@ export default function CampaignsPage() {
                             );
                           }
 
-                          const action = getStageAction(currentActiveEvent);
+                          const action = getStageAction(
+                            currentActiveEvent,
+                            Date.now(),
+                            session?.user
+                          );
                           if (action.isClosed) {
                             return (
                               <Button
@@ -1277,7 +1323,7 @@ export default function CampaignsPage() {
                               );
                             }
 
-                            const action = getStageAction(ev);
+                            const action = getStageAction(ev, Date.now(), session?.user);
                             if (action.isClosed) {
                               return (
                                 <Button

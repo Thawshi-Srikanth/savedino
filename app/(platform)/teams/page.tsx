@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { isOrganizer, canParticipateInTeams } from "@/lib/rbac";
+import { checkUserRegistrationEligibility } from "@/lib/campaign-utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +65,7 @@ interface TeamEvent {
   status: string;
   maxTeamSize?: number | null;
   maxTeams?: number | null;
+  regEnd?: string | null;
 }
 
 interface Team {
@@ -337,6 +339,20 @@ function TeamsContent() {
       toast.error("Please enter a message or application note to the squad leader.");
       return;
     }
+
+    if (session?.user?.role !== "admin" && requestTeam.event?.regEnd && session?.user?.createdAt) {
+      const eligibility = checkUserRegistrationEligibility(
+        session.user.createdAt,
+        requestTeam.event
+      );
+      if (!eligibility.eligible) {
+        toast.error(
+          eligibility.reason || "Campaign registration closed before your account was created."
+        );
+        return;
+      }
+    }
+
     setRequestLoading(true);
 
     try {
@@ -962,6 +978,20 @@ function TeamsContent() {
                             title="Your join request is awaiting review by the squad leader."
                           >
                             Request Pending
+                          </Button>
+                        ) : session?.user?.role !== "admin" &&
+                          team.event?.regEnd &&
+                          session?.user?.createdAt &&
+                          new Date(session.user.createdAt).getTime() >
+                            new Date(team.event.regEnd).getTime() ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled
+                            className="w-full h-8 text-xs font-bold bg-muted/60 text-muted-foreground border-border cursor-not-allowed opacity-80"
+                            title="Campaign registration closed before your account was created. You cannot apply to squads for this campaign."
+                          >
+                            Registration Closed
                           </Button>
                         ) : team.isRecruiting && !isFull ? (
                           <Button

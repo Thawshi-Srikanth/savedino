@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendTeamJoinRequestEmail } from "@/lib/email";
 import { maskEmail } from "@/lib/mask-email";
-import { isRegistrationClosed } from "@/lib/campaign-engine";
+import { isRegistrationClosed, checkUserRegistrationEligibility } from "@/lib/campaign-engine";
 import { captureServerEvent, captureServerException } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +25,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     const team = await prisma.team.findUnique({
       where: { id: teamId },
       include: {
+        event: {
+          select: { regEnd: true },
+        },
         members: true,
         joinRequests: {
           include: {
@@ -35,6 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
                 email: true,
                 institution: true,
                 country: true,
+                createdAt: true,
               },
             },
           },
@@ -97,8 +101,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     const requestsWithConflictInfo = team.joinRequests.map((req) => {
       const activeMem = membershipMap.get(req.userId);
       const isSelf = req.userId === session.user.id;
+      const isLateRegistration = Boolean(
+        team.event?.regEnd &&
+        req.user?.createdAt &&
+        new Date(req.user.createdAt).getTime() > new Date(team.event.regEnd).getTime()
+      );
       return {
         ...req,
+        isLateRegistration,
         user: {
           ...req.user,
           email: canSeeFullEmails || isSelf ? req.user.email : maskEmail(req.user.email),
@@ -217,6 +227,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
           },
           { status: 400 }
         );
+      }
+
+      // Check User Registration Eligibility (Accounts created after regEnd cannot apply for squads)
+      if (team.event.regEnd) {
+        const user = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { createdAt: true },
+        });
+        const eligibility = checkUserRegistrationEligibility(user?.createdAt, team.event);
+        if (!eligibility.eligible) {
+          return NextResponse.json({ success: false, error: eligibility.reason }, { status: 403 });
+        }
       }
     }
 
