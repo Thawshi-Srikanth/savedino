@@ -242,13 +242,19 @@ export default function AdminDashboardPage() {
 
       const isUnassigned = u.teamMembers.length === 0;
       const isMemberOnly = u.teamMembers.length > 0 && !isSquadLeader;
+      const hasApplications = Boolean(u.joinRequests && u.joinRequests.length > 0);
+      const hasPendingApplications = Boolean(
+        u.joinRequests && u.joinRequests.some((r) => r.status === "PENDING")
+      );
 
       const matchesTeam =
         teamStatusFilter === "ALL" ||
         (teamStatusFilter === "LEADER" && isSquadLeader) ||
         (teamStatusFilter === "MEMBERS_ONLY" && isMemberOnly) ||
         (teamStatusFilter === "UNASSIGNED" && isUnassigned) ||
-        (teamStatusFilter === "IN_TEAM" && !isUnassigned);
+        (teamStatusFilter === "IN_TEAM" && !isUnassigned) ||
+        (teamStatusFilter === "APPLIED" && hasApplications) ||
+        (teamStatusFilter === "PENDING_APPS" && hasPendingApplications);
 
       return matchesSearch && matchesRole && matchesTeam;
     });
@@ -280,6 +286,17 @@ export default function AdminDashboardPage() {
   );
   const unassignedCount = useMemo(
     () => users.filter((u) => u.teamMembers.length === 0 && !u.banned).length,
+    [users]
+  );
+  const appliedCount = useMemo(
+    () => users.filter((u) => u.joinRequests && u.joinRequests.length > 0 && !u.banned).length,
+    [users]
+  );
+  const pendingAppsCount = useMemo(
+    () =>
+      users.filter(
+        (u) => u.joinRequests && u.joinRequests.some((r) => r.status === "PENDING") && !u.banned
+      ).length,
     [users]
   );
 
@@ -1071,6 +1088,8 @@ export default function AdminDashboardPage() {
               leaderCount={leaderCount}
               citizenCount={citizenCount}
               unassignedCount={unassignedCount}
+              appliedCount={appliedCount}
+              pendingAppsCount={pendingAppsCount}
               loading={isDisplayLoading}
               fetchAdminData={fetchAdminData}
               onQuickRoleChange={handleQuickRoleChange}

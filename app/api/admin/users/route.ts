@@ -68,6 +68,31 @@ export async function GET() {
             },
           },
         },
+        joinRequests: {
+          select: {
+            id: true,
+            status: true,
+            message: true,
+            createdAt: true,
+            team: {
+              select: {
+                id: true,
+                name: true,
+                inviteCode: true,
+                leaderId: true,
+                status: true,
+                event: {
+                  select: {
+                    id: true,
+                    title: true,
+                    code: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
       },
       orderBy: { createdAt: "desc" },
     });

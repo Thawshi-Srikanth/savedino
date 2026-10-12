@@ -53,6 +53,10 @@ import {
   Download,
   Mail,
   Eye,
+  Send,
+  Clock,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, getInitials, isUserSquadLeader } from "./types";
@@ -79,6 +83,8 @@ interface UsersTabProps {
   leaderCount?: number;
   citizenCount: number;
   unassignedCount: number;
+  appliedCount?: number;
+  pendingAppsCount?: number;
   loading: boolean;
   fetchAdminData: () => void;
   onQuickRoleChange: (userId: string, newRole: string) => void;
@@ -110,6 +116,8 @@ export function UsersTab({
   leaderCount = 0,
   citizenCount,
   unassignedCount,
+  appliedCount = 0,
+  pendingAppsCount = 0,
   loading,
   fetchAdminData,
   onQuickRoleChange,
@@ -147,6 +155,9 @@ export function UsersTab({
       "Squad Role",
       "Campaign Code",
       "Campaign Title",
+      "Applied Squads",
+      "Total Applications",
+      "Pending Applications",
       "Registered Date",
     ];
 
@@ -169,6 +180,11 @@ export function UsersTab({
       const lastActiveDate = latestSession?.updatedAt
         ? new Date(latestSession.updatedAt).toISOString()
         : "";
+      const appliedSquads = (u.joinRequests || [])
+        .map((r) => `${r.team.name} [${r.status}]`)
+        .join("; ");
+      const totalApps = u.joinRequests?.length || 0;
+      const pendingApps = (u.joinRequests || []).filter((r) => r.status === "PENDING").length;
 
       return [
         escapeCsv(u.id),
@@ -187,6 +203,9 @@ export function UsersTab({
         escapeCsv(squadRole),
         escapeCsv(squadCode),
         escapeCsv(squadEventTitle),
+        escapeCsv(appliedSquads),
+        escapeCsv(totalApps),
+        escapeCsv(pendingApps),
         escapeCsv(u.createdAt ? new Date(u.createdAt).toISOString() : ""),
       ].join(",");
     });
@@ -369,6 +388,10 @@ export function UsersTab({
             <span>Unassigned:</span>
             <span className="font-bold text-amber-500 font-mono">{unassignedCount}</span>
           </div>
+          <div className="flex justify-between">
+            <span>Applied to Squads:</span>
+            <span className="font-bold text-sky-400 font-mono">{appliedCount}</span>
+          </div>
         </div>
       </aside>
 
@@ -414,7 +437,7 @@ export function UsersTab({
 
             {/* Team Status Filter Selector */}
             <Select value={teamStatusFilter} onValueChange={setTeamStatusFilter}>
-              <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[140px]">
+              <SelectTrigger className="h-8 text-xs font-sans bg-background w-full sm:w-[150px]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -422,6 +445,10 @@ export function UsersTab({
                 <SelectItem value="LEADER">Squad Leaders ({leaderCount})</SelectItem>
                 <SelectItem value="IN_TEAM">In Squad (All)</SelectItem>
                 <SelectItem value="MEMBERS_ONLY">Squad Members Only</SelectItem>
+                <SelectItem value="APPLIED">Applied to Squads ({appliedCount})</SelectItem>
+                <SelectItem value="PENDING_APPS">
+                  Pending Applications ({pendingAppsCount})
+                </SelectItem>
                 <SelectItem value="UNASSIGNED">Solo / Unassigned ({unassignedCount})</SelectItem>
               </SelectContent>
             </Select>
@@ -662,7 +689,104 @@ export function UsersTab({
                                 ({currentTeam.event?.code || "AST"})
                               </span>
                             )}
+                            {u.joinRequests && u.joinRequests.length > 0 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20 cursor-help shrink-0">
+                                    <Send className="size-2" />
+                                    <span>
+                                      +{u.joinRequests.length} app
+                                      {u.joinRequests.length > 1 ? "s" : ""}
+                                    </span>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs font-sans max-w-xs">
+                                  <p className="font-bold text-foreground">Applied Squads Log:</p>
+                                  <ul className="text-muted-foreground list-disc pl-4 space-y-0.5 mt-1">
+                                    {u.joinRequests.map((r) => (
+                                      <li key={r.id}>
+                                        <span className="font-semibold text-foreground">
+                                          {r.team.name}
+                                        </span>{" "}
+                                        <span
+                                          className={
+                                            r.status === "PENDING"
+                                              ? "text-amber-400 font-mono font-bold"
+                                              : r.status === "ACCEPTED"
+                                                ? "text-emerald-400 font-mono font-bold"
+                                                : "text-muted-foreground font-mono"
+                                          }
+                                        >
+                                          ({r.status})
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                           </div>
+                        ) : u.joinRequests && u.joinRequests.length > 0 ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex flex-col gap-0.5 cursor-help">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="size-2 rounded-full bg-sky-400 shrink-0" />
+                                  <span className="font-semibold text-sky-400 truncate max-w-[120px]">
+                                    Applied: {u.joinRequests[0].team.name}
+                                  </span>
+                                  {u.joinRequests.length > 1 && (
+                                    <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                                      +{u.joinRequests.length - 1}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground">
+                                  <span
+                                    className={
+                                      u.joinRequests[0].status === "PENDING"
+                                        ? "text-amber-400 font-bold"
+                                        : u.joinRequests[0].status === "ACCEPTED"
+                                          ? "text-emerald-400 font-bold"
+                                          : "text-muted-foreground"
+                                    }
+                                  >
+                                    {u.joinRequests[0].status === "PENDING"
+                                      ? "Pending"
+                                      : u.joinRequests[0].status === "ACCEPTED"
+                                        ? "Accepted"
+                                        : "Declined"}
+                                  </span>
+                                  {u.joinRequests.length > 1 && (
+                                    <span>&middot; {u.joinRequests.length} total apps</span>
+                                  )}
+                                </div>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs font-sans max-w-xs">
+                              <p className="font-bold text-foreground">Applied Squads Log:</p>
+                              <ul className="text-muted-foreground list-disc pl-4 space-y-0.5 mt-1">
+                                {u.joinRequests.map((r) => (
+                                  <li key={r.id}>
+                                    <span className="font-semibold text-foreground">
+                                      {r.team.name}
+                                    </span>{" "}
+                                    <span
+                                      className={
+                                        r.status === "PENDING"
+                                          ? "text-amber-400 font-mono font-bold"
+                                          : r.status === "ACCEPTED"
+                                            ? "text-emerald-400 font-mono font-bold"
+                                            : "text-muted-foreground font-mono"
+                                      }
+                                    >
+                                      ({r.status})
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 font-semibold">
                             <span className="size-1.5 rounded-full bg-amber-500 shrink-0" />

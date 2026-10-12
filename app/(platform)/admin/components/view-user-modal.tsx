@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   User,
   Mail,
@@ -150,6 +151,14 @@ export function ViewUserModal({
     };
   }, [userIp]);
 
+  const [activeModalTab, setActiveModalTab] = React.useState<
+    "overview" | "applications" | "activity"
+  >("overview");
+
+  React.useEffect(() => {
+    setActiveModalTab("overview");
+  }, [user?.id]);
+
   // Declared profile country flag
   const declaredCountryCode = resolveCountryCode(user.country);
   const declaredFlagUrl = `https://flagcdn.com/w40/${declaredCountryCode.toLowerCase()}.png`;
@@ -267,7 +276,24 @@ export function ViewUserModal({
               </span>
             )}
 
-            {/* 6. Onboarding Tour Tag */}
+            {/* 6. Applications Log Tag */}
+            {user.joinRequests && user.joinRequests.length > 0 ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                <Send className="size-2.5" />
+                <span>
+                  {user.joinRequests.length} Applied
+                  {user.joinRequests.filter((r) => r.status === "PENDING").length > 0
+                    ? ` (${user.joinRequests.filter((r) => r.status === "PENDING").length} Pending)`
+                    : ""}
+                </span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border">
+                <span>0 Applications</span>
+              </span>
+            )}
+
+            {/* 7. Onboarding Tour Tag */}
             {user.tourCompleted ? (
               <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border">
                 <CheckCircle2 className="size-2.5 text-emerald-500" />
@@ -280,6 +306,48 @@ export function ViewUserModal({
               </span>
             )}
           </div>
+        </div>
+
+        {/* Navigation Tabs Bar */}
+        <div className="px-6 border-b border-border bg-card shrink-0">
+          <Tabs
+            value={activeModalTab}
+            onValueChange={(val) => setActiveModalTab(val as any)}
+            className="w-full"
+          >
+            <TabsList className="h-10 bg-transparent p-0 gap-5 border-b-0 w-full justify-start rounded-none">
+              <TabsTrigger
+                value="overview"
+                className="h-10 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none text-xs font-semibold px-1 py-2 cursor-pointer flex items-center gap-1.5 transition-colors"
+              >
+                <User className="size-3.5 text-muted-foreground" />
+                <span>Overview &amp; Profile</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="applications"
+                className="h-10 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none text-xs font-semibold px-1 py-2 cursor-pointer flex items-center gap-1.5 transition-colors"
+              >
+                <Send className="size-3.5 text-sky-400" />
+                <span>Applied Teams &amp; Log</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    user.joinRequests && user.joinRequests.length > 0
+                      ? "bg-primary/20 text-primary font-bold"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {user.joinRequests?.length || 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="activity"
+                className="h-10 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none text-xs font-semibold px-1 py-2 cursor-pointer flex items-center gap-1.5 transition-colors"
+              >
+                <Activity className="size-3.5 text-muted-foreground" />
+                <span>Security &amp; Activity</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Scrollable Body Content */}
@@ -302,356 +370,668 @@ export function ViewUserModal({
             </div>
           )}
 
-          {/* User Details Grid */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
-              <User className="size-3.5 text-primary" />
-              <span>Contact &amp; Account Information</span>
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {/* Email Address */}
-              <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
-                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Mail className="size-3 text-muted-foreground" />
-                  <span>Email Address</span>
-                </span>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs text-foreground font-semibold truncate select-all">
-                    {user.email}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(user.email, "Email Address")}
-                    className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
-                    title="Copy Email"
-                  >
-                    <Copy className="size-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Login Method / Auth Provider */}
-              <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
-                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <KeyRound className="size-3 text-muted-foreground" />
-                  <span>Authentication Method</span>
-                </span>
-                <div className="text-xs font-semibold text-foreground truncate flex items-center gap-1.5">
-                  <span>{loginMethodLabel}</span>
-                  {user.accounts && user.accounts.length > 0 && (
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      ({user.accounts.length} linked account{user.accounts.length > 1 ? "s" : ""})
+          {/* TAB 1: OVERVIEW & PROFILE */}
+          {activeModalTab === "overview" && (
+            <div className="space-y-5">
+              {/* User Details Grid */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+                  <User className="size-3.5 text-primary" />
+                  <span>Contact &amp; Account Information</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* Email Address */}
+                  <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                      <Mail className="size-3 text-muted-foreground" />
+                      <span>Email Address</span>
                     </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Institution */}
-              <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
-                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Building2 className="size-3 text-muted-foreground" />
-                  <span>Institution / School</span>
-                </span>
-                <div className="text-xs font-semibold text-foreground truncate">
-                  {user.institution || "Independent Researcher"}
-                </div>
-              </div>
-
-              {/* Country */}
-              <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
-                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Globe className="size-3 text-muted-foreground" />
-                  <span>Profile Country / Region</span>
-                </span>
-                <div className="text-xs font-semibold text-foreground truncate flex items-center gap-2">
-                  {user.country ? (
-                    <>
-                      <img
-                        src={declaredFlagUrl}
-                        alt={user.country}
-                        className="w-4 h-3 object-cover rounded-xs border border-border/80 shadow-2xs shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = "none";
-                        }}
-                      />
-                      <span>{user.country}</span>
-                      <span className="text-muted-foreground font-mono text-[10px]">
-                        ({declaredCountryCode})
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs text-foreground font-semibold truncate select-all">
+                        {user.email}
                       </span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">Global / Unspecified</span>
-                  )}
-                </div>
-              </div>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(user.email, "Email Address")}
+                        className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
+                        title="Copy Email"
+                      >
+                        <Copy className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
 
-              {/* WhatsApp Contact */}
-              <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
-                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Phone className="size-3 text-muted-foreground" />
-                  <span>WhatsApp / Contact</span>
-                </span>
-                <div className="flex items-center justify-between gap-2">
-                  {user.whatsapp ? (
-                    <>
-                      <span className="font-mono text-xs text-foreground font-semibold truncate">
-                        {user.whatsapp}
-                      </span>
-                      {cleanWhatsappNumber && (
-                        <a
-                          href={`https://wa.me/${cleanWhatsappNumber}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] text-emerald-400 hover:underline flex items-center gap-1 font-sans font-semibold"
-                        >
-                          <span>Chat</span>
-                          <ExternalLink className="size-3" />
-                        </a>
+                  {/* Login Method / Auth Provider */}
+                  <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                      <KeyRound className="size-3 text-muted-foreground" />
+                      <span>Authentication Method</span>
+                    </span>
+                    <div className="text-xs font-semibold text-foreground truncate flex items-center gap-1.5">
+                      <span>{loginMethodLabel}</span>
+                      {user.accounts && user.accounts.length > 0 && (
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          ({user.accounts.length} linked account
+                          {user.accounts.length > 1 ? "s" : ""})
+                        </span>
                       )}
-                    </>
-                  ) : (
-                    <span className="text-xs text-muted-foreground italic">Not provided</span>
-                  )}
-                </div>
-              </div>
+                    </div>
+                  </div>
 
-              {/* Registration Date */}
-              <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
-                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Calendar className="size-3 text-muted-foreground" />
-                  <span>Account Created</span>
-                </span>
-                <div className="font-mono text-xs text-foreground font-semibold">
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Unknown"}
-                  <span className="text-muted-foreground font-normal ml-1 text-[11px]">
-                    (
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : ""}
-                    )
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+                  {/* Institution */}
+                  <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                      <Building2 className="size-3 text-muted-foreground" />
+                      <span>Institution / School</span>
+                    </span>
+                    <div className="text-xs font-semibold text-foreground truncate">
+                      {user.institution || "Independent Researcher"}
+                    </div>
+                  </div>
 
-          {/* Last Activity & Network IP Logs */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
-              <Activity className="size-3.5 text-primary" />
-              <span>Activity &amp; Logged IP Address</span>
-            </h4>
-            <div className="p-3.5 rounded-lg border border-border bg-muted/20 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* IP Address & Country Flag Logo */}
-                <div className="space-y-1.5">
-                  <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Network className="size-3 text-muted-foreground" />
-                    <span>Last Logged IP &amp; Country</span>
-                  </span>
-                  {latestSession?.ipAddress ? (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {/* Country Flag Logo / Image */}
-                        {ipGeo.flagUrl ? (
+                  {/* Country */}
+                  <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                      <Globe className="size-3 text-muted-foreground" />
+                      <span>Profile Country / Region</span>
+                    </span>
+                    <div className="text-xs font-semibold text-foreground truncate flex items-center gap-2">
+                      {user.country ? (
+                        <>
                           <img
-                            src={ipGeo.flagUrl}
-                            alt={ipGeo.countryCode || "Country Flag"}
-                            className="w-5 h-3.5 object-cover rounded-xs border border-border/80 shadow-2xs shrink-0"
-                            title={`${ipGeo.country || ipGeo.countryCode} (${ipGeo.countryCode})`}
+                            src={declaredFlagUrl}
+                            alt={user.country}
+                            className="w-4 h-3 object-cover rounded-xs border border-border/80 shadow-2xs shrink-0"
                             onError={(e) => {
                               (e.target as HTMLElement).style.display = "none";
                             }}
                           />
-                        ) : ipGeo.flagEmoji ? (
-                          <span className="text-sm shrink-0" title={ipGeo.country || "Country"}>
-                            {ipGeo.flagEmoji}
+                          <span>{user.country}</span>
+                          <span className="text-muted-foreground font-mono text-[10px]">
+                            ({declaredCountryCode})
                           </span>
-                        ) : null}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">Global / Unspecified</span>
+                      )}
+                    </div>
+                  </div>
 
-                        <span className="font-mono text-xs text-foreground font-bold bg-background px-2.5 py-1 rounded border border-border select-all shadow-xs">
-                          {latestSession.ipAddress}
-                        </span>
+                  {/* WhatsApp Contact */}
+                  <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                      <Phone className="size-3 text-muted-foreground" />
+                      <span>WhatsApp / Contact</span>
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      {user.whatsapp ? (
+                        <>
+                          <span className="font-mono text-xs text-foreground font-semibold truncate">
+                            {user.whatsapp}
+                          </span>
+                          {cleanWhatsappNumber && (
+                            <a
+                              href={`https://wa.me/${cleanWhatsappNumber}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-emerald-400 hover:underline flex items-center gap-1 font-sans font-semibold"
+                            >
+                              <span>Chat</span>
+                              <ExternalLink className="size-3" />
+                            </a>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">Not provided</span>
+                      )}
+                    </div>
+                  </div>
 
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(latestSession.ipAddress!, "IP Address")}
-                          className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
-                          title="Copy IP Address"
-                        >
-                          <Copy className="size-3.5" />
-                        </button>
+                  {/* Registration Date */}
+                  <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                      <Calendar className="size-3 text-muted-foreground" />
+                      <span>Account Created</span>
+                    </span>
+                    <div className="font-mono text-xs text-foreground font-semibold">
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Unknown"}
+                      <span className="text-muted-foreground font-normal ml-1 text-[11px]">
+                        (
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : ""}
+                        )
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                        <a
-                          href={`https://ipinfo.io/${latestSession.ipAddress}`}
+              {/* Research Squad Memberships */}
+              <div>
+                <div className="flex items-center justify-between mb-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Telescope className="size-3.5 text-primary" />
+                    <span>Active Squad Memberships</span>
+                  </h4>
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    {user.teamMembers?.length || 0} squad(s)
+                  </Badge>
+                </div>
+
+                {inTeam ? (
+                  <div className="space-y-2">
+                    {user.teamMembers.map((tm) => (
+                      <div
+                        key={tm.id}
+                        className="p-3.5 rounded-lg border border-border bg-card/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-primary/40 transition-colors"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-foreground">
+                              {tm.team.name}
+                            </span>
+                            {tm.role?.toLowerCase() === "leader" ||
+                            tm.team?.leaderId === user.id ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                <Crown className="size-2.5" />
+                                Leader
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                                Member
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
+                            <span>
+                              Campaign:{" "}
+                              <strong className="text-foreground/90">
+                                {tm.team.event?.title || "Asteroid Search"}
+                              </strong>
+                            </span>
+                            {tm.team.event?.code && (
+                              <span className="font-mono text-[10px] text-primary">
+                                ({tm.team.event.code})
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <Link
+                          href={`/team/${tm.team.id}`}
                           target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 px-2 py-0.5 rounded border border-sky-500/20 transition-colors"
-                          title="Lookup IP details on ipinfo.io"
+                          className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors self-start sm:self-auto"
                         >
-                          <Globe className="size-3" />
-                          <span>Lookup</span>
-                          <ExternalLink className="size-2.5" />
-                        </a>
+                          <span>Open Workspace</span>
+                          <ExternalLink className="size-3" />
+                        </Link>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-lg border border-dashed border-border bg-muted/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                    <div>
+                      <p className="font-semibold text-foreground">
+                        This user is currently not assigned to any research squad.
+                      </p>
+                      <p className="text-muted-foreground text-[11px] mt-0.5">
+                        They are available in the Solo Matchmaking Pool and can be assigned to open
+                        squad slots.
+                      </p>
+                    </div>
+                    {onAssignUser && !isBanned && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          onClose();
+                          onAssignUser(user);
+                        }}
+                        className="gap-1.5 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade cursor-pointer shrink-0"
+                      >
+                        <UserPlus className="size-3.5" />
+                        <span>Assign to Squad</span>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
 
-                      {/* Resolved Country Info Pill / Warning */}
-                      {ipGeo.country && (
-                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+              {/* Quick Applications Preview */}
+              <div>
+                <div className="flex items-center justify-between mb-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Send className="size-3.5 text-sky-400" />
+                    <span>Applied Teams Overview</span>
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setActiveModalTab("applications")}
+                    className="text-xs text-primary hover:underline font-semibold cursor-pointer"
+                  >
+                    View All ({user.joinRequests?.length || 0}) &rarr;
+                  </button>
+                </div>
+
+                {user.joinRequests && user.joinRequests.length > 0 ? (
+                  <div className="space-y-2">
+                    {user.joinRequests.slice(0, 3).map((req) => (
+                      <div
+                        key={req.id}
+                        className="p-3 rounded-lg border border-border bg-muted/20 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-foreground truncate">
+                              {req.team.name}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground truncate">
+                              ({req.team.event?.title || "Asteroid Search"})
+                            </span>
+                          </div>
+                          {req.message && (
+                            <p className="text-muted-foreground italic text-[11px] truncate max-w-md">
+                              &ldquo;{req.message}&rdquo;
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
                           <span
-                            className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
-                              ipGeo.countryCode === "IN"
-                                ? "bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold"
-                                : "bg-muted text-foreground border-border"
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
+                              req.status === "PENDING"
+                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                : req.status === "ACCEPTED"
+                                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-500 border-rose-500/20"
                             }`}
                           >
-                            <span>{ipGeo.country}</span>
-                            {ipGeo.city && (
-                              <span className="text-muted-foreground font-normal">
-                                &middot; {ipGeo.city}
-                              </span>
-                            )}
-                            {ipGeo.countryCode && ipGeo.countryCode !== "LOC" && (
-                              <span className="font-mono text-[10px] text-muted-foreground">
-                                ({ipGeo.countryCode})
-                              </span>
-                            )}
+                            {req.status === "PENDING"
+                              ? "Pending"
+                              : req.status === "ACCEPTED"
+                                ? "Accepted"
+                                : "Declined"}
                           </span>
+                          <Link
+                            href={`/team/${req.team.id}`}
+                            target="_blank"
+                            className="p-1 rounded text-muted-foreground hover:text-foreground cursor-pointer"
+                            title="Open Squad"
+                          >
+                            <ExternalLink className="size-3.5" />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
 
-                          {ipGeo.countryCode === "IN" && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-destructive text-destructive-foreground">
-                              <ShieldAlert className="size-2.5" />
-                              <span>Restricted Region (India)</span>
+                    {user.joinRequests.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveModalTab("applications")}
+                        className="w-full py-2 text-center text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-lg border border-dashed border-border transition-colors cursor-pointer"
+                      >
+                        +{user.joinRequests.length - 3} more squad application(s). Click to view
+                        full log.
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-lg border border-dashed border-border bg-muted/10 text-xs text-muted-foreground text-center">
+                    No squad applications submitted yet.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: APPLIED TEAMS & APPLICATIONS LOG */}
+          {activeModalTab === "applications" && (
+            <div className="space-y-4">
+              {/* Summary Stats Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="p-3 rounded-lg border border-border bg-muted/20 space-y-0.5">
+                  <span className="text-[11px] text-muted-foreground font-medium block">
+                    Total Applied
+                  </span>
+                  <span className="text-lg font-bold font-mono text-foreground">
+                    {user.joinRequests?.length || 0}
+                  </span>
+                </div>
+                <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/5 space-y-0.5">
+                  <span className="text-[11px] text-amber-500 font-medium block">
+                    Pending Review
+                  </span>
+                  <span className="text-lg font-bold font-mono text-amber-500">
+                    {user.joinRequests?.filter((r) => r.status === "PENDING").length || 0}
+                  </span>
+                </div>
+                <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 space-y-0.5">
+                  <span className="text-[11px] text-emerald-500 font-medium block">Accepted</span>
+                  <span className="text-lg font-bold font-mono text-emerald-500">
+                    {user.joinRequests?.filter((r) => r.status === "ACCEPTED").length || 0}
+                  </span>
+                </div>
+                <div className="p-3 rounded-lg border border-rose-500/20 bg-rose-500/5 space-y-0.5">
+                  <span className="text-[11px] text-rose-500 font-medium block">Declined</span>
+                  <span className="text-lg font-bold font-mono text-rose-500">
+                    {user.joinRequests?.filter((r) => r.status === "REJECTED").length || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Full Applications Log List */}
+              <div className="space-y-2.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Send className="size-3.5 text-sky-400" />
+                    <span>Squad Applications &amp; Join Request History</span>
+                  </h4>
+                  <span className="text-[11px] font-mono text-muted-foreground">
+                    Sorted by newest first
+                  </span>
+                </div>
+
+                {!user.joinRequests || user.joinRequests.length === 0 ? (
+                  <div className="p-8 text-center rounded-xl border border-dashed border-border bg-muted/10 space-y-2">
+                    <div className="size-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+                      <Send className="size-5" />
+                    </div>
+                    <p className="font-semibold text-xs text-foreground">
+                      No squad applications found
+                    </p>
+                    <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
+                      This citizen scientist has not applied to join any research squads yet.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {user.joinRequests.map((req) => (
+                      <div
+                        key={req.id}
+                        className="p-4 rounded-xl border border-border bg-card/90 space-y-3 hover:border-primary/40 transition-colors shadow-xs"
+                      >
+                        {/* Squad & Status Header */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-bold text-foreground">
+                                {req.team.name}
+                              </span>
+                              {req.team.inviteCode && (
+                                <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">
+                                  {req.team.inviteCode}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
+                              <span>
+                                Campaign:{" "}
+                                <strong className="text-foreground/90">
+                                  {req.team.event?.title || "Asteroid Search"}
+                                </strong>
+                              </span>
+                              {req.team.event?.code && (
+                                <span className="font-mono text-[10px] text-primary">
+                                  ({req.team.event.code})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-start sm:self-auto">
+                            {req.status === "PENDING" && (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                <Clock className="size-3 animate-pulse" />
+                                <span>Pending Review</span>
+                              </span>
+                            )}
+                            {req.status === "ACCEPTED" && (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                <CheckCircle2 className="size-3" />
+                                <span>Accepted</span>
+                              </span>
+                            )}
+                            {req.status === "REJECTED" && (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                <XCircle className="size-3" />
+                                <span>Declined</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Application Timestamp & Message */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
+                            <Calendar className="size-3 text-muted-foreground" />
+                            <span>
+                              Applied on:{" "}
+                              <strong className="text-foreground font-sans">
+                                {new Date(req.createdAt).toLocaleDateString()}
+                              </strong>{" "}
+                              at{" "}
+                              <strong className="text-foreground font-sans">
+                                {new Date(req.createdAt).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </strong>
                             </span>
+                          </div>
+
+                          {req.message ? (
+                            <div className="p-3 rounded-lg bg-muted/30 border border-border/80 space-y-1">
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                                Applicant&apos;s Message
+                              </span>
+                              <p className="text-xs text-foreground/90 italic font-sans leading-relaxed">
+                                &ldquo;{req.message}&rdquo;
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="text-[11px] text-muted-foreground italic">
+                              No custom message was included with this application.
+                            </div>
                           )}
+                        </div>
+
+                        {/* Card Footer with Squad Link */}
+                        <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            Request ID: {req.id}
+                          </span>
+                          <Link
+                            href={`/team/${req.team.id}`}
+                            target="_blank"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors cursor-pointer"
+                          >
+                            <span>Open Squad Workspace</span>
+                            <ExternalLink className="size-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: SECURITY & ACTIVITY */}
+          {activeModalTab === "activity" && (
+            <div className="space-y-5">
+              {/* Last Activity & Network IP Logs */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+                  <Activity className="size-3.5 text-primary" />
+                  <span>Activity &amp; Logged IP Address</span>
+                </h4>
+                <div className="p-3.5 rounded-lg border border-border bg-muted/20 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* IP Address & Country Flag Logo */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                        <Network className="size-3 text-muted-foreground" />
+                        <span>Last Logged IP &amp; Country</span>
+                      </span>
+                      {latestSession?.ipAddress ? (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* Country Flag Logo / Image */}
+                            {ipGeo.flagUrl ? (
+                              <img
+                                src={ipGeo.flagUrl}
+                                alt={ipGeo.countryCode || "Country Flag"}
+                                className="w-5 h-3.5 object-cover rounded-xs border border-border/80 shadow-2xs shrink-0"
+                                title={`${ipGeo.country || ipGeo.countryCode} (${ipGeo.countryCode})`}
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            ) : ipGeo.flagEmoji ? (
+                              <span className="text-sm shrink-0" title={ipGeo.country || "Country"}>
+                                {ipGeo.flagEmoji}
+                              </span>
+                            ) : null}
+
+                            <span className="font-mono text-xs text-foreground font-bold bg-background px-2.5 py-1 rounded border border-border select-all shadow-xs">
+                              {latestSession.ipAddress}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                copyToClipboard(latestSession.ipAddress!, "IP Address")
+                              }
+                              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
+                              title="Copy IP Address"
+                            >
+                              <Copy className="size-3.5" />
+                            </button>
+
+                            <a
+                              href={`https://ipinfo.io/${latestSession.ipAddress}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 px-2 py-0.5 rounded border border-sky-500/20 transition-colors"
+                              title="Lookup IP details on ipinfo.io"
+                            >
+                              <Globe className="size-3" />
+                              <span>Lookup</span>
+                              <ExternalLink className="size-2.5" />
+                            </a>
+                          </div>
+
+                          {/* Resolved Country Info Pill / Warning */}
+                          {ipGeo.country && (
+                            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                              <span
+                                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                                  ipGeo.countryCode === "IN"
+                                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold"
+                                    : "bg-muted text-foreground border-border"
+                                }`}
+                              >
+                                <span>{ipGeo.country}</span>
+                                {ipGeo.city && (
+                                  <span className="text-muted-foreground font-normal">
+                                    &middot; {ipGeo.city}
+                                  </span>
+                                )}
+                                {ipGeo.countryCode && ipGeo.countryCode !== "LOC" && (
+                                  <span className="font-mono text-[10px] text-muted-foreground">
+                                    ({ipGeo.countryCode})
+                                  </span>
+                                )}
+                              </span>
+
+                              {ipGeo.countryCode === "IN" && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-destructive text-destructive-foreground">
+                                  <ShieldAlert className="size-2.5" />
+                                  <span>Restricted Region (India)</span>
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-xs font-mono text-muted-foreground italic py-1">
+                          No IP address logged yet
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="text-xs font-mono text-muted-foreground italic py-1">
-                      No IP address logged yet
+
+                    {/* Last Active Timestamp */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                        <Clock className="size-3 text-muted-foreground" />
+                        <span>Last Active Session</span>
+                      </span>
+                      <div className="font-mono text-xs text-foreground font-semibold py-1">
+                        {latestSession?.updatedAt
+                          ? new Date(latestSession.updatedAt).toLocaleString()
+                          : user.createdAt
+                            ? `Registered on ${new Date(user.createdAt).toLocaleDateString()}`
+                            : "No active session"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User Agent / Client Details */}
+                  {latestSession?.userAgent && (
+                    <div className="pt-2.5 border-t border-border/60 flex items-start gap-2 text-[11px] text-muted-foreground">
+                      <Laptop className="size-3 text-muted-foreground shrink-0 mt-0.5" />
+                      <span className="font-mono text-[10px] break-all text-muted-foreground">
+                        {latestSession.userAgent}
+                      </span>
                     </div>
                   )}
                 </div>
-
-                {/* Last Active Timestamp */}
-                <div className="space-y-1.5">
-                  <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Clock className="size-3 text-muted-foreground" />
-                    <span>Last Active Session</span>
-                  </span>
-                  <div className="font-mono text-xs text-foreground font-semibold py-1">
-                    {latestSession?.updatedAt
-                      ? new Date(latestSession.updatedAt).toLocaleString()
-                      : user.createdAt
-                        ? `Registered on ${new Date(user.createdAt).toLocaleDateString()}`
-                        : "No active session"}
-                  </div>
-                </div>
               </div>
 
-              {/* User Agent / Client Details */}
-              {latestSession?.userAgent && (
-                <div className="pt-2.5 border-t border-border/60 flex items-start gap-2 text-[11px] text-muted-foreground">
-                  <Laptop className="size-3 text-muted-foreground shrink-0 mt-0.5" />
-                  <span className="font-mono text-[10px] break-all text-muted-foreground">
-                    {latestSession.userAgent}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Research Squad & Campaign Section */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <Telescope className="size-3.5 text-primary" />
-                <span>Squad &amp; Campaign Memberships</span>
-              </h4>
-              <Badge variant="outline" className="text-[10px] font-mono">
-                {user.teamMembers?.length || 0} squad(s)
-              </Badge>
-            </div>
-
-            {inTeam ? (
-              <div className="space-y-2">
-                {user.teamMembers.map((tm) => (
-                  <div
-                    key={tm.id}
-                    className="p-3.5 rounded-lg border border-border bg-card/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-primary/40 transition-colors"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-foreground">{tm.team.name}</span>
-                        {tm.role?.toLowerCase() === "leader" || tm.team?.leaderId === user.id ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                            <Crown className="size-2.5" />
-                            Leader
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                            Member
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
-                        <span>
-                          Campaign:{" "}
-                          <strong className="text-foreground/90">
-                            {tm.team.event?.title || "Asteroid Search"}
-                          </strong>
-                        </span>
-                        {tm.team.event?.code && (
-                          <span className="font-mono text-[10px] text-primary">
-                            ({tm.team.event.code})
-                          </span>
-                        )}
+              {/* Authentication & Accounts Log */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+                  <KeyRound className="size-3.5 text-primary" />
+                  <span>Authentication &amp; Linked Provider Accounts</span>
+                </h4>
+                <div className="p-3.5 rounded-lg border border-border bg-muted/20 space-y-2">
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Primary Login Method: </span>
+                    <strong className="text-foreground">{loginMethodLabel}</strong>
+                  </div>
+                  {user.accounts && user.accounts.length > 0 ? (
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] text-muted-foreground font-medium block">
+                        Linked Account Identifiers:
+                      </span>
+                      <div className="space-y-1">
+                        {user.accounts.map((acc) => (
+                          <div
+                            key={acc.id}
+                            className="p-2 rounded bg-card border border-border flex items-center justify-between text-xs font-mono"
+                          >
+                            <span className="text-foreground font-semibold uppercase text-[11px]">
+                              {acc.providerId}
+                            </span>
+                            <span className="text-muted-foreground text-[10px]">ID: {acc.id}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-
-                    <Link
-                      href={`/team/${tm.team.id}`}
-                      target="_blank"
-                      className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md bg-muted hover:bg-muted/80 text-foreground border border-border transition-colors self-start sm:self-auto"
-                    >
-                      <span>Open Workspace</span>
-                      <ExternalLink className="size-3" />
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-4 rounded-lg border border-dashed border-border bg-muted/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                <div>
-                  <p className="font-semibold text-foreground">
-                    This user is currently not assigned to any research squad.
-                  </p>
-                  <p className="text-muted-foreground text-[11px] mt-0.5">
-                    They are available in the Solo Matchmaking Pool and can be assigned to open
-                    squad slots.
-                  </p>
+                  ) : (
+                    <div className="text-xs text-muted-foreground italic">
+                      No external OAuth accounts linked.
+                    </div>
+                  )}
                 </div>
-                {onAssignUser && !isBanned && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      onClose();
-                      onAssignUser(user);
-                    }}
-                    className="gap-1.5 text-xs font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade cursor-pointer shrink-0"
-                  >
-                    <UserPlus className="size-3.5" />
-                    <span>Assign to Squad</span>
-                  </Button>
-                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Quick Action Toolbar */}

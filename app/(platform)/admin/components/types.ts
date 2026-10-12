@@ -99,7 +99,27 @@ export interface UserData {
       };
     };
   }>;
+  joinRequests?: Array<{
+    id: string;
+    status: "PENDING" | "ACCEPTED" | "REJECTED" | string;
+    message?: string | null;
+    createdAt: string;
+    team: {
+      id: string;
+      name: string;
+      inviteCode?: string;
+      leaderId?: string;
+      status?: string;
+      event?: {
+        id: string;
+        title: string;
+        code?: string;
+      };
+    };
+  }>;
 }
+
+export type UserJoinRequestData = NonNullable<UserData["joinRequests"]>[number];
 
 export function isUserSquadLeader(u: UserData): boolean {
   if (!u || !u.teamMembers || u.teamMembers.length === 0) return false;
