@@ -51,6 +51,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  PlusCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TeamData, EventData, getInitials } from "./types";
@@ -84,6 +85,7 @@ interface TeamsTabProps {
   onEditTeam: (team: TeamData) => void;
   onReportTeam: (team: TeamData) => void;
   onDeleteTeam: (team: TeamData) => void;
+  onCreateTeam?: () => void;
   onSendLeaderReminder?: (
     team: TeamData,
     leaderUser: { id: string; name: string; email: string }
@@ -119,6 +121,7 @@ export function TeamsTab({
   onEditTeam,
   onReportTeam,
   onDeleteTeam,
+  onCreateTeam,
   onSendLeaderReminder,
 }: TeamsTabProps) {
   const handleCopyCode = (code: string) => {
@@ -319,6 +322,20 @@ export function TeamsTab({
             </div>
           )}
         </div>
+
+        {/* Create Squad Action in Sidebar */}
+        {onCreateTeam && (
+          <div className="pt-2 border-t border-border">
+            <Button
+              type="button"
+              onClick={onCreateTeam}
+              className="w-full h-8 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-arcade-primary active:translate-y-0.5"
+            >
+              <PlusCircle className="size-3.5" />
+              <span>Create Squad</span>
+            </Button>
+          </div>
+        )}
       </aside>
 
       {/* Main Squad Management Table Card */}
@@ -439,6 +456,19 @@ export function TeamsTab({
                 </p>
               </TooltipContent>
             </Tooltip>
+
+            {/* New Squad Button in Toolbar */}
+            {onCreateTeam && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={onCreateTeam}
+                className="h-8 px-3 text-xs font-bold gap-1.5 cursor-pointer bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shrink-0 shadow-arcade-primary active:translate-y-0.5"
+              >
+                <PlusCircle className="size-3.5" />
+                <span>New Squad</span>
+              </Button>
+            )}
           </div>
         </div>
 

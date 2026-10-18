@@ -26,6 +26,7 @@ import { ReportTeamModal } from "./components/report-team-modal";
 import { BanUserModal } from "./components/ban-user-modal";
 import { SendEmailModal } from "./components/send-email-modal";
 import { ViewUserModal } from "./components/view-user-modal";
+import { CreateTeamModal } from "./components/create-team-modal";
 
 type AdminTab = "USERS" | "MATCHMAKING" | "TEAMS" | "EVENTS";
 
@@ -111,6 +112,9 @@ export default function AdminDashboardPage() {
   // Delete Squad Dialog State
   const [deletingTeam, setDeletingTeam] = useState<TeamData | null>(null);
   const [deleteTeamLoading, setDeleteTeamLoading] = useState<boolean>(false);
+
+  // Create Squad Modal State
+  const [isCreateTeamOpen, setIsCreateTeamOpen] = useState<boolean>(false);
 
   // Report Squad Modal State
   const [reportingTeam, setReportingTeam] = useState<TeamData | null>(null);
@@ -761,6 +765,37 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleTeamCreated = (newTeam: TeamData) => {
+    setTeams((prev) => [newTeam, ...prev]);
+
+    // Update users state so the leader reflects their new squad assignment immediately
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === newTeam.leaderId) {
+          const newMembership = {
+            id: `temp-${Date.now()}`,
+            role: "LEADER",
+            team: {
+              id: newTeam.id,
+              name: newTeam.name,
+              leaderId: newTeam.leaderId,
+              event: {
+                id: newTeam.eventId,
+                title: newTeam.event?.title || "",
+                code: newTeam.event?.code || "",
+              },
+            },
+          };
+          return {
+            ...u,
+            teamMembers: [newMembership, ...(u.teamMembers || [])],
+          };
+        }
+        return u;
+      })
+    );
+  };
+
   // Squad Moderation / Report Handlers
   const handleConfirmReportTeam = async (
     teamId: string,
@@ -1155,6 +1190,7 @@ export default function AdminDashboardPage() {
               onEditTeam={handleOpenEditTeam}
               onReportTeam={setReportingTeam}
               onDeleteTeam={setDeletingTeam}
+              onCreateTeam={() => setIsCreateTeamOpen(true)}
               onSendLeaderReminder={handleSendTeamLeaderReminder}
             />
           </TabsContent>
@@ -1351,6 +1387,14 @@ export default function AdminDashboardPage() {
             setAssigningUser(u);
             setSelectedTeamId("");
           }}
+        />
+
+        <CreateTeamModal
+          open={isCreateTeamOpen}
+          onOpenChange={setIsCreateTeamOpen}
+          events={events}
+          users={users}
+          onTeamCreated={handleTeamCreated}
         />
       </div>
     </TooltipProvider>
