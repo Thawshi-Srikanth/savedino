@@ -81,6 +81,7 @@ export async function POST(req: Request) {
       discordRoleId,
       discordAlertsChannelId,
       discordSquadsChannelId,
+      allowInviteBypass,
     } = body;
 
     const parsedMaxTeamSize =
@@ -114,6 +115,7 @@ export async function POST(req: Request) {
         discordRoleId: discordRoleId?.trim() || null,
         discordAlertsChannelId: discordAlertsChannelId?.trim() || null,
         discordSquadsChannelId: discordSquadsChannelId?.trim() || null,
+        allowInviteBypass: Boolean(allowInviteBypass),
         status: "ACTIVE",
       },
     });

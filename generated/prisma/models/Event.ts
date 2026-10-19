@@ -55,6 +55,7 @@ export type EventMinAggregateOutputType = {
   discordRoleId: string | null
   discordAlertsChannelId: string | null
   discordSquadsChannelId: string | null
+  allowInviteBypass: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -78,6 +79,7 @@ export type EventMaxAggregateOutputType = {
   discordRoleId: string | null
   discordAlertsChannelId: string | null
   discordSquadsChannelId: string | null
+  allowInviteBypass: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -101,6 +103,7 @@ export type EventCountAggregateOutputType = {
   discordRoleId: number
   discordAlertsChannelId: number
   discordSquadsChannelId: number
+  allowInviteBypass: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -136,6 +139,7 @@ export type EventMinAggregateInputType = {
   discordRoleId?: true
   discordAlertsChannelId?: true
   discordSquadsChannelId?: true
+  allowInviteBypass?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -159,6 +163,7 @@ export type EventMaxAggregateInputType = {
   discordRoleId?: true
   discordAlertsChannelId?: true
   discordSquadsChannelId?: true
+  allowInviteBypass?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -182,6 +187,7 @@ export type EventCountAggregateInputType = {
   discordRoleId?: true
   discordAlertsChannelId?: true
   discordSquadsChannelId?: true
+  allowInviteBypass?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -292,6 +298,7 @@ export type EventGroupByOutputType = {
   discordRoleId: string | null
   discordAlertsChannelId: string | null
   discordSquadsChannelId: string | null
+  allowInviteBypass: boolean
   createdAt: Date
   updatedAt: Date
   _count: EventCountAggregateOutputType | null
@@ -338,6 +345,7 @@ export type EventWhereInput = {
   discordRoleId?: Prisma.StringNullableFilter<"Event"> | string | null
   discordAlertsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
   discordSquadsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
+  allowInviteBypass?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   teams?: Prisma.TeamListRelationFilter
@@ -363,6 +371,7 @@ export type EventOrderByWithRelationInput = {
   discordRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
   discordAlertsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
   discordSquadsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowInviteBypass?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   teams?: Prisma.TeamOrderByRelationAggregateInput
@@ -391,6 +400,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   discordRoleId?: Prisma.StringNullableFilter<"Event"> | string | null
   discordAlertsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
   discordSquadsChannelId?: Prisma.StringNullableFilter<"Event"> | string | null
+  allowInviteBypass?: Prisma.BoolFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   teams?: Prisma.TeamListRelationFilter
@@ -416,6 +426,7 @@ export type EventOrderByWithAggregationInput = {
   discordRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
   discordAlertsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
   discordSquadsChannelId?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowInviteBypass?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.EventCountOrderByAggregateInput
@@ -447,6 +458,7 @@ export type EventScalarWhereWithAggregatesInput = {
   discordRoleId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   discordAlertsChannelId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   discordSquadsChannelId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  allowInviteBypass?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
 }
@@ -470,6 +482,7 @@ export type EventCreateInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamCreateNestedManyWithoutEventInput
@@ -495,6 +508,7 @@ export type EventUncheckedCreateInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutEventInput
@@ -520,6 +534,7 @@ export type EventUpdateInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUpdateManyWithoutEventNestedInput
@@ -545,6 +560,7 @@ export type EventUncheckedUpdateInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUncheckedUpdateManyWithoutEventNestedInput
@@ -570,6 +586,7 @@ export type EventCreateManyInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -593,6 +610,7 @@ export type EventUpdateManyMutationInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -616,6 +634,7 @@ export type EventUncheckedUpdateManyInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -639,6 +658,7 @@ export type EventCountOrderByAggregateInput = {
   discordRoleId?: Prisma.SortOrder
   discordAlertsChannelId?: Prisma.SortOrder
   discordSquadsChannelId?: Prisma.SortOrder
+  allowInviteBypass?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -667,6 +687,7 @@ export type EventMaxOrderByAggregateInput = {
   discordRoleId?: Prisma.SortOrder
   discordAlertsChannelId?: Prisma.SortOrder
   discordSquadsChannelId?: Prisma.SortOrder
+  allowInviteBypass?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -690,6 +711,7 @@ export type EventMinOrderByAggregateInput = {
   discordRoleId?: Prisma.SortOrder
   discordAlertsChannelId?: Prisma.SortOrder
   discordSquadsChannelId?: Prisma.SortOrder
+  allowInviteBypass?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -763,6 +785,7 @@ export type EventCreateWithoutTeamsInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   imageSets?: Prisma.ImageSetCreateNestedManyWithoutEventInput
@@ -787,6 +810,7 @@ export type EventUncheckedCreateWithoutTeamsInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   imageSets?: Prisma.ImageSetUncheckedCreateNestedManyWithoutEventInput
@@ -827,6 +851,7 @@ export type EventUpdateWithoutTeamsInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   imageSets?: Prisma.ImageSetUpdateManyWithoutEventNestedInput
@@ -851,6 +876,7 @@ export type EventUncheckedUpdateWithoutTeamsInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   imageSets?: Prisma.ImageSetUncheckedUpdateManyWithoutEventNestedInput
@@ -875,6 +901,7 @@ export type EventCreateWithoutImageSetsInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamCreateNestedManyWithoutEventInput
@@ -899,6 +926,7 @@ export type EventUncheckedCreateWithoutImageSetsInput = {
   discordRoleId?: string | null
   discordAlertsChannelId?: string | null
   discordSquadsChannelId?: string | null
+  allowInviteBypass?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutEventInput
@@ -939,6 +967,7 @@ export type EventUpdateWithoutImageSetsInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUpdateManyWithoutEventNestedInput
@@ -963,6 +992,7 @@ export type EventUncheckedUpdateWithoutImageSetsInput = {
   discordRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordAlertsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordSquadsChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowInviteBypass?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUncheckedUpdateManyWithoutEventNestedInput
@@ -1027,6 +1057,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   discordRoleId?: boolean
   discordAlertsChannelId?: boolean
   discordSquadsChannelId?: boolean
+  allowInviteBypass?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teams?: boolean | Prisma.Event$teamsArgs<ExtArgs>
@@ -1053,6 +1084,7 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   discordRoleId?: boolean
   discordAlertsChannelId?: boolean
   discordSquadsChannelId?: boolean
+  allowInviteBypass?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
@@ -1076,6 +1108,7 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   discordRoleId?: boolean
   discordAlertsChannelId?: boolean
   discordSquadsChannelId?: boolean
+  allowInviteBypass?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["event"]>
@@ -1099,11 +1132,12 @@ export type EventSelectScalar = {
   discordRoleId?: boolean
   discordAlertsChannelId?: boolean
   discordSquadsChannelId?: boolean
+  allowInviteBypass?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "code" | "description" | "regStart" | "regEnd" | "teamFormationStart" | "teamFormationEnd" | "startDate" | "endDate" | "submissionStart" | "submissionEnd" | "maxTeamSize" | "maxTeams" | "status" | "discordRoleId" | "discordAlertsChannelId" | "discordSquadsChannelId" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "code" | "description" | "regStart" | "regEnd" | "teamFormationStart" | "teamFormationEnd" | "startDate" | "endDate" | "submissionStart" | "submissionEnd" | "maxTeamSize" | "maxTeams" | "status" | "discordRoleId" | "discordAlertsChannelId" | "discordSquadsChannelId" | "allowInviteBypass" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teams?: boolean | Prisma.Event$teamsArgs<ExtArgs>
   imageSets?: boolean | Prisma.Event$imageSetsArgs<ExtArgs>
@@ -1137,6 +1171,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     discordRoleId: string | null
     discordAlertsChannelId: string | null
     discordSquadsChannelId: string | null
+    allowInviteBypass: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["event"]>
@@ -1582,6 +1617,7 @@ export interface EventFieldRefs {
   readonly discordRoleId: Prisma.FieldRef<"Event", 'String'>
   readonly discordAlertsChannelId: Prisma.FieldRef<"Event", 'String'>
   readonly discordSquadsChannelId: Prisma.FieldRef<"Event", 'String'>
+  readonly allowInviteBypass: Prisma.FieldRef<"Event", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>
 }

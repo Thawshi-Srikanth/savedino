@@ -17,6 +17,7 @@ export interface EventData {
   discordRoleId?: string | null;
   discordAlertsChannelId?: string | null;
   discordSquadsChannelId?: string | null;
+  allowInviteBypass?: boolean;
   _count?: {
     teams: number;
     imageSets?: number;

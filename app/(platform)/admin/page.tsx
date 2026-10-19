@@ -182,6 +182,7 @@ export default function AdminDashboardPage() {
   const [editCampDiscordRoleId, setEditCampDiscordRoleId] = useState<string>("");
   const [editCampDiscordAlertsChannelId, setEditCampDiscordAlertsChannelId] = useState<string>("");
   const [editCampDiscordSquadsChannelId, setEditCampDiscordSquadsChannelId] = useState<string>("");
+  const [editCampAllowInviteBypass, setEditCampAllowInviteBypass] = useState<boolean>(false);
   const [editCampTab, setEditCampTab] = useState<string>("overview");
   const [editCampLoading, setEditCampLoading] = useState<boolean>(false);
   const [deleteCampLoading, setDeleteCampLoading] = useState<boolean>(false);
@@ -943,6 +944,7 @@ export default function AdminDashboardPage() {
     setEditCampDiscordRoleId(ev.discordRoleId || "");
     setEditCampDiscordAlertsChannelId(ev.discordAlertsChannelId || "");
     setEditCampDiscordSquadsChannelId(ev.discordSquadsChannelId || "");
+    setEditCampAllowInviteBypass(Boolean(ev.allowInviteBypass));
     setEditCampTab("overview");
   };
 
@@ -969,6 +971,7 @@ export default function AdminDashboardPage() {
         discordRoleId: editCampDiscordRoleId.trim() || null,
         discordAlertsChannelId: editCampDiscordAlertsChannelId.trim() || null,
         discordSquadsChannelId: editCampDiscordSquadsChannelId.trim() || null,
+        allowInviteBypass: editCampAllowInviteBypass,
       };
 
       const res = await fetch(`/api/events/${editingCampaign.id}`, {
@@ -1298,6 +1301,8 @@ export default function AdminDashboardPage() {
           setEditCampDiscordAlertsChannelId={setEditCampDiscordAlertsChannelId}
           editCampDiscordSquadsChannelId={editCampDiscordSquadsChannelId}
           setEditCampDiscordSquadsChannelId={setEditCampDiscordSquadsChannelId}
+          editCampAllowInviteBypass={editCampAllowInviteBypass}
+          setEditCampAllowInviteBypass={setEditCampAllowInviteBypass}
           editCampLoading={editCampLoading}
           onSave={handleSaveCampaign}
         />

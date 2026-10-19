@@ -1292,6 +1292,7 @@ export const EventScalarFieldEnum = {
   discordRoleId: 'discordRoleId',
   discordAlertsChannelId: 'discordAlertsChannelId',
   discordSquadsChannelId: 'discordSquadsChannelId',
+  allowInviteBypass: 'allowInviteBypass',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

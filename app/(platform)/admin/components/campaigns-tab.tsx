@@ -423,8 +423,18 @@ export function CampaignsTab({
                             <ExternalLink className="size-3" />
                           </Link>
                         </div>
-                        <div className="font-mono text-[11px] font-bold text-primary">
-                          {ev.code}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-mono text-[11px] font-bold text-primary">
+                            {ev.code}
+                          </span>
+                          {ev.allowInviteBypass && (
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] py-0 px-1.5 h-4 font-sans font-medium border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            >
+                              Invite Bypass
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </TableCell>

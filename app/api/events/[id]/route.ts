@@ -144,6 +144,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       dataToUpdate.discordAlertsChannelId = body.discordAlertsChannelId?.trim() || null;
     if (body.discordSquadsChannelId !== undefined)
       dataToUpdate.discordSquadsChannelId = body.discordSquadsChannelId?.trim() || null;
+    if (body.allowInviteBypass !== undefined)
+      dataToUpdate.allowInviteBypass = Boolean(body.allowInviteBypass);
 
     const updatedEvent = await prisma.event.update({
       where: { id: existingEvent.id },

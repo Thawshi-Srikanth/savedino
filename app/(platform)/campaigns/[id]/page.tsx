@@ -63,6 +63,7 @@ interface EventDetail {
   submissionStart?: string | null;
   submissionEnd?: string | null;
   status: string;
+  allowInviteBypass?: boolean;
   maxTeamSize?: number | null;
   maxTeams?: number | null;
   teams: Array<{
@@ -354,21 +355,23 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       return;
     }
 
-    // Check registration deadline
-    const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
-    if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
-      setJoinError("Team registration for this campaign has closed.");
-      return;
-    }
-
-    // Check registration eligibility: account created after regEnd is forbidden
-    if (session?.user?.role !== "admin" && event.regEnd && session?.user?.createdAt) {
-      const eligibility = checkUserRegistrationEligibility(session.user.createdAt, event);
-      if (!eligibility.eligible) {
-        setJoinError(
-          eligibility.reason || "Campaign registration closed before your account was created."
-        );
+    // Check registration deadline & account eligibility (skipped if invite bypass mode is active)
+    if (!event.allowInviteBypass) {
+      const regDeadlineStr = event.teamFormationEnd || event.regEnd || event.startDate;
+      if (regDeadlineStr && Date.now() > new Date(regDeadlineStr).getTime()) {
+        setJoinError("Team registration for this campaign has closed.");
         return;
+      }
+
+      // Check registration eligibility: account created after regEnd is forbidden
+      if (session?.user?.role !== "admin" && event.regEnd && session?.user?.createdAt) {
+        const eligibility = checkUserRegistrationEligibility(session.user.createdAt, event);
+        if (!eligibility.eligible) {
+          setJoinError(
+            eligibility.reason || "Campaign registration closed before your account was created."
+          );
+          return;
+        }
       }
     }
 

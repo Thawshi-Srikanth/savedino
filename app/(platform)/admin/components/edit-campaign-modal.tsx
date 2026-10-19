@@ -18,7 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit2, Calendar, Users, Telescope, FileCode, Sparkles, RefreshCw } from "lucide-react";
+import {
+  Edit2,
+  Calendar,
+  Users,
+  Telescope,
+  FileCode,
+  Sparkles,
+  RefreshCw,
+  KeyRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import { EventData } from "./types";
 
@@ -61,6 +70,8 @@ interface EditCampaignModalProps {
   setEditCampDiscordAlertsChannelId: (val: string) => void;
   editCampDiscordSquadsChannelId: string;
   setEditCampDiscordSquadsChannelId: (val: string) => void;
+  editCampAllowInviteBypass: boolean;
+  setEditCampAllowInviteBypass: (val: boolean) => void;
   editCampLoading: boolean;
   onSave: (e: React.FormEvent) => void;
 }
@@ -104,6 +115,8 @@ export function EditCampaignModal({
   setEditCampDiscordAlertsChannelId,
   editCampDiscordSquadsChannelId,
   setEditCampDiscordSquadsChannelId,
+  editCampAllowInviteBypass,
+  setEditCampAllowInviteBypass,
   editCampLoading,
   onSave,
 }: EditCampaignModalProps) {
@@ -258,6 +271,35 @@ export function EditCampaignModal({
                   placeholder="Campaign details, telescope source, and research objective..."
                   className="w-full p-2.5 rounded-lg border border-border bg-background text-xs text-foreground focus:outline-hidden leading-relaxed font-sans"
                 />
+              </div>
+
+              {/* Invite Code Deadline Bypass Toggle Card */}
+              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                <div className="space-y-0.5 pr-4">
+                  <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <KeyRound className="size-3.5 text-primary" />
+                    <span>Invite Code Deadline Bypass</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-normal">
+                    When active, users joining with a direct squad invite code can bypass
+                    registration deadlines and account creation age limits.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={editCampAllowInviteBypass}
+                  onClick={() => setEditCampAllowInviteBypass(!editCampAllowInviteBypass)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    editCampAllowInviteBypass ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      editCampAllowInviteBypass ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
             </div>
           ) : editCampTab === "schedule" ? (

@@ -80,26 +80,42 @@ export async function POST(req: Request) {
 
     // 3. Check Event Registration Deadline
     if (team.event) {
-      const regCheck = isRegistrationClosed(team.event);
-      if (regCheck.closed) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: regCheck.reason || "Team registration has closed for this campaign.",
-          },
-          { status: 400 }
-        );
-      }
+      if (team.event.allowInviteBypass) {
+        // Invite Bypass Mode is enabled: direct invite code bypasses registration deadlines and account age checks
+        if (team.event.status === "COMPLETED") {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "This campaign has concluded and is no longer accepting squad members.",
+            },
+            { status: 400 }
+          );
+        }
+      } else {
+        const regCheck = isRegistrationClosed(team.event);
+        if (regCheck.closed) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: regCheck.reason || "Team registration has closed for this campaign.",
+            },
+            { status: 400 }
+          );
+        }
 
-      // Check User Registration Eligibility (Accounts created after regEnd cannot join squads)
-      if (team.event.regEnd && session.user.role !== "admin") {
-        const user = await prisma.user.findUnique({
-          where: { id: session.user.id },
-          select: { createdAt: true },
-        });
-        const eligibility = checkUserRegistrationEligibility(user?.createdAt, team.event);
-        if (!eligibility.eligible) {
-          return NextResponse.json({ success: false, error: eligibility.reason }, { status: 403 });
+        // Check User Registration Eligibility (Accounts created after regEnd cannot join squads)
+        if (team.event.regEnd && session.user.role !== "admin") {
+          const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { createdAt: true },
+          });
+          const eligibility = checkUserRegistrationEligibility(user?.createdAt, team.event);
+          if (!eligibility.eligible) {
+            return NextResponse.json(
+              { success: false, error: eligibility.reason },
+              { status: 403 }
+            );
+          }
         }
       }
     }

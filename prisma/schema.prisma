@@ -121,6 +121,7 @@ model Event {
   discordRoleId          String?     // Specific campaign role ID (e.g. SEDS-2026-A)
   discordAlertsChannelId String?     // Channel ID for discovery alerts & campaign announcements
   discordSquadsChannelId String?     // Channel ID for squad recruitments & formations
+  allowInviteBypass      Boolean     @default(false) // When true, users joining with squad invite code bypass registration deadline & account creation age restriction
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
