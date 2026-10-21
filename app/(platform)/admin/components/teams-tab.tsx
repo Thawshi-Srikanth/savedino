@@ -52,6 +52,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   PlusCircle,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TeamData, EventData, getInitials } from "./types";
@@ -172,6 +173,83 @@ export function TeamsTab({
 
   const disabledSquadsCount = teams.filter((t) => t.status === "DISQUALIFIED").length;
   const activeSquadsCount = teams.filter((t) => t.status === "ACTIVE").length;
+  const nonSuspendedSquadsCount = teams.filter((t) => t.status !== "DISQUALIFIED").length;
+
+  const handleExportNonSuspendedTeams = () => {
+    const nonSuspended = teams.filter((t) => t.status !== "DISQUALIFIED");
+
+    if (nonSuspended.length === 0) {
+      toast.info("No active squads found to export.");
+      return;
+    }
+
+    const headers = ["Team", "Country", "Team leader", "Leader email"];
+
+    const escapeCsv = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows: string[] = [];
+
+    nonSuspended.forEach((team) => {
+      const leaderMember = team.members?.find(
+        (m) => m.role === "LEADER" || m.role === "leader" || m.userId === team.leaderId
+      );
+      const country =
+        leaderMember?.user?.country ||
+        team.members?.find((m) => m.user?.country)?.user?.country ||
+        "";
+      const leaderName = leaderMember?.user?.name || team.leaderContact || "Unassigned";
+      const leaderEmail = leaderMember?.user?.email || "";
+
+      // 1. Leader row (Team, Country, Team Leader, Leader Email)
+      rows.push(
+        [
+          escapeCsv(team.name),
+          escapeCsv(country),
+          escapeCsv(leaderName),
+          escapeCsv(leaderEmail),
+        ].join(",")
+      );
+
+      // 2. Member rows: [blank], [blank], member name, member email
+      const regularMembers =
+        team.members?.filter(
+          (m) =>
+            m !== leaderMember &&
+            m.userId !== team.leaderId &&
+            m.role !== "LEADER" &&
+            m.role !== "leader"
+        ) || [];
+
+      regularMembers.forEach((member) => {
+        rows.push(
+          [
+            escapeCsv(""),
+            escapeCsv(""),
+            escapeCsv(member.user?.name || "Member"),
+            escapeCsv(member.user?.email || ""),
+          ].join(",")
+        );
+      });
+    });
+
+    const csvContent =
+      "\uFEFF" + [headers.map((h) => escapeCsv(h)).join(","), ...rows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.setAttribute("href", url);
+    link.setAttribute("download", `savedino_non_suspended_teams_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${nonSuspended.length} active squads to CSV!`);
+  };
 
   return (
     <div className="flex flex-col md:flex-row gap-4 items-start w-full font-sans">
@@ -410,6 +488,29 @@ export function TeamsTab({
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Export Non-Suspended Squads Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportNonSuspendedTeams}
+                  className="h-8 text-xs font-semibold gap-1.5 cursor-pointer shadow-arcade active:translate-y-0.5 border-border bg-background hover:bg-muted text-foreground shrink-0"
+                >
+                  <Download className="size-3.5 text-[#10b981]" />
+                  <span className="hidden sm:inline">Export Squads</span>
+                  <span className="sm:hidden">Export</span>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    ({nonSuspendedSquadsCount})
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs font-sans">
+                Export non-suspended squads with leaders and member emails to CSV / Excel
+              </TooltipContent>
+            </Tooltip>
 
             {/* Refresh Icon Button with Tooltip */}
             <Tooltip>
